@@ -1,7 +1,16 @@
 import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { afterEach, beforeEach, vi } from 'vitest'
 import App from './App'
+import { envelope, mockApi, page } from './test/api'
 import { renderWithProviders } from './test/render'
+
+beforeEach(() => {
+  localStorage.clear()
+  mockApi({ 'GET /api/feed/latest': () => envelope(200, page([])) })
+})
+
+afterEach(() => vi.unstubAllGlobals())
 
 function renderAt(path: string) {
   return renderWithProviders(<App />, path)

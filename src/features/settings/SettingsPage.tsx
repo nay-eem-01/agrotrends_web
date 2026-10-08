@@ -6,17 +6,24 @@ import { Button } from '../../ui/Button'
 import { TextField } from '../../ui/TextField'
 import { FormError } from '../auth/AuthPage'
 import { useSession } from '../auth/session'
+import { AuthorProfileForm } from './AuthorProfileForm'
 
 export const EMAIL_CHANGED_NOTICE = 'E-mail changed. Sign in with your new address.'
 export const PASSWORD_CHANGED_NOTICE = 'Password changed. Sign in with your new password.'
 
 export function SettingsPage() {
+  const { user } = useSession()
   return (
     <section className="mx-auto max-w-(--container-feed) px-4 pt-12 pb-20 sm:px-6">
       <h1 className="text-2xl">Settings</h1>
       <Section title="Account" intro="Your name is shown on your stories, questions and answers.">
         <AccountForm />
       </Section>
+      {user?.authorId != null && (
+        <Section title="Author profile" intro="Readers see this next to your stories and on your author page.">
+          <AuthorProfileForm name={user.name ?? ''} />
+        </Section>
+      )}
       <Section title="Password" intro="Changing it signs you out on every device.">
         <PasswordForm />
       </Section>

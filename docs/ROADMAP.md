@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend
 
-**Progress:** 7 of 36 steps done
+**Progress:** 17 of 36 steps done
 
 ---
 
@@ -28,22 +28,22 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 | F1.1 | Sign in and sign up (reader or author with professional info); session restore on reload; protected routes | ✅ |
 | F1.2 | Forgot / reset password (link from e-mail: `/reset-password?token=`) | ✅ |
 | F1.3 | Settings: edit my account (name, e-mail, mobile), change password | ✅ |
-| F1.4 | Settings: my author profile (designation, specialities, bio, photo via `POST /api/images`) — needs `GET /api/authors/me` | ⏸ |
+| F1.4 | Settings: my author profile (designation, specialities, bio, photo via `POST /api/images`) | ✅ |
 
 ## Phase F2 — Reading (`feat/reading-base`)
 
 | # | Step | Status |
 |---|---|---|
 | F2.0 | **Backend:** public read access — anonymous GET on published blogs, slug, search, feeds latest/trending, tags, categories, authors, comments, questions, answers (backend 2.13, `feat/public-reads`). Related posts, the following feed, claps, bookmarks and AI stay signed-in | ✅ |
-| F2.1 | Home: feed tabs (For you = following, Latest, Trending), story card, infinite scroll | ⬜ |
-| F2.2 | The crop-season strip: current season marked, filters the feed by season; crop / region / soil filters | ⬜ |
-| F2.3 | Story page by slug: sanitised HTML, reading time, author block, agri chips, tags | ⬜ |
-| F2.4 | Claps (press-and-hold, up to 50) and bookmarks on the story page and cards | ⬜ |
-| F2.5 | Comments and replies (owner edit / delete) | ⬜ |
-| F2.6 | Tag page with follow; topic list | ⬜ |
-| F2.7 | Author page (profile, posts, follow) | ⬜ |
-| F2.8 | Search page | ⬜ |
-| F2.9 | Library: reading list (bookmarks), following (authors, tags) | ⬜ |
+| F2.1 | Home: feed tabs (For you = following, Latest, Trending), story card, infinite scroll | ✅ |
+| F2.2 | The crop-season strip: current season marked, filters the feed by season; crop / region / soil filters | ✅ |
+| F2.3 | Story page by slug: sanitised HTML, reading time, author block, agri chips, tags | ✅ |
+| F2.4 | Claps (press-and-hold, up to 50) and bookmarks on the story page and cards | ✅ |
+| F2.5 | Comments and replies (owner edit / delete) | ✅ |
+| F2.6 | Tag page with follow; topic list | ✅ |
+| F2.7 | Author page (profile, posts, follow) | ✅ |
+| F2.8 | Search page | ✅ |
+| F2.9 | Library: reading list (bookmarks), following (authors, tags) | ✅ |
 
 ## Phase F3 — Writing (`feat/writing-base`)
 
@@ -88,7 +88,10 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 | Item | Needed for | Status |
 |---|---|---|
-| `GET /api/authors/me` (or `authorId` on `UserResponse`): the signed-in author's own profile, to prefill the editor | F1.4 | ⏸ |
+| "Followed by me" per tag (or a larger followed-tags read) | exact Follow state past the 100 most recent follows (F2.6) | ⏸ |
+| "Saved by me" per story (`bookmarkedByMe` on `BlogResponse`, or `GET /api/blogs/id/{id}/bookmark`) | exact saved state past the 100 most recent saves (F2.4) | ⏸ |
+| Comments: `CommentResponse` in the OpenAPI document and a reply count per comment (or replies nested) | typed comments without a hand-written type; one request per story instead of one per thread (F2.5) | ⏸ |
+| `GET /api/authors/me` and `authorId` on `UserResponse` | F1.4 | ✅ (backend `feat/author-me`) |
 | Public GET access to published content | anonymous reading (F2) | ✅ backend 2.13 |
 | Refresh token as an `HttpOnly` cookie instead of in the JSON body | keeping the refresh token out of script reach | ⏸ |
 | CORS origins from a property (backend 4.1) | a deployed split origin | ⏸ |

@@ -9,26 +9,252 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 
 - New frontend, built from scratch (the old `AGROTRENDS- FrontEnd` repo is retired: it called the pre-hardening API,
   sent `userId` in URLs and called Gemini from the browser with a key).
-- Phase F0 (foundation) merged into `development`.
-- Phase F1 (accounts) on `feat/accounts-base`: F1.1 sign in / sign up (`feat/sign-in`), F1.2 password reset
-  (`feat/password-reset`) and F1.3 settings (`feat/settings`) done. F1.4 author profile waits on the backend.
+- Phase F0 (foundation) merged into `development`. Phase F1 (accounts) complete on `feat/accounts-base`
+  (F1.1-F1.3 also in `development`; F1.4 author profile merged into the base, PR #8).
+- Phase F2 reading, stacked on `feat/reading-base`: F2.1 home feed (`feat/home-feed`), F2.2 season strip and
+  filters (`feat/season-filters`), F2.3 story page (`feat/story-page`), F2.4 claps and bookmarks
+  (`feat/claps-bookmarks`), F2.5 responses (`feat/comments`), F2.6 topics (`feat/tag-page`), F2.8 search
+  (`feat/search`), F2.9 library (`feat/library`), F2.7 author page (`feat/author-page`, which also merges
+  `feat/accounts-base` in for F1.4's `src/api/authors.ts`). Phase F2 is complete.
 
 ## Next up
 
-1. **Nayeem:** open and merge, in order: `feat/sign-in` -> `feat/accounts-base`, `feat/password-reset` ->
-   `feat/accounts-base`, `feat/settings` -> `feat/accounts-base`.
-2. Backend: `GET /api/authors/me` for F1.4 (author profile settings). Phase F1 can merge into `development` without
-   it; F1.4 then follows as its own PR.
-3. Phase F2 reading (F2.1 home feed).
+1. **Nayeem:** merge `feat/accounts-base` -> `development`. Open and merge, in order, into `feat/reading-base`:
+   `feat/home-feed`, `feat/season-filters`, `feat/story-page`, `feat/claps-bookmarks`, `feat/comments`,
+   `feat/tag-page`, `feat/search`, `feat/library`, `feat/author-page`.
+2. Then `feat/reading-base` -> `development`, and Phase F3 writing (`feat/writing-base`, from `development`).
 
 ## Open items
 
 | Item | Needs | Blocks |
 |---|---|---|
-| No way to read my own author profile (`GET /api/authors/me` missing; `UserResponse` has no `authorId`) | backend step | F1.4 |
+| Comment endpoints aren't typed in OpenAPI and have no reply counts: `CommentResponse` is hand-written and every thread is fetched | backend | — |
+| No per-story "saved by me": the app reads the 100 most recent saves to mark Save buttons | backend: `bookmarkedByMe` | exact saved state for heavy savers |
 | Make `development` the default branch on GitHub and protect it | Nayeem | — |
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
+
+---
+
+## 2026-10-08 (F2.7 author page)
+
+**Done**
+- `/authors/:authorId`: photo, name, designation and workplace, followers and stories, Follow / Following (Edit
+  profile on your own page), bio, specialities, their stories newest first (`/api/blogs/all/author/{id}`). 404 ->
+  not found.
+- "Written by" card at the end of a story: photo, designation, followers, bio, Follow.
+- Follow: optimistic on the open profile (button and follower count), rolled back on failure; reloads the profile,
+  For you and the library's author list. The read waits for a restoring session so `followedByMe` is the reader's.
+- `useAuthor` / `useAuthorStories` in F1.4's `src/api/authors.ts`; `feat/accounts-base` merged into this branch
+  for it (docs conflicts resolved there).
+- Tests: `authors.test.tsx` (7 cases). Looked at in Chrome at 1280 and 390px.
+
+**Decisions**
+- The card under a story is outlined, not filled, so an initials avatar stays visible.
+
+**Known limitations**
+- "Who to follow" in the home rail still has no data source (no suggested-authors endpoint).
+
+---
+
+## 2026-10-08 (F2.9 library)
+
+**Done**
+- `/library` behind `RequireAuth`, linked from the account menu. Reading list (`/api/bookmarks`, most recent first,
+  paged) and Following (`?tab=following`): authors (`/api/me/following/authors`, paged, Following / Follow that can
+  be undone in place) and topics (Follow buttons as on tag pages).
+- `src/api/follows.ts`: reading list, followed authors, author follow / unfollow (reloads For you and the
+  author's profile). Kept apart from F1.4's `authors.ts` so the branches don't conflict; F2.7 uses it too.
+- Tests: `library.test.tsx` (5 cases). Checked on the local backend: follow, list, `followedByMe`, unfollow.
+
+**Decisions**
+- Unfollowing keeps the row with a Follow button, so a mis-tap can be undone; the list is fresh on the next visit.
+- A failed unfollow puts the button back.
+
+---
+
+## 2026-10-08 (F2.8 search)
+
+**Done**
+- `/search?q=` (where the top bar sends a search): a search field on the page too (phones hide the top bar's),
+  matching topics as chips (`/api/tags?q=`), the story count and results from `/api/blogs/search`, paged with
+  the shared `StoryList`. No results -> Ask a question. Empty search -> a prompt and topics to browse, no request.
+- `useSearch(q)` in `src/api/blogs.ts`.
+- Tests: `search.test.tsx` (4 cases).
+
+**Decisions**
+- Results keep the backend's ranking (no sort parameter sent).
+- Topic suggestions use the lower-cased query, as tags are stored lower-case.
+
+---
+
+## 2026-10-08 (F2.6 tag page and topics)
+
+**Done**
+- `/tags/:tagName`: topic name, story count, Follow / Following, its stories newest first
+  (`/api/blogs/all/tag/{name}`), empty state inviting a first story.
+- Follow: `PUT` / `DELETE /api/tags/{name}/follow`, optimistic with rollback; For you reloads afterwards. Visitors
+  go to sign-in and back.
+- `/topics`: searchable list (`/api/tags?q=`, lower-cased prefix), followed topics first for signed-in readers.
+- Home right rail from 1024px: "Topics to follow" (12) and See all topics, per `docs/DESIGN.md`.
+- `src/api/topics.ts`; `StoryList` exported from the feed for any paged story list.
+- Tests: `topics.test.tsx` (5 cases). Checked on the local backend (follow, list, unfollow) and in Chrome at
+  1280 and 390px.
+
+**Decisions**
+- Followed state comes from the 100 most recent follows (no per-tag flag); backend need added.
+
+**Known limitations**
+- The rail lists the first tags alphabetically, not popular ones (no popularity endpoint).
+- "Who to follow" in the rail waits for author lists (F2.7).
+
+---
+
+## 2026-10-08 (F2.5 responses)
+
+**Done**
+- "Responses (n)" under a published story: top-level responses oldest first, each with its replies one level deep
+  (a reply to a reply joins the same thread, as on Medium).
+- Signed in: respond, reply (the field opens focused), edit and delete your own (inline confirm). Visitors see
+  everything; Respond and Reply send them to sign-in and back.
+- Text goes through `SafeHtml` (plain text keeps its line breaks; any HTML is cleaned).
+- `src/api/comments.ts`: list, replies (`useQueries`), one write mutation for create / reply / update / delete that
+  reloads the comments. `TextArea` copied byte-for-byte from F1.4 so the branches merge cleanly.
+- Tests: `comments.test.tsx` (6 cases). Checked on the local backend: create, reply, edit, replies, delete.
+
+**Decisions**
+- `CommentResponse` is written by hand (the OpenAPI document doesn't describe it); backend need added.
+- Edit and Delete show for the comment's own user only; admins can do both on the backend but get no buttons yet.
+
+**Known limitations**
+- One request per thread to load replies (no reply counts in the API).
+- Deleting a response removes its replies too (backend cascade); the confirm text doesn't say so yet.
+
+---
+
+## 2026-10-08 (F2.4 claps and bookmarks)
+
+**Done**
+- Clap button on the story page (under the author and after the body): a tap adds one, holding adds one every
+  120ms after 350ms; claps show at once and go to `POST /api/blogs/id/{id}/claps?count=n` as one request 500ms
+  after the burst ends (claps made meanwhile are sent next). Stops at 50 per reader; mustard filled icon once
+  clapped. The reader's own story shows the count only (no request, the backend refuses it).
+- Save button on the story page and every feed card: `PUT` / `DELETE /api/blogs/id/{id}/bookmark`, optimistic,
+  rolled back on failure.
+- Visitors see counts; Clap and Save send them to sign-in and back (`useRequireSignIn`, for later write controls
+  too).
+- `src/api/reactions.ts`. Schema regenerated here too (identical to F1.4's, so the branches merge cleanly), for
+  `authorId` on the user.
+- Tests: `reactions.test.tsx` (8 cases). Checked on the local backend: clap, read, save, list, unsave, remove claps.
+
+**Decisions**
+- Saved state comes from the 100 most recent saves (`GET /api/bookmarks`), as the API has no per-story flag yet
+  (backend need added).
+- Taking claps back (`DELETE .../claps`) isn't offered yet.
+
+**Known limitations**
+- A story saved before the reader's latest 100 saves shows as unsaved.
+
+---
+
+## 2026-10-08 (F2.3 story page)
+
+**Done**
+- `/stories/:slug`: title, author (avatar, link to `/authors/:id`), reading time, date, category; cover up to
+  1000px; body; farming chips (crop, season, region, soil -> filtered home) and tags (-> `/tags/:name`). Page
+  `<title>` set via React 19. A draft is labelled "only you can see this"; 404 shows the not-found page.
+- `SafeHtml` (`src/ui/SafeHtml.tsx`) with `src/lib/sanitize.ts`: DOMPurify, no scripts, handlers, styles, classes,
+  frames or forms; external links open in a new tab with `rel="noopener noreferrer nofollow"`; `javascript:`,
+  `data:` and `//host` hrefs dropped. Plain-text stories (older ones) become paragraphs without HTML parsing.
+- `.story-body` styles in `index.css`: Literata 18px / 1.6 on phones, 20px / 1.65 from 640px, headings, lists,
+  quotes, images, code.
+- Tests: `story.test.tsx` (5 cases incl. XSS payloads), `sanitize.test.ts`. Looked at in Chrome at 1280 and 360px.
+
+**Decisions**
+- The story read waits for a restoring session, so an author's own draft loads with the token.
+- 4xx from the story read isn't retried (a 404 stays a 404).
+- The author block uses the story's author summary only; designation, photo and Follow come with F2.7, once
+  F1.4's `src/api/authors.ts` is in `development` (adding it here would conflict).
+
+**Known limitations**
+- Only plain-text stories exist locally, so the rich-text styles are checked by tests, not by eye.
+- Tag pages (F2.6) and author pages (F2.7) are still not found.
+
+---
+
+## 2026-10-08 (F2.2 crop-season strip and filters)
+
+**Done**
+- Season strip under the top bar on home: Rabi (16 Oct-15 Mar), Kharif-1 (16 Mar-15 Jul), Kharif-2 (16 Jul-15 Oct),
+  each band as wide as the season is long; the current one in paddy with "now", today marked with a mustard dot.
+  A band filters by its season (`?season=`); choosing it again clears it.
+- Crop, region and soil filters behind "Filter by crop, region or soil"; active filters are removable chips (plus
+  Clear all). Crop and season chips on story cards are filter links.
+- With any filter set the feed reads `GET /api/blogs/all` (`sortBy=creationDate&ascOrDesc=desc`, public) instead of
+  a feed tab; an empty result offers Clear filters and Ask a question.
+- `src/lib/agri.ts`: season calendar, soil labels, read / write filters in the URL (unknown values dropped).
+  `src/api/blogs.ts`: `useBlogs(filters)`.
+- Tests: `season-filters.test.tsx` (5 cases), `agri.test.ts`. Looked at in Chrome at 1280, 390 and 360px.
+
+**Decisions**
+- Season dates follow the DAE calendar; the farming year starts with Rabi, so the strip reads Rabi -> Kharif-2.
+- Filters live in the URL so a filtered feed can be shared and survives reload.
+- Year-round has no band; it is reachable from a story's season chip.
+- The backend matches crop and region exactly (lower-cased, trimmed), so "rice" does not find "boro rice".
+
+**Known limitations**
+- Feeds (Latest / Trending / For you) themselves don't take filters; a filtered view is always newest first.
+- No suggestions for crop and region yet (free text on the backend; a distinct-values endpoint would help).
+
+---
+
+## 2026-10-08 (F2.1 home feed)
+
+**Done**
+- Home: feed tabs For you (`/api/feed/following`, signed-in only), Latest, Trending, on `?feed=`; signed-in readers
+  start on For you, visitors on Latest (a visitor's `?feed=following` falls back to Latest).
+- Story card: author, title, two-line excerpt (story HTML -> text with DOMParser, no HTML rendered), date, reading
+  time, claps, crop and season chips, cover on the right. Hairline separators, no boxes.
+- Infinite scroll: `useInfiniteQuery`, 10 per page; an IntersectionObserver loads the next page 600px early and a
+  "Show more stories" button does the same for keyboards; "You're all caught up" at the end.
+- States: loading, error with Try again, empty For you (points to Latest), empty site (invites writing).
+- Visitors keep a short welcome above the feed.
+- `src/lib/html.ts`, `dates.ts`, `agri.ts`; `src/test/api.ts` (`envelope`, `page`, `mockApi` routing by
+  "METHOD /path") for screen tests.
+- Tests: `feed.test.tsx` (7 cases), html and date helpers.
+
+**Decisions**
+- The feed waits until the session has restored, so the first read carries the token and For you vs Latest is
+  known.
+- Story URLs are `/stories/:slug`, author URLs `/authors/:authorId`.
+- `BlogResponse` alias added at the end of `types.ts`, away from F1.4's edit, so the two branches merge cleanly.
+
+**Known limitations**
+- The links from cards lead to not-found until F2.3 (story) and F2.7 (author).
+- Checked in jsdom only, not in a browser yet.
+
+---
+
+## 2026-10-08 (F1.4 author profile settings)
+
+**Done**
+- Settings shows an "Author profile" section when the session's user has an `authorId`: photo, designation,
+  specialities, occupation, workplace, about you. Loaded from `GET /api/authors/me`, saved with `PUT /api/authors/me`.
+- Photo: picked, checked (JPEG / PNG / WebP, <= 5 MB, as the backend), uploaded at once to `POST /api/images`, saved
+  with the profile; Remove photo clears it.
+- `src/api/authors.ts`, `src/api/images.ts`, `src/lib/images.ts`, `TextArea` primitive.
+- Tests: `author-profile.test.tsx` (7 cases), `images.test.ts`. Checked on the local backend (backend
+  `feat/author-me`): me, upload and update.
+
+**Decisions**
+- Readers don't see the section, and no request is made for them (`/api/authors/me` is 403 for readers).
+- The step PRs F1.1-F1.3 were merged straight into `development`; `feat/accounts-base` was fast-forwarded to it so
+  F1.4 still goes through the phase base.
+
+**Known limitations**
+- Upload URLs are absolute (`http://localhost:8080/uploads/...`), built from the backend's own base URL; fine while
+  it matches what the browser can reach, worth checking for a deployed split origin.
+- A replaced photo stays on the server (no delete endpoint).
 
 ---
 

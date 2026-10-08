@@ -5,6 +5,7 @@ export type Schemas = components['schemas']
 
 export type UserResponse = Schemas['UserResponse']
 export type WebTokenResponse = Schemas['WebTokenResponse']
+export type AuthorProfileResponse = Schemas['AuthorProfileResponse']
 
 /** Spring Data's `Page` as the backend serialises it. */
 export interface Page<T> {
@@ -17,3 +18,5 @@ export interface Page<T> {
   last: boolean
   empty: boolean
 }
+
+export type BlogResponse = Schemas['BlogResponse']

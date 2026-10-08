@@ -5,6 +5,7 @@ import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { SIGNED_UP_BUT_NOT_IN } from '../../api/auth'
 import { clearSession, getAccessToken, hasStoredSession } from '../../api/client'
 import App from '../../App'
+import { mockApi, page } from '../../test/api'
 import { renderWithProviders } from '../../test/render'
 import { RequireAuth } from './RequireAuth'
 
@@ -128,17 +129,26 @@ test('a reader signs up without professional details', async () => {
 
 test('a stored session is restored on load', async () => {
   localStorage.setItem('agrotrends.refreshToken', 'r0')
-  fetchMock.mockResolvedValueOnce(envelope(200, tokens))
+  const api = mockApi({
+    'POST /api/auth/refresh-token': () => envelope(200, tokens),
+    'GET /api/feed/following': () => envelope(200, page([])),
+  })
   renderWithProviders(<App />, '/')
 
   expect(await screen.findByRole('button', { name: 'Account' })).toBeInTheDocument()
   expect(screen.queryByRole('link', { name: 'Get started' })).not.toBeInTheDocument()
-  expect(body(0)).toEqual({ refreshToken: 'r0' })
+  const refresh = api.mock.calls.find(([url]) => url === '/api/auth/refresh-token')!
+  expect(JSON.parse((refresh[1] as RequestInit).body as string)).toEqual({ refreshToken: 'r0' })
 })
 
 test('signing out ends the session on the server and here', async () => {
   localStorage.setItem('agrotrends.refreshToken', 'r0')
-  fetchMock.mockResolvedValueOnce(envelope(200, tokens)).mockResolvedValueOnce(envelope(200, null, 'You are signed out.'))
+  const api = mockApi({
+    'POST /api/auth/refresh-token': () => envelope(200, tokens),
+    'GET /api/feed/following': () => envelope(200, page([])),
+    'GET /api/feed/latest': () => envelope(200, page([])),
+    'GET /api/auth/sign-out': () => envelope(200, null, 'You are signed out.'),
+  })
   renderWithProviders(<App />, '/')
 
   await userEvent.click(await screen.findByRole('button', { name: 'Account' }))
@@ -146,7 +156,7 @@ test('signing out ends the session on the server and here', async () => {
   await userEvent.click(screen.getByRole('button', { name: 'Sign out' }))
 
   expect(await screen.findByRole('link', { name: 'Get started' })).toBeInTheDocument()
-  expect(fetchMock.mock.calls[1][0]).toBe('/api/auth/sign-out')
+  expect(api.mock.calls.some(([url]) => url === '/api/auth/sign-out')).toBe(true)
   expect(hasStoredSession()).toBe(false)
   expect(getAccessToken()).toBeNull()
 })

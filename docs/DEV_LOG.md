@@ -14,15 +14,16 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 - Phase F2 reading on `feat/reading-base`: F2.1 home feed (`feat/home-feed`), F2.2 season strip and filters
   (`feat/season-filters`) F2.3 story page (`feat/story-page`), F2.4 claps and
   bookmarks (`feat/claps-bookmarks`) F2.5 responses (`feat/comments`), F2.6 topics
-  (`feat/tag-page`) and F2.8 search (`feat/search`) done. F2.7 author page waits for F1.4 in `development`.
+  (`feat/tag-page`) F2.8 search (`feat/search`) and F2.9 library
+  (`feat/library`) done. F2.7 author page waits for F1.4 in `development`.
 
 ## Next up
 
 1. **Nayeem:** merge backend `feat/author-me`; open and merge `feat/author-profile` -> `feat/accounts-base` ->
    `development`. Open and merge, in order, `feat/home-feed`,
    `feat/season-filters`, `feat/story-page`, `feat/claps-bookmarks`, `feat/comments`,
-   `feat/tag-page` and `feat/search` -> `feat/reading-base`.
-2. F2.9 library; then F2.7 author page once F1.4 (`src/api/authors.ts`) is in `development`. The richer author block (designation, photo, Follow) waits for F1.4's
+   `feat/tag-page`, `feat/search` and `feat/library` -> `feat/reading-base`.
+2. F2.7 author page once F1.4 (`src/api/authors.ts`) is in `development`; it closes Phase F2. The richer author block (designation, photo, Follow) waits for F1.4's
    `src/api/authors.ts` to reach `development`.
 
 ## Open items
@@ -35,6 +36,22 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Make `development` the default branch on GitHub and protect it | Nayeem | — |
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
+
+---
+
+## 2026-10-08 (F2.9 library)
+
+**Done**
+- `/library` behind `RequireAuth`, linked from the account menu. Reading list (`/api/bookmarks`, most recent first,
+  paged) and Following (`?tab=following`): authors (`/api/me/following/authors`, paged, Following / Follow that can
+  be undone in place) and topics (Follow buttons as on tag pages).
+- `src/api/follows.ts`: reading list, followed authors, author follow / unfollow (reloads For you and the
+  author's profile). Kept apart from F1.4's `authors.ts` so the branches don't conflict; F2.7 uses it too.
+- Tests: `library.test.tsx` (5 cases). Checked on the local backend: follow, list, `followedByMe`, unfollow.
+
+**Decisions**
+- Unfollowing keeps the row with a Follow button, so a mis-tap can be undone; the list is fresh on the next visit.
+- A failed unfollow puts the button back.
 
 ---
 

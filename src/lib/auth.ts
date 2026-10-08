@@ -36,3 +36,13 @@ export function signInPath(path: string): string {
   const next = safeNext(path)
   return next === '/' ? '/sign-in' : `/sign-in?next=${encodeURIComponent(next)}`
 }
+
+/**
+ * The backend stores code and number joined ("+8801712345678") but takes them apart on update. Bangladesh numbers
+ * split at +880; anything else is left whole in the number field for the reader to separate.
+ */
+export function splitMobile(mobile: string | undefined): { countryCode: string; mobileNumber: string } {
+  const value = (mobile ?? '').trim()
+  if (value.startsWith('+880')) return { countryCode: '+880', mobileNumber: value.slice(4) }
+  return { countryCode: '', mobileNumber: value }
+}

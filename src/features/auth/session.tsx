@@ -9,9 +9,17 @@ type Status = 'restoring' | 'anonymous' | 'signed-in'
 interface Session {
   status: Status
   user: UserResponse | null
+  /** Why the last session ended, for sign-in to show (e.g. after a password change); null otherwise. */
+  endNotice: string | null
   /** Store the tokens from sign-in and mark the reader as signed in. */
   signedIn: (tokens: WebTokenResponse) => void
-  signOut: () => Promise<void>
+  /**
+   * Ends the session. `remote: false` skips the server call when the backend has already revoked it; `notice` is
+   * shown on sign-in (RequireAuth carries it there).
+   */
+  signOut: (options?: { remote?: boolean; notice?: string }) => Promise<void>
+  /** Reflect an edit of the signed-in account without a round trip. */
+  updateUser: (changes: Partial<UserResponse>) => void
 }
 
 const SessionContext = createContext<Session | null>(null)
@@ -24,6 +32,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient()
   const [status, setStatus] = useState<Status>(() => (hasStoredSession() ? 'restoring' : 'anonymous'))
   const [user, setUser] = useState<UserResponse | null>(null)
+  const [endNotice, setEndNotice] = useState<string | null>(null)
 
   const becomeAnonymous = useCallback(() => {
     setUser(null)
@@ -57,6 +66,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const signedIn = useCallback(
     (tokens: WebTokenResponse) => {
       startSession(tokens)
+      setEndNotice(null)
       setUser(tokens.user ?? null)
       setStatus('signed-in')
       queryClient.clear()
@@ -64,17 +74,27 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     [queryClient],
   )
 
-  const signOut = useCallback(async () => {
-    try {
-      await signOutRequest()
-    } catch {
-      // Signed out here either way; the server-side session expires on its own.
+  const signOut = useCallback(async ({ remote = true, notice }: { remote?: boolean; notice?: string } = {}) => {
+    if (remote) {
+      try {
+        await signOutRequest()
+      } catch {
+        // Signed out here either way; the server-side session expires on its own.
+      }
     }
     clearSession()
+    setEndNotice(notice ?? null)
     becomeAnonymous()
   }, [becomeAnonymous])
 
-  const value = useMemo(() => ({ status, user, signedIn, signOut }), [status, user, signedIn, signOut])
+  const updateUser = useCallback((changes: Partial<UserResponse>) => {
+    setUser((current) => (current ? { ...current, ...changes } : current))
+  }, [])
+
+  const value = useMemo(
+    () => ({ status, user, endNotice, signedIn, signOut, updateUser }),
+    [status, user, endNotice, signedIn, signOut, updateUser],
+  )
   return <SessionContext value={value}>{children}</SessionContext>
 }
 

@@ -1,6 +1,6 @@
-import { SignOut } from '@phosphor-icons/react'
+import { GearSix, SignOut } from '@phosphor-icons/react'
 import { useEffect, useId, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useSession } from '../features/auth/session'
 import { Avatar } from '../ui/Avatar'
 
@@ -52,7 +52,11 @@ export function AccountMenu() {
             <p className="truncate font-medium">{name}</p>
             {user?.email && <p className="truncate text-sm text-ink-muted">{user.email}</p>}
           </div>
-          <button type="button" onClick={leave} className="mt-1 flex h-11 w-full items-center gap-2 px-4 text-left text-sm text-ink-muted hover:bg-field hover:text-ink">
+          <Link to="/settings" onClick={() => setOpen(false)} className="mt-1 flex h-11 items-center gap-2 px-4 text-sm text-ink-muted hover:bg-field hover:text-ink">
+            <GearSix size={18} aria-hidden="true" />
+            Settings
+          </Link>
+          <button type="button" onClick={leave} className="flex h-11 w-full items-center gap-2 px-4 text-left text-sm text-ink-muted hover:bg-field hover:text-ink">
             <SignOut size={18} aria-hidden="true" />
             Sign out
           </button>

@@ -1,4 +1,4 @@
-import { isEmail, passwordProblem, safeNext, signInPath, splitList } from './auth'
+import { isEmail, passwordProblem, safeNext, signInPath, splitList, splitMobile } from './auth'
 
 test('password rules match the backend', () => {
   expect(passwordProblem('')).toBe('Enter a password.')
@@ -35,4 +35,10 @@ test('only same-site paths are followed after sign-in', () => {
 test('sign-in links carry the way back', () => {
   expect(signInPath('/stories/a?b=1')).toBe('/sign-in?next=%2Fstories%2Fa%3Fb%3D1')
   expect(signInPath('/')).toBe('/sign-in')
+})
+
+test('stored mobile numbers split back into code and number', () => {
+  expect(splitMobile('+8801712345678')).toEqual({ countryCode: '+880', mobileNumber: '1712345678' })
+  expect(splitMobile('+447700900123')).toEqual({ countryCode: '', mobileNumber: '+447700900123' })
+  expect(splitMobile(undefined)).toEqual({ countryCode: '', mobileNumber: '' })
 })

@@ -14,14 +14,17 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 
 ## Next up
 
-1. Phase F1 accounts (F1.1 sign in / sign up).
-2. Backend: public read access for anonymous readers (roadmap F2.0) before Phase F2.
+1. **Nayeem:** open and merge, in order: `feat/scaffold` -> `feat/foundation-base`, `feat/design-shell` ->
+   `feat/foundation-base`, `feat/api-client` -> `feat/foundation-base`; then `feat/foundation-base` -> `development`.
+2. Decide whether anonymous visitors can read (backend step F2.0); recommended yes, like Medium.
+3. Phase F1 accounts (F1.1 sign in / sign up).
+4. Backend: public read access for anonymous readers (roadmap F2.0) before Phase F2.
 
 ## Open items
 
 | Item | Needs | Blocks |
 |---|---|---|
-| GitHub repository not created yet; branches are local only | Nayeem (create repo, share the URL) | pushing, PRs |
+| Make `development` the default branch on GitHub and protect it | Nayeem | — |
 | Only `/api/blogs/all` is public on the backend; stories, feeds, search, authors and questions need sign-in | backend step | anonymous reading (F2) |
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |

@@ -9,6 +9,8 @@ import { Chip } from '../../ui/Chip'
 import { SafeHtml } from '../../ui/SafeHtml'
 import { Spinner } from '../../ui/Spinner'
 import { useSession } from '../auth/session'
+import { BookmarkButton } from '../reactions/BookmarkButton'
+import { ClapButton } from '../reactions/ClapButton'
 import { NotFoundPage } from '../errors/NotFoundPage'
 
 export function StoryPage() {
@@ -48,7 +50,7 @@ function Story({ story }: { story: BlogResponse }) {
         )}
         <h1 className="text-2xl sm:text-3xl">{story.title}</h1>
         {author?.name && (
-          <div className="mt-8 flex items-center gap-3 border-b border-rule pb-6">
+          <div className="mt-8 flex items-center gap-3">
             <Avatar name={author.name} size={44} />
             <div className="min-w-0 text-sm">
               <Link to={`/authors/${author.authorId}`} className="font-medium text-ink hover:underline">
@@ -65,6 +67,7 @@ function Story({ story }: { story: BlogResponse }) {
             </div>
           </div>
         )}
+        <StoryActions story={story} />
       </header>
 
       {story.imageUrl && (
@@ -76,8 +79,18 @@ function Story({ story }: { story: BlogResponse }) {
       <div className="mx-auto mt-10 max-w-(--container-feed) px-4 sm:px-6">
         <SafeHtml html={story.content} className="story-body" />
         <StoryFooter story={story} />
+        <StoryActions story={story} />
       </div>
     </article>
+  )
+}
+
+function StoryActions({ story }: { story: BlogResponse }) {
+  return (
+    <div className="mt-6 flex items-center justify-between border-y border-rule py-1">
+      <ClapButton story={story} />
+      <BookmarkButton story={story} />
+    </div>
   )
 }
 

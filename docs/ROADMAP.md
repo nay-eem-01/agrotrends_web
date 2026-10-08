@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend
 
-**Progress:** 10 of 36 steps done
+**Progress:** 11 of 36 steps done
 
 ---
 
@@ -38,7 +38,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 | F2.1 | Home: feed tabs (For you = following, Latest, Trending), story card, infinite scroll | ✅ |
 | F2.2 | The crop-season strip: current season marked, filters the feed by season; crop / region / soil filters | ✅ |
 | F2.3 | Story page by slug: sanitised HTML, reading time, author block, agri chips, tags | ✅ |
-| F2.4 | Claps (press-and-hold, up to 50) and bookmarks on the story page and cards | ⬜ |
+| F2.4 | Claps (press-and-hold, up to 50) and bookmarks on the story page and cards | ✅ |
 | F2.5 | Comments and replies (owner edit / delete) | ⬜ |
 | F2.6 | Tag page with follow; topic list | ⬜ |
 | F2.7 | Author page (profile, posts, follow) | ⬜ |
@@ -89,6 +89,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 | Item | Needed for | Status |
 |---|---|---|
 | `GET /api/authors/me` (or `authorId` on `UserResponse`): the signed-in author's own profile, to prefill the editor | F1.4 | ⏸ |
+| "Saved by me" per story (`bookmarkedByMe` on `BlogResponse`, or `GET /api/blogs/id/{id}/bookmark`) | exact saved state past the 100 most recent saves (F2.4) | ⏸ |
 | Public GET access to published content | anonymous reading (F2) | ✅ backend 2.13 |
 | Refresh token as an `HttpOnly` cookie instead of in the JSON body | keeping the refresh token out of script reach | ⏸ |
 | CORS origins from a property (backend 4.1) | a deployed split origin | ⏸ |

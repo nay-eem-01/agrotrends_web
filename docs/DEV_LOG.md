@@ -12,14 +12,15 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 - Phase F0 and F1.1-F1.3 merged into `development`. F1.4 author profile is on `feat/author-profile` (PR into
   `feat/accounts-base`).
 - Phase F2 reading on `feat/reading-base`: F2.1 home feed (`feat/home-feed`), F2.2 season strip and filters
-  (`feat/season-filters`) and F2.3 story page (`feat/story-page`) done.
+  (`feat/season-filters`) F2.3 story page (`feat/story-page`) and F2.4 claps and
+  bookmarks (`feat/claps-bookmarks`) done.
 
 ## Next up
 
 1. **Nayeem:** merge backend `feat/author-me`; open and merge `feat/author-profile` -> `feat/accounts-base` ->
    `development`. Open and merge, in order, `feat/home-feed`,
-   `feat/season-filters` and `feat/story-page` -> `feat/reading-base`.
-2. F2.4 claps and bookmarks, F2.5 comments. The richer author block (designation, photo, Follow) waits for F1.4's
+   `feat/season-filters`, `feat/story-page` and `feat/claps-bookmarks` -> `feat/reading-base`.
+2. F2.5 comments. The richer author block (designation, photo, Follow) waits for F1.4's
    `src/api/authors.ts` to reach `development`.
 
 ## Open items
@@ -27,9 +28,35 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Item | Needs | Blocks |
 |---|---|---|
 | No way to read my own author profile (`GET /api/authors/me` missing; `UserResponse` has no `authorId`) | backend step | F1.4 |
+| No per-story "saved by me": the app reads the 100 most recent saves to mark Save buttons | backend: `bookmarkedByMe` | exact saved state for heavy savers |
 | Make `development` the default branch on GitHub and protect it | Nayeem | — |
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
+
+---
+
+## 2026-10-08 (F2.4 claps and bookmarks)
+
+**Done**
+- Clap button on the story page (under the author and after the body): a tap adds one, holding adds one every
+  120ms after 350ms; claps show at once and go to `POST /api/blogs/id/{id}/claps?count=n` as one request 500ms
+  after the burst ends (claps made meanwhile are sent next). Stops at 50 per reader; mustard filled icon once
+  clapped. The reader's own story shows the count only (no request, the backend refuses it).
+- Save button on the story page and every feed card: `PUT` / `DELETE /api/blogs/id/{id}/bookmark`, optimistic,
+  rolled back on failure.
+- Visitors see counts; Clap and Save send them to sign-in and back (`useRequireSignIn`, for later write controls
+  too).
+- `src/api/reactions.ts`. Schema regenerated here too (identical to F1.4's, so the branches merge cleanly), for
+  `authorId` on the user.
+- Tests: `reactions.test.tsx` (8 cases). Checked on the local backend: clap, read, save, list, unsave, remove claps.
+
+**Decisions**
+- Saved state comes from the 100 most recent saves (`GET /api/bookmarks`), as the API has no per-story flag yet
+  (backend need added).
+- Taking claps back (`DELETE .../claps`) isn't offered yet.
+
+**Known limitations**
+- A story saved before the reader's latest 100 saves shows as unsaved.
 
 ---
 

@@ -9,13 +9,13 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 
 - New frontend, built from scratch (the old `AGROTRENDS- FrontEnd` repo is retired: it called the pre-hardening API,
   sent `userId` in URLs and called Gemini from the browser with a key).
-- Phase F0 (foundation) in progress on `feat/foundation-base`.
+- Phase F0 (foundation) done: scaffold, design system and shell, API client. Steps are stacked on
+  `feat/foundation-base`.
 
 ## Next up
 
-1. F0.3 API client.
-2. Phase F1 accounts.
-3. Backend: public read access for anonymous readers (roadmap F2.0) before Phase F2.
+1. Phase F1 accounts (F1.1 sign in / sign up).
+2. Backend: public read access for anonymous readers (roadmap F2.0) before Phase F2.
 
 ## Open items
 
@@ -25,6 +25,26 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Only `/api/blogs/all` is public on the backend; stories, feeds, search, authors and questions need sign-in | backend step | anonymous reading (F2) |
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
+
+---
+
+## 2026-10-08 (F0.3 API client)
+
+**Done**
+- `src/api/client.ts`: `api<T>()` unwraps the `HttpResponse` envelope; JSON or `FormData` bodies; query params with
+  empty values dropped. Errors are `ApiError` (`status`, user-safe `message`, `errorId` on a 500). Network failure ->
+  a friendly status-0 error.
+- Session: access token in memory, refresh token in `localStorage`. A 401 triggers one refresh shared by concurrent
+  callers, then one retry; a rejected refresh clears the session and calls the session-lost handler; an unreachable
+  server keeps it. `restoreSession()` for app start. Auth paths never refresh.
+- `src/api/types.ts`: aliases over the generated schema; `Page<T>`.
+- Tests: `client.test.ts` (11 cases: envelope, errors, rotation, single-flight refresh, session loss, offline).
+
+**Decisions**
+- 500 messages are replaced with a generic one on the client too; the `errorId` is kept for bug reports.
+
+**Known limitations**
+- The refresh token is readable by scripts on the page until the backend sends it as an HttpOnly cookie (open item).
 
 ---
 

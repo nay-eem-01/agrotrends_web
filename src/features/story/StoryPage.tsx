@@ -11,6 +11,7 @@ import { Spinner } from '../../ui/Spinner'
 import { useSession } from '../auth/session'
 import { BookmarkButton } from '../reactions/BookmarkButton'
 import { ClapButton } from '../reactions/ClapButton'
+import { WrittenBy } from '../authors/AuthorPage'
 import { Responses } from '../comments/Responses'
 import { NotFoundPage } from '../errors/NotFoundPage'
 
@@ -81,6 +82,7 @@ function Story({ story }: { story: BlogResponse }) {
         <SafeHtml html={story.content} className="story-body" />
         <StoryFooter story={story} />
         <StoryActions story={story} />
+        {author?.authorId != null && <WrittenBy authorId={author.authorId} fallbackName={author.name ?? ''} />}
         {story.id != null && story.status === 'PUBLISHED' && <Responses blogId={story.id} />}
       </div>
     </article>

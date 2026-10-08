@@ -1,4 +1,5 @@
 import { Route, Routes } from 'react-router-dom'
+import { AuthorPage } from './features/authors/AuthorPage'
 import { ForgotPasswordPage } from './features/auth/ForgotPasswordPage'
 import { ResetPasswordPage } from './features/auth/ResetPasswordPage'
 import { RequireAuth } from './features/auth/RequireAuth'
@@ -20,6 +21,7 @@ export default function App() {
       <Route element={<AppLayout />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/stories/:slug" element={<StoryPage />} />
+        <Route path="/authors/:authorId" element={<AuthorPage />} />
         <Route path="/tags/:tagName" element={<TagPage />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/topics" element={<TopicsPage />} />

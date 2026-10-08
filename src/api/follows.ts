@@ -1,7 +1,7 @@
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from './client'
 import { feedKeys } from './feed'
-import type { BlogResponse, Page, Schemas } from './types'
+import type { AuthorProfileResponse, BlogResponse, Page, Schemas } from './types'
 
 export type AuthorSummary = Schemas['AuthorSummaryResponse']
 
@@ -40,10 +40,28 @@ export function useToggleAuthorFollow() {
   return useMutation({
     mutationFn: ({ authorId, follow }: { authorId: number; follow: boolean }) =>
       api<null>(`/api/authors/${authorId}/follow`, { method: follow ? 'PUT' : 'DELETE' }),
+    // An open author profile shows the change at once and gets it back if the request fails.
+    onMutate: async ({ authorId, follow }) => {
+      const key = ['authors', authorId]
+      await queryClient.cancelQueries({ queryKey: key, exact: true })
+      const before = queryClient.getQueryData<AuthorProfileResponse>(key)
+      if (before && before.followedByMe !== follow) {
+        queryClient.setQueryData<AuthorProfileResponse>(key, {
+          ...before,
+          followedByMe: follow,
+          followerCount: Math.max(0, (before.followerCount ?? 0) + (follow ? 1 : -1)),
+        })
+      }
+      return { before }
+    },
+    onError: (_error, { authorId }, context) => {
+      if (context?.before) queryClient.setQueryData(['authors', authorId], context.before)
+    },
     onSettled: (_data, _error, { authorId }) => {
       void queryClient.invalidateQueries({ queryKey: feedKeys.feed('following') })
       // The author's public profile carries followedByMe and the follower count.
-      void queryClient.invalidateQueries({ queryKey: ['authors', authorId] })
+      void queryClient.invalidateQueries({ queryKey: ['authors', authorId], exact: true })
+      void queryClient.invalidateQueries({ queryKey: followKeys.authors })
     },
   })
 }

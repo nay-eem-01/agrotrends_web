@@ -71,7 +71,8 @@ export function Feed() {
 
 type StoryQuery = UseInfiniteQueryResult<InfiniteData<Page<BlogResponse>>>
 
-function StoryList({ ready, query, empty }: { ready: boolean; query: StoryQuery; empty: ReactNode }) {
+/** Stories from any paged query, with loading, error, empty and load-more states. */
+export function StoryList({ ready, query, empty }: { ready: boolean; query: StoryQuery; empty: ReactNode }) {
   const stories = query.data?.pages.flatMap((page) => page.content) ?? []
   if (!ready || query.isPending) {
     return (

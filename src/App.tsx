@@ -8,6 +8,8 @@ import { NotFoundPage } from './features/errors/NotFoundPage'
 import { HomePage } from './features/home/HomePage'
 import { SettingsPage } from './features/settings/SettingsPage'
 import { StoryPage } from './features/story/StoryPage'
+import { TagPage } from './features/topics/TagPage'
+import { TopicsPage } from './features/topics/TopicsPage'
 import { AppLayout } from './layout/AppLayout'
 
 export default function App() {
@@ -16,6 +18,8 @@ export default function App() {
       <Route element={<AppLayout />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/stories/:slug" element={<StoryPage />} />
+        <Route path="/tags/:tagName" element={<TagPage />} />
+        <Route path="/topics" element={<TopicsPage />} />
         <Route path="/sign-in" element={<SignInPage />} />
         <Route path="/sign-up" element={<SignUpPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />

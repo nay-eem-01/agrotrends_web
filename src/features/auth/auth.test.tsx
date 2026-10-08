@@ -137,7 +137,8 @@ test('a stored session is restored on load', async () => {
 
   expect(await screen.findByRole('button', { name: 'Account' })).toBeInTheDocument()
   expect(screen.queryByRole('link', { name: 'Get started' })).not.toBeInTheDocument()
-  expect(JSON.parse((api.mock.calls[0][1] as RequestInit).body as string)).toEqual({ refreshToken: 'r0' })
+  const refresh = api.mock.calls.find(([url]) => url === '/api/auth/refresh-token')!
+  expect(JSON.parse((refresh[1] as RequestInit).body as string)).toEqual({ refreshToken: 'r0' })
 })
 
 test('signing out ends the session on the server and here', async () => {

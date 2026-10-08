@@ -13,7 +13,7 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 
 ## Next up
 
-1. F0.2 design tokens and app shell, F0.3 API client.
+1. F0.3 API client.
 2. Phase F1 accounts.
 3. Backend: public read access for anonymous readers (roadmap F2.0) before Phase F2.
 
@@ -25,6 +25,23 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Only `/api/blogs/all` is public on the backend; stories, feeds, search, authors and questions need sign-in | backend step | anonymous reading (F2) |
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
+
+---
+
+## 2026-10-08 (F0.2 design tokens and app shell)
+
+**Done**
+- Tailwind `@theme` tokens from `docs/DESIGN.md` (colours, fonts, type scale, container widths); focus ring,
+  selection colour, reduced motion.
+- Self-hosted fonts: Literata (optical sizes), Hind Siliguri 400/500/600, Noto Serif Bengali.
+- Shell: sticky top bar (logo, search -> `/search?q=`, Questions, Write, Sign in, Get started), footer, skip link.
+- Primitives in `src/ui`: `Button` / `ButtonLink` (primary, secondary, quiet, danger; loading), `TextField`
+  (label, hint, error wired to `aria-describedby`), `Avatar` (initials fallback, Bengali-aware), `Chip`, `Spinner`.
+- Placeholder home and a not-found page. Checked at 1280px, 390px and 360px.
+
+**Decisions**
+- Avatars are decorative (`alt=""`): a name is always shown next to one.
+- Sign in is hidden below 640px; Get started leads to sign-in as well.
 
 ---
 

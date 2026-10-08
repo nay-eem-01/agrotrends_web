@@ -10,22 +10,47 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 - New frontend, built from scratch (the old `AGROTRENDS- FrontEnd` repo is retired: it called the pre-hardening API,
   sent `userId` in URLs and called Gemini from the browser with a key).
 - Phase F0 (foundation) merged into `development`.
-- Phase F1 (accounts) on `feat/accounts-base`: F1.1 sign in / sign up (`feat/sign-in`) and F1.2 password reset
-  (`feat/password-reset`) done.
+- Phase F1 (accounts) on `feat/accounts-base`: F1.1 sign in / sign up (`feat/sign-in`), F1.2 password reset
+  (`feat/password-reset`) and F1.3 settings (`feat/settings`) done. F1.4 author profile waits on the backend.
 
 ## Next up
 
 1. **Nayeem:** open and merge, in order: `feat/sign-in` -> `feat/accounts-base`, `feat/password-reset` ->
-   `feat/accounts-base`.
-2. F1.3 settings (first screens behind `RequireAuth`).
+   `feat/accounts-base`, `feat/settings` -> `feat/accounts-base`.
+2. Backend: `GET /api/authors/me` for F1.4 (author profile settings). Phase F1 can merge into `development` without
+   it; F1.4 then follows as its own PR.
+3. Phase F2 reading (F2.1 home feed).
 
 ## Open items
 
 | Item | Needs | Blocks |
 |---|---|---|
+| No way to read my own author profile (`GET /api/authors/me` missing; `UserResponse` has no `authorId`) | backend step | F1.4 |
 | Make `development` the default branch on GitHub and protect it | Nayeem | — |
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
+
+---
+
+## 2026-10-08 (F1.3 settings: account and password)
+
+**Done**
+- `/settings` behind `RequireAuth`, linked from the account menu. Account: name, e-mail, code + mobile, prefilled from
+  the session (`+880...` split back into code and number). Password: current, new, repeat.
+- `src/api/account.ts`: `PUT /api/user/update`, `POST /api/user/change-password`.
+- The backend revokes every session when the e-mail or password changes, so both end the session locally (no
+  sign-out call) and RequireAuth sends the reader to sign-in with a notice and back to settings.
+- Session: `updateUser` (a saved name shows in the menu at once), `endNotice` carried by RequireAuth's redirect.
+- Tests: `settings.test.tsx` (7 cases), `splitMobile`. Update and wrong-password replies checked on the local backend.
+
+**Decisions**
+- The author profile editor is split out as F1.4: the backend has no way to load the signed-in author's profile, and
+  a blank form would overwrite designation and specialities on save.
+- The end-of-session notice lives in the session, not in a navigate call: React Router 7 navigates in a transition,
+  so the guard's redirect raced it and dropped router state.
+
+**Known limitations**
+- A mobile number outside +880 is shown whole in the number field; the reader has to split off the code once.
 
 ---
 

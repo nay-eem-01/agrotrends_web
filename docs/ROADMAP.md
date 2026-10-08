@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend
 
-**Progress:** 6 of 35 steps done
+**Progress:** 7 of 36 steps done
 
 ---
 
@@ -27,7 +27,8 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 |---|---|---|
 | F1.1 | Sign in and sign up (reader or author with professional info); session restore on reload; protected routes | ✅ |
 | F1.2 | Forgot / reset password (link from e-mail: `/reset-password?token=`) | ✅ |
-| F1.3 | Settings: edit my account, my author profile (bio, specialities, photo), change password | ⬜ |
+| F1.3 | Settings: edit my account (name, e-mail, mobile), change password | ✅ |
+| F1.4 | Settings: my author profile (designation, specialities, bio, photo via `POST /api/images`) — needs `GET /api/authors/me` | ⏸ |
 
 ## Phase F2 — Reading (`feat/reading-base`)
 
@@ -87,6 +88,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 | Item | Needed for | Status |
 |---|---|---|
+| `GET /api/authors/me` (or `authorId` on `UserResponse`): the signed-in author's own profile, to prefill the editor | F1.4 | ⏸ |
 | Public GET access to published content | anonymous reading (F2) | ✅ backend 2.13 |
 | Refresh token as an `HttpOnly` cookie instead of in the JSON body | keeping the refresh token out of script reach | ⏸ |
 | CORS origins from a property (backend 4.1) | a deployed split origin | ⏸ |

@@ -32,7 +32,10 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals())
 
 test('a story shows its title, author, details and cleaned body', async () => {
-  const api = mockApi({ 'GET /api/blogs/slug/rice-blast-and-nitrogen': () => envelope(200, story) })
+  const api = mockApi({
+    'GET /api/blogs/slug/rice-blast-and-nitrogen': () => envelope(200, story),
+    'GET /api/comments/blog/402': () => envelope(200, []),
+  })
   renderWithProviders(<App />, '/stories/rice-blast-and-nitrogen')
 
   expect(await screen.findByRole('heading', { level: 1, name: 'Rice blast and nitrogen' })).toBeInTheDocument()
@@ -49,7 +52,7 @@ test('a story shows its title, author, details and cleaned body', async () => {
   expect(document.querySelector('[onerror]')).toBeNull()
   expect((window as unknown as { __pwned?: number }).__pwned).toBeUndefined()
   expect(document.title).toBe('Rice blast and nitrogen – AgroTrends')
-  expect(api).toHaveBeenCalledOnce()
+  expect(api.mock.calls.filter(([url]) => String(url).startsWith('/api/blogs/slug/'))).toHaveLength(1)
 })
 
 test('farming context and tags link to filtered lists', async () => {

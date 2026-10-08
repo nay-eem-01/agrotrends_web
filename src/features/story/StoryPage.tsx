@@ -11,6 +11,7 @@ import { Spinner } from '../../ui/Spinner'
 import { useSession } from '../auth/session'
 import { BookmarkButton } from '../reactions/BookmarkButton'
 import { ClapButton } from '../reactions/ClapButton'
+import { Responses } from '../comments/Responses'
 import { NotFoundPage } from '../errors/NotFoundPage'
 
 export function StoryPage() {
@@ -80,6 +81,7 @@ function Story({ story }: { story: BlogResponse }) {
         <SafeHtml html={story.content} className="story-body" />
         <StoryFooter story={story} />
         <StoryActions story={story} />
+        {story.id != null && story.status === 'PUBLISHED' && <Responses blogId={story.id} />}
       </div>
     </article>
   )

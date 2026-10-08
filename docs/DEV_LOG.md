@@ -9,28 +9,25 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 
 - New frontend, built from scratch (the old `AGROTRENDS- FrontEnd` repo is retired: it called the pre-hardening API,
   sent `userId` in URLs and called Gemini from the browser with a key).
-- Phase F0 and F1.1-F1.3 merged into `development`. F1.4 author profile is on `feat/author-profile` (PR into
-  `feat/accounts-base`).
-- Phase F2 reading on `feat/reading-base`: F2.1 home feed (`feat/home-feed`), F2.2 season strip and filters
-  (`feat/season-filters`) F2.3 story page (`feat/story-page`), F2.4 claps and
-  bookmarks (`feat/claps-bookmarks`) F2.5 responses (`feat/comments`), F2.6 topics
-  (`feat/tag-page`) F2.8 search (`feat/search`) and F2.9 library
-  (`feat/library`) done. F2.7 author page waits for F1.4 in `development`.
+- Phase F0 (foundation) merged into `development`. Phase F1 (accounts) complete on `feat/accounts-base`
+  (F1.1-F1.3 also in `development`; F1.4 author profile merged into the base, PR #8).
+- Phase F2 reading, stacked on `feat/reading-base`: F2.1 home feed (`feat/home-feed`), F2.2 season strip and
+  filters (`feat/season-filters`), F2.3 story page (`feat/story-page`), F2.4 claps and bookmarks
+  (`feat/claps-bookmarks`), F2.5 responses (`feat/comments`), F2.6 topics (`feat/tag-page`), F2.8 search
+  (`feat/search`), F2.9 library (`feat/library`). F2.7 author page on `feat/author-page`, which also merges
+  `feat/accounts-base` in so it can use F1.4's `src/api/authors.ts`.
 
 ## Next up
 
-1. **Nayeem:** merge backend `feat/author-me`; open and merge `feat/author-profile` -> `feat/accounts-base` ->
-   `development`. Open and merge, in order, `feat/home-feed`,
-   `feat/season-filters`, `feat/story-page`, `feat/claps-bookmarks`, `feat/comments`,
-   `feat/tag-page`, `feat/search` and `feat/library` -> `feat/reading-base`.
-2. F2.7 author page once F1.4 (`src/api/authors.ts`) is in `development`; it closes Phase F2. The richer author block (designation, photo, Follow) waits for F1.4's
-   `src/api/authors.ts` to reach `development`.
+1. **Nayeem:** merge `feat/accounts-base` -> `development`. Open and merge, in order, into `feat/reading-base`:
+   `feat/home-feed`, `feat/season-filters`, `feat/story-page`, `feat/claps-bookmarks`, `feat/comments`,
+   `feat/tag-page`, `feat/search`, `feat/library`, `feat/author-page`.
+2. F2.7 author page, which closes Phase F2; then Phase F3 writing.
 
 ## Open items
 
 | Item | Needs | Blocks |
 |---|---|---|
-| No way to read my own author profile (`GET /api/authors/me` missing; `UserResponse` has no `authorId`) | backend step | F1.4 |
 | Comment endpoints aren't typed in OpenAPI and have no reply counts: `CommentResponse` is hand-written and every thread is fetched | backend | — |
 | No per-story "saved by me": the app reads the 100 most recent saves to mark Save buttons | backend: `bookmarkedByMe` | exact saved state for heavy savers |
 | Make `development` the default branch on GitHub and protect it | Nayeem | — |
@@ -214,6 +211,29 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 **Known limitations**
 - The links from cards lead to not-found until F2.3 (story) and F2.7 (author).
 - Checked in jsdom only, not in a browser yet.
+
+---
+
+## 2026-10-08 (F1.4 author profile settings)
+
+**Done**
+- Settings shows an "Author profile" section when the session's user has an `authorId`: photo, designation,
+  specialities, occupation, workplace, about you. Loaded from `GET /api/authors/me`, saved with `PUT /api/authors/me`.
+- Photo: picked, checked (JPEG / PNG / WebP, <= 5 MB, as the backend), uploaded at once to `POST /api/images`, saved
+  with the profile; Remove photo clears it.
+- `src/api/authors.ts`, `src/api/images.ts`, `src/lib/images.ts`, `TextArea` primitive.
+- Tests: `author-profile.test.tsx` (7 cases), `images.test.ts`. Checked on the local backend (backend
+  `feat/author-me`): me, upload and update.
+
+**Decisions**
+- Readers don't see the section, and no request is made for them (`/api/authors/me` is 403 for readers).
+- The step PRs F1.1-F1.3 were merged straight into `development`; `feat/accounts-base` was fast-forwarded to it so
+  F1.4 still goes through the phase base.
+
+**Known limitations**
+- Upload URLs are absolute (`http://localhost:8080/uploads/...`), built from the backend's own base URL; fine while
+  it matches what the browser can reach, worth checking for a deployed split origin.
+- A replaced photo stays on the server (no delete endpoint).
 
 ---
 

@@ -14,15 +14,15 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 - Phase F2 reading, stacked on `feat/reading-base`: F2.1 home feed (`feat/home-feed`), F2.2 season strip and
   filters (`feat/season-filters`), F2.3 story page (`feat/story-page`), F2.4 claps and bookmarks
   (`feat/claps-bookmarks`), F2.5 responses (`feat/comments`), F2.6 topics (`feat/tag-page`), F2.8 search
-  (`feat/search`), F2.9 library (`feat/library`). F2.7 author page on `feat/author-page`, which also merges
-  `feat/accounts-base` in so it can use F1.4's `src/api/authors.ts`.
+  (`feat/search`), F2.9 library (`feat/library`), F2.7 author page (`feat/author-page`, which also merges
+  `feat/accounts-base` in for F1.4's `src/api/authors.ts`). Phase F2 is complete.
 
 ## Next up
 
 1. **Nayeem:** merge `feat/accounts-base` -> `development`. Open and merge, in order, into `feat/reading-base`:
    `feat/home-feed`, `feat/season-filters`, `feat/story-page`, `feat/claps-bookmarks`, `feat/comments`,
    `feat/tag-page`, `feat/search`, `feat/library`, `feat/author-page`.
-2. F2.7 author page, which closes Phase F2; then Phase F3 writing.
+2. Then `feat/reading-base` -> `development`, and Phase F3 writing (`feat/writing-base`, from `development`).
 
 ## Open items
 
@@ -33,6 +33,27 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Make `development` the default branch on GitHub and protect it | Nayeem | — |
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
+
+---
+
+## 2026-10-08 (F2.7 author page)
+
+**Done**
+- `/authors/:authorId`: photo, name, designation and workplace, followers and stories, Follow / Following (Edit
+  profile on your own page), bio, specialities, their stories newest first (`/api/blogs/all/author/{id}`). 404 ->
+  not found.
+- "Written by" card at the end of a story: photo, designation, followers, bio, Follow.
+- Follow: optimistic on the open profile (button and follower count), rolled back on failure; reloads the profile,
+  For you and the library's author list. The read waits for a restoring session so `followedByMe` is the reader's.
+- `useAuthor` / `useAuthorStories` in F1.4's `src/api/authors.ts`; `feat/accounts-base` merged into this branch
+  for it (docs conflicts resolved there).
+- Tests: `authors.test.tsx` (7 cases). Looked at in Chrome at 1280 and 390px.
+
+**Decisions**
+- The card under a story is outlined, not filled, so an initials avatar stays visible.
+
+**Known limitations**
+- "Who to follow" in the home rail still has no data source (no suggested-authors endpoint).
 
 ---
 

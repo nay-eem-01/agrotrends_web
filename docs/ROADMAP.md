@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend
 
-**Progress:** 16 of 36 steps done
+**Progress:** 17 of 36 steps done
 
 ---
 
@@ -41,7 +41,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 | F2.4 | Claps (press-and-hold, up to 50) and bookmarks on the story page and cards | ✅ |
 | F2.5 | Comments and replies (owner edit / delete) | ✅ |
 | F2.6 | Tag page with follow; topic list | ✅ |
-| F2.7 | Author page (profile, posts, follow) | ⬜ |
+| F2.7 | Author page (profile, posts, follow) | ✅ |
 | F2.8 | Search page | ✅ |
 | F2.9 | Library: reading list (bookmarks), following (authors, tags) | ✅ |
 

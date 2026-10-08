@@ -12,15 +12,16 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 - Phase F0 and F1.1-F1.3 merged into `development`. F1.4 author profile is on `feat/author-profile` (PR into
   `feat/accounts-base`).
 - Phase F2 reading on `feat/reading-base`: F2.1 home feed (`feat/home-feed`), F2.2 season strip and filters
-  (`feat/season-filters`) F2.3 story page (`feat/story-page`) and F2.4 claps and
-  bookmarks (`feat/claps-bookmarks`) done.
+  (`feat/season-filters`) F2.3 story page (`feat/story-page`), F2.4 claps and
+  bookmarks (`feat/claps-bookmarks`) and F2.5 responses (`feat/comments`) done.
 
 ## Next up
 
 1. **Nayeem:** merge backend `feat/author-me`; open and merge `feat/author-profile` -> `feat/accounts-base` ->
    `development`. Open and merge, in order, `feat/home-feed`,
-   `feat/season-filters`, `feat/story-page` and `feat/claps-bookmarks` -> `feat/reading-base`.
-2. F2.5 comments. The richer author block (designation, photo, Follow) waits for F1.4's
+   `feat/season-filters`, `feat/story-page`, `feat/claps-bookmarks` and `feat/comments` ->
+   `feat/reading-base`.
+2. F2.6 tag page and topics. The richer author block (designation, photo, Follow) waits for F1.4's
    `src/api/authors.ts` to reach `development`.
 
 ## Open items
@@ -28,10 +29,33 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Item | Needs | Blocks |
 |---|---|---|
 | No way to read my own author profile (`GET /api/authors/me` missing; `UserResponse` has no `authorId`) | backend step | F1.4 |
+| Comment endpoints aren't typed in OpenAPI and have no reply counts: `CommentResponse` is hand-written and every thread is fetched | backend | — |
 | No per-story "saved by me": the app reads the 100 most recent saves to mark Save buttons | backend: `bookmarkedByMe` | exact saved state for heavy savers |
 | Make `development` the default branch on GitHub and protect it | Nayeem | — |
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
+
+---
+
+## 2026-10-08 (F2.5 responses)
+
+**Done**
+- "Responses (n)" under a published story: top-level responses oldest first, each with its replies one level deep
+  (a reply to a reply joins the same thread, as on Medium).
+- Signed in: respond, reply (the field opens focused), edit and delete your own (inline confirm). Visitors see
+  everything; Respond and Reply send them to sign-in and back.
+- Text goes through `SafeHtml` (plain text keeps its line breaks; any HTML is cleaned).
+- `src/api/comments.ts`: list, replies (`useQueries`), one write mutation for create / reply / update / delete that
+  reloads the comments. `TextArea` copied byte-for-byte from F1.4 so the branches merge cleanly.
+- Tests: `comments.test.tsx` (6 cases). Checked on the local backend: create, reply, edit, replies, delete.
+
+**Decisions**
+- `CommentResponse` is written by hand (the OpenAPI document doesn't describe it); backend need added.
+- Edit and Delete show for the comment's own user only; admins can do both on the backend but get no buttons yet.
+
+**Known limitations**
+- One request per thread to load replies (no reply counts in the API).
+- Deleting a response removes its replies too (backend cascade); the confirm text doesn't say so yet.
 
 ---
 

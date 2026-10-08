@@ -11,13 +11,15 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   sent `userId` in URLs and called Gemini from the browser with a key).
 - Phase F0 and F1.1-F1.3 merged into `development`. F1.4 author profile is on `feat/author-profile` (PR into
   `feat/accounts-base`).
-- Phase F2 reading on `feat/reading-base`: F2.1 home feed done on `feat/home-feed`.
+- Phase F2 reading on `feat/reading-base`: F2.1 home feed (`feat/home-feed`) and F2.2 season strip and filters
+  (`feat/season-filters`) done.
 
 ## Next up
 
 1. **Nayeem:** merge backend `feat/author-me`; open and merge `feat/author-profile` -> `feat/accounts-base` ->
-   `development`. Open and merge `feat/home-feed` -> `feat/reading-base`.
-2. F2.2 crop-season strip and filters, then F2.3 story page (cards already link to `/stories/:slug`).
+   `development`. Open and merge, in order, `feat/home-feed` and
+   `feat/season-filters` -> `feat/reading-base`.
+2. F2.3 story page (cards already link to `/stories/:slug`).
 
 ## Open items
 
@@ -27,6 +29,32 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Make `development` the default branch on GitHub and protect it | Nayeem | — |
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
+
+---
+
+## 2026-10-08 (F2.2 crop-season strip and filters)
+
+**Done**
+- Season strip under the top bar on home: Rabi (16 Oct-15 Mar), Kharif-1 (16 Mar-15 Jul), Kharif-2 (16 Jul-15 Oct),
+  each band as wide as the season is long; the current one in paddy with "now", today marked with a mustard dot.
+  A band filters by its season (`?season=`); choosing it again clears it.
+- Crop, region and soil filters behind "Filter by crop, region or soil"; active filters are removable chips (plus
+  Clear all). Crop and season chips on story cards are filter links.
+- With any filter set the feed reads `GET /api/blogs/all` (`sortBy=creationDate&ascOrDesc=desc`, public) instead of
+  a feed tab; an empty result offers Clear filters and Ask a question.
+- `src/lib/agri.ts`: season calendar, soil labels, read / write filters in the URL (unknown values dropped).
+  `src/api/blogs.ts`: `useBlogs(filters)`.
+- Tests: `season-filters.test.tsx` (5 cases), `agri.test.ts`. Looked at in Chrome at 1280, 390 and 360px.
+
+**Decisions**
+- Season dates follow the DAE calendar; the farming year starts with Rabi, so the strip reads Rabi -> Kharif-2.
+- Filters live in the URL so a filtered feed can be shared and survives reload.
+- Year-round has no band; it is reachable from a story's season chip.
+- The backend matches crop and region exactly (lower-cased, trimmed), so "rice" does not find "boro rice".
+
+**Known limitations**
+- Feeds (Latest / Trending / For you) themselves don't take filters; a filtered view is always newest first.
+- No suggestions for crop and region yet (free text on the backend; a distinct-values endpoint would help).
 
 ---
 

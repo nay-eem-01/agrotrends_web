@@ -7,6 +7,7 @@ import { SignUpPage } from './features/auth/SignUpPage'
 import { NotFoundPage } from './features/errors/NotFoundPage'
 import { HomePage } from './features/home/HomePage'
 import { SettingsPage } from './features/settings/SettingsPage'
+import { StoryPage } from './features/story/StoryPage'
 import { AppLayout } from './layout/AppLayout'
 
 export default function App() {
@@ -14,6 +15,7 @@ export default function App() {
     <Routes>
       <Route element={<AppLayout />}>
         <Route path="/" element={<HomePage />} />
+        <Route path="/stories/:slug" element={<StoryPage />} />
         <Route path="/sign-in" element={<SignInPage />} />
         <Route path="/sign-up" element={<SignUpPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />

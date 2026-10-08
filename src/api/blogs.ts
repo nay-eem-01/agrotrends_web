@@ -1,6 +1,7 @@
-import { useInfiniteQuery } from '@tanstack/react-query'
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import type { AgriFilters } from '../lib/agri'
 import { api } from './client'
+import { ApiError } from './errors'
 import { FEED_PAGE_SIZE } from './feed'
 import type { BlogResponse, Page } from './types'
 
@@ -20,5 +21,16 @@ export function useBlogs(filters: AgriFilters, enabled = true) {
     initialPageParam: 0,
     getNextPageParam: (page) => (page.last ? undefined : page.number + 1),
     enabled,
+  })
+}
+
+/** A story by its URL slug: public when published; a draft only for its author (404 for anyone else). */
+export function useStory(slug: string, enabled = true) {
+  return useQuery({
+    queryKey: ['blogs', 'slug', slug],
+    queryFn: ({ signal }) => api<BlogResponse>(`/api/blogs/slug/${encodeURIComponent(slug)}`, { signal }),
+    enabled,
+    // A 404 won't turn up on a second try.
+    retry: (count, error) => !(error instanceof ApiError && error.status < 500) && count < 1,
   })
 }

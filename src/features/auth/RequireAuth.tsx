@@ -5,7 +5,7 @@ import { useSession } from './session'
 
 /** Wraps routes that need a signed-in reader; anyone else goes to sign-in and comes back here afterwards. */
 export function RequireAuth() {
-  const { status } = useSession()
+  const { status, endNotice } = useSession()
   const location = useLocation()
 
   if (status === 'restoring') {
@@ -16,7 +16,7 @@ export function RequireAuth() {
     )
   }
   if (status === 'anonymous') {
-    return <Navigate to={signInPath(location.pathname + location.search)} replace />
+    return <Navigate to={signInPath(location.pathname + location.search)} replace state={endNotice ? { notice: endNotice } : undefined} />
   }
   return <Outlet />
 }

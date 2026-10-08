@@ -13,16 +13,16 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   `feat/accounts-base`).
 - Phase F2 reading on `feat/reading-base`: F2.1 home feed (`feat/home-feed`), F2.2 season strip and filters
   (`feat/season-filters`) F2.3 story page (`feat/story-page`), F2.4 claps and
-  bookmarks (`feat/claps-bookmarks`) F2.5 responses (`feat/comments`) and F2.6 topics
-  (`feat/tag-page`) done.
+  bookmarks (`feat/claps-bookmarks`) F2.5 responses (`feat/comments`), F2.6 topics
+  (`feat/tag-page`) and F2.8 search (`feat/search`) done. F2.7 author page waits for F1.4 in `development`.
 
 ## Next up
 
 1. **Nayeem:** merge backend `feat/author-me`; open and merge `feat/author-profile` -> `feat/accounts-base` ->
    `development`. Open and merge, in order, `feat/home-feed`,
-   `feat/season-filters`, `feat/story-page`, `feat/claps-bookmarks`, `feat/comments` and
-   `feat/tag-page` -> `feat/reading-base`.
-2. F2.7 author page (after F1.4 is in `development`, for `src/api/authors.ts`), F2.8 search, F2.9 library. The richer author block (designation, photo, Follow) waits for F1.4's
+   `feat/season-filters`, `feat/story-page`, `feat/claps-bookmarks`, `feat/comments`,
+   `feat/tag-page` and `feat/search` -> `feat/reading-base`.
+2. F2.9 library; then F2.7 author page once F1.4 (`src/api/authors.ts`) is in `development`. The richer author block (designation, photo, Follow) waits for F1.4's
    `src/api/authors.ts` to reach `development`.
 
 ## Open items
@@ -35,6 +35,21 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Make `development` the default branch on GitHub and protect it | Nayeem | — |
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
+
+---
+
+## 2026-10-08 (F2.8 search)
+
+**Done**
+- `/search?q=` (where the top bar sends a search): a search field on the page too (phones hide the top bar's),
+  matching topics as chips (`/api/tags?q=`), the story count and results from `/api/blogs/search`, paged with
+  the shared `StoryList`. No results -> Ask a question. Empty search -> a prompt and topics to browse, no request.
+- `useSearch(q)` in `src/api/blogs.ts`.
+- Tests: `search.test.tsx` (4 cases).
+
+**Decisions**
+- Results keep the backend's ranking (no sort parameter sent).
+- Topic suggestions use the lower-cased query, as tags are stored lower-case.
 
 ---
 

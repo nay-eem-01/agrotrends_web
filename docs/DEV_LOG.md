@@ -9,15 +9,13 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 
 - New frontend, built from scratch (the old `AGROTRENDS- FrontEnd` repo is retired: it called the pre-hardening API,
   sent `userId` in URLs and called Gemini from the browser with a key).
-- Phase F0 (foundation) done: scaffold, design system and shell, API client. Steps are stacked on
-  `feat/foundation-base`.
+- Phase F0 (foundation) merged into `development`.
+- Phase F1 (accounts) on `feat/accounts-base`: F1.1 sign in / sign up done on `feat/sign-in`.
 
 ## Next up
 
-1. **Nayeem:** open and merge, in order: `feat/scaffold` -> `feat/foundation-base`, `feat/design-shell` ->
-   `feat/foundation-base`, `feat/api-client` -> `feat/foundation-base`; then `feat/foundation-base` -> `development`.
-2. Phase F1 accounts (F1.1 sign in / sign up). In F1.1, refresh the access token shortly before it expires
-   (15 minutes): an expired token on a public read is treated as anonymous by the backend, not a 401.
+1. **Nayeem:** open and merge `feat/sign-in` -> `feat/accounts-base`.
+2. F1.2 forgot / reset password, then F1.3 settings (first screens behind `RequireAuth`).
 
 ## Open items
 
@@ -26,6 +24,38 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Make `development` the default branch on GitHub and protect it | Nayeem | — |
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
+
+---
+
+## 2026-10-08 (F1.1 sign in and sign up)
+
+**Done**
+- `src/api/auth.ts`: sign-in, sign-up (then an automatic sign-in, since sign-up returns no tokens), sign-out;
+  mutation hooks.
+- Early refresh in `client.ts`: the JWT's `exp` is read and, within 60 s of it, a request first refreshes the
+  session. Needed because public reads treat an expired token as anonymous (no 401), which would show
+  "followed by me" as false.
+- `SessionProvider` / `useSession`: `restoring` -> `signed-in` / `anonymous`; restores a stored refresh token on
+  load; a lost session or sign-out clears the query cache. `RequireAuth` waits while restoring, then sends visitors to
+  `/sign-in?next=...` and back.
+- Sign-in and sign-up screens; sign-up as reader or author (designation and specialities required for authors).
+  Password rule mirrors the backend: 8-16 characters, no spaces, a capital, a digit, a symbol.
+- Top bar: account menu (name, e-mail, Sign out) when signed in; nothing while the session restores.
+- Tests: `lib/auth.test.ts` (password rule, `next` safety), `auth.test.tsx` (sign in, errors, sign up as author and
+  reader, restore, sign out, guarded route), client early-refresh cases. Checked against the local backend: the
+  access token's `exp` is 15 minutes.
+
+**Decisions**
+- Reader -> `userType: ["CONSUMER"]`, author -> `["AUTHOR"]` (the backend only acts on AUTHOR, by creating the
+  author profile).
+- `?next=` is followed only for same-site paths (not `//host`, not back to sign-in / sign-up).
+- If sign-up succeeds but the sign-in after it fails, the form says the account is ready and to sign in, instead of a
+  retry hitting "e-mail already taken".
+- The author's bio and photo are left to settings (F1.3) to keep sign-up short.
+
+**Known limitations**
+- No protected screens exist yet; `RequireAuth` is first used by settings (F1.3).
+- The early refresh runs on the next request, not on a timer; an idle tab refreshes when it next loads data.
 
 ---
 

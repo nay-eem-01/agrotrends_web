@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend
 
-**Progress:** 4 of 35 steps done
+**Progress:** 5 of 35 steps done
 
 ---
 
@@ -25,7 +25,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 | # | Step | Status |
 |---|---|---|
-| F1.1 | Sign in and sign up (reader or author with professional info); session restore on reload; protected routes | ⬜ |
+| F1.1 | Sign in and sign up (reader or author with professional info); session restore on reload; protected routes | ✅ |
 | F1.2 | Forgot / reset password (link from e-mail: `/reset-password?token=`) | ⬜ |
 | F1.3 | Settings: edit my account, my author profile (bio, specialities, photo), change password | ⬜ |
 

@@ -11,15 +11,16 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   sent `userId` in URLs and called Gemini from the browser with a key).
 - Phase F0 and F1.1-F1.3 merged into `development`. F1.4 author profile is on `feat/author-profile` (PR into
   `feat/accounts-base`).
-- Phase F2 reading on `feat/reading-base`: F2.1 home feed (`feat/home-feed`) and F2.2 season strip and filters
-  (`feat/season-filters`) done.
+- Phase F2 reading on `feat/reading-base`: F2.1 home feed (`feat/home-feed`), F2.2 season strip and filters
+  (`feat/season-filters`) and F2.3 story page (`feat/story-page`) done.
 
 ## Next up
 
 1. **Nayeem:** merge backend `feat/author-me`; open and merge `feat/author-profile` -> `feat/accounts-base` ->
-   `development`. Open and merge, in order, `feat/home-feed` and
-   `feat/season-filters` -> `feat/reading-base`.
-2. F2.3 story page (cards already link to `/stories/:slug`).
+   `development`. Open and merge, in order, `feat/home-feed`,
+   `feat/season-filters` and `feat/story-page` -> `feat/reading-base`.
+2. F2.4 claps and bookmarks, F2.5 comments. The richer author block (designation, photo, Follow) waits for F1.4's
+   `src/api/authors.ts` to reach `development`.
 
 ## Open items
 
@@ -29,6 +30,31 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Make `development` the default branch on GitHub and protect it | Nayeem | — |
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
+
+---
+
+## 2026-10-08 (F2.3 story page)
+
+**Done**
+- `/stories/:slug`: title, author (avatar, link to `/authors/:id`), reading time, date, category; cover up to
+  1000px; body; farming chips (crop, season, region, soil -> filtered home) and tags (-> `/tags/:name`). Page
+  `<title>` set via React 19. A draft is labelled "only you can see this"; 404 shows the not-found page.
+- `SafeHtml` (`src/ui/SafeHtml.tsx`) with `src/lib/sanitize.ts`: DOMPurify, no scripts, handlers, styles, classes,
+  frames or forms; external links open in a new tab with `rel="noopener noreferrer nofollow"`; `javascript:`,
+  `data:` and `//host` hrefs dropped. Plain-text stories (older ones) become paragraphs without HTML parsing.
+- `.story-body` styles in `index.css`: Literata 18px / 1.6 on phones, 20px / 1.65 from 640px, headings, lists,
+  quotes, images, code.
+- Tests: `story.test.tsx` (5 cases incl. XSS payloads), `sanitize.test.ts`. Looked at in Chrome at 1280 and 360px.
+
+**Decisions**
+- The story read waits for a restoring session, so an author's own draft loads with the token.
+- 4xx from the story read isn't retried (a 404 stays a 404).
+- The author block uses the story's author summary only; designation, photo and Follow come with F2.7, once
+  F1.4's `src/api/authors.ts` is in `development` (adding it here would conflict).
+
+**Known limitations**
+- Only plain-text stories exist locally, so the rich-text styles are checked by tests, not by eye.
+- Tag pages (F2.6) and author pages (F2.7) are still not found.
 
 ---
 

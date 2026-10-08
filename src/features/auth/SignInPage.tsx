@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useSignIn } from '../../api/auth'
 import { errorMessage } from '../../api/errors'
 import { isEmail, safeNext } from '../../lib/auth'
@@ -12,6 +12,7 @@ export function SignInPage() {
   const [params] = useSearchParams()
   const next = safeNext(params.get('next'))
   const navigate = useNavigate()
+  const notice = (useLocation().state as { notice?: string } | null)?.notice
   const session = useSession()
   const signIn = useSignIn()
   const [email, setEmail] = useState('')
@@ -43,6 +44,9 @@ export function SignInPage() {
 
   return (
     <AuthPage title="Sign in" intro="Welcome back. Sign in to write, clap, follow and ask the advisor.">
+      {notice && (
+        <output className="mb-6 block rounded-lg bg-field px-3 py-2 text-sm text-paddy">{notice}</output>
+      )}
       <form onSubmit={submit} noValidate className="flex flex-col gap-5">
         <TextField label="E-mail" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} error={errors.email} />
         <TextField
@@ -53,6 +57,9 @@ export function SignInPage() {
           onChange={(e) => setPassword(e.target.value)}
           error={errors.password}
         />
+        <Link to="/forgot-password" className="-mt-2 self-start text-sm text-ink-muted underline-offset-4 hover:text-ink hover:underline">
+          Forgot your password?
+        </Link>
         <FormError message={signIn.isError ? errorMessage(signIn.error) : null} />
         <Button type="submit" loading={signIn.isPending} className="mt-1">
           Sign in

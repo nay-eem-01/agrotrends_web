@@ -1,4 +1,6 @@
 import { Route, Routes } from 'react-router-dom'
+import { ForgotPasswordPage } from './features/auth/ForgotPasswordPage'
+import { ResetPasswordPage } from './features/auth/ResetPasswordPage'
 import { SignInPage } from './features/auth/SignInPage'
 import { SignUpPage } from './features/auth/SignUpPage'
 import { NotFoundPage } from './features/errors/NotFoundPage'
@@ -12,6 +14,8 @@ export default function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/sign-in" element={<SignInPage />} />
         <Route path="/sign-up" element={<SignUpPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>

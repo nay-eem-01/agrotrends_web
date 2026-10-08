@@ -13,15 +13,16 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   `feat/accounts-base`).
 - Phase F2 reading on `feat/reading-base`: F2.1 home feed (`feat/home-feed`), F2.2 season strip and filters
   (`feat/season-filters`) F2.3 story page (`feat/story-page`), F2.4 claps and
-  bookmarks (`feat/claps-bookmarks`) and F2.5 responses (`feat/comments`) done.
+  bookmarks (`feat/claps-bookmarks`) F2.5 responses (`feat/comments`) and F2.6 topics
+  (`feat/tag-page`) done.
 
 ## Next up
 
 1. **Nayeem:** merge backend `feat/author-me`; open and merge `feat/author-profile` -> `feat/accounts-base` ->
    `development`. Open and merge, in order, `feat/home-feed`,
-   `feat/season-filters`, `feat/story-page`, `feat/claps-bookmarks` and `feat/comments` ->
-   `feat/reading-base`.
-2. F2.6 tag page and topics. The richer author block (designation, photo, Follow) waits for F1.4's
+   `feat/season-filters`, `feat/story-page`, `feat/claps-bookmarks`, `feat/comments` and
+   `feat/tag-page` -> `feat/reading-base`.
+2. F2.7 author page (after F1.4 is in `development`, for `src/api/authors.ts`), F2.8 search, F2.9 library. The richer author block (designation, photo, Follow) waits for F1.4's
    `src/api/authors.ts` to reach `development`.
 
 ## Open items
@@ -34,6 +35,28 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Make `development` the default branch on GitHub and protect it | Nayeem | — |
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
+
+---
+
+## 2026-10-08 (F2.6 tag page and topics)
+
+**Done**
+- `/tags/:tagName`: topic name, story count, Follow / Following, its stories newest first
+  (`/api/blogs/all/tag/{name}`), empty state inviting a first story.
+- Follow: `PUT` / `DELETE /api/tags/{name}/follow`, optimistic with rollback; For you reloads afterwards. Visitors
+  go to sign-in and back.
+- `/topics`: searchable list (`/api/tags?q=`, lower-cased prefix), followed topics first for signed-in readers.
+- Home right rail from 1024px: "Topics to follow" (12) and See all topics, per `docs/DESIGN.md`.
+- `src/api/topics.ts`; `StoryList` exported from the feed for any paged story list.
+- Tests: `topics.test.tsx` (5 cases). Checked on the local backend (follow, list, unfollow) and in Chrome at
+  1280 and 390px.
+
+**Decisions**
+- Followed state comes from the 100 most recent follows (no per-tag flag); backend need added.
+
+**Known limitations**
+- The rail lists the first tags alphabetically, not popular ones (no popularity endpoint).
+- "Who to follow" in the rail waits for author lists (F2.7).
 
 ---
 

@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend
 
-**Progress:** 12 of 36 steps done
+**Progress:** 13 of 36 steps done
 
 ---
 
@@ -40,7 +40,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 | F2.3 | Story page by slug: sanitised HTML, reading time, author block, agri chips, tags | ✅ |
 | F2.4 | Claps (press-and-hold, up to 50) and bookmarks on the story page and cards | ✅ |
 | F2.5 | Comments and replies (owner edit / delete) | ✅ |
-| F2.6 | Tag page with follow; topic list | ⬜ |
+| F2.6 | Tag page with follow; topic list | ✅ |
 | F2.7 | Author page (profile, posts, follow) | ⬜ |
 | F2.8 | Search page | ⬜ |
 | F2.9 | Library: reading list (bookmarks), following (authors, tags) | ⬜ |
@@ -89,6 +89,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 | Item | Needed for | Status |
 |---|---|---|
 | `GET /api/authors/me` (or `authorId` on `UserResponse`): the signed-in author's own profile, to prefill the editor | F1.4 | ⏸ |
+| "Followed by me" per tag (or a larger followed-tags read) | exact Follow state past the 100 most recent follows (F2.6) | ⏸ |
 | "Saved by me" per story (`bookmarkedByMe` on `BlogResponse`, or `GET /api/blogs/id/{id}/bookmark`) | exact saved state past the 100 most recent saves (F2.4) | ⏸ |
 | Comments: `CommentResponse` in the OpenAPI document and a reply count per comment (or replies nested) | typed comments without a hand-written type; one request per story instead of one per thread (F2.5) | ⏸ |
 | Public GET access to published content | anonymous reading (F2) | ✅ backend 2.13 |

@@ -16,10 +16,17 @@ const REFRESH_TOKEN_KEY = 'agrotrends.refreshToken'
 const REFRESH_PATH = '/api/auth/refresh-token'
 
 /**
+ * Refresh this long before the access token's `exp`. Public reads accept an expired token as an anonymous visitor
+ * (no 401), so waiting for a 401 would quietly show "followed by me" and similar as false.
+ */
+const REFRESH_AHEAD_MS = 60_000
+
+/**
  * The access token lives in memory only. The refresh token has to survive a reload, and the backend returns it in
  * the JSON body (not an HttpOnly cookie), so it is kept in localStorage until the backend changes that.
  */
 let accessToken: string | null = null
+let accessTokenExpiresAt: number | null = null
 let refreshing: Promise<WebTokenResponse> | null = null
 let onSessionLost: () => void = () => {}
 
@@ -34,11 +41,13 @@ export function hasStoredSession(): boolean {
 /** Store the tokens from sign-in, sign-up or a refresh. */
 export function startSession(tokens: Pick<WebTokenResponse, 'accessToken' | 'refreshToken'>): void {
   accessToken = tokens.accessToken ?? null
+  accessTokenExpiresAt = accessToken ? tokenExpiry(accessToken) : null
   writeRefreshToken(tokens.refreshToken ?? null)
 }
 
 export function clearSession(): void {
   accessToken = null
+  accessTokenExpiresAt = null
   writeRefreshToken(null)
 }
 
@@ -63,6 +72,10 @@ interface RequestOptions {
  * A `FormData` body is sent as multipart; anything else as JSON.
  */
 export async function api<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  if (!path.startsWith('/api/auth/') && isAccessTokenExpiring()) {
+    // Best effort: if it fails the request still goes out and the 401 path (or an anonymous read) takes over.
+    await refreshSession().catch(() => undefined)
+  }
   const first = await send(path, options)
   if (first.status === 401 && accessToken !== null && !path.startsWith('/api/auth/')) {
     try {
@@ -90,6 +103,23 @@ export async function restoreSession(): Promise<WebTokenResponse | null> {
   if (!hasStoredSession()) return null
   try {
     return await refreshSession()
+  } catch {
+    return null
+  }
+}
+
+function isAccessTokenExpiring(now = Date.now()): boolean {
+  return accessToken !== null && accessTokenExpiresAt !== null && accessTokenExpiresAt - now <= REFRESH_AHEAD_MS
+}
+
+/** The JWT's `exp` in milliseconds, or null when the token can't be read (then only a 401 triggers a refresh). */
+export function tokenExpiry(token: string): number | null {
+  try {
+    const part = token.split('.')[1]
+    if (!part) return null
+    const json = atob(part.replace(/-/g, '+').replace(/_/g, '/'))
+    const exp = (JSON.parse(json) as { exp?: unknown }).exp
+    return typeof exp === 'number' ? exp * 1000 : null
   } catch {
     return null
   }

@@ -34,3 +34,15 @@ export function useStory(slug: string, enabled = true) {
     retry: (count, error) => !(error instanceof ApiError && error.status < 500) && count < 1,
   })
 }
+
+/** Stories matching `q` (title, body and tags, ranked by the backend). Public; disabled for a blank query. */
+export function useSearch(q: string) {
+  return useInfiniteQuery({
+    queryKey: ['blogs', 'search', q],
+    queryFn: ({ pageParam, signal }) =>
+      api<Page<BlogResponse>>('/api/blogs/search', { params: { q, pageNo: pageParam, pageSize: FEED_PAGE_SIZE }, signal }),
+    initialPageParam: 0,
+    getNextPageParam: (page) => (page.last ? undefined : page.number + 1),
+    enabled: q.trim() !== '',
+  })
+}

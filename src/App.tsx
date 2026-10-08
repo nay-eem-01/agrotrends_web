@@ -7,6 +7,7 @@ import { SignUpPage } from './features/auth/SignUpPage'
 import { NotFoundPage } from './features/errors/NotFoundPage'
 import { HomePage } from './features/home/HomePage'
 import { SettingsPage } from './features/settings/SettingsPage'
+import { SearchPage } from './features/search/SearchPage'
 import { StoryPage } from './features/story/StoryPage'
 import { TagPage } from './features/topics/TagPage'
 import { TopicsPage } from './features/topics/TopicsPage'
@@ -19,6 +20,7 @@ export default function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/stories/:slug" element={<StoryPage />} />
         <Route path="/tags/:tagName" element={<TagPage />} />
+        <Route path="/search" element={<SearchPage />} />
         <Route path="/topics" element={<TopicsPage />} />
         <Route path="/sign-in" element={<SignInPage />} />
         <Route path="/sign-up" element={<SignUpPage />} />

@@ -1,6 +1,7 @@
 import { ButtonLink } from '../../ui/Button'
 import { useSession } from '../auth/session'
 import { Feed } from '../feed/Feed'
+import { SeasonStrip } from '../feed/SeasonStrip'
 
 /** Visitors get a short welcome above the feed; signed-in readers go straight to it. */
 export function HomePage() {
@@ -24,7 +25,8 @@ export function HomePage() {
           </div>
         </section>
       )}
-      <div className="mx-auto max-w-(--container-page) px-4 pt-6 pb-16 sm:px-6">
+      <SeasonStrip />
+      <div className="mx-auto max-w-(--container-page) px-4 pt-2 pb-16 sm:px-6">
         <div className="max-w-(--container-feed)">
           {status === 'anonymous' ? <h2 className="sr-only">Stories</h2> : <h1 className="sr-only">Stories</h1>}
           <Feed />

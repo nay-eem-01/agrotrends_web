@@ -1,7 +1,7 @@
 import { HandsClapping } from '@phosphor-icons/react'
 import { Link } from 'react-router-dom'
 import type { BlogResponse } from '../../api/types'
-import { SEASON_LABELS } from '../../lib/agri'
+import { filterPath, SEASON_LABELS } from '../../lib/agri'
 import { storyDate } from '../../lib/dates'
 import { excerpt, htmlToText } from '../../lib/html'
 import { Avatar } from '../../ui/Avatar'
@@ -11,7 +11,8 @@ export function StoryCard({ story }: { story: BlogResponse }) {
   const href = `/stories/${story.slug}`
   const author = story.author
   const preview = excerpt(htmlToText(story.content))
-  const season = story.agri?.season ? SEASON_LABELS[story.agri.season] : null
+  const crop = story.agri?.crop
+  const season = story.agri?.season
   const meta = [storyDate(story.publishedAt), story.readingTimeMinutes ? `${story.readingTimeMinutes} min read` : null].filter(Boolean)
 
   return (
@@ -38,8 +39,16 @@ export function StoryCard({ story }: { story: BlogResponse }) {
                 {story.clapCount}
               </span>
             )}
-            {story.agri?.crop && <span className="rounded-full bg-field px-2 py-0.5 text-ink">{story.agri.crop}</span>}
-            {season && <span className="rounded-full bg-field px-2 py-0.5 text-ink">{season}</span>}
+            {crop && (
+              <Link to={filterPath({ crop })} className="rounded-full bg-field px-2 py-0.5 text-ink hover:bg-rule" aria-label={`Stories about ${crop}`}>
+                {crop}
+              </Link>
+            )}
+            {season && (
+              <Link to={filterPath({ season })} className="rounded-full bg-field px-2 py-0.5 text-ink hover:bg-rule" aria-label={`${SEASON_LABELS[season]} season stories`}>
+                {SEASON_LABELS[season]}
+              </Link>
+            )}
           </div>
         </div>
         {story.imageUrl && (

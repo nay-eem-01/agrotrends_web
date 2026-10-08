@@ -1,11 +1,16 @@
-import { useEffect, useRef } from 'react'
+import type { InfiniteData, UseInfiniteQueryResult } from '@tanstack/react-query'
+import { useEffect, useRef, type ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { useFeed, type FeedKind } from '../../api/feed'
+import { useBlogs } from '../../api/blogs'
 import { errorMessage } from '../../api/errors'
+import { useFeed, type FeedKind } from '../../api/feed'
+import type { BlogResponse, Page } from '../../api/types'
+import { hasAgriFilters, readAgriFilters } from '../../lib/agri'
 import { Button, ButtonLink } from '../../ui/Button'
 import { cx } from '../../ui/cx'
 import { Spinner } from '../../ui/Spinner'
 import { useSession } from '../auth/session'
+import { AgriFilterBar } from './AgriFilterBar'
 import { StoryCard } from './StoryCard'
 
 const TABS: { kind: FeedKind; label: string; signedInOnly?: boolean }[] = [
@@ -27,12 +32,15 @@ export function useFeedKind(): { kind: FeedKind; signedIn: boolean } {
 
 export function Feed() {
   const { status } = useSession()
+  const [params] = useSearchParams()
   const { kind, signedIn } = useFeedKind()
+  const filters = readAgriFilters(params)
+  const filtered = hasAgriFilters(filters)
   // While the session restores, wait: For you vs Latest isn't known yet, and a read made before the token is back
   // would come back as anonymous.
   const ready = status !== 'restoring'
-  const feed = useFeed(kind, ready)
-  const stories = feed.data?.pages.flatMap((page) => page.content) ?? []
+  const feed = useFeed(kind, ready && !filtered)
+  const matching = useBlogs(filters, ready && filtered)
 
   return (
     <div>
@@ -41,45 +49,78 @@ export function Feed() {
           <Link
             key={tab.kind}
             to={`/?feed=${tab.kind}`}
-            aria-current={tab.kind === kind ? 'page' : undefined}
+            aria-current={!filtered && tab.kind === kind ? 'page' : undefined}
             className={cx(
               '-mb-px flex h-12 items-center border-b text-sm',
-              tab.kind === kind ? 'border-ink text-ink' : 'border-transparent text-ink-muted hover:text-ink',
+              !filtered && tab.kind === kind ? 'border-ink text-ink' : 'border-transparent text-ink-muted hover:text-ink',
             )}
           >
             {tab.label}
           </Link>
         ))}
       </nav>
-
-      {!ready || feed.isPending ? (
-        <div className="flex justify-center py-16 text-ink-muted">
-          <Spinner label="Loading stories" />
-        </div>
-      ) : feed.isError ? (
-        <div className="py-16">
-          <p role="alert" className="text-ink-muted">
-            {errorMessage(feed.error)}
-          </p>
-          <Button variant="secondary" size="sm" className="mt-4" onClick={() => void feed.refetch()}>
-            Try again
-          </Button>
-        </div>
-      ) : stories.length === 0 ? (
-        <EmptyFeed kind={kind} />
+      <AgriFilterBar filters={filters} />
+      {filtered ? (
+        <StoryList ready={ready} query={matching} empty={<EmptyFiltered />} />
       ) : (
-        <>
-          {stories.map((story) => (
-            <StoryCard key={story.id} story={story} />
-          ))}
-          <MoreStories
-            hasMore={feed.hasNextPage}
-            loading={feed.isFetchingNextPage}
-            failed={feed.isFetchNextPageError}
-            onMore={() => void feed.fetchNextPage()}
-          />
-        </>
+        <StoryList ready={ready} query={feed} empty={<EmptyFeed kind={kind} />} />
       )}
+    </div>
+  )
+}
+
+type StoryQuery = UseInfiniteQueryResult<InfiniteData<Page<BlogResponse>>>
+
+function StoryList({ ready, query, empty }: { ready: boolean; query: StoryQuery; empty: ReactNode }) {
+  const stories = query.data?.pages.flatMap((page) => page.content) ?? []
+  if (!ready || query.isPending) {
+    return (
+      <div className="flex justify-center py-16 text-ink-muted">
+        <Spinner label="Loading stories" />
+      </div>
+    )
+  }
+  if (query.isError) {
+    return (
+      <div className="py-16">
+        <p role="alert" className="text-ink-muted">
+          {errorMessage(query.error)}
+        </p>
+        <Button variant="secondary" size="sm" className="mt-4" onClick={() => void query.refetch()}>
+          Try again
+        </Button>
+      </div>
+    )
+  }
+  if (stories.length === 0) return <>{empty}</>
+  return (
+    <>
+      {stories.map((story) => (
+        <StoryCard key={story.id} story={story} />
+      ))}
+      <MoreStories
+        hasMore={query.hasNextPage}
+        loading={query.isFetchingNextPage}
+        failed={query.isFetchNextPageError}
+        onMore={() => void query.fetchNextPage()}
+      />
+    </>
+  )
+}
+
+function EmptyFiltered() {
+  return (
+    <div className="py-16 text-center">
+      <h2 className="text-xl">No stories match these filters</h2>
+      <p className="mt-2 text-ink-muted">Remove a filter, or ask the community about it.</p>
+      <div className="mt-6 flex justify-center gap-3">
+        <ButtonLink to="/" variant="secondary" size="sm">
+          Clear filters
+        </ButtonLink>
+        <ButtonLink to="/questions" variant="quiet" size="sm">
+          Ask a question
+        </ButtonLink>
+      </div>
     </div>
   )
 }

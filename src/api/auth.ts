@@ -41,3 +41,21 @@ export function useSignUp() {
     },
   })
 }
+
+/** Always succeeds for a well-formed e-mail, so accounts can't be discovered; the e-mail holds the reset link. */
+export function forgotPassword(email: string): Promise<null> {
+  return api<null>('/api/auth/forgot-password', { method: 'POST', body: { email } })
+}
+
+/** Sets a new password with the token from the reset link; the token is single-use. */
+export function resetPassword(request: Schemas['ResetPasswordWithTokenRequest']): Promise<null> {
+  return api<null>('/api/auth/reset-password', { method: 'POST', body: request })
+}
+
+export function useForgotPassword() {
+  return useMutation({ mutationFn: forgotPassword })
+}
+
+export function useResetPassword() {
+  return useMutation({ mutationFn: resetPassword })
+}

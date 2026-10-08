@@ -10,12 +10,14 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 - New frontend, built from scratch (the old `AGROTRENDS- FrontEnd` repo is retired: it called the pre-hardening API,
   sent `userId` in URLs and called Gemini from the browser with a key).
 - Phase F0 (foundation) merged into `development`.
-- Phase F1 (accounts) on `feat/accounts-base`: F1.1 sign in / sign up done on `feat/sign-in`.
+- Phase F1 (accounts) on `feat/accounts-base`: F1.1 sign in / sign up (`feat/sign-in`) and F1.2 password reset
+  (`feat/password-reset`) done.
 
 ## Next up
 
-1. **Nayeem:** open and merge `feat/sign-in` -> `feat/accounts-base`.
-2. F1.2 forgot / reset password, then F1.3 settings (first screens behind `RequireAuth`).
+1. **Nayeem:** open and merge, in order: `feat/sign-in` -> `feat/accounts-base`, `feat/password-reset` ->
+   `feat/accounts-base`.
+2. F1.3 settings (first screens behind `RequireAuth`).
 
 ## Open items
 
@@ -24,6 +26,24 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Make `development` the default branch on GitHub and protect it | Nayeem | — |
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
+
+---
+
+## 2026-10-08 (F1.2 forgot and reset password)
+
+**Done**
+- `forgotPassword` / `resetPassword` calls and hooks in `src/api/auth.ts`.
+- `/forgot-password`: e-mail -> "Check your e-mail", worded so it never says whether an account exists (the backend
+  answers 200 either way); 429 shows the server message. Linked from sign-in.
+- `/reset-password?token=`: new password twice, checked against the backend rule; success returns to sign-in with a
+  notice; an invalid or expired link shows the server message and a link to ask again; a missing token says so.
+- Tests: `password-reset.test.tsx` (7 cases).
+
+**Decisions**
+- The success notice travels in router state, not the URL, so it doesn't reappear on reload or in shared links.
+
+**Known limitations**
+- Not checked end to end by e-mail: the dev backend logs reset links instead of sending them.
 
 ---
 

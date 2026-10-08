@@ -9,17 +9,15 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 
 - New frontend, built from scratch (the old `AGROTRENDS- FrontEnd` repo is retired: it called the pre-hardening API,
   sent `userId` in URLs and called Gemini from the browser with a key).
-- Phase F0 (foundation) merged into `development`.
-- Phase F1 (accounts) on `feat/accounts-base`: F1.1 sign in / sign up (`feat/sign-in`), F1.2 password reset
-  (`feat/password-reset`) and F1.3 settings (`feat/settings`) done. F1.4 author profile waits on the backend.
+- Phase F0 and F1.1-F1.3 merged into `development`. F1.4 author profile is on `feat/author-profile` (PR into
+  `feat/accounts-base`).
+- Phase F2 reading on `feat/reading-base`: F2.1 home feed done on `feat/home-feed`.
 
 ## Next up
 
-1. **Nayeem:** open and merge, in order: `feat/sign-in` -> `feat/accounts-base`, `feat/password-reset` ->
-   `feat/accounts-base`, `feat/settings` -> `feat/accounts-base`.
-2. Backend: `GET /api/authors/me` for F1.4 (author profile settings). Phase F1 can merge into `development` without
-   it; F1.4 then follows as its own PR.
-3. Phase F2 reading (F2.1 home feed).
+1. **Nayeem:** merge backend `feat/author-me`; open and merge `feat/author-profile` -> `feat/accounts-base` ->
+   `development`. Open and merge `feat/home-feed` -> `feat/reading-base`.
+2. F2.2 crop-season strip and filters, then F2.3 story page (cards already link to `/stories/:slug`).
 
 ## Open items
 
@@ -29,6 +27,33 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Make `development` the default branch on GitHub and protect it | Nayeem | — |
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
+
+---
+
+## 2026-10-08 (F2.1 home feed)
+
+**Done**
+- Home: feed tabs For you (`/api/feed/following`, signed-in only), Latest, Trending, on `?feed=`; signed-in readers
+  start on For you, visitors on Latest (a visitor's `?feed=following` falls back to Latest).
+- Story card: author, title, two-line excerpt (story HTML -> text with DOMParser, no HTML rendered), date, reading
+  time, claps, crop and season chips, cover on the right. Hairline separators, no boxes.
+- Infinite scroll: `useInfiniteQuery`, 10 per page; an IntersectionObserver loads the next page 600px early and a
+  "Show more stories" button does the same for keyboards; "You're all caught up" at the end.
+- States: loading, error with Try again, empty For you (points to Latest), empty site (invites writing).
+- Visitors keep a short welcome above the feed.
+- `src/lib/html.ts`, `dates.ts`, `agri.ts`; `src/test/api.ts` (`envelope`, `page`, `mockApi` routing by
+  "METHOD /path") for screen tests.
+- Tests: `feed.test.tsx` (7 cases), html and date helpers.
+
+**Decisions**
+- The feed waits until the session has restored, so the first read carries the token and For you vs Latest is
+  known.
+- Story URLs are `/stories/:slug`, author URLs `/authors/:authorId`.
+- `BlogResponse` alias added at the end of `types.ts`, away from F1.4's edit, so the two branches merge cleanly.
+
+**Known limitations**
+- The links from cards lead to not-found until F2.3 (story) and F2.7 (author).
+- Checked in jsdom only, not in a browser yet.
 
 ---
 

@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend
 
-**Progress:** 1 of 35 steps done
+**Progress:** 2 of 35 steps done
 
 ---
 
@@ -18,7 +18,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 | # | Step | Status |
 |---|---|---|
 | F0.1 | Scaffold: Vite + React 19 + TypeScript + Tailwind 4, router, TanStack Query, Vitest, oxlint, dev proxy, OpenAPI types; docs | ✅ |
-| F0.2 | Design tokens (colour, type, spacing), fonts (Literata, Hind Siliguri, Noto Serif Bengali), app shell (top bar, footer), UI primitives | ⬜ |
+| F0.2 | Design tokens (colour, type, spacing), fonts (Literata, Hind Siliguri, Noto Serif Bengali), app shell (top bar, footer), UI primitives | ✅ |
 | F0.3 | API client: envelope, `ApiError`, access token in memory, refresh-token rotation with a single in-flight refresh, sign-out | ⬜ |
 
 ## Phase F1 — Accounts (`feat/accounts-base`)

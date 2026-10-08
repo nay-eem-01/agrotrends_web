@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend
 
-**Progress:** 3 of 35 steps done
+**Progress:** 4 of 35 steps done
 
 ---
 
@@ -33,7 +33,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 | # | Step | Status |
 |---|---|---|
-| F2.0 | **Backend:** public read access (published blogs, slug, feeds latest/trending, search, tags, authors, related, comments, questions) — anonymous readers | ⏸ |
+| F2.0 | **Backend:** public read access — anonymous GET on published blogs, slug, search, feeds latest/trending, tags, categories, authors, comments, questions, answers (backend 2.13, `feat/public-reads`). Related posts, the following feed, claps, bookmarks and AI stay signed-in | ✅ |
 | F2.1 | Home: feed tabs (For you = following, Latest, Trending), story card, infinite scroll | ⬜ |
 | F2.2 | The crop-season strip: current season marked, filters the feed by season; crop / region / soil filters | ⬜ |
 | F2.3 | Story page by slug: sanitised HTML, reading time, author block, agri chips, tags | ⬜ |
@@ -87,7 +87,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 | Item | Needed for | Status |
 |---|---|---|
-| Public GET access to published content (only `/api/blogs/all` is public today) | anonymous reading (F2) | ⏸ |
+| Public GET access to published content | anonymous reading (F2) | ✅ backend 2.13 |
 | Refresh token as an `HttpOnly` cookie instead of in the JSON body | keeping the refresh token out of script reach | ⏸ |
 | CORS origins from a property (backend 4.1) | a deployed split origin | ⏸ |
 | Notifications API (backend Phase 5) | F6.7 | ⏸ |

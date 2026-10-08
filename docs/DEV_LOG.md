@@ -16,18 +16,27 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 
 1. **Nayeem:** open and merge, in order: `feat/scaffold` -> `feat/foundation-base`, `feat/design-shell` ->
    `feat/foundation-base`, `feat/api-client` -> `feat/foundation-base`; then `feat/foundation-base` -> `development`.
-2. Decide whether anonymous visitors can read (backend step F2.0); recommended yes, like Medium.
-3. Phase F1 accounts (F1.1 sign in / sign up).
-4. Backend: public read access for anonymous readers (roadmap F2.0) before Phase F2.
+2. Phase F1 accounts (F1.1 sign in / sign up). In F1.1, refresh the access token shortly before it expires
+   (15 minutes): an expired token on a public read is treated as anonymous by the backend, not a 401.
 
 ## Open items
 
 | Item | Needs | Blocks |
 |---|---|---|
 | Make `development` the default branch on GitHub and protect it | Nayeem | — |
-| Only `/api/blogs/all` is public on the backend; stories, feeds, search, authors and questions need sign-in | backend step | anonymous reading (F2) |
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
+
+---
+
+## 2026-10-08 (decision: reading is public, posting needs sign-in)
+
+**Decisions**
+- Nayeem: anyone can read stories and questions; posting anything (story, comment, clap, answer, question, follow)
+  requires sign-in. Backend roadmap 2.13 (`feat/public-reads`) opens GET on published content only.
+- UI rule that follows: an anonymous visitor sees every read screen; any write control (Clap, Respond, Follow,
+  Bookmark, Write, Ask) opens sign-in and returns to the same place afterwards.
+- Signed-in only, so hidden or gated for visitors: For you (following) feed, related stories, bookmarks, AI advisor.
 
 ---
 

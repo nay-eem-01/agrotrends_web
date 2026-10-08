@@ -9,26 +9,46 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 
 - New frontend, built from scratch (the old `AGROTRENDS- FrontEnd` repo is retired: it called the pre-hardening API,
   sent `userId` in URLs and called Gemini from the browser with a key).
-- Phase F0 (foundation) merged into `development`.
-- Phase F1 (accounts) on `feat/accounts-base`: F1.1 sign in / sign up (`feat/sign-in`), F1.2 password reset
-  (`feat/password-reset`) and F1.3 settings (`feat/settings`) done. F1.4 author profile waits on the backend.
+- Phase F0 (foundation) and F1.1-F1.3 merged into `development`.
+- F1.4 author profile settings done on `feat/author-profile` (from `feat/accounts-base`, fast-forwarded to
+  `development`). That completes Phase F1.
 
 ## Next up
 
-1. **Nayeem:** open and merge, in order: `feat/sign-in` -> `feat/accounts-base`, `feat/password-reset` ->
-   `feat/accounts-base`, `feat/settings` -> `feat/accounts-base`.
-2. Backend: `GET /api/authors/me` for F1.4 (author profile settings). Phase F1 can merge into `development` without
-   it; F1.4 then follows as its own PR.
-3. Phase F2 reading (F2.1 home feed).
+1. **Nayeem:** merge backend `feat/author-me` (F1.4 depends on it); open and merge `feat/author-profile` ->
+   `feat/accounts-base`, then `feat/accounts-base` -> `development`.
+2. Phase F2 reading (`feat/reading-base`): F2.1 home feed.
 
 ## Open items
 
 | Item | Needs | Blocks |
 |---|---|---|
-| No way to read my own author profile (`GET /api/authors/me` missing; `UserResponse` has no `authorId`) | backend step | F1.4 |
 | Make `development` the default branch on GitHub and protect it | Nayeem | — |
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
+
+---
+
+## 2026-10-08 (F1.4 author profile settings)
+
+**Done**
+- Settings shows an "Author profile" section when the session's user has an `authorId`: photo, designation,
+  specialities, occupation, workplace, about you. Loaded from `GET /api/authors/me`, saved with `PUT /api/authors/me`.
+- Photo: picked, checked (JPEG / PNG / WebP, <= 5 MB, as the backend), uploaded at once to `POST /api/images`, saved
+  with the profile; Remove photo clears it.
+- `src/api/authors.ts`, `src/api/images.ts`, `src/lib/images.ts`, `TextArea` primitive.
+- Tests: `author-profile.test.tsx` (7 cases), `images.test.ts`. Checked on the local backend (backend
+  `feat/author-me`): me, upload and update.
+
+**Decisions**
+- Readers don't see the section, and no request is made for them (`/api/authors/me` is 403 for readers).
+- The step PRs F1.1-F1.3 were merged straight into `development`; `feat/accounts-base` was fast-forwarded to it so
+  F1.4 still goes through the phase base.
+
+**Known limitations**
+- Upload URLs are absolute (`http://localhost:8080/uploads/...`), built from the backend's own base URL; fine while
+  it matches what the browser can reach, worth checking for a deployed split origin.
+- A replaced photo stays on the server (no delete endpoint).
 
 ---
 

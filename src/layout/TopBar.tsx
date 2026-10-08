@@ -1,11 +1,14 @@
 import { MagnifyingGlass, NotePencil } from '@phosphor-icons/react'
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useSession } from '../features/auth/session'
 import { ButtonLink } from '../ui/Button'
+import { AccountMenu } from './AccountMenu'
 import { Logo } from './Logo'
 
 export function TopBar() {
   const navigate = useNavigate()
+  const { status } = useSession()
   const [query, setQuery] = useState('')
 
   function search(event: FormEvent) {
@@ -44,12 +47,17 @@ export function TopBar() {
             <NotePencil size={20} aria-hidden="true" />
             Write
           </Link>
-          <Link to="/sign-in" className="hidden h-11 items-center px-2 text-sm whitespace-nowrap text-ink-muted hover:text-ink sm:flex">
-            Sign in
-          </Link>
-          <ButtonLink to="/sign-up" size="sm">
-            Get started
-          </ButtonLink>
+          {status === 'signed-in' && <AccountMenu />}
+          {status === 'anonymous' && (
+            <>
+              <Link to="/sign-in" className="hidden h-11 items-center px-2 text-sm whitespace-nowrap text-ink-muted hover:text-ink sm:flex">
+                Sign in
+              </Link>
+              <ButtonLink to="/sign-up" size="sm">
+                Get started
+              </ButtonLink>
+            </>
+          )}
         </nav>
       </div>
     </header>

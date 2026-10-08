@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
-import { api, clearSession, getAccessToken, hasStoredSession, queryString, restoreSession, setSessionLostHandler, startSession } from './client'
+import { api, clearSession, getAccessToken, hasStoredSession, queryString, restoreSession, setSessionLostHandler, startSession, tokenExpiry } from './client'
 import { ApiError, NETWORK_ERROR_MESSAGE, SERVER_ERROR_MESSAGE } from './errors'
 
 function envelope(status: number, payload: unknown, message = 'OK', success = status < 400) {
@@ -122,4 +122,47 @@ test('auth paths never trigger a refresh', async () => {
 test('restoring without a stored token does nothing', async () => {
   await expect(restoreSession()).resolves.toBeNull()
   expect(fetchMock).not.toHaveBeenCalled()
+})
+
+/** A JWT-shaped token whose `exp` is `secondsFromNow` away (the signature is never checked on the client). */
+function jwt(secondsFromNow: number): string {
+  const payload = btoa(JSON.stringify({ sub: 'a@b.c', exp: Math.floor(Date.now() / 1000) + secondsFromNow }))
+  return `e30.${payload.replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_')}.sig`
+}
+
+test('reads the expiry from a JWT and ignores anything else', () => {
+  const token = jwt(900)
+  expect(tokenExpiry(token)).toBeGreaterThan(Date.now() + 890_000)
+  expect(tokenExpiry('not-a-jwt')).toBeNull()
+  expect(tokenExpiry('a.%%%.c')).toBeNull()
+})
+
+test('refreshes before a request when the access token is about to expire', async () => {
+  const fresh = jwt(900)
+  startSession({ accessToken: jwt(30), refreshToken: 'r1' })
+  fetchMock
+    .mockResolvedValueOnce(envelope(200, { accessToken: fresh, refreshToken: 'r2' }))
+    .mockResolvedValueOnce(envelope(200, { followedByMe: true }))
+
+  await expect(api('/api/authors/3')).resolves.toEqual({ followedByMe: true })
+  expect(fetchMock.mock.calls[0][0]).toBe('/api/auth/refresh-token')
+  expect(authHeader(1)).toBe(`Bearer ${fresh}`)
+})
+
+test('a token with time left is used as it is', async () => {
+  const token = jwt(600)
+  startSession({ accessToken: token, refreshToken: 'r1' })
+  fetchMock.mockResolvedValueOnce(envelope(200, 'ok'))
+
+  await api('/api/authors/3')
+  expect(fetchMock).toHaveBeenCalledOnce()
+  expect(authHeader(0)).toBe(`Bearer ${token}`)
+})
+
+test('a failed early refresh still sends the request', async () => {
+  startSession({ accessToken: jwt(10), refreshToken: 'r1' })
+  fetchMock.mockRejectedValueOnce(new TypeError('Failed to fetch')).mockResolvedValueOnce(envelope(200, 'ok'))
+
+  await expect(api('/api/blogs/all')).resolves.toBe('ok')
+  expect(fetchMock).toHaveBeenCalledTimes(2)
 })

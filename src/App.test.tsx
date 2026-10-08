@@ -1,22 +1,10 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 import App from './App'
-
-function CurrentPath() {
-  const location = useLocation()
-  return <output data-testid="path">{location.pathname + location.search}</output>
-}
+import { renderWithProviders } from './test/render'
 
 function renderAt(path: string) {
-  return render(
-    <MemoryRouter initialEntries={[path]}>
-      <App />
-      <Routes>
-        <Route path="*" element={<CurrentPath />} />
-      </Routes>
-    </MemoryRouter>,
-  )
+  return renderWithProviders(<App />, path)
 }
 
 test('home renders inside the shell', () => {

@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend
 
-**Progress:** 30 of 36 steps done
+**Progress:** 31 of 36 steps done
 
 ---
 
@@ -77,7 +77,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 | # | Step | Status |
 |---|---|---|
 | F6.1 | Bengali interface (`lang=bn` passed to the API, UI strings translated) | ✅ |
-| F6.2 | Dark theme | ⬜ |
+| F6.2 | Dark theme | ✅ |
 | F6.3 | Accessibility pass (keyboard, focus, contrast, screen-reader labels) | ⬜ |
 | F6.4 | Playwright smoke tests against a running backend | ⬜ |
 | F6.5 | Performance: route-level code splitting, image sizes, Lighthouse budget | ⬜ |

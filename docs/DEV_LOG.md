@@ -13,11 +13,13 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 - Phase F3 writing on `feat/writing-base`: F3.1 editor (`feat/editor`), F3.2 images (`feat/images`) , F3.3
   publish sheet (`feat/publish`) , F3.4 AI help (`feat/ai-assist`) and F3.5 my stories
   (`feat/my-stories`) done. Phase F3 is complete.
+- Phase F4 questions and answers on `feat/qa-base` (stacked on F3's tip, as F3 isn't in `development` yet):
+  F4.1 questions list (`feat/questions`) done.
 
 ## Next up
 
 1. **Nayeem:** open and merge the F3 step PRs into `feat/writing-base` in order, then the base into `development`.
-2. Phase F4 questions and answers (`feat/qa-base`).
+2. F4.2 question page, F4.3 ask, F4.4 AI draft answer.
 
 ## Open items
 
@@ -28,6 +30,21 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Make `development` the default branch on GitHub and protect it | Nayeem | — |
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
+
+---
+
+## 2026-10-09 (F4.1 questions list)
+
+**Done**
+- `/questions`: newest first (`/api/questions/all`), title, a plain-text excerpt of the question, asker and date,
+  crop / season / region / soil chips that filter the list; Show more questions; Ask a question.
+- The season strip and the crop / region / soil filter bar from home, now page-aware: `filterPath(filters, base)`
+  and both components keep their links on the page they are on.
+- `src/api/questions.ts`: list, one question, ask / edit / delete, AI draft.
+- Tests: `qa/questions.test.tsx` (3 cases). Looked at in Chromium at 1280 and 390px.
+
+**Decisions**
+- `feat/qa-base` is stacked on F3's last branch: F4 uses F3's 503 handling and AI client.
 
 ---
 

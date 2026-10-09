@@ -96,13 +96,13 @@ export function hasAgriFilters(filters: AgriFilters): boolean {
   return Object.keys(filters).length > 0
 }
 
-/** The home URL showing stories that match `filters`. */
-export function filterPath(filters: AgriFilters): string {
+/** The URL of `base` (home by default) filtered by `filters`. */
+export function filterPath(filters: AgriFilters, base = '/'): string {
   const params = new URLSearchParams()
   for (const key of ['crop', 'season', 'region', 'soil'] as const) {
     const value = filters[key]
     if (value) params.set(key, value)
   }
   const query = params.toString()
-  return query ? `/?${query}` : '/'
+  return query ? `${base}?${query}` : base
 }

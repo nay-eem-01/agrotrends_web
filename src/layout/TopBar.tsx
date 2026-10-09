@@ -47,7 +47,14 @@ export function TopBar() {
             <NotePencil size={20} aria-hidden="true" />
             Write
           </Link>
-          {status === 'signed-in' && <AccountMenu />}
+          {status === 'signed-in' && (
+            <>
+              <Link to="/write" className="flex h-11 w-11 items-center justify-center rounded-full text-ink-muted hover:text-ink md:hidden" aria-label="Write">
+                <NotePencil size={22} />
+              </Link>
+              <AccountMenu />
+            </>
+          )}
           {status === 'anonymous' && (
             <>
               <Link to="/sign-in" className="hidden h-11 items-center px-2 text-sm whitespace-nowrap text-ink-muted hover:text-ink sm:flex">

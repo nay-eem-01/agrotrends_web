@@ -190,7 +190,8 @@ async function parse<T>(response: Response): Promise<T> {
     return (envelope?.payload ?? null) as T
   }
 
-  if (response.status >= 500) {
+  // A 503 is a known, temporary state (the AI service is down) whose message is written for people; keep it.
+  if (response.status >= 500 && response.status !== 503) {
     const errorId = (envelope?.payload as { errorId?: string } | null)?.errorId ?? null
     throw new ApiError(response.status, SERVER_ERROR_MESSAGE, errorId)
   }

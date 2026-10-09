@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend
 
-**Progress:** 20 of 36 steps done
+**Progress:** 21 of 36 steps done
 
 ---
 
@@ -52,7 +52,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 | F3.1 | Editor (Tiptap): title, body, autosaved draft | ✅ |
 | F3.2 | Images: cover and inline, via `POST /api/images` | ✅ |
 | F3.3 | Publish sheet: category, tags (max 5, suggestions), agri metadata; publish / unpublish | ✅ |
-| F3.4 | AI help in the editor: summary and suggested tags (`POST /api/ai/blog-assist`) | ⬜ |
+| F3.4 | AI help in the editor: summary and suggested tags (`POST /api/ai/blog-assist`) | ✅ |
 | F3.5 | My stories: drafts and published, edit, delete | ⬜ |
 
 ## Phase F4 — Questions and answers (`feat/qa-base`)

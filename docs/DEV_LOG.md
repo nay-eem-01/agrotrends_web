@@ -10,13 +10,13 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 - New frontend, built from scratch (the old `AGROTRENDS- FrontEnd` repo is retired: it called the pre-hardening API,
   sent `userId` in URLs and called Gemini from the browser with a key).
 - Phases F0 (foundation), F1 (accounts) and F2 (reading) are in `development`.
-- Phase F3 writing on `feat/writing-base`: F3.1 editor (`feat/editor`), F3.2 images (`feat/images`) and F3.3
-  publish sheet (`feat/publish`) done.
+- Phase F3 writing on `feat/writing-base`: F3.1 editor (`feat/editor`), F3.2 images (`feat/images`) , F3.3
+  publish sheet (`feat/publish`) and F3.4 AI help (`feat/ai-assist`) done.
 
 ## Next up
 
 1. **Nayeem:** open and merge the F3 step PRs into `feat/writing-base` in order, then the base into `development`.
-2. F3.4 AI help, F3.5 my stories.
+2. F3.5 my stories.
 
 ## Open items
 
@@ -27,6 +27,23 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Make `development` the default branch on GitHub and protect it | Nayeem | — |
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
+
+---
+
+## 2026-10-09 (F3.4 AI help in the editor)
+
+**Done**
+- The publish sheet has "Suggest topics and a summary" (`POST /api/ai/blog-assist` with the draft's title and
+  HTML): the summary with Copy summary, and suggested topics as "+ topic" buttons that add to the story's topics
+  (up to 5). Marked "Suggested by AI. Check before you use it."; nothing changes until the author chooses.
+- `src/api/client.ts`: a 503 keeps the backend's message ("The AI advisor is not available right now..."); other
+  5xx stay generic. F5 relies on this too.
+- Tests: `editor/ai-assist.test.tsx` (2 cases), client 503 case.
+
+**Known limitations**
+- Not seen working live: Gemini answers 503 on the local backend (open item: key rejected). The 503 path was
+  checked live.
+- The summary has nowhere to live on a story (no field on the backend); it is offered to copy.
 
 ---
 

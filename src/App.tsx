@@ -15,6 +15,7 @@ import { NotFoundPage } from './features/errors/NotFoundPage'
 import { HomePage } from './features/home/HomePage'
 import { SettingsPage } from './features/settings/SettingsPage'
 import { SearchPage } from './features/search/SearchPage'
+import { StoryById } from './features/story/StoryById'
 import { StoryPage } from './features/story/StoryPage'
 import { TagPage } from './features/topics/TagPage'
 import { TopicsPage } from './features/topics/TopicsPage'
@@ -42,6 +43,7 @@ export default function App() {
       <Route element={<AppLayout />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/stories/:slug" element={<StoryPage />} />
+        <Route path="/s/:blogId" element={<StoryById />} />
         <Route path="/authors/:authorId" element={<AuthorPage />} />
         <Route path="/tags/:tagName" element={<TagPage />} />
         <Route path="/questions" element={<QuestionsPage />} />

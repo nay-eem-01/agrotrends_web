@@ -16,11 +16,12 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 - Phase F4 questions and answers on `feat/qa-base` (stacked on F3's tip, as F3 isn't in `development` yet):
   F4.1 questions list (`feat/questions`) , F4.2 question page (`feat/question-page`) , F4.3 ask
   (`feat/ask`) and F4.4 AI draft answer (`feat/ai-draft-answer`) done. Phase F4 is complete.
+- Phase F5 AI advisor on `feat/ai-base` (stacked on F4): F5.1 advisor (`feat/advisor`) done.
 
 ## Next up
 
 1. **Nayeem:** open and merge the F3 step PRs into `feat/writing-base` in order, then the base into `development`.
-2. Phase F5 AI advisor (`feat/ai-base`).
+2. F5.2 advisor history, F5.3 related stories.
 
 ## Open items
 
@@ -32,6 +33,24 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Make `development` the default branch on GitHub and protect it | Nayeem | — |
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
+
+---
+
+## 2026-10-09 (F5.1 the advisor)
+
+**Done**
+- `/advisor` (top bar: Advisor; footer: AI advisor): a question box (Bangla or English, up to 1000 characters, with
+  a counter); each answer is added to the conversation in Literata under its question, with "From these stories"
+  links (`/s/:id`) or, with no sources, a note that the answer is general advice.
+- Three example questions for the current season (Rabi / Kharif-1 / Kharif-2) fill the box.
+- Visitors see the page and are sent to sign-in to ask. The daily limit (429) and an AI outage (503) show the
+  backend's message and keep the question in the box.
+- `useAskAdvisor` / `useAdvisorHistory` in `src/api/ai.ts`.
+- Tests: `ai/advisor.test.tsx` (5 cases). The 503 path seen live in Chromium.
+
+**Decisions**
+- "Daily quota shown" is the copy "A daily limit applies" plus the 429 message: the API doesn't report what is
+  left (backend need added).
 
 ---
 

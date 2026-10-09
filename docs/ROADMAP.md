@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend
 
-**Progress:** 26 of 36 steps done
+**Progress:** 27 of 36 steps done
 
 ---
 
@@ -68,7 +68,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 | # | Step | Status |
 |---|---|---|
-| F5.1 | Ask the advisor: answer with cited stories as links, daily quota shown, 503 handled | ⬜ |
+| F5.1 | Ask the advisor: answer with cited stories as links, daily quota shown, 503 handled | ✅ |
 | F5.2 | My AI history | ⬜ |
 | F5.3 | Related stories at the end of a story page | ⬜ |
 
@@ -90,6 +90,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 |---|---|---|
 | "Followed by me" per tag (or a larger followed-tags read) | exact Follow state past the 100 most recent follows (F2.6) | ⏸ |
 | "Saved by me" per story (`bookmarkedByMe` on `BlogResponse`, or `GET /api/blogs/id/{id}/bookmark`) | exact saved state past the 100 most recent saves (F2.4) | ⏸ |
+| The advisor's remaining daily questions (e.g. on `AiAnswerResponse` or `GET /api/ai/quota`) | showing the quota before it runs out (F5.1) | ⏸ |
 | Answers: `/api/answers/question/{id}` also returns replies and `AnswerResponse` has no `parentAnswerId` | the client filters replies out of the answer list (F4.2) | ⏸ |
 | Comments: `CommentResponse` in the OpenAPI document and a reply count per comment (or replies nested) | typed comments without a hand-written type; one request per story instead of one per thread (F2.5) | ⏸ |
 | `GET /api/authors/me` and `authorId` on `UserResponse` | F1.4 | ✅ (backend `feat/author-me`) |

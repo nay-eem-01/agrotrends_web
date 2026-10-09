@@ -10,12 +10,12 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 - New frontend, built from scratch (the old `AGROTRENDS- FrontEnd` repo is retired: it called the pre-hardening API,
   sent `userId` in URLs and called Gemini from the browser with a key).
 - Phases F0 (foundation), F1 (accounts) and F2 (reading) are in `development`.
-- Phase F3 writing on `feat/writing-base`: F3.1 editor done on `feat/editor`.
+- Phase F3 writing on `feat/writing-base`: F3.1 editor (`feat/editor`) and F3.2 images (`feat/images`) done.
 
 ## Next up
 
 1. **Nayeem:** open and merge the F3 step PRs into `feat/writing-base` in order, then the base into `development`.
-2. F3.2 images, F3.3 publish sheet, F3.4 AI help, F3.5 my stories.
+2. F3.3 publish sheet, F3.4 AI help, F3.5 my stories.
 
 ## Open items
 
@@ -26,6 +26,21 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Make `development` the default branch on GitHub and protect it | Nayeem | — |
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
+
+---
+
+## 2026-10-09 (F3.2 images)
+
+**Done**
+- Cover: Add a cover image / Change cover / Remove cover above the title, shown as it will be on the story page;
+  kept in the device draft or saved with the server draft (`imageUrl`; omitting it clears the cover).
+- Inline images: an Image tool in the toolbar uploads and places the picture at the cursor (Tiptap Image, `alt=""`).
+- Both check the file first (JPEG / PNG / WebP, <= 5 MB, `src/lib/images.ts`) and upload with F1.4's
+  `useUploadImage`; errors show next to the control.
+- Tests: `editor/images.test.tsx` (4 cases). A real upload checked in Chromium against the backend.
+
+**Known limitations**
+- No paste or drag-and-drop of images, and no captions or alt text input yet.
 
 ---
 

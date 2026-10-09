@@ -59,3 +59,13 @@ export function useForgotPassword() {
 export function useResetPassword() {
   return useMutation({ mutationFn: resetPassword })
 }
+
+/** Admins sign in on their own endpoint; the regular one refuses them (and this one refuses everyone else). */
+export function useAdminSignIn() {
+  return useMutation({ mutationFn: (request: SignInRequest) => api<WebTokenResponse>('/api/admin/sign-in', { method: 'POST', body: request }) })
+}
+
+/** Any role besides USER is staff; the backend checks the exact permission on each call. */
+export function isAdmin(user: { roles?: string[] } | null | undefined): boolean {
+  return (user?.roles ?? []).some((role) => role !== 'USER')
+}

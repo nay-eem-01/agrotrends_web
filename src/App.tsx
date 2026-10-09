@@ -28,6 +28,7 @@ const SearchPage = page(() => import('./features/search/SearchPage'), 'SearchPag
 const StoryById = page(() => import('./features/story/StoryById'), 'StoryById')
 const TagPage = page(() => import('./features/topics/TagPage'), 'TagPage')
 const TopicsPage = page(() => import('./features/topics/TopicsPage'), 'TopicsPage')
+const AdminCategoriesPage = page(() => import('./features/admin/AdminCategoriesPage'), 'AdminCategoriesPage')
 const EditorPage = page(() => import('./features/editor/EditorPage'), 'EditorPage')
 
 export default function App() {
@@ -40,6 +41,7 @@ export default function App() {
         <Route path="/authors/:authorId" element={<AuthorPage />} />
         <Route path="/tags/:tagName" element={<TagPage />} />
         <Route path="/advisor" element={<AdvisorPage />} />
+        <Route path="/admin/categories" element={<AdminCategoriesPage />} />
         <Route path="/questions" element={<QuestionsPage />} />
         <Route path="/questions/:questionId" element={<QuestionPage />} />
         <Route path="/search" element={<SearchPage />} />

@@ -16,6 +16,7 @@ export const BN: Record<string, string> = {
   'Your stories': 'আপনার লেখা',
   Library: 'লাইব্রেরি',
   Settings: 'সেটিংস',
+  Categories: 'বিভাগ',
   'Sign out': 'সাইন আউট',
   Account: 'অ্যাকাউন্ট',
   'Your account': 'আপনার অ্যাকাউন্ট',

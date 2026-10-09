@@ -64,6 +64,8 @@ interface RequestOptions {
   body?: unknown
   /** Query string values; null and undefined are left out. */
   params?: Record<string, QueryValue>
+  /** Sent as text/plain instead of `body`, for the one endpoint that reads a raw string (category rename). */
+  text?: string
   signal?: AbortSignal
 }
 
@@ -148,7 +150,10 @@ async function doRefresh(): Promise<WebTokenResponse> {
 async function send(path: string, options: RequestOptions, withToken = true): Promise<Response> {
   const headers: Record<string, string> = { Accept: 'application/json' }
   let body: BodyInit | undefined
-  if (options.body instanceof FormData) {
+  if (options.text !== undefined) {
+    headers['Content-Type'] = 'text/plain'
+    body = options.text
+  } else if (options.body instanceof FormData) {
     body = options.body
   } else if (options.body !== undefined) {
     headers['Content-Type'] = 'application/json'

@@ -10,12 +10,13 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 - New frontend, built from scratch (the old `AGROTRENDS- FrontEnd` repo is retired: it called the pre-hardening API,
   sent `userId` in URLs and called Gemini from the browser with a key).
 - Phases F0 (foundation), F1 (accounts) and F2 (reading) are in `development`.
-- Phase F3 writing on `feat/writing-base`: F3.1 editor (`feat/editor`) and F3.2 images (`feat/images`) done.
+- Phase F3 writing on `feat/writing-base`: F3.1 editor (`feat/editor`), F3.2 images (`feat/images`) and F3.3
+  publish sheet (`feat/publish`) done.
 
 ## Next up
 
 1. **Nayeem:** open and merge the F3 step PRs into `feat/writing-base` in order, then the base into `development`.
-2. F3.3 publish sheet, F3.4 AI help, F3.5 my stories.
+2. F3.4 AI help, F3.5 my stories.
 
 ## Open items
 
@@ -26,6 +27,27 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Make `development` the default branch on GitHub and protect it | Nayeem | — |
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
+
+---
+
+## 2026-10-09 (F3.3 publish sheet)
+
+**Done**
+- Publish (new story or draft) and Details (published) open a sheet (native `<dialog>`, bottom sheet on phones):
+  category (required), topics as chips (Enter or comma; up to 5, 40 characters, lower-cased; suggestions from
+  existing topics), farming details (season picker drawn as the season strip plus a dashed Year-round, crop,
+  region, soil).
+- New story: Publish now (-> the story page, "Published") or Save as draft (-> `/write/:id`, "Draft saved"); the
+  device draft is cleared. Draft: Publish saves the details, then publishes; Save details. Published: Save details
+  or Unpublish (back to a draft in place).
+- An author sees Edit story on their own story page.
+- Tests: `editor/publish.test.tsx` (7 cases), plus a `<dialog>` polyfill in `src/test/setup.ts`. Written and
+  published end to end in Chromium against the backend.
+
+**Decisions**
+- The submitting button is read from the submit event (`submitter`); setting state in the same click was too late
+  (the tests caught Save as draft publishing).
+- Empty farming fields are sent as absent, not blank.
 
 ---
 

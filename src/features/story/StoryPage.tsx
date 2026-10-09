@@ -88,7 +88,7 @@ function Story({ story }: { story: BlogResponse }) {
 
       {story.imageUrl && (
         <figure className="mx-auto mt-10 max-w-[1000px] sm:px-6">
-          <img src={story.imageUrl} alt="" className="w-full sm:rounded" />
+          <img src={story.imageUrl} alt="" fetchPriority="high" decoding="async" className="w-full sm:rounded" />
         </figure>
       )}
 

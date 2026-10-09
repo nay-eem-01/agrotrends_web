@@ -41,7 +41,7 @@ afterEach(() => vi.unstubAllGlobals())
 test('visitors are sent to sign-in and readers are told only authors publish', async () => {
   mockApi({})
   const { unmount } = renderWithProviders(<App />, '/write')
-  expect(screen.getByTestId('path')).toHaveTextContent('/sign-in?next=%2Fwrite')
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/sign-in?next=%2Fwrite'))
   unmount()
 
   mockApi(signedInAs({ id: 9, name: 'Karim' }))

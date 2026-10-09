@@ -92,7 +92,7 @@ test('switching to Trending loads that feed', async () => {
   await screen.findByRole('link', { name: 'Story 1' })
   await userEvent.click(screen.getByRole('link', { name: 'Trending' }))
   expect(await screen.findByRole('link', { name: 'Most clapped' })).toBeInTheDocument()
-  expect(screen.getByTestId('path')).toHaveTextContent('/?feed=trending')
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/?feed=trending'))
 })
 
 test('a visitor asking for For you gets Latest', async () => {

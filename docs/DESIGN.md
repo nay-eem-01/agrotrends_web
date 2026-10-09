@@ -58,3 +58,15 @@ Mustard is the rabi-season mustard field; it is spent in one or two places so it
 4. Words: plain verbs, sentence case. A button says what happens ("Publish", "Save draft"); its toast repeats it.
 5. Motion only answers an action (clap burst, sheet opening); `prefers-reduced-motion` turns it off.
 6. Phone-first: every screen works at 360px; tap targets >= 44px.
+
+## Performance budget
+
+Checked with Lighthouse (mobile, simulated slow 4G) on a production build; re-check when a page changes a lot.
+
+| Measure | Budget | 2026-10-09 |
+|---|---|---|
+| Main JS (gzip) | <= 120 kB | 106 kB (every page but home and story is lazy; the editor alone is 139 kB) |
+| Lighthouse performance (home, questions) | >= 80 | 85, 89 |
+| Accessibility / best practices / SEO | 100 | 100 / 100 / 100 |
+| CLS | < 0.1 | 0.07 (fonts swapping in) |
+| LCP, slow 4G | < 3.5 s | 3.2 s (the headline waits for JS: client-rendered) |

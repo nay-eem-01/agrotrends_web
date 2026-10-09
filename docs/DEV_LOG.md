@@ -19,13 +19,13 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 - Phase F5 AI advisor on `feat/ai-base` (stacked on F4): F5.1 advisor (`feat/advisor`) , F5.2 history (`feat/advisor-history`) and F5.3 related stories
   (`feat/related`) done. Phase F5 is complete.
 - Phase F6 polish on `feat/polish-base` (stacked on F5): F6.1 Bengali interface (`feat/bengali`) , F6.2 dark theme
-  (`feat/dark-theme`) , F6.3 accessibility (`feat/a11y`) and F6.4 smoke tests
-  (`feat/e2e`) done.
+  (`feat/dark-theme`) , F6.3 accessibility (`feat/a11y`) , F6.4 smoke tests
+  (`feat/e2e`) and F6.5 performance (`feat/perf`) done.
 
 ## Next up
 
 1. **Nayeem:** open and merge the F3 step PRs into `feat/writing-base` in order, then the base into `development`.
-2. F6.5 performance, F6.6 admin categories.
+2. F6.6 admin categories.
 
 ## Open items
 
@@ -38,6 +38,23 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Make `development` the default branch on GitHub and protect it | Nayeem | — |
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
+
+---
+
+## 2026-10-09 (F6.5 performance)
+
+**Done**
+- Every page except home and the story page is lazy-loaded (`page()` in `App.tsx`, one Suspense in `AppLayout`);
+  main JS 495 -> 335 kB (150 -> 106 kB gzip). Tests that open a lazy page now wait for it (`findBy` / `waitFor`).
+- Images: story cover `fetchpriority="high"`; card covers and avatars `loading="lazy"`, all `decoding="async"`.
+- `public/robots.txt` (the preview served the app for it, failing Lighthouse SEO).
+- Lighthouse on a production build: performance 85 (home) / 89 (questions), accessibility, best practices and SEO
+  100. Budget recorded in `docs/DESIGN.md`.
+
+**Known limitations**
+- LCP 3.2s on simulated slow 4G: the page is client-rendered, so the headline waits for JS. Server rendering or
+  prerendering the home page would be the next step if it matters.
+- Text compression is the production server's job (`vite preview` doesn't gzip).
 
 ---
 

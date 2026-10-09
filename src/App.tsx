@@ -1,43 +1,34 @@
-import { lazy, Suspense } from 'react'
+import { lazy, type ComponentType } from 'react'
 import { Route, Routes } from 'react-router-dom'
-import { AdvisorHistoryPage } from './features/ai/AdvisorHistoryPage'
-import { AdvisorPage } from './features/ai/AdvisorPage'
-import { AuthorPage } from './features/authors/AuthorPage'
-import { ForgotPasswordPage } from './features/auth/ForgotPasswordPage'
-import { ResetPasswordPage } from './features/auth/ResetPasswordPage'
 import { RequireAuth } from './features/auth/RequireAuth'
-import { SignInPage } from './features/auth/SignInPage'
-import { SignUpPage } from './features/auth/SignUpPage'
-import { LibraryPage } from './features/library/LibraryPage'
-import { MyStoriesPage } from './features/mystories/MyStoriesPage'
-import { AskPage } from './features/qa/AskPage'
-import { QuestionPage } from './features/qa/QuestionPage'
-import { QuestionsPage } from './features/qa/QuestionsPage'
 import { NotFoundPage } from './features/errors/NotFoundPage'
 import { HomePage } from './features/home/HomePage'
-import { SettingsPage } from './features/settings/SettingsPage'
-import { SearchPage } from './features/search/SearchPage'
-import { StoryById } from './features/story/StoryById'
 import { StoryPage } from './features/story/StoryPage'
-import { TagPage } from './features/topics/TagPage'
-import { TopicsPage } from './features/topics/TopicsPage'
 import { AppLayout } from './layout/AppLayout'
-import { Spinner } from './ui/Spinner'
 
-// The editor (Tiptap) is most of the bundle; only writers download it.
-const EditorPage = lazy(() => import('./features/editor/EditorPage').then((m) => ({ default: m.EditorPage })))
+// Home and the story page load with the app (most visits start there); every other page is fetched when first
+// opened. The editor (Tiptap) is the largest of them. AppLayout's Suspense shows a spinner meanwhile.
+const page = <K extends string>(load: () => Promise<Record<K, ComponentType>>, name: K) =>
+  lazy(() => load().then((m) => ({ default: m[name] })))
 
-const editor = (
-  <Suspense
-    fallback={
-      <div className="flex justify-center py-24 text-ink-muted">
-        <Spinner label="Loading editor" />
-      </div>
-    }
-  >
-    <EditorPage />
-  </Suspense>
-)
+const AdvisorHistoryPage = page(() => import('./features/ai/AdvisorHistoryPage'), 'AdvisorHistoryPage')
+const AdvisorPage = page(() => import('./features/ai/AdvisorPage'), 'AdvisorPage')
+const AuthorPage = page(() => import('./features/authors/AuthorPage'), 'AuthorPage')
+const ForgotPasswordPage = page(() => import('./features/auth/ForgotPasswordPage'), 'ForgotPasswordPage')
+const ResetPasswordPage = page(() => import('./features/auth/ResetPasswordPage'), 'ResetPasswordPage')
+const SignInPage = page(() => import('./features/auth/SignInPage'), 'SignInPage')
+const SignUpPage = page(() => import('./features/auth/SignUpPage'), 'SignUpPage')
+const LibraryPage = page(() => import('./features/library/LibraryPage'), 'LibraryPage')
+const MyStoriesPage = page(() => import('./features/mystories/MyStoriesPage'), 'MyStoriesPage')
+const AskPage = page(() => import('./features/qa/AskPage'), 'AskPage')
+const QuestionPage = page(() => import('./features/qa/QuestionPage'), 'QuestionPage')
+const QuestionsPage = page(() => import('./features/qa/QuestionsPage'), 'QuestionsPage')
+const SettingsPage = page(() => import('./features/settings/SettingsPage'), 'SettingsPage')
+const SearchPage = page(() => import('./features/search/SearchPage'), 'SearchPage')
+const StoryById = page(() => import('./features/story/StoryById'), 'StoryById')
+const TagPage = page(() => import('./features/topics/TagPage'), 'TagPage')
+const TopicsPage = page(() => import('./features/topics/TopicsPage'), 'TopicsPage')
+const EditorPage = page(() => import('./features/editor/EditorPage'), 'EditorPage')
 
 export default function App() {
   return (
@@ -58,8 +49,8 @@ export default function App() {
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route element={<RequireAuth />}>
-          <Route path="/write" element={editor} />
-          <Route path="/write/:blogId" element={editor} />
+          <Route path="/write" element={<EditorPage />} />
+          <Route path="/write/:blogId" element={<EditorPage />} />
           <Route path="/questions/ask" element={<AskPage />} />
           <Route path="/questions/:questionId/edit" element={<AskPage />} />
           <Route path="/advisor/history" element={<AdvisorHistoryPage />} />

@@ -23,10 +23,10 @@ beforeEach(() => {
 
 afterEach(() => vi.unstubAllGlobals())
 
-test('the library needs sign-in', () => {
+test('the library needs sign-in', async () => {
   mockApi({})
   renderWithProviders(<App />, '/library?tab=following')
-  expect(screen.getByTestId('path')).toHaveTextContent('/sign-in?next=%2Flibrary%3Ftab%3Dfollowing')
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/sign-in?next=%2Flibrary%3Ftab%3Dfollowing'))
 })
 
 test('the reading list shows saved stories, marked as saved', async () => {

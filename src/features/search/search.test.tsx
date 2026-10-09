@@ -65,6 +65,6 @@ test('searching again from the page updates the URL and results', async () => {
   await userEvent.clear(field)
   await userEvent.type(field, 'jute aphids{Enter}')
 
-  expect(screen.getByTestId('path')).toHaveTextContent('/search?q=jute%20aphids')
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/search?q=jute%20aphids'))
   await waitFor(() => expect(screen.getByRole('link', { name: 'About jute aphids' })).toBeInTheDocument())
 })

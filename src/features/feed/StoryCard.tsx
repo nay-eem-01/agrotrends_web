@@ -59,7 +59,7 @@ export function StoryCard({ story }: { story: BlogResponse }) {
         </div>
         {story.imageUrl && (
           <Link to={href} tabIndex={-1} aria-hidden="true" className="shrink-0">
-            <img src={story.imageUrl} alt="" loading="lazy" className="size-20 rounded object-cover sm:h-28 sm:w-40" />
+            <img src={story.imageUrl} alt="" loading="lazy" decoding="async" className="size-20 rounded object-cover sm:h-28 sm:w-40" />
           </Link>
         )}
       </div>

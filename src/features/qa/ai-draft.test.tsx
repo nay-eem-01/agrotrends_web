@@ -60,7 +60,7 @@ test('visitors sign in before asking the AI', async () => {
   renderWithProviders(<App />, '/questions/5')
 
   await userEvent.click(await screen.findByRole('button', { name: 'See an AI draft answer' }))
-  expect(screen.getByTestId('path')).toHaveTextContent('/sign-in?next=%2Fquestions%2F5')
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/sign-in?next=%2Fquestions%2F5'))
 })
 
 test('answered questions have no AI offer', async () => {

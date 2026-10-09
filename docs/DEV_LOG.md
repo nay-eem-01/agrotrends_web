@@ -16,12 +16,12 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 - Phase F4 questions and answers on `feat/qa-base` (stacked on F3's tip, as F3 isn't in `development` yet):
   F4.1 questions list (`feat/questions`) , F4.2 question page (`feat/question-page`) , F4.3 ask
   (`feat/ask`) and F4.4 AI draft answer (`feat/ai-draft-answer`) done. Phase F4 is complete.
-- Phase F5 AI advisor on `feat/ai-base` (stacked on F4): F5.1 advisor (`feat/advisor`) done.
+- Phase F5 AI advisor on `feat/ai-base` (stacked on F4): F5.1 advisor (`feat/advisor`) and F5.2 history (`feat/advisor-history`) done.
 
 ## Next up
 
 1. **Nayeem:** open and merge the F3 step PRs into `feat/writing-base` in order, then the base into `development`.
-2. F5.2 advisor history, F5.3 related stories.
+2. F5.3 related stories.
 
 ## Open items
 
@@ -33,6 +33,15 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Make `development` the default branch on GitHub and protect it | Nayeem | — |
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
+
+---
+
+## 2026-10-09 (F5.2 advisor history)
+
+**Done**
+- `/advisor/history` behind `RequireAuth` (linked from the advisor as "Your earlier questions"): questions newest
+  first with the date; each opens its answer in place (native `<details>`); Show older questions; empty state.
+- Tests: `ai/advisor-history.test.tsx` (3 cases). The endpoint answered (empty) on the local backend.
 
 ---
 

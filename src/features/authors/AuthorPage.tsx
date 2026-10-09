@@ -1,3 +1,4 @@
+import { useT } from '../../lib/i18n'
 import { Link, useParams } from 'react-router-dom'
 import { useAuthor, useAuthorStories } from '../../api/authors'
 import { ApiError, errorMessage } from '../../api/errors'
@@ -12,6 +13,7 @@ import { FollowAuthorButton } from './FollowAuthorButton'
 const count = (n: number | undefined, one: string, many: string) => `${n ?? 0} ${(n ?? 0) === 1 ? one : many}`
 
 export function AuthorPage() {
+  const t = useT()
   const authorId = Number(useParams().authorId)
   const { status } = useSession()
   // Wait for a restoring session so followedByMe comes back for the reader, not for an anonymous visitor.
@@ -22,7 +24,7 @@ export function AuthorPage() {
   if (status === 'restoring' || author.isPending) {
     return (
       <div className="flex justify-center py-24 text-ink-muted">
-        <Spinner label="Loading author" />
+        <Spinner label={t('Loading author')} />
       </div>
     )
   }
@@ -36,7 +38,7 @@ export function AuthorPage() {
   }
 
   const profile = author.data
-  const name = profile.name ?? 'Author'
+  const name = profile.name ?? t('Author')
   const work = [profile.designation, profile.workPlaceOrInstitution].filter(Boolean).join(' · ')
 
   return (
@@ -57,7 +59,7 @@ export function AuthorPage() {
       </header>
       {profile.bio && <p className="mt-8 font-serif text-lg whitespace-pre-line">{profile.bio}</p>}
       {(profile.specialities?.length ?? 0) > 0 && (
-        <section aria-label="Specialities" className="mt-6">
+        <section aria-label={t('Specialities')} className="mt-6">
           <ul className="flex flex-wrap gap-2">
             {profile.specialities!.map((speciality) => (
               <li key={speciality}>
@@ -67,7 +69,7 @@ export function AuthorPage() {
           </ul>
         </section>
       )}
-      <h2 className="mt-12 border-b border-rule pb-3 font-sans text-base font-semibold">Stories</h2>
+      <h2 className="mt-12 border-b border-rule pb-3 font-sans text-base font-semibold">{t('Stories')}</h2>
       <StoryList
         ready
         query={stories}
@@ -79,6 +81,7 @@ export function AuthorPage() {
 
 /** "Written by" under a story: the author's photo, followers, bio and Follow. */
 export function WrittenBy({ authorId, fallbackName }: { authorId: number; fallbackName: string }) {
+  const t = useT()
   const { status } = useSession()
   const author = useAuthor(authorId, status !== 'restoring')
   const profile = author.data
@@ -86,10 +89,10 @@ export function WrittenBy({ authorId, fallbackName }: { authorId: number; fallba
   const name = profile.name ?? fallbackName
 
   return (
-    <aside aria-label="About the author" className="mt-12 flex flex-col items-start gap-4 rounded-lg border border-rule p-6 sm:flex-row">
+    <aside aria-label={t('About the author')} className="mt-12 flex flex-col items-start gap-4 rounded-lg border border-rule p-6 sm:flex-row">
       <Avatar name={name} src={profile.profileImageUrl} size={56} />
       <div className="min-w-0 flex-1">
-        <p className="text-sm text-ink-muted">Written by</p>
+        <p className="text-sm text-ink-muted">{t('Written by')}</p>
         <Link to={`/authors/${authorId}`} className="font-serif text-xl font-bold hover:underline">
           {name}
         </Link>

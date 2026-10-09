@@ -1,3 +1,4 @@
+import { useT, formatNumber } from '../../lib/i18n'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import { useStory } from '../../api/blogs'
 import { ApiError, errorMessage } from '../../api/errors'
@@ -18,6 +19,7 @@ import { Thread } from '../threads/Thread'
 import { RelatedStories } from './RelatedStories'
 
 export function StoryPage() {
+  const t = useT()
   const { slug = '' } = useParams()
   const { status } = useSession()
   // Wait for a restoring session: an author opening their own draft needs the token on the first read.
@@ -26,7 +28,7 @@ export function StoryPage() {
   if (status === 'restoring' || story.isPending) {
     return (
       <div className="flex justify-center py-24 text-ink-muted">
-        <Spinner label="Loading story" />
+        <Spinner label={t('Loading story')} />
       </div>
     )
   }
@@ -42,11 +44,12 @@ export function StoryPage() {
 }
 
 function Story({ story }: { story: BlogResponse }) {
+  const t = useT()
   const author = story.author
   const notice = (useLocation().state as { notice?: string } | null)?.notice
   const { user } = useSession()
   const own = user?.authorId != null && user.authorId === author?.authorId
-  const meta = [story.readingTimeMinutes ? `${story.readingTimeMinutes} min read` : null, storyDate(story.publishedAt)].filter(Boolean)
+  const meta = [story.readingTimeMinutes ? t('{n} min read', { n: formatNumber(story.readingTimeMinutes) }) : null, storyDate(story.publishedAt)].filter(Boolean)
 
   return (
     <article className="pb-20">
@@ -54,7 +57,7 @@ function Story({ story }: { story: BlogResponse }) {
       <header className="mx-auto max-w-(--container-feed) px-4 pt-10 sm:px-6 sm:pt-14">
         {notice && <output className="mb-4 block w-fit rounded-full bg-paddy px-3 py-1 text-sm text-paper">{notice}</output>}
         {story.status === 'DRAFT' && (
-          <p className="mb-4 inline-block rounded-full bg-field px-3 py-1 text-sm text-ink">Draft — only you can see this</p>
+          <p className="mb-4 inline-block rounded-full bg-field px-3 py-1 text-sm text-ink">{t('Draft — only you can see this')}</p>
         )}
         <h1 className="text-2xl sm:text-3xl">{story.title}</h1>
         {author?.name && (
@@ -75,7 +78,7 @@ function Story({ story }: { story: BlogResponse }) {
             </div>
             {own && (
               <ButtonLink to={`/write/${story.id}`} variant="secondary" size="sm" className="ml-auto">
-                Edit story
+                {t('Edit story')}
               </ButtonLink>
             )}
           </div>
@@ -111,12 +114,13 @@ function StoryActions({ story }: { story: BlogResponse }) {
 }
 
 function StoryFooter({ story }: { story: BlogResponse }) {
+  const t = useT()
   const agri = story.agri ?? {}
   const farming = [
-    agri.crop && { label: agri.crop, to: filterPath({ crop: agri.crop }), name: 'Crop' },
-    agri.season && { label: SEASON_LABELS[agri.season], to: filterPath({ season: agri.season }), name: 'Season' },
-    agri.region && { label: agri.region, to: filterPath({ region: agri.region }), name: 'Region' },
-    agri.soil && { label: SOIL_LABELS[agri.soil], to: filterPath({ soil: agri.soil }), name: 'Soil' },
+    agri.crop && { label: agri.crop, to: filterPath({ crop: agri.crop }), name: t('Crop') },
+    agri.season && { label: t(SEASON_LABELS[agri.season]), to: filterPath({ season: agri.season }), name: t('Season') },
+    agri.region && { label: agri.region, to: filterPath({ region: agri.region }), name: t('Region') },
+    agri.soil && { label: t(SOIL_LABELS[agri.soil]), to: filterPath({ soil: agri.soil }), name: t('Soil') },
   ].filter((item): item is { label: string; to: string; name: string } => Boolean(item))
   const tags = story.tags ?? []
 
@@ -124,12 +128,12 @@ function StoryFooter({ story }: { story: BlogResponse }) {
   return (
     <footer className="mt-12 flex flex-col gap-5">
       {farming.length > 0 && (
-        <section aria-label="Farming context">
+        <section aria-label={t('Farming context')}>
           <ul className="flex flex-wrap gap-2">
             {farming.map((item) => (
               <li key={item.name}>
                 <Chip to={item.to}>
-                  <span className="mr-1 text-ink-muted">{item.name}</span>
+                  <span className="mr-1 text-ink-muted">{t(item.name)}</span>
                   {item.label}
                 </Chip>
               </li>
@@ -138,7 +142,7 @@ function StoryFooter({ story }: { story: BlogResponse }) {
         </section>
       )}
       {tags.length > 0 && (
-        <section aria-label="Tags">
+        <section aria-label={t('Tags')}>
           <ul className="flex flex-wrap gap-2">
             {tags.map((tag) => (
               <li key={tag}>

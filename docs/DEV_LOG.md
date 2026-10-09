@@ -18,22 +18,46 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   (`feat/ask`) and F4.4 AI draft answer (`feat/ai-draft-answer`) done. Phase F4 is complete.
 - Phase F5 AI advisor on `feat/ai-base` (stacked on F4): F5.1 advisor (`feat/advisor`) , F5.2 history (`feat/advisor-history`) and F5.3 related stories
   (`feat/related`) done. Phase F5 is complete.
+- Phase F6 polish on `feat/polish-base` (stacked on F5): F6.1 Bengali interface (`feat/bengali`) done.
 
 ## Next up
 
 1. **Nayeem:** open and merge the F3 step PRs into `feat/writing-base` in order, then the base into `development`.
-2. Phase F6 polish (`feat/polish-base`).
+2. F6.2 dark theme, F6.3 accessibility, F6.4 Playwright smoke tests, F6.5 performance, F6.6 admin categories.
 
 ## Open items
 
 | Item | Needs | Blocks |
 |---|---|---|
 | The answers list also returns replies, with no parent field; the page drops anything that is someone's reply | backend | — |
+| The backend takes `lang` but has no Bengali messages yet, so its errors stay English in the Bengali interface | backend: message files | — |
 | Comment endpoints aren't typed in OpenAPI and have no reply counts: `CommentResponse` is hand-written and every thread is fetched | backend | — |
 | No per-story "saved by me": the app reads the 100 most recent saves to mark Save buttons | backend: `bookmarkedByMe` | exact saved state for heavy savers |
 | Make `development` the default branch on GitHub and protect it | Nayeem | — |
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
+
+---
+
+## 2026-10-09 (F6.1 Bengali interface)
+
+**Done**
+- `src/lib/i18n.ts`: the language (English default, stored on the device, set on `<html lang>`), `useT()` /
+  `translate()` keyed by the English text so anything untranslated stays English, `{placeholders}`, and
+  `formatNumber` (Bengali digits). `src/lib/bn.ts`: ~200 strings in plain Bengali.
+- Translated: top bar, footer, account menu, home, feed, season strip (names and months), filters, story page,
+  responses and answers, topics, search, authors, questions, ask, AI draft, advisor and history, library, sign in
+  and up, password reset, not found; dates in Bengali months and digits; the app's own error messages.
+- A বাংলা / English switch in the footer and the account menu; switching reloads data. Every API call carries
+  `lang=bn` while Bengali is on.
+- Tests: `i18n.test.ts` (4), `bengali.test.tsx` (2; switch, digits, dates, `lang=bn`). Looked at in Chromium.
+
+**Decisions**
+- No i18n library: a dictionary keyed by English and a `useSyncExternalStore` hook are enough for two languages.
+
+**Known limitations**
+- Still English: the editor and publish sheet, settings, your stories, and form validation messages (authors and
+  settings screens first got the reader-facing pass). The backend has no Bengali messages yet (open item).
 
 ---
 

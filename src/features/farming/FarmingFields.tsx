@@ -1,3 +1,4 @@
+import { useT } from '../../lib/i18n'
 import { useId, useState } from 'react'
 import { SEASON_LABELS, SOIL_LABELS, seasonCalendar, type Season, type Soil } from '../../lib/agri'
 import { cx } from '../../ui/cx'
@@ -12,30 +13,31 @@ export interface Farming {
 
 /** Season (drawn as the season strip), crop, region and soil: the farming a story or question is about. */
 export function FarmingFields({ value, onChange }: { value: Farming; onChange: (changes: Partial<Farming>) => void }) {
+  const t = useT()
   return (
     <fieldset className="flex flex-col gap-4">
-      <legend className="mb-2 font-sans text-base font-semibold">Farming details</legend>
+      <legend className="mb-2 font-sans text-base font-semibold">{t('Farming details')}</legend>
       <SeasonPicker value={value.season} onChange={(season) => onChange({ season })} />
       <div className="grid gap-4 sm:grid-cols-2">
         <TextField
-          label="Crop"
+          label={t('Crop')}
           placeholder="boro rice"
           value={value.crop}
           onChange={(e) => onChange({ crop: e.target.value })}
         />
         <TextField
-          label="Region"
+          label={t('Region')}
           placeholder="rangpur"
           value={value.region}
           onChange={(e) => onChange({ region: e.target.value })}
         />
       </div>
       <Select
-        label="Soil"
+        label={t('Soil')}
         value={value.soil ?? ''}
         onChange={(soil) => onChange({ soil: (soil || undefined) as Soil | undefined })}
-        options={(Object.keys(SOIL_LABELS) as Soil[]).map((soil) => ({ value: soil, label: SOIL_LABELS[soil] }))}
-        placeholder="Any soil"
+        options={(Object.keys(SOIL_LABELS) as Soil[]).map((soil) => ({ value: soil, label: t(SOIL_LABELS[soil]) }))}
+        placeholder={t('Any soil')}
       />
     </fieldset>
   )
@@ -101,6 +103,7 @@ export function Select({
 
 /** The season strip again, as a choice: the three seasons sized by length, plus Year-round. */
 function SeasonPicker({ value, onChange }: { value?: Season; onChange: (season?: Season) => void }) {
+  const t = useT()
   const [today] = useState(() => new Date())
   const { segments, current } = seasonCalendar(today)
   const options: { season: Season; share: number }[] = [
@@ -109,7 +112,7 @@ function SeasonPicker({ value, onChange }: { value?: Season; onChange: (season?:
   ]
 
   return (
-    <div role="radiogroup" aria-label="Season" className="flex gap-2">
+    <div role="radiogroup" aria-label={t('Season')} className="flex gap-2">
       {options.map(({ season, share }) => {
         const selected = value === season
         return (
@@ -134,7 +137,7 @@ function SeasonPicker({ value, onChange }: { value?: Season; onChange: (season?:
                 selected ? 'font-semibold text-ink' : 'text-ink-muted group-hover:text-ink',
               )}
             >
-              {SEASON_LABELS[season]}
+              {t(SEASON_LABELS[season])}
               {season === current && <span className="sr-only"> (now)</span>}
             </span>
             <span

@@ -1,17 +1,20 @@
+import { useT } from '../lib/i18n'
 import { BookmarksSimple, GearSix, NotePencil, SignOut } from '@phosphor-icons/react'
 import { useEffect, useId, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useSession } from '../features/auth/session'
 import { Avatar } from '../ui/Avatar'
+import { LanguageSwitch } from './Footer'
 
 /** The signed-in reader's avatar in the top bar; opens a small panel with who is signed in and Sign out. */
 export function AccountMenu() {
+  const t = useT()
   const { user, signOut } = useSession()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const panelId = useId()
   const root = useRef<HTMLDivElement>(null)
-  const name = user?.name || 'Your account'
+  const name = user?.name || t('Your account')
 
   useEffect(() => {
     if (!open) return
@@ -40,7 +43,7 @@ export function AccountMenu() {
         type="button"
         aria-expanded={open}
         aria-controls={panelId}
-        aria-label="Account"
+        aria-label={t('Account')}
         onClick={() => setOpen((value) => !value)}
         className="flex h-11 w-11 items-center justify-center rounded-full"
       >
@@ -55,21 +58,24 @@ export function AccountMenu() {
           {user?.authorId != null && (
             <Link to="/me/stories" onClick={() => setOpen(false)} className="mt-1 flex h-11 items-center gap-2 px-4 text-sm text-ink-muted hover:bg-field hover:text-ink">
               <NotePencil size={18} aria-hidden="true" />
-              Your stories
+              {t('Your stories')}
             </Link>
           )}
           <Link to="/library" onClick={() => setOpen(false)} className="flex h-11 items-center gap-2 px-4 text-sm text-ink-muted hover:bg-field hover:text-ink">
             <BookmarksSimple size={18} aria-hidden="true" />
-            Library
+            {t('Library')}
           </Link>
           <Link to="/settings" onClick={() => setOpen(false)} className="flex h-11 items-center gap-2 px-4 text-sm text-ink-muted hover:bg-field hover:text-ink">
             <GearSix size={18} aria-hidden="true" />
-            Settings
+            {t('Settings')}
           </Link>
           <button type="button" onClick={leave} className="flex h-11 w-full items-center gap-2 px-4 text-left text-sm text-ink-muted hover:bg-field hover:text-ink">
             <SignOut size={18} aria-hidden="true" />
-            Sign out
+            {t('Sign out')}
           </button>
+          <div className="border-t border-rule px-4 pt-1">
+            <LanguageSwitch className="flex h-11 items-center text-sm text-ink-muted hover:text-ink" />
+          </div>
         </div>
       )}
     </div>

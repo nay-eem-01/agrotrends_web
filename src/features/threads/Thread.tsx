@@ -1,3 +1,4 @@
+import { useT } from '../../lib/i18n'
 import { useEffect, useId, useState, type FormEvent, type ReactNode } from 'react'
 import { useThread, useThreadReplies, useThreadWrite, type ThreadItem, type ThreadKind } from '../../api/threads'
 import { errorMessage } from '../../api/errors'
@@ -49,6 +50,7 @@ interface ThreadProps {
 
 /** Responses under a story or answers under a question: one level of replies, like Medium; owners edit and delete. */
 export function Thread({ kind, parentId, whenEmpty }: ThreadProps) {
+  const t = useT()
   const copy = COPY[kind]
   const headingId = useId()
   const { status } = useSession()
@@ -64,21 +66,21 @@ export function Thread({ kind, parentId, whenEmpty }: ThreadProps) {
   return (
     <section aria-labelledby={headingId} className="mt-14">
       <h2 id={headingId} className="text-xl">
-        {copy.heading}
+        {t(copy.heading)}
         {thread.data ? ` (${list.length + replyCount})` : ''}
       </h2>
       <div className="mt-6">
         {status === 'signed-in' ? (
-          <Composer kind={kind} parentId={parentId} placeholder={copy.placeholder} label={copy.compose} submitLabel={copy.submit} doneLabel={copy.posted} />
+          <Composer kind={kind} parentId={parentId} placeholder={t(copy.placeholder)} label={t(copy.compose)} submitLabel={t(copy.submit)} doneLabel={t(copy.posted)} />
         ) : (
           <Button variant="secondary" size="sm" onClick={() => requireSignIn(() => {})}>
-            {copy.signIn}
+            {t(copy.signIn)}
           </Button>
         )}
       </div>
       {thread.isPending ? (
         <div className="py-8 text-ink-muted">
-          <Spinner label={`Loading ${copy.heading.toLowerCase()}`} />
+          <Spinner label={t('Loading')} />
         </div>
       ) : thread.isError ? (
         <p role="alert" className="py-8 text-ink-muted">
@@ -86,7 +88,7 @@ export function Thread({ kind, parentId, whenEmpty }: ThreadProps) {
         </p>
       ) : list.length === 0 ? (
         <div className="py-8">
-          <p className="text-ink-muted">{copy.empty}</p>
+          <p className="text-ink-muted">{t(copy.empty)}</p>
           {whenEmpty}
         </div>
       ) : (
@@ -145,6 +147,7 @@ function Conversation({ kind, parentId, copy, item, replies }: ItemProps & { ite
 }
 
 function Item({ kind, parentId, copy, item, onReply }: ItemProps & { item: ThreadItem; onReply?: () => void }) {
+  const t = useT()
   const { user } = useSession()
   const own = user?.id != null && user.id === item.userId
   const [mode, setMode] = useState<'view' | 'edit' | 'confirm-delete'>('view')
@@ -152,7 +155,7 @@ function Item({ kind, parentId, copy, item, onReply }: ItemProps & { item: Threa
   const edited = new Date(item.updatedAt).getTime() - new Date(item.createdAt).getTime() > 1000
 
   return (
-    <article aria-label={`${copy.item} by ${item.authorName}`}>
+    <article aria-label={`${t(copy.item)} by ${item.authorName}`}>
       <header className="flex items-center gap-2 text-sm">
         <Avatar name={item.authorName} size={28} />
         <span className="font-medium">{item.authorName}</span>
@@ -169,7 +172,7 @@ function Item({ kind, parentId, copy, item, onReply }: ItemProps & { item: Threa
             parentId={parentId}
             editing={item.id}
             initial={item.content}
-            label={copy.edit}
+            label={t(copy.edit)}
             submitLabel="Save"
             doneLabel="Saved"
             focusOnOpen
@@ -183,17 +186,17 @@ function Item({ kind, parentId, copy, item, onReply }: ItemProps & { item: Threa
 
       {mode === 'confirm-delete' ? (
         <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
-          <span>{copy.remove}</span>
+          <span>{t(copy.remove)}</span>
           <Button
             variant="danger"
             size="sm"
             loading={remove.isPending}
             onClick={() => remove.mutate({ action: 'delete', id: item.id })}
           >
-            Delete
+            {t('Delete')}
           </Button>
           <Button variant="quiet" size="sm" onClick={() => setMode('view')}>
-            Cancel
+            {t('Cancel')}
           </Button>
           {remove.isError && (
             <span role="alert" className="text-danger">
@@ -206,16 +209,16 @@ function Item({ kind, parentId, copy, item, onReply }: ItemProps & { item: Threa
           <div className="mt-1 -ml-3 flex gap-1">
             {onReply && (
               <Button variant="quiet" size="sm" onClick={onReply}>
-                Reply
+                {t('Reply')}
               </Button>
             )}
             {own && (
               <>
                 <Button variant="quiet" size="sm" onClick={() => setMode('edit')}>
-                  Edit
+                  {t('Edit')}
                 </Button>
                 <Button variant="quiet" size="sm" onClick={() => setMode('confirm-delete')}>
-                  Delete
+                  {t('Delete')}
                 </Button>
               </>
             )}
@@ -245,6 +248,7 @@ interface ComposerProps {
 }
 
 function Composer({ kind, parentId, replyTo, editing, initial = '', placeholder, label, submitLabel, doneLabel, focusOnOpen, onCancel, onDone }: ComposerProps) {
+  const t = useT()
   const fieldId = useId()
   const write = useThreadWrite(kind, parentId)
   const [text, setText] = useState(initial)
@@ -303,7 +307,7 @@ function Composer({ kind, parentId, replyTo, editing, initial = '', placeholder,
         </Button>
         {onCancel && (
           <Button variant="quiet" size="sm" onClick={onCancel}>
-            Cancel
+            {t('Cancel')}
           </Button>
         )}
         {done && !onDone && <output className="text-sm text-paddy">{doneLabel}</output>}

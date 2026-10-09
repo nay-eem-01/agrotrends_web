@@ -2,6 +2,8 @@
 export interface LocalDraft {
   title: string
   html: string
+  /** Cover image URL, already uploaded. */
+  cover?: string
   savedAt: number
 }
 
@@ -36,6 +38,6 @@ export function clearLocalDraft(): void {
 }
 
 /** Tiptap's empty document is "<p></p>". */
-export function isBlank({ title, html }: { title: string; html: string }): boolean {
-  return !title.trim() && !html.replace(/<[^>]*>/g, '').trim() && !/<img/i.test(html)
+export function isBlank({ title, html, cover }: { title: string; html: string; cover?: string }): boolean {
+  return !title.trim() && !html.replace(/<[^>]*>/g, '').trim() && !/<img/i.test(html) && !cover
 }

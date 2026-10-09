@@ -9,20 +9,13 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 
 - New frontend, built from scratch (the old `AGROTRENDS- FrontEnd` repo is retired: it called the pre-hardening API,
   sent `userId` in URLs and called Gemini from the browser with a key).
-- Phase F0 (foundation) merged into `development`. Phase F1 (accounts) complete on `feat/accounts-base`
-  (F1.1-F1.3 also in `development`; F1.4 author profile merged into the base, PR #8).
-- Phase F2 reading, stacked on `feat/reading-base`: F2.1 home feed (`feat/home-feed`), F2.2 season strip and
-  filters (`feat/season-filters`), F2.3 story page (`feat/story-page`), F2.4 claps and bookmarks
-  (`feat/claps-bookmarks`), F2.5 responses (`feat/comments`), F2.6 topics (`feat/tag-page`), F2.8 search
-  (`feat/search`), F2.9 library (`feat/library`), F2.7 author page (`feat/author-page`, which also merges
-  `feat/accounts-base` in for F1.4's `src/api/authors.ts`). Phase F2 is complete.
+- Phases F0 (foundation), F1 (accounts) and F2 (reading) are in `development`.
+- Phase F3 writing on `feat/writing-base`: F3.1 editor done on `feat/editor`.
 
 ## Next up
 
-1. **Nayeem:** merge `feat/accounts-base` -> `development`. Open and merge, in order, into `feat/reading-base`:
-   `feat/home-feed`, `feat/season-filters`, `feat/story-page`, `feat/claps-bookmarks`, `feat/comments`,
-   `feat/tag-page`, `feat/search`, `feat/library`, `feat/author-page`.
-2. Then `feat/reading-base` -> `development`, and Phase F3 writing (`feat/writing-base`, from `development`).
+1. **Nayeem:** open and merge the F3 step PRs into `feat/writing-base` in order, then the base into `development`.
+2. F3.2 images, F3.3 publish sheet, F3.4 AI help, F3.5 my stories.
 
 ## Open items
 
@@ -33,6 +26,33 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Make `development` the default branch on GitHub and protect it | Nayeem | — |
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
+
+---
+
+## 2026-10-09 (F3.1 editor)
+
+**Done**
+- `/write` (new story) and `/write/:blogId` (edit yours), behind `RequireAuth`; readers without an author profile
+  are told publishing is for authors. A Write icon in the top bar on phones too.
+- Tiptap editor (StarterKit: headings 2-3, bold, italic, link, quote, lists; placeholder) in the `.story-body`
+  styles, so it reads as it will publish; a big Literata title (Enter moves into the story). Sticky formatting
+  toolbar with pressed states.
+- New story: autosaved to this device (`src/lib/draft.ts`) 1.2s after typing stops, restored on return. A server
+  draft (needs a category, chosen at publish, F3.3) autosaves with `PUT /api/blogs/update`, keeping category, tags,
+  farming details and cover. A published story changes only on Save changes, so half-done edits never go live.
+- `useBlogById`, `useBlogWrite` (create / update / publish / unpublish / delete) in `src/api/blogs.ts`.
+- The editor route is lazy-loaded (Tiptap is ~420 kB); the main bundle stays as before.
+- `vite.config.ts`: `API_TARGET` env points the dev proxy elsewhere (8080 was taken by another app today).
+- Tests: `editor.test.tsx` (5 cases), `draft.test.ts`. Looked at in Chromium (Playwright, signed in) at 1280 and
+  390px against the backend on 8081.
+
+**Decisions**
+- Local-first drafts: the backend needs a category to create anything, so a new story stays on the device until the
+  publish sheet.
+- Links use a native prompt for the URL (shortcut, noted in code).
+
+**Known limitations**
+- One local draft at a time.
 
 ---
 

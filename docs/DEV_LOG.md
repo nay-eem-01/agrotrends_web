@@ -11,12 +11,13 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   sent `userId` in URLs and called Gemini from the browser with a key).
 - Phases F0 (foundation), F1 (accounts) and F2 (reading) are in `development`.
 - Phase F3 writing on `feat/writing-base`: F3.1 editor (`feat/editor`), F3.2 images (`feat/images`) , F3.3
-  publish sheet (`feat/publish`) and F3.4 AI help (`feat/ai-assist`) done.
+  publish sheet (`feat/publish`) , F3.4 AI help (`feat/ai-assist`) and F3.5 my stories
+  (`feat/my-stories`) done. Phase F3 is complete.
 
 ## Next up
 
 1. **Nayeem:** open and merge the F3 step PRs into `feat/writing-base` in order, then the base into `development`.
-2. F3.5 my stories.
+2. Phase F4 questions and answers (`feat/qa-base`).
 
 ## Open items
 
@@ -27,6 +28,20 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Make `development` the default branch on GitHub and protect it | Nayeem | — |
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
+
+---
+
+## 2026-10-09 (F3.5 my stories)
+
+**Done**
+- `/me/stories` (account menu: Your stories, authors only): Drafts (`/api/blogs/me/drafts`, last edited first,
+  plus the unsaved story on this device) and Published (the author's public list). Each row: open, Edit, Delete
+  with an inline confirm that says claps and responses go too.
+- `useMyDrafts` in `src/api/blogs.ts`.
+- Tests: `mystories.test.tsx` (4 cases). Looked at in Chromium at 390px, signed in.
+
+**Decisions**
+- Readers reaching `/me/stories` are pointed to their library.
 
 ---
 

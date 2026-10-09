@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react'
+import { screen, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { clearSession } from '../../api/client'
@@ -84,6 +84,6 @@ test('visitors are asked to sign in', async () => {
 
   await userEvent.type(screen.getByLabelText('Your question'), 'Blast?')
   await userEvent.click(screen.getByRole('button', { name: 'Sign in to ask' }))
-  expect(screen.getByTestId('path')).toHaveTextContent('/sign-in?next=%2Fadvisor')
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/sign-in?next=%2Fadvisor'))
   expect(api).not.toHaveBeenCalled()
 })

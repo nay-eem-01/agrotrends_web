@@ -1,4 +1,6 @@
+import { Suspense } from 'react'
 import { Outlet } from 'react-router-dom'
+import { Spinner } from '../ui/Spinner'
 import { Footer } from './Footer'
 import { TopBar } from './TopBar'
 
@@ -10,7 +12,15 @@ export function AppLayout() {
       </a>
       <TopBar />
       <main id="main" className="flex-1">
-        <Outlet />
+        <Suspense
+          fallback={
+            <div className="flex justify-center py-24 text-ink-muted">
+              <Spinner label="Loading page" />
+            </div>
+          }
+        >
+          <Outlet />
+        </Suspense>
       </main>
       <Footer />
     </div>

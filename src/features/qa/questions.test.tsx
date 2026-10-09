@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react'
+import { screen, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { clearSession } from '../../api/client'
@@ -44,13 +44,13 @@ test('the season strip and filters stay on the questions page', async () => {
 
   expect(await screen.findByRole('heading', { name: 'No questions match these filters' })).toBeInTheDocument()
   await userEvent.click(within(screen.getByRole('navigation', { name: 'Crop seasons' })).getByRole('link', { name: /Kharif-1/ }))
-  expect(screen.getByTestId('path')).toHaveTextContent('/questions?crop=jute&season=KHARIF_1')
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/questions?crop=jute&season=KHARIF_1'))
   const last = new URL(String(api.mock.calls.at(-1)![0]), 'http://x')
   expect(last.searchParams.get('season')).toBe('KHARIF_1')
   expect(last.searchParams.get('crop')).toBe('jute')
 
   await userEvent.click(screen.getByRole('link', { name: 'Remove filter crop jute' }))
-  expect(screen.getByTestId('path')).toHaveTextContent('/questions?season=KHARIF_1')
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/questions?season=KHARIF_1'))
 })
 
 test('more questions load on request', async () => {

@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react'
+import { screen, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { clearSession } from '../../api/client'
@@ -57,7 +57,7 @@ test('choosing a season filters the stories, and choosing it again clears it', a
   await userEvent.click(within(strip).getByRole('link', { name: /Kharif-2/ }))
 
   expect(await screen.findByRole('link', { name: 'Aman transplanting' })).toBeInTheDocument()
-  expect(screen.getByTestId('path')).toHaveTextContent('/?season=KHARIF_2')
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/?season=KHARIF_2'))
   const sent = query(api, '/api/blogs/all')[0]
   expect(sent.get('season')).toBe('KHARIF_2')
   expect(sent.get('sortBy')).toBe('creationDate')
@@ -66,7 +66,7 @@ test('choosing a season filters the stories, and choosing it again clears it', a
   expect(screen.getByRole('link', { name: 'Latest' })).not.toHaveAttribute('aria-current')
 
   await userEvent.click(within(strip).getByRole('link', { name: /Kharif-2/ }))
-  expect(screen.getByTestId('path')).toHaveTextContent(/^\/$/)
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent(/^\/$/))
 })
 
 test('crop, region and soil filters combine with the season', async () => {
@@ -80,7 +80,7 @@ test('crop, region and soil filters combine with the season', async () => {
   await userEvent.selectOptions(screen.getByLabelText('Soil'), 'Clay loam')
   await userEvent.click(screen.getByRole('button', { name: 'Show stories' }))
 
-  expect(screen.getByTestId('path')).toHaveTextContent('/?crop=boro+rice&season=RABI&region=Rangpur&soil=CLAY_LOAM')
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/?crop=boro+rice&season=RABI&region=Rangpur&soil=CLAY_LOAM'))
   const last = query(api, '/api/blogs/all').at(-1)!
   expect(Object.fromEntries(['crop', 'season', 'region', 'soil'].map((key) => [key, last.get(key)]))).toEqual({
     crop: 'boro rice',
@@ -96,7 +96,7 @@ test('active filters can be removed one at a time', async () => {
   await screen.findByRole('link', { name: 'Story 4' })
 
   await userEvent.click(screen.getByRole('link', { name: 'Remove filter soil Sandy' }))
-  expect(screen.getByTestId('path')).toHaveTextContent('/?crop=jute')
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/?crop=jute'))
   expect(screen.queryByRole('link', { name: 'Clear all' })).not.toBeInTheDocument()
 })
 
@@ -108,6 +108,6 @@ test('crop and season chips on a story are filters', async () => {
   renderWithProviders(<App />, '/')
 
   await userEvent.click(await screen.findByRole('link', { name: 'Stories about jute' }))
-  expect(screen.getByTestId('path')).toHaveTextContent('/?crop=jute')
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/?crop=jute'))
   expect(await screen.findByRole('heading', { name: 'No stories match these filters' })).toBeInTheDocument()
 })

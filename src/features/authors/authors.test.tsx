@@ -56,7 +56,7 @@ test('a visitor following an author is sent to sign-in', async () => {
   renderWithProviders(<App />, '/authors/3')
 
   await userEvent.click(await screen.findByRole('button', { name: 'Follow Rahim Uddin' }))
-  expect(screen.getByTestId('path')).toHaveTextContent('/sign-in?next=%2Fauthors%2F3')
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/sign-in?next=%2Fauthors%2F3'))
 })
 
 test('following updates the count at once and survives the reload', async () => {

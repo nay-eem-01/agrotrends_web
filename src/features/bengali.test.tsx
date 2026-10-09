@@ -46,6 +46,6 @@ test('the choice is remembered', async () => {
   setLang('bn')
   mockApi({ 'GET /api/questions/all': () => envelope(200, page([])) })
   renderWithProviders(<App />, '/questions')
-  expect(screen.getByRole('heading', { level: 1, name: 'প্রশ্ন' })).toBeInTheDocument()
+  expect(await screen.findByRole('heading', { level: 1, name: 'প্রশ্ন' })).toBeInTheDocument()
   expect(await screen.findByRole('heading', { name: 'এখনো কোনো প্রশ্ন নেই' })).toBeInTheDocument()
 })

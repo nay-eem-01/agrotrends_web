@@ -42,7 +42,7 @@ test('visitors see the clap count and are sent to sign-in to clap or save', asyn
   const [clap] = await screen.findAllByRole('button', { name: /^Sign in to clap/ })
   expect(clap).toHaveTextContent('10')
   await userEvent.click(clap)
-  expect(screen.getByTestId('path')).toHaveTextContent('/sign-in?next=%2Fstories%2Frice-blast')
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/sign-in?next=%2Fstories%2Frice-blast'))
   expect(calls(api, 'GET', '/api/blogs/id/')).toHaveLength(0)
 })
 

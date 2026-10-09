@@ -14,13 +14,13 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   publish sheet (`feat/publish`) , F3.4 AI help (`feat/ai-assist`) and F3.5 my stories
   (`feat/my-stories`) done. Phase F3 is complete.
 - Phase F4 questions and answers on `feat/qa-base` (stacked on F3's tip, as F3 isn't in `development` yet):
-  F4.1 questions list (`feat/questions`) , F4.2 question page (`feat/question-page`) and F4.3 ask
-  (`feat/ask`) done.
+  F4.1 questions list (`feat/questions`) , F4.2 question page (`feat/question-page`) , F4.3 ask
+  (`feat/ask`) and F4.4 AI draft answer (`feat/ai-draft-answer`) done. Phase F4 is complete.
 
 ## Next up
 
 1. **Nayeem:** open and merge the F3 step PRs into `feat/writing-base` in order, then the base into `development`.
-2. F4.4 AI draft answer.
+2. Phase F5 AI advisor (`feat/ai-base`).
 
 ## Open items
 
@@ -32,6 +32,21 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Make `development` the default branch on GitHub and protect it | Nayeem | — |
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
+
+---
+
+## 2026-10-09 (F4.4 AI draft answer)
+
+**Done**
+- A question with no answers offers "See an AI draft answer" (`POST /api/questions/{id}/ai-draft`; visitors sign in
+  first). The draft shows in a dashed panel with the backend's label ("AI-generated..."), the answer, its sources
+  and "Not posted"; it is never saved as an answer.
+- `features/ai/Sources.tsx`: cited stories as numbered links; `/s/:blogId` (`StoryById`) looks a story up by id and
+  goes to its slug, since AI sources carry ids only. F5 reuses both.
+- Tests: `qa/ai-draft.test.tsx` (4 cases).
+
+**Known limitations**
+- Not seen working live: Gemini answers 503 locally (open item). The 503 message path is covered.
 
 ---
 

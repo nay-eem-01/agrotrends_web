@@ -166,3 +166,8 @@ test('a failed early refresh still sends the request', async () => {
   await expect(api('/api/blogs/all')).resolves.toBe('ok')
   expect(fetchMock).toHaveBeenCalledTimes(2)
 })
+
+test('a 503 keeps its message, which says what is unavailable', async () => {
+  fetchMock.mockResolvedValueOnce(envelope(503, null, 'The AI advisor is not available right now. Please try again later.'))
+  await expect(api('/api/ai/chat')).rejects.toMatchObject({ status: 503, message: 'The AI advisor is not available right now. Please try again later.' })
+})

@@ -1,4 +1,4 @@
-import { BookmarksSimple, GearSix, SignOut } from '@phosphor-icons/react'
+import { BookmarksSimple, GearSix, NotePencil, SignOut } from '@phosphor-icons/react'
 import { useEffect, useId, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useSession } from '../features/auth/session'
@@ -52,7 +52,13 @@ export function AccountMenu() {
             <p className="truncate font-medium">{name}</p>
             {user?.email && <p className="truncate text-sm text-ink-muted">{user.email}</p>}
           </div>
-          <Link to="/library" onClick={() => setOpen(false)} className="mt-1 flex h-11 items-center gap-2 px-4 text-sm text-ink-muted hover:bg-field hover:text-ink">
+          {user?.authorId != null && (
+            <Link to="/me/stories" onClick={() => setOpen(false)} className="mt-1 flex h-11 items-center gap-2 px-4 text-sm text-ink-muted hover:bg-field hover:text-ink">
+              <NotePencil size={18} aria-hidden="true" />
+              Your stories
+            </Link>
+          )}
+          <Link to="/library" onClick={() => setOpen(false)} className="flex h-11 items-center gap-2 px-4 text-sm text-ink-muted hover:bg-field hover:text-ink">
             <BookmarksSimple size={18} aria-hidden="true" />
             Library
           </Link>

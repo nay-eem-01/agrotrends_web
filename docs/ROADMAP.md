@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend
 
-**Progress:** 33 of 36 steps done
+**Progress:** 34 of 36 steps done
 
 ---
 
@@ -80,7 +80,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 | F6.2 | Dark theme | ✅ |
 | F6.3 | Accessibility pass (keyboard, focus, contrast, screen-reader labels) | ✅ |
 | F6.4 | Playwright smoke tests against a running backend | ✅ |
-| F6.5 | Performance: route-level code splitting, image sizes, Lighthouse budget | ⬜ |
+| F6.5 | Performance: route-level code splitting, image sizes, Lighthouse budget | ✅ |
 | F6.6 | Admin: categories (create / edit / delete) | ⬜ |
 | F6.7 | Notifications bell (needs backend Phase 5) | ⏸ |
 

@@ -90,3 +90,17 @@ function sendBlogWrite(write: BlogWrite): Promise<BlogResponse | null> {
       return api<BlogResponse>(`/api/blogs/id/${write.blogId}/${write.kind}`, { method: 'POST' })
   }
 }
+
+/** The author's own drafts, most recently edited first. */
+export function useMyDrafts() {
+  return useInfiniteQuery({
+    queryKey: ['blogs', 'drafts'],
+    queryFn: ({ pageParam, signal }) =>
+      api<Page<BlogResponse>>('/api/blogs/me/drafts', {
+        params: { pageNo: pageParam, pageSize: 20, sortBy: 'lastModifiedDate', ascOrDesc: 'desc' },
+        signal,
+      }),
+    initialPageParam: 0,
+    getNextPageParam: (page) => (page.last ? undefined : page.number + 1),
+  })
+}

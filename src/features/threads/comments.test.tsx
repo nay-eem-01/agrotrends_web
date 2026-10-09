@@ -2,13 +2,23 @@ import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { clearSession } from '../../api/client'
-import type { CommentResponse } from '../../api/comments'
 import type { BlogResponse } from '../../api/types'
 import App from '../../App'
 import { envelope, mockApi, page } from '../../test/api'
 import { renderWithProviders } from '../../test/render'
 
 const story: BlogResponse = { id: 402, slug: 'rice-blast', title: 'Rice blast', content: '<p>Body.</p>', author: { authorId: 1, name: 'Nasrin' }, status: 'PUBLISHED', agri: {} }
+
+interface CommentResponse {
+  commentId: number
+  blogId: number
+  parentCommentId: number | null
+  userId: number
+  authorName: string
+  content: string
+  createdAt: string
+  updatedAt: string
+}
 
 function comment(commentId: number, overrides: Partial<CommentResponse> = {}): CommentResponse {
   return {

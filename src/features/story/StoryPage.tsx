@@ -13,8 +13,8 @@ import { useSession } from '../auth/session'
 import { BookmarkButton } from '../reactions/BookmarkButton'
 import { ClapButton } from '../reactions/ClapButton'
 import { WrittenBy } from '../authors/AuthorPage'
-import { Responses } from '../comments/Responses'
 import { NotFoundPage } from '../errors/NotFoundPage'
+import { Thread } from '../threads/Thread'
 
 export function StoryPage() {
   const { slug = '' } = useParams()
@@ -93,7 +93,7 @@ function Story({ story }: { story: BlogResponse }) {
         <StoryFooter story={story} />
         <StoryActions story={story} />
         {author?.authorId != null && <WrittenBy authorId={author.authorId} fallbackName={author.name ?? ''} />}
-        {story.id != null && story.status === 'PUBLISHED' && <Responses blogId={story.id} />}
+        {story.id != null && story.status === 'PUBLISHED' && <Thread kind="comments" parentId={story.id} />}
       </div>
     </article>
   )

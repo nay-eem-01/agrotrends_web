@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend
 
-**Progress:** 22 of 36 steps done
+**Progress:** 26 of 36 steps done
 
 ---
 
@@ -59,10 +59,10 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 | # | Step | Status |
 |---|---|---|
-| F4.1 | Questions list with crop / season / region / soil filters | ⬜ |
-| F4.2 | Question page: answers and replies; answer, edit, delete own | ⬜ |
-| F4.3 | Ask a question (with agri metadata) | ⬜ |
-| F4.4 | AI draft answer for unanswered questions, clearly labelled | ⬜ |
+| F4.1 | Questions list with crop / season / region / soil filters | ✅ |
+| F4.2 | Question page: answers and replies; answer, edit, delete own | ✅ |
+| F4.3 | Ask a question (with agri metadata) | ✅ |
+| F4.4 | AI draft answer for unanswered questions, clearly labelled | ✅ |
 
 ## Phase F5 — AI advisor (`feat/ai-base`)
 
@@ -90,6 +90,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 |---|---|---|
 | "Followed by me" per tag (or a larger followed-tags read) | exact Follow state past the 100 most recent follows (F2.6) | ⏸ |
 | "Saved by me" per story (`bookmarkedByMe` on `BlogResponse`, or `GET /api/blogs/id/{id}/bookmark`) | exact saved state past the 100 most recent saves (F2.4) | ⏸ |
+| Answers: `/api/answers/question/{id}` also returns replies and `AnswerResponse` has no `parentAnswerId` | the client filters replies out of the answer list (F4.2) | ⏸ |
 | Comments: `CommentResponse` in the OpenAPI document and a reply count per comment (or replies nested) | typed comments without a hand-written type; one request per story instead of one per thread (F2.5) | ⏸ |
 | `GET /api/authors/me` and `authorId` on `UserResponse` | F1.4 | ✅ (backend `feat/author-me`) |
 | Public GET access to published content | anonymous reading (F2) | ✅ backend 2.13 |

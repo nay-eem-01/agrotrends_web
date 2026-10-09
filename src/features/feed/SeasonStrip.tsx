@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { filterPath, readAgriFilters, seasonCalendar, SEASON_LABELS } from '../../lib/agri'
 import { cx } from '../../ui/cx'
 
@@ -11,6 +11,7 @@ export function SeasonStrip() {
   // Read once per visit; the season changes four times a year, not while the page is open.
   const [today] = useState(() => new Date())
   const [params] = useSearchParams()
+  const { pathname } = useLocation()
   const filters = readAgriFilters(params)
   const { segments, current, position } = seasonCalendar(today)
   // Today's place within the current band, 0-1.
@@ -28,7 +29,7 @@ export function SeasonStrip() {
             return (
               <li key={segment.season} style={{ flexGrow: segment.share, flexBasis: 0 }} className="min-w-0">
                 <Link
-                  to={filterPath(selected ? withoutSeason : { ...filters, season: segment.season })}
+                  to={filterPath(selected ? withoutSeason : { ...filters, season: segment.season }, pathname)}
                   aria-current={selected ? 'true' : undefined}
                   className="group flex flex-col gap-1.5 pt-3 pb-3 pr-2"
                 >

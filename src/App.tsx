@@ -8,10 +8,14 @@ import { SignInPage } from './features/auth/SignInPage'
 import { SignUpPage } from './features/auth/SignUpPage'
 import { LibraryPage } from './features/library/LibraryPage'
 import { MyStoriesPage } from './features/mystories/MyStoriesPage'
+import { AskPage } from './features/qa/AskPage'
+import { QuestionPage } from './features/qa/QuestionPage'
+import { QuestionsPage } from './features/qa/QuestionsPage'
 import { NotFoundPage } from './features/errors/NotFoundPage'
 import { HomePage } from './features/home/HomePage'
 import { SettingsPage } from './features/settings/SettingsPage'
 import { SearchPage } from './features/search/SearchPage'
+import { StoryById } from './features/story/StoryById'
 import { StoryPage } from './features/story/StoryPage'
 import { TagPage } from './features/topics/TagPage'
 import { TopicsPage } from './features/topics/TopicsPage'
@@ -39,8 +43,11 @@ export default function App() {
       <Route element={<AppLayout />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/stories/:slug" element={<StoryPage />} />
+        <Route path="/s/:blogId" element={<StoryById />} />
         <Route path="/authors/:authorId" element={<AuthorPage />} />
         <Route path="/tags/:tagName" element={<TagPage />} />
+        <Route path="/questions" element={<QuestionsPage />} />
+        <Route path="/questions/:questionId" element={<QuestionPage />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/topics" element={<TopicsPage />} />
         <Route path="/sign-in" element={<SignInPage />} />
@@ -50,6 +57,8 @@ export default function App() {
         <Route element={<RequireAuth />}>
           <Route path="/write" element={editor} />
           <Route path="/write/:blogId" element={editor} />
+          <Route path="/questions/ask" element={<AskPage />} />
+          <Route path="/questions/:questionId/edit" element={<AskPage />} />
           <Route path="/me/stories" element={<MyStoriesPage />} />
           <Route path="/library" element={<LibraryPage />} />
           <Route path="/settings" element={<SettingsPage />} />

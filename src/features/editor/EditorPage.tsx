@@ -1,16 +1,33 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useBlogById, useBlogWrite } from '../../api/blogs'
 import { ApiError, errorMessage } from '../../api/errors'
 import type { BlogResponse } from '../../api/types'
-import { loadLocalDraft, saveLocalDraft } from '../../lib/draft'
+import { clearLocalDraft, isBlank, loadLocalDraft, saveLocalDraft } from '../../lib/draft'
 import { Button, ButtonLink } from '../../ui/Button'
 import { Spinner } from '../../ui/Spinner'
 import { useSession } from '../auth/session'
 import { NotFoundPage } from '../errors/NotFoundPage'
+import { PublishSheet, type PublishAction, type StoryDetails } from './PublishSheet'
 import { StoryEditor } from './StoryEditor'
 
 const AUTOSAVE_DELAY = 1200
+
+const hasText = (html: string) => html.replace(/<[^>]*>/g, '').trim() !== '' || /<img/i.test(html)
+
+function detailsOf(story?: BlogResponse): StoryDetails {
+  const agri = story?.agri ?? {}
+  return { categoryId: story?.category?.id, tags: story?.tags ?? [], crop: agri.crop ?? '', season: agri.season, region: agri.region ?? '', soil: agri.soil }
+}
+
+/** The request fields the publish sheet controls. Empty farming details are sent as absent. */
+function detailFields(details: StoryDetails) {
+  return {
+    categoryId: details.categoryId ?? 0,
+    tags: details.tags,
+    agri: { crop: details.crop || undefined, season: details.season, region: details.region || undefined, soil: details.soil },
+  }
+}
 
 /** `/write` starts a story; `/write/:blogId` edits one of yours. Authors only (RequireAuth handles visitors). */
 export function EditorPage() {
@@ -72,11 +89,41 @@ function NewStory() {
   const [savedAt, setSavedAt] = useState(draft.savedAt)
   const content = { title: draft.title, html: draft.html, cover: draft.cover }
   useAutosave(JSON.stringify(content), () => setSavedAt(saveLocalDraft(content).savedAt), true)
+  const [sheetOpen, setSheetOpen] = useState(false)
+  const write = useBlogWrite()
+  const navigate = useNavigate()
+  const ready = draft.title.trim() !== '' && hasText(draft.html)
+
+  function submit(details: StoryDetails, action: PublishAction) {
+    const status = action === 'publish' ? 'PUBLISHED' : 'DRAFT'
+    write.mutate(
+      { kind: 'create', request: { ...detailFields(details), title: draft.title.trim(), content: draft.html, imageUrl: draft.cover || undefined, status } },
+      {
+        onSuccess: (story) => {
+          clearLocalDraft()
+          navigate(status === 'PUBLISHED' ? `/stories/${story?.slug}` : `/write/${story?.id}`, { replace: true, state: { notice: status === 'PUBLISHED' ? 'Published' : 'Draft saved' } })
+        },
+      },
+    )
+  }
 
   return (
     <Page>
       <title>New story – AgroTrends</title>
-      <StatusBar status={savedAt ? 'Draft saved on this device' : 'New story'} />
+      <StatusBar status={savedAt && !isBlank(content) ? 'Draft saved on this device' : 'New story'}>
+        <Button size="sm" disabled={!ready} title={ready ? undefined : 'Add a title and some text first'} onClick={() => setSheetOpen(true)}>
+          Publish
+        </Button>
+      </StatusBar>
+      <PublishSheet
+        open={sheetOpen}
+        mode="new"
+        initial={detailsOf()}
+        busy={write.isPending}
+        error={write.isError ? errorMessage(write.error) : null}
+        onSubmit={submit}
+        onClose={() => setSheetOpen(false)}
+      />
       <StoryEditor
         title={draft.title}
         html={draft.html}
@@ -120,25 +167,35 @@ function StoryForm({ story }: { story: BlogResponse }) {
   const [html, setHtml] = useState(story.content ?? '')
   const [cover, setCover] = useState(story.imageUrl ?? '')
   const [dirty, setDirty] = useState(false)
+  const [sheetOpen, setSheetOpen] = useState(false)
+  const sheetWrite = useBlogWrite()
+  const navigate = useNavigate()
   const published = story.status === 'PUBLISHED'
+  const blogId = story.id ?? 0
+  const notice = (useLocation().state as { notice?: string } | null)?.notice
+
+  function request(details: StoryDetails) {
+    return { blogId, title: title.trim(), content: html, imageUrl: cover || undefined, ...detailFields(details) }
+  }
 
   function save(quiet: boolean) {
-    if (!title.trim() || !html.replace(/<[^>]*>/g, '').trim()) return
-    write.mutate(
+    if (!title.trim() || !hasText(html)) return
+    write.mutate({ kind: 'update', quiet, request: request(detailsOf(story)) }, { onSuccess: () => setDirty(false) })
+  }
+
+  function submit(details: StoryDetails, action: PublishAction) {
+    if (action === 'unpublish') {
+      return sheetWrite.mutate({ kind: 'unpublish', blogId }, { onSuccess: () => setSheetOpen(false) })
+    }
+    sheetWrite.mutate(
+      { kind: 'update', request: request(details) },
       {
-        kind: 'update',
-        quiet,
-        request: {
-          blogId: story.id ?? 0,
-          title: title.trim(),
-          content: html,
-          categoryId: story.category?.id ?? 0,
-          imageUrl: cover || undefined,
-          tags: story.tags,
-          agri: story.agri,
+        onSuccess: () => {
+          setDirty(false)
+          if (action !== 'publish') return setSheetOpen(false)
+          sheetWrite.mutate({ kind: 'publish', blogId }, { onSuccess: (live) => navigate(`/stories/${live?.slug ?? story.slug}`, { state: { notice: 'Published' } }) })
         },
       },
-      { onSuccess: () => setDirty(false) },
     )
   }
   useAutosave(`${title}\u0000${html}\u0000${cover}`, () => save(true), !published)
@@ -155,7 +212,7 @@ function StoryForm({ story }: { story: BlogResponse }) {
           ? 'Published'
           : write.isSuccess
             ? 'Draft saved'
-            : 'Draft'
+            : (notice ?? 'Draft')
 
   return (
     <Page>
@@ -166,7 +223,19 @@ function StoryForm({ story }: { story: BlogResponse }) {
             Save changes
           </Button>
         )}
+        <Button size="sm" variant={published ? 'secondary' : 'primary'} onClick={() => setSheetOpen(true)}>
+          {published ? 'Details' : 'Publish'}
+        </Button>
       </StatusBar>
+      <PublishSheet
+        open={sheetOpen}
+        mode={published ? 'published' : 'draft'}
+        initial={detailsOf(story)}
+        busy={sheetWrite.isPending}
+        error={sheetWrite.isError ? errorMessage(sheetWrite.error) : null}
+        onSubmit={submit}
+        onClose={() => setSheetOpen(false)}
+      />
       <StoryEditor
         title={title}
         html={html}

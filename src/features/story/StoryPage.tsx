@@ -1,10 +1,11 @@
-import { Link, useParams } from 'react-router-dom'
+import { Link, useLocation, useParams } from 'react-router-dom'
 import { useStory } from '../../api/blogs'
 import { ApiError, errorMessage } from '../../api/errors'
 import type { BlogResponse } from '../../api/types'
 import { filterPath, SEASON_LABELS, SOIL_LABELS } from '../../lib/agri'
 import { storyDate } from '../../lib/dates'
 import { Avatar } from '../../ui/Avatar'
+import { ButtonLink } from '../../ui/Button'
 import { Chip } from '../../ui/Chip'
 import { SafeHtml } from '../../ui/SafeHtml'
 import { Spinner } from '../../ui/Spinner'
@@ -41,12 +42,16 @@ export function StoryPage() {
 
 function Story({ story }: { story: BlogResponse }) {
   const author = story.author
+  const notice = (useLocation().state as { notice?: string } | null)?.notice
+  const { user } = useSession()
+  const own = user?.authorId != null && user.authorId === author?.authorId
   const meta = [story.readingTimeMinutes ? `${story.readingTimeMinutes} min read` : null, storyDate(story.publishedAt)].filter(Boolean)
 
   return (
     <article className="pb-20">
       <title>{`${story.title} – AgroTrends`}</title>
       <header className="mx-auto max-w-(--container-feed) px-4 pt-10 sm:px-6 sm:pt-14">
+        {notice && <output className="mb-4 block w-fit rounded-full bg-paddy px-3 py-1 text-sm text-paper">{notice}</output>}
         {story.status === 'DRAFT' && (
           <p className="mb-4 inline-block rounded-full bg-field px-3 py-1 text-sm text-ink">Draft — only you can see this</p>
         )}
@@ -67,6 +72,11 @@ function Story({ story }: { story: BlogResponse }) {
                 )}
               </p>
             </div>
+            {own && (
+              <ButtonLink to={`/write/${story.id}`} variant="secondary" size="sm" className="ml-auto">
+                Edit story
+              </ButtonLink>
+            )}
           </div>
         )}
         <StoryActions story={story} />

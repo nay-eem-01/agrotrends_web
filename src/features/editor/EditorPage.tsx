@@ -8,6 +8,7 @@ import { Button, ButtonLink } from '../../ui/Button'
 import { Spinner } from '../../ui/Spinner'
 import { useSession } from '../auth/session'
 import { NotFoundPage } from '../errors/NotFoundPage'
+import { toAgri } from '../farming/FarmingFields'
 import { PublishSheet, type PublishAction, type StoryDetails } from './PublishSheet'
 import { StoryEditor } from './StoryEditor'
 
@@ -25,7 +26,7 @@ function detailFields(details: StoryDetails) {
   return {
     categoryId: details.categoryId ?? 0,
     tags: details.tags,
-    agri: { crop: details.crop || undefined, season: details.season, region: details.region || undefined, soil: details.soil },
+    agri: toAgri(details),
   }
 }
 

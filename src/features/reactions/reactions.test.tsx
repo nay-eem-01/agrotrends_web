@@ -39,10 +39,10 @@ test('visitors see the clap count and are sent to sign-in to clap or save', asyn
   const api = mockApi({ 'GET /api/blogs/slug/rice-blast': () => envelope(200, story) })
   renderWithProviders(<App />, '/stories/rice-blast')
 
-  const [clap] = await screen.findAllByRole('button', { name: 'Sign in to clap' })
+  const [clap] = await screen.findAllByRole('button', { name: /^Sign in to clap/ })
   expect(clap).toHaveTextContent('10')
   await userEvent.click(clap)
-  expect(screen.getByTestId('path')).toHaveTextContent('/sign-in?next=%2Fstories%2Frice-blast')
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/sign-in?next=%2Fstories%2Frice-blast'))
   expect(calls(api, 'GET', '/api/blogs/id/')).toHaveLength(0)
 })
 
@@ -61,7 +61,7 @@ test('a burst of claps is sent as one request', async () => {
   })
   renderWithProviders(<App />, '/stories/rice-blast')
 
-  const [clap] = await screen.findAllByRole('button', { name: 'Clap for this story' })
+  const [clap] = await screen.findAllByRole('button', { name: /^Clap for this story/ })
   await waitFor(() => expect(clap).toHaveTextContent('12'))
   await userEvent.click(clap)
   await userEvent.click(clap)
@@ -83,7 +83,7 @@ test('holding the clap button keeps clapping', async () => {
   })
   renderWithProviders(<App />, '/stories/rice-blast')
 
-  const [clap] = await screen.findAllByRole('button', { name: 'Clap for this story' })
+  const [clap] = await screen.findAllByRole('button', { name: /^Clap for this story/ })
   fireEvent.pointerDown(clap)
   await new Promise((resolve) => setTimeout(resolve, 700))
   fireEvent.pointerUp(clap)
@@ -104,11 +104,11 @@ test('claps stop at 50', async () => {
   })
   renderWithProviders(<App />, '/stories/rice-blast')
 
-  const [clap] = await screen.findAllByRole('button', { name: 'Clap for this story' })
+  const [clap] = await screen.findAllByRole('button', { name: /^Clap for this story/ })
   await waitFor(() => expect(clap).toHaveTextContent('60'))
   await userEvent.click(clap)
   expect(clap).toBeDisabled()
-  expect(clap).toHaveAccessibleName('You gave this story 50 claps')
+  expect(clap).toHaveAccessibleName(/^You gave this story 50 claps, 61/)
 })
 
 test('an author cannot clap their own story', async () => {

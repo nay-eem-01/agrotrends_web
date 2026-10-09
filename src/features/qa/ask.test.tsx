@@ -24,10 +24,10 @@ beforeEach(() => {
 
 afterEach(() => vi.unstubAllGlobals())
 
-test('asking needs sign-in', () => {
+test('asking needs sign-in', async () => {
   mockApi({})
   renderWithProviders(<App />, '/questions/ask')
-  expect(screen.getByTestId('path')).toHaveTextContent('/sign-in?next=%2Fquestions%2Fask')
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/sign-in?next=%2Fquestions%2Fask'))
 })
 
 test('a question is checked, posted with its farming details and opened', async () => {

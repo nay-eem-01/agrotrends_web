@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { clearSession } from '../../api/client'
@@ -47,8 +47,8 @@ test('no history says what will appear', async () => {
   expect(await screen.findByText(/What you ask the advisor is kept here/)).toBeInTheDocument()
 })
 
-test('history needs sign-in', () => {
+test('history needs sign-in', async () => {
   mockApi({})
   renderWithProviders(<App />, '/advisor/history')
-  expect(screen.getByTestId('path')).toHaveTextContent('/sign-in?next=%2Fadvisor%2Fhistory')
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/sign-in?next=%2Fadvisor%2Fhistory'))
 })

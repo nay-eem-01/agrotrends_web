@@ -18,22 +18,133 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   (`feat/ask`) and F4.4 AI draft answer (`feat/ai-draft-answer`) done. Phase F4 is complete.
 - Phase F5 AI advisor on `feat/ai-base` (stacked on F4): F5.1 advisor (`feat/advisor`) , F5.2 history (`feat/advisor-history`) and F5.3 related stories
   (`feat/related`) done. Phase F5 is complete.
+- Phase F6 polish on `feat/polish-base` (stacked on F5): F6.1 Bengali interface (`feat/bengali`) , F6.2 dark theme
+  (`feat/dark-theme`) , F6.3 accessibility (`feat/a11y`) , F6.4 smoke tests
+  (`feat/e2e`) , F6.5 performance (`feat/perf`) and F6.6 admin categories
+  (`feat/admin-categories`) done. Only F6.7 notifications remains; it waits for the backend's notifications API.
 
 ## Next up
 
 1. **Nayeem:** open and merge the F3 step PRs into `feat/writing-base` in order, then the base into `development`.
-2. Phase F6 polish (`feat/polish-base`).
+2. F6.7 notifications once the backend has them (backend Phase 5).
 
 ## Open items
 
 | Item | Needs | Blocks |
 |---|---|---|
 | The answers list also returns replies, with no parent field; the page drops anything that is someone's reply | backend | — |
+| The backend takes `lang` but has no Bengali messages yet, so its errors stay English in the Bengali interface | backend: message files | — |
 | Comment endpoints aren't typed in OpenAPI and have no reply counts: `CommentResponse` is hand-written and every thread is fetched | backend | — |
 | No per-story "saved by me": the app reads the 100 most recent saves to mark Save buttons | backend: `bookmarkedByMe` | exact saved state for heavy savers |
 | Make `development` the default branch on GitHub and protect it | Nayeem | — |
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
+
+---
+
+## 2026-10-09 (F6.6 admin categories)
+
+**Done**
+- `/admin/categories` (account menu: Categories, for staff): add (`POST /api/categories/create?categoryName=`),
+  rename (`PUT .../update/categoryId/{id}`, raw text body) and delete (inline confirm) categories; duplicate names
+  are caught before sending; the backend's 403 shows when a permission is missing.
+- Staff sign in on `/api/admin/sign-in` from the same page (the regular sign-in refuses admin accounts); a reader
+  there is told their account has no admin access. Staff = any role besides USER (`isAdmin`); the backend checks
+  each permission.
+- `src/api/client.ts`: a `text` option sends a text/plain body (only the rename needs it).
+- Tests: `admin/admin.test.tsx` (3 cases). Live: admin sign-in refuses a regular account, and create answers 403
+  for it.
+
+**Known limitations**
+- Not run end to end as an admin: the local super admin's password was generated at first start and isn't known
+  here. Deleting a category that has stories may fail on the backend; its message is shown.
+
+---
+
+## 2026-10-09 (F6.5 performance)
+
+**Done**
+- Every page except home and the story page is lazy-loaded (`page()` in `App.tsx`, one Suspense in `AppLayout`);
+  main JS 495 -> 335 kB (150 -> 106 kB gzip). Tests that open a lazy page now wait for it (`findBy` / `waitFor`).
+- Images: story cover `fetchpriority="high"`; card covers and avatars `loading="lazy"`, all `decoding="async"`.
+- `public/robots.txt` (the preview served the app for it, failing Lighthouse SEO).
+- Lighthouse on a production build: performance 85 (home) / 89 (questions), accessibility, best practices and SEO
+  100. Budget recorded in `docs/DESIGN.md`.
+
+**Known limitations**
+- LCP 3.2s on simulated slow 4G: the page is client-rendered, so the headline waits for JS. Server rendering or
+  prerendering the home page would be the next step if it matters.
+- Text compression is the production server's job (`vite preview` doesn't gzip).
+
+---
+
+## 2026-10-09 (F6.4 Playwright smoke tests)
+
+**Done**
+- `npm run e2e` (`@playwright/test`, `playwright.config.ts`, `e2e/smoke.spec.ts`): starts the dev server on 5174
+  with `API_TARGET`, then: a visitor reads the feed and opens a story; questions, search and the advisor load; the
+  Bengali switch works both ways; signed in, an author writes, publishes and deletes a story, and asks and deletes a
+  question (both clean up after themselves).
+- Signed-in tests need `E2E_EMAIL` / `E2E_PASSWORD` and are skipped otherwise. `PW_CHANNEL=chrome` uses the
+  installed Chrome; without it, `npx playwright install chromium` once.
+- Vitest now only collects `src/**/*.test.*`; Playwright output is git-ignored; CLAUDE.md lists the command.
+- All 5 passed against the local backend (8081).
+
+---
+
+## 2026-10-09 (F6.3 accessibility pass)
+
+**Done**
+- axe-core (WCAG 2.1 A/AA rules) on 15 pages, signed in and out, light and dark, in Chromium: 7 findings, all
+  fixed; the re-run reports none. No colour-contrast findings in either theme.
+- Clap button: the action is screen-reader text before the visible count, so its name matches what's shown
+  ("Clap for this story, 12 claps"). Account button: screen-reader text instead of `aria-label` (the visible
+  initials). The editor has a level-one heading ("New story" / "Editing ...").
+- Escape closes the account menu and puts focus back on its button.
+- Already in place and re-checked: skip link, visible focus ring, 44px targets, labelled fields with described
+  errors, native `<dialog>` for the publish sheet, `prefers-reduced-motion`.
+- Tests: clap names updated, account menu Escape case.
+
+**Known limitations**
+- The editor's formatting toolbar is reached with Tab (no arrow-key roving focus).
+
+---
+
+## 2026-10-09 (F6.2 dark theme)
+
+**Done**
+- Dark tokens in `src/index.css` ("the field at night": loam `#1B1A17` paper, warm `#ECE8DF` ink, paddy lifted to
+  `#74C48A`, mustard unchanged), applied by the system setting or the reader's choice (`data-theme` on `<html>`).
+  Components needed no changes: they only use tokens. New `shade` token for the dialog veil.
+- `src/lib/theme.ts`; a Dark theme / Light theme switch in the footer, remembered on the device (choosing the
+  system's own theme forgets the choice). An inline script in `index.html` applies the saved theme and language
+  before the first paint; `theme-color` has a dark variant. The logo's stem uses the paper colour.
+- Tests: `theme.test.ts` (2). Looked at in Chromium (home at 1280, a story at 390).
+
+**Decisions**
+- Dark paper is a warm earth tone, not the usual near-black, to keep the farming character.
+
+---
+
+## 2026-10-09 (F6.1 Bengali interface)
+
+**Done**
+- `src/lib/i18n.ts`: the language (English default, stored on the device, set on `<html lang>`), `useT()` /
+  `translate()` keyed by the English text so anything untranslated stays English, `{placeholders}`, and
+  `formatNumber` (Bengali digits). `src/lib/bn.ts`: ~200 strings in plain Bengali.
+- Translated: top bar, footer, account menu, home, feed, season strip (names and months), filters, story page,
+  responses and answers, topics, search, authors, questions, ask, AI draft, advisor and history, library, sign in
+  and up, password reset, not found; dates in Bengali months and digits; the app's own error messages.
+- A বাংলা / English switch in the footer and the account menu; switching reloads data. Every API call carries
+  `lang=bn` while Bengali is on.
+- Tests: `i18n.test.ts` (4), `bengali.test.tsx` (2; switch, digits, dates, `lang=bn`). Looked at in Chromium.
+
+**Decisions**
+- No i18n library: a dictionary keyed by English and a `useSyncExternalStore` hook are enough for two languages.
+
+**Known limitations**
+- Still English: the editor and publish sheet, settings, your stories, and form validation messages (authors and
+  settings screens first got the reader-facing pass). The backend has no Bengali messages yet (open item).
 
 ---
 

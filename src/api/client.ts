@@ -1,3 +1,4 @@
+import { getLang } from '../lib/i18n'
 import { ApiError, NETWORK_ERROR_MESSAGE, SERVER_ERROR_MESSAGE } from './errors'
 import type { WebTokenResponse } from './types'
 
@@ -63,6 +64,8 @@ interface RequestOptions {
   body?: unknown
   /** Query string values; null and undefined are left out. */
   params?: Record<string, QueryValue>
+  /** Sent as text/plain instead of `body`, for the one endpoint that reads a raw string (category rename). */
+  text?: string
   signal?: AbortSignal
 }
 
@@ -147,7 +150,10 @@ async function doRefresh(): Promise<WebTokenResponse> {
 async function send(path: string, options: RequestOptions, withToken = true): Promise<Response> {
   const headers: Record<string, string> = { Accept: 'application/json' }
   let body: BodyInit | undefined
-  if (options.body instanceof FormData) {
+  if (options.text !== undefined) {
+    headers['Content-Type'] = 'text/plain'
+    body = options.text
+  } else if (options.body instanceof FormData) {
     body = options.body
   } else if (options.body !== undefined) {
     headers['Content-Type'] = 'application/json'
@@ -156,7 +162,9 @@ async function send(path: string, options: RequestOptions, withToken = true): Pr
   if (withToken && accessToken) headers.Authorization = `Bearer ${accessToken}`
 
   try {
-    return await fetch(BASE_URL + path + queryString(options.params), {
+    // The backend's messages follow the reader's language; English is its default, so only Bengali is sent.
+    const params = getLang() === 'bn' ? { ...options.params, lang: 'bn' } : options.params
+    return await fetch(BASE_URL + path + queryString(params), {
       method: options.method ?? 'GET',
       headers,
       body,

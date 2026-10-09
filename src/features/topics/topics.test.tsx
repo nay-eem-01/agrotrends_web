@@ -44,7 +44,7 @@ test('a visitor following a tag is sent to sign-in', async () => {
 
   expect(await screen.findByRole('heading', { name: 'No stories on this topic yet' })).toBeInTheDocument()
   await userEvent.click(screen.getByRole('button', { name: 'Follow' }))
-  expect(screen.getByTestId('path')).toHaveTextContent('/sign-in?next=%2Ftags%2Frice')
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/sign-in?next=%2Ftags%2Frice'))
 })
 
 test('following and unfollowing a tag', async () => {

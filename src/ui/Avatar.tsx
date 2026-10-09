@@ -20,7 +20,7 @@ export function initials(name: string): string {
 export function Avatar({ name, src, size = 32, className }: AvatarProps) {
   const style = { width: size, height: size, fontSize: Math.round(size * 0.4) }
   if (src) {
-    return <img src={src} alt="" style={style} className={cx('rounded-full object-cover', className)} />
+    return <img src={src} alt="" loading="lazy" decoding="async" style={style} className={cx('rounded-full object-cover', className)} />
   }
   return (
     <span

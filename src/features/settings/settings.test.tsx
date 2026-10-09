@@ -72,7 +72,7 @@ test('changing the e-mail sends the reader to sign in again', async () => {
   await userEvent.click(screen.getByRole('button', { name: 'Save changes' }))
 
   expect(await screen.findByText(EMAIL_CHANGED_NOTICE)).toBeInTheDocument()
-  expect(screen.getByTestId('path')).toHaveTextContent('/sign-in?next=%2Fsettings')
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/sign-in?next=%2Fsettings'))
   expect(hasStoredSession()).toBe(false)
   // Restore, update; no sign-out call for a session the backend already revoked.
   expect(fetchMock).toHaveBeenCalledTimes(2)
@@ -115,7 +115,7 @@ test('a wrong current password keeps the reader here', async () => {
   await userEvent.click(screen.getByRole('button', { name: 'Change password' }))
 
   expect(await screen.findByRole('alert')).toHaveTextContent('Current password is incorrect.')
-  expect(screen.getByTestId('path')).toHaveTextContent('/settings')
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/settings'))
 })
 
 test('the new password is checked before sending', async () => {

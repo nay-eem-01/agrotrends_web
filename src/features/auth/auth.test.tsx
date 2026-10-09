@@ -38,7 +38,7 @@ test('signing in stores the session and goes back where the reader was', async (
   fetchMock.mockResolvedValueOnce(envelope(200, tokens))
   renderWithProviders(<App />, '/sign-in?next=%2Fstories%2Fboro-rice')
 
-  await userEvent.type(screen.getByLabelText('E-mail'), ' nasrin@farm.bd ')
+  await userEvent.type(await screen.findByLabelText('E-mail'), ' nasrin@farm.bd ')
   await userEvent.type(screen.getByLabelText('Password'), 'Paddy2026!')
   await userEvent.click(screen.getByRole('button', { name: 'Sign in' }))
 
@@ -54,17 +54,17 @@ test('a rejected sign-in shows the server message', async () => {
   fetchMock.mockResolvedValueOnce(envelope(401, null, 'Invalid email or password.'))
   renderWithProviders(<App />, '/sign-in')
 
-  await userEvent.type(screen.getByLabelText('E-mail'), 'nasrin@farm.bd')
+  await userEvent.type(await screen.findByLabelText('E-mail'), 'nasrin@farm.bd')
   await userEvent.type(screen.getByLabelText('Password'), 'wrong')
   await userEvent.click(screen.getByRole('button', { name: 'Sign in' }))
 
   expect(await screen.findByRole('alert')).toHaveTextContent('Invalid email or password.')
-  expect(screen.getByTestId('path')).toHaveTextContent('/sign-in')
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/sign-in'))
 })
 
 test('an empty sign-in form is checked before anything is sent', async () => {
   renderWithProviders(<App />, '/sign-in')
-  await userEvent.click(screen.getByRole('button', { name: 'Sign in' }))
+  await userEvent.click(await screen.findByRole('button', { name: 'Sign in' }))
 
   expect(screen.getByLabelText('E-mail')).toHaveAccessibleDescription('Enter your e-mail address.')
   expect(screen.getByLabelText('Password')).toHaveAccessibleDescription('Enter your password.')
@@ -75,7 +75,7 @@ test('signing up as an author sends the professional details, then signs in', as
   fetchMock.mockResolvedValueOnce(envelope(200, tokens.user)).mockResolvedValueOnce(envelope(200, tokens))
   renderWithProviders(<App />, '/sign-up')
 
-  await userEvent.type(screen.getByLabelText('Full name'), 'Nasrin Akter')
+  await userEvent.type(await screen.findByLabelText('Full name'), 'Nasrin Akter')
   await userEvent.type(screen.getByLabelText('E-mail'), 'nasrin@farm.bd')
   await userEvent.type(screen.getByLabelText('Mobile number'), '1712345678')
   await userEvent.type(screen.getByLabelText('Password'), 'Paddy2026!')
@@ -102,7 +102,7 @@ test('signing up as an author sends the professional details, then signs in', as
 test('sign-up checks the password rule and author fields before sending', async () => {
   renderWithProviders(<App />, '/sign-up')
 
-  await userEvent.type(screen.getByLabelText('Password'), 'paddy2026')
+  await userEvent.type(await screen.findByLabelText('Password'), 'paddy2026')
   await userEvent.click(screen.getByRole('radio', { name: /author/i }))
   await userEvent.click(screen.getByRole('button', { name: 'Create account' }))
 
@@ -116,7 +116,7 @@ test('a reader signs up without professional details', async () => {
   fetchMock.mockResolvedValueOnce(envelope(200, tokens.user)).mockResolvedValueOnce(envelope(500, null))
   renderWithProviders(<App />, '/sign-up')
 
-  await userEvent.type(screen.getByLabelText('Full name'), 'Karim')
+  await userEvent.type(await screen.findByLabelText('Full name'), 'Karim')
   await userEvent.type(screen.getByLabelText('E-mail'), 'karim@farm.bd')
   await userEvent.type(screen.getByLabelText('Mobile number'), '1812345678')
   await userEvent.type(screen.getByLabelText('Password'), 'Jute2026#')
@@ -171,9 +171,9 @@ function Guarded() {
   )
 }
 
-test('a protected screen sends a visitor to sign-in with the way back', () => {
+test('a protected screen sends a visitor to sign-in with the way back', async () => {
   renderWithProviders(<Guarded />, '/settings?tab=profile')
-  expect(screen.getByTestId('path')).toHaveTextContent('/sign-in?next=%2Fsettings%3Ftab%3Dprofile')
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/sign-in?next=%2Fsettings%3Ftab%3Dprofile'))
 })
 
 test('a protected screen waits for the session to restore', async () => {
@@ -183,5 +183,18 @@ test('a protected screen waits for the session to restore', async () => {
 
   expect(screen.getByRole('status', { name: 'Loading' })).toBeInTheDocument()
   expect(await screen.findByRole('heading', { name: 'Settings' })).toBeInTheDocument()
-  expect(screen.getByTestId('path')).toHaveTextContent('/settings')
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/settings'))
+})
+
+test('Escape closes the account menu and returns focus to it', async () => {
+  localStorage.setItem('agrotrends.refreshToken', 'r0')
+  mockApi({ 'POST /api/auth/refresh-token': () => envelope(200, tokens), 'GET /api/feed/following': () => envelope(200, page([])), 'GET /api/tags': () => envelope(200, []) })
+  renderWithProviders(<App />, '/')
+
+  const button = await screen.findByRole('button', { name: 'Account' })
+  await userEvent.click(button)
+  expect(screen.getByRole('button', { name: 'Sign out' })).toBeInTheDocument()
+  await userEvent.keyboard('{Escape}')
+  expect(screen.queryByRole('button', { name: 'Sign out' })).not.toBeInTheDocument()
+  expect(button).toHaveFocus()
 })

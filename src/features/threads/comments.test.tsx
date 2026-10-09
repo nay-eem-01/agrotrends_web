@@ -103,7 +103,7 @@ test('a visitor replying is sent to sign-in', async () => {
 
   const section = await responsesSection()
   await userEvent.click(await section.findByRole('button', { name: 'Reply' }))
-  expect(screen.getByTestId('path')).toHaveTextContent('/sign-in?next=%2Fstories%2Frice-blast')
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/sign-in?next=%2Fstories%2Frice-blast'))
 })
 
 test('responding posts the text and reloads the list', async () => {

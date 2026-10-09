@@ -1,3 +1,4 @@
+import { useT } from '../lib/i18n'
 import { MagnifyingGlass, NotePencil } from '@phosphor-icons/react'
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
@@ -7,6 +8,7 @@ import { AccountMenu } from './AccountMenu'
 import { Logo } from './Logo'
 
 export function TopBar() {
+  const t = useT()
   const navigate = useNavigate()
   const { status } = useSession()
   const [query, setQuery] = useState('')
@@ -25,34 +27,34 @@ export function TopBar() {
           <form onSubmit={search}>
             <label className="flex h-10 items-center gap-2 rounded-full bg-field px-3 text-ink-muted focus-within:ring-2 focus-within:ring-paddy">
               <MagnifyingGlass size={18} aria-hidden="true" />
-              <span className="sr-only">Search stories</span>
+              <span className="sr-only">{t('Search stories')}</span>
               <input
                 type="search"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search"
+                placeholder={t('Search')}
                 className="min-w-0 flex-1 bg-transparent text-sm text-ink placeholder:text-ink-muted focus:outline-none"
               />
             </label>
           </form>
         </search>
-        <nav aria-label="Main" className="ml-auto flex items-center gap-0 sm:gap-3">
-          <Link to="/search" className="flex h-11 w-11 items-center justify-center rounded-full text-ink-muted hover:text-ink sm:hidden" aria-label="Search">
+        <nav aria-label={t('Main')} className="ml-auto flex items-center gap-0 sm:gap-3">
+          <Link to="/search" className="flex h-11 w-11 items-center justify-center rounded-full text-ink-muted hover:text-ink sm:hidden" aria-label={t('Search')}>
             <MagnifyingGlass size={22} />
           </Link>
           <Link to="/questions" className="hidden h-11 items-center px-2 text-sm text-ink-muted hover:text-ink md:flex">
-            Questions
+            {t('Questions')}
           </Link>
           <Link to="/advisor" className="hidden h-11 items-center px-2 text-sm text-ink-muted hover:text-ink md:flex">
-            Advisor
+            {t('Advisor')}
           </Link>
           <Link to="/write" className="hidden h-11 items-center gap-1.5 px-2 text-sm text-ink-muted hover:text-ink md:flex">
             <NotePencil size={20} aria-hidden="true" />
-            Write
+            {t('Write')}
           </Link>
           {status === 'signed-in' && (
             <>
-              <Link to="/write" className="flex h-11 w-11 items-center justify-center rounded-full text-ink-muted hover:text-ink md:hidden" aria-label="Write">
+              <Link to="/write" className="flex h-11 w-11 items-center justify-center rounded-full text-ink-muted hover:text-ink md:hidden" aria-label={t('Write')}>
                 <NotePencil size={22} />
               </Link>
               <AccountMenu />
@@ -61,10 +63,10 @@ export function TopBar() {
           {status === 'anonymous' && (
             <>
               <Link to="/sign-in" className="hidden h-11 items-center px-2 text-sm whitespace-nowrap text-ink-muted hover:text-ink sm:flex">
-                Sign in
+                {t('Sign in')}
               </Link>
               <ButtonLink to="/sign-up" size="sm">
-                Get started
+                {t('Get started')}
               </ButtonLink>
             </>
           )}

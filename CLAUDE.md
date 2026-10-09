@@ -25,6 +25,7 @@ npm run dev        # http://localhost:5173; /api and /uploads are proxied to the
 npm test           # Vitest + Testing Library
 npm run lint       # oxlint
 npm run build      # type-check + production build
+npm run e2e        # Playwright smoke tests against a running backend (see playwright.config.ts for env vars)
 ```
 
 ## Rules that matter most

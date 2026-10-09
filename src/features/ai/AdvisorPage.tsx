@@ -1,3 +1,4 @@
+import { useT } from '../../lib/i18n'
 import { Sparkle } from '@phosphor-icons/react'
 import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
@@ -13,9 +14,21 @@ import { Sources } from './Sources'
 
 /** Starting points that fit the season now; tapping one fills the box. */
 const EXAMPLES: Record<Exclude<Season, 'YEAR_ROUND'>, string[]> = {
-  RABI: ['How do I protect boro seedlings from cold injury?', 'When should I sow mustard in the north?', 'What causes late blight on potato?'],
-  KHARIF_1: ['How do I control stem borer in aus rice?', 'When is jute ready to harvest?', 'How much urea does aus rice need?'],
-  KHARIF_2: ['When should I transplant aman seedlings?', 'How do I manage brown planthopper in aman?', 'What should I do after a flood in my rice field?'],
+  RABI: [
+    'How do I protect boro seedlings from cold injury?',
+    'When should I sow mustard in the north?',
+    'What causes late blight on potato?',
+  ],
+  KHARIF_1: [
+    'How do I control stem borer in aus rice?',
+    'When is jute ready to harvest?',
+    'How much urea does aus rice need?',
+  ],
+  KHARIF_2: [
+    'When should I transplant aman seedlings?',
+    'How do I manage brown planthopper in aman?',
+    'What should I do after a flood in my rice field?',
+  ],
 }
 
 interface Exchange {
@@ -25,6 +38,7 @@ interface Exchange {
 
 /** `/advisor`: ask a farming question; answers are built from AgroTrends stories and link to them. */
 export function AdvisorPage() {
+  const t = useT()
   const { status } = useSession()
   const [today] = useState(() => new Date())
   const season = seasonCalendar(today).current as Exclude<Season, 'YEAR_ROUND'>
@@ -54,24 +68,30 @@ export function AdvisorPage() {
 
   return (
     <section className="mx-auto max-w-(--container-feed) px-4 pt-10 pb-20 sm:px-6">
-      <title>AI advisor – AgroTrends</title>
-      <h1 className="text-2xl sm:text-3xl">Ask the advisor</h1>
+      <title>{t('AI advisor – AgroTrends')}</title>
+      <h1 className="text-2xl sm:text-3xl">{t('Ask the advisor')}</h1>
       <p className="mt-2 text-ink-muted">
-        Answers are written from stories farmers and agronomists published here, with links so you can check where the
-        advice came from. A daily limit applies.
+        {t(
+          'Answers are written from stories farmers and agronomists published here, with links so you can check where the advice came from. A daily limit applies.',
+        )}
       </p>
 
       {exchanges.length > 0 && (
-        <ol aria-label="This conversation" className="mt-10 flex flex-col gap-10">
+        <ol aria-label={t('This conversation')} className="mt-10 flex flex-col gap-10">
           {exchanges.map((exchange, index) => (
             <li key={index}>
               <p className="font-sans text-lg font-semibold">{exchange.question}</p>
               <div className="mt-3 border-l-2 border-paddy pl-5">
-                <SafeHtml html={exchange.answer.answer} className="font-serif text-lg whitespace-pre-line [&>p+p]:mt-4" />
+                <SafeHtml
+                  html={exchange.answer.answer}
+                  className="font-serif text-lg whitespace-pre-line [&>p+p]:mt-4"
+                />
                 {exchange.answer.sources?.length ? (
                   <Sources sources={exchange.answer.sources} />
                 ) : (
-                  <p className="mt-4 text-sm text-ink-muted">No story on AgroTrends matched, so this answer is general advice.</p>
+                  <p className="mt-4 text-sm text-ink-muted">
+                    {t('No story on AgroTrends matched, so this answer is general advice.')}
+                  </p>
                 )}
               </div>
             </li>
@@ -81,10 +101,10 @@ export function AdvisorPage() {
 
       <form onSubmit={submit} noValidate className="mt-10 flex flex-col gap-3">
         <TextArea
-          label={exchanges.length ? 'Ask another question' : 'Your question'}
+          label={exchanges.length ? t('Ask another question') : t('Your question')}
           rows={4}
           maxLength={MAX_ADVISOR_QUESTION}
-          placeholder="Bangla or English: what you grow, where, and what you are seeing"
+          placeholder={t('Bangla or English: what you grow, where, and what you are seeing')}
           hint={`${question.length} / ${MAX_ADVISOR_QUESTION}`}
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
@@ -98,19 +118,24 @@ export function AdvisorPage() {
         <div className="flex flex-wrap items-center gap-3">
           <Button type="submit" loading={ask.isPending}>
             <Sparkle size={18} aria-hidden="true" />
-            {status === 'signed-in' ? 'Ask' : 'Sign in to ask'}
+            {status === 'signed-in' ? t('Ask') : t('Sign in to ask')}
           </Button>
           {status === 'signed-in' && (
-            <Link to="/advisor/history" className="text-sm text-ink-muted underline-offset-4 hover:text-ink hover:underline">
-              Your earlier questions
+            <Link
+              to="/advisor/history"
+              className="text-sm text-ink-muted underline-offset-4 hover:text-ink hover:underline"
+            >
+              {t('Your earlier questions')}
             </Link>
           )}
         </div>
       </form>
 
       {exchanges.length === 0 && (
-        <section aria-label={`Questions for ${SEASON_LABELS[season]}`} className="mt-10">
-          <h2 className="font-sans text-base font-semibold">For this {SEASON_LABELS[season]} season</h2>
+        <section aria-label={`Questions for ${t(SEASON_LABELS[season])}`} className="mt-10">
+          <h2 className="font-sans text-base font-semibold">
+            {t('For this {season} season', { season: t(SEASON_LABELS[season]) })}
+          </h2>
           <ul className="mt-3 flex flex-col gap-2">
             {EXAMPLES[season].map((example) => (
               <li key={example}>

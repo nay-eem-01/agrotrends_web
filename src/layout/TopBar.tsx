@@ -43,6 +43,9 @@ export function TopBar() {
           <Link to="/questions" className="hidden h-11 items-center px-2 text-sm text-ink-muted hover:text-ink md:flex">
             Questions
           </Link>
+          <Link to="/advisor" className="hidden h-11 items-center px-2 text-sm text-ink-muted hover:text-ink md:flex">
+            Advisor
+          </Link>
           <Link to="/write" className="hidden h-11 items-center gap-1.5 px-2 text-sm text-ink-muted hover:text-ink md:flex">
             <NotePencil size={20} aria-hidden="true" />
             Write

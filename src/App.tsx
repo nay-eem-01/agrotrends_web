@@ -8,6 +8,7 @@ import { SignInPage } from './features/auth/SignInPage'
 import { SignUpPage } from './features/auth/SignUpPage'
 import { LibraryPage } from './features/library/LibraryPage'
 import { MyStoriesPage } from './features/mystories/MyStoriesPage'
+import { QuestionPage } from './features/qa/QuestionPage'
 import { QuestionsPage } from './features/qa/QuestionsPage'
 import { NotFoundPage } from './features/errors/NotFoundPage'
 import { HomePage } from './features/home/HomePage'
@@ -43,6 +44,7 @@ export default function App() {
         <Route path="/authors/:authorId" element={<AuthorPage />} />
         <Route path="/tags/:tagName" element={<TagPage />} />
         <Route path="/questions" element={<QuestionsPage />} />
+        <Route path="/questions/:questionId" element={<QuestionPage />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/topics" element={<TopicsPage />} />
         <Route path="/sign-in" element={<SignInPage />} />

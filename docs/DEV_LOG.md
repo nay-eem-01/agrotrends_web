@@ -14,22 +14,39 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   publish sheet (`feat/publish`) , F3.4 AI help (`feat/ai-assist`) and F3.5 my stories
   (`feat/my-stories`) done. Phase F3 is complete.
 - Phase F4 questions and answers on `feat/qa-base` (stacked on F3's tip, as F3 isn't in `development` yet):
-  F4.1 questions list (`feat/questions`) done.
+  F4.1 questions list (`feat/questions`) and F4.2 question page (`feat/question-page`) done.
 
 ## Next up
 
 1. **Nayeem:** open and merge the F3 step PRs into `feat/writing-base` in order, then the base into `development`.
-2. F4.2 question page, F4.3 ask, F4.4 AI draft answer.
+2. F4.3 ask, F4.4 AI draft answer.
 
 ## Open items
 
 | Item | Needs | Blocks |
 |---|---|---|
+| The answers list also returns replies, with no parent field; the page drops anything that is someone's reply | backend | — |
 | Comment endpoints aren't typed in OpenAPI and have no reply counts: `CommentResponse` is hand-written and every thread is fetched | backend | — |
 | No per-story "saved by me": the app reads the 100 most recent saves to mark Save buttons | backend: `bookmarkedByMe` | exact saved state for heavy savers |
 | Make `development` the default branch on GitHub and protect it | Nayeem | — |
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
+
+---
+
+## 2026-10-09 (F4.2 question page)
+
+**Done**
+- `/questions/:id`: title, asker and date, the question (through `SafeHtml`), farming chips that filter the
+  questions list; Edit and Delete (inline confirm, back to the list) for the asker; answers below.
+- Answers reuse the story responses: `Responses` became `features/threads/Thread.tsx` (`kind` = comments or
+  answers, with its own wording), on `src/api/threads.ts`, which turns both backend DTOs into one shape and holds
+  the routes for each; `src/api/comments.ts` is gone. Story responses behave as before (their tests unchanged).
+- Tests: `qa/question-page.test.tsx` (5 cases). Answer, reply, list and delete checked on the local backend.
+
+**Decisions**
+- The answers list from the backend includes replies and has no parent field: anything that appears among some
+  answer's replies is dropped from the top level (backend need added).
 
 ---
 

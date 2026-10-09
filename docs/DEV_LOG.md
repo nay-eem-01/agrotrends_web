@@ -20,12 +20,13 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   (`feat/related`) done. Phase F5 is complete.
 - Phase F6 polish on `feat/polish-base` (stacked on F5): F6.1 Bengali interface (`feat/bengali`) , F6.2 dark theme
   (`feat/dark-theme`) , F6.3 accessibility (`feat/a11y`) , F6.4 smoke tests
-  (`feat/e2e`) and F6.5 performance (`feat/perf`) done.
+  (`feat/e2e`) , F6.5 performance (`feat/perf`) and F6.6 admin categories
+  (`feat/admin-categories`) done. Only F6.7 notifications remains; it waits for the backend's notifications API.
 
 ## Next up
 
 1. **Nayeem:** open and merge the F3 step PRs into `feat/writing-base` in order, then the base into `development`.
-2. F6.6 admin categories.
+2. F6.7 notifications once the backend has them (backend Phase 5).
 
 ## Open items
 
@@ -38,6 +39,25 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Make `development` the default branch on GitHub and protect it | Nayeem | — |
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
+
+---
+
+## 2026-10-09 (F6.6 admin categories)
+
+**Done**
+- `/admin/categories` (account menu: Categories, for staff): add (`POST /api/categories/create?categoryName=`),
+  rename (`PUT .../update/categoryId/{id}`, raw text body) and delete (inline confirm) categories; duplicate names
+  are caught before sending; the backend's 403 shows when a permission is missing.
+- Staff sign in on `/api/admin/sign-in` from the same page (the regular sign-in refuses admin accounts); a reader
+  there is told their account has no admin access. Staff = any role besides USER (`isAdmin`); the backend checks
+  each permission.
+- `src/api/client.ts`: a `text` option sends a text/plain body (only the rename needs it).
+- Tests: `admin/admin.test.tsx` (3 cases). Live: admin sign-in refuses a regular account, and create answers 403
+  for it.
+
+**Known limitations**
+- Not run end to end as an admin: the local super admin's password was generated at first start and isn't known
+  here. Deleting a category that has stories may fail on the backend; its message is shown.
 
 ---
 

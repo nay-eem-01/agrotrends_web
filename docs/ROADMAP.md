@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend
 
-**Progress:** 22 of 36 steps done
+**Progress:** 23 of 36 steps done
 
 ---
 
@@ -59,7 +59,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 | # | Step | Status |
 |---|---|---|
-| F4.1 | Questions list with crop / season / region / soil filters | ⬜ |
+| F4.1 | Questions list with crop / season / region / soil filters | ✅ |
 | F4.2 | Question page: answers and replies; answer, edit, delete own | ⬜ |
 | F4.3 | Ask a question (with agri metadata) | ⬜ |
 | F4.4 | AI draft answer for unanswered questions, clearly labelled | ⬜ |

@@ -11,6 +11,8 @@
   --color-paddy-deep: #154d29;
   --color-mustard: #e2b007;
   --color-danger: #b3261e;
+  /* Dialog veil: stays dark in both themes. */
+  --color-shade: #242424;
 
   --font-serif: 'Literata Variable', 'Noto Serif Bengali Variable', Georgia, serif;
   --font-sans: 'Hind Siliguri', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -33,6 +35,38 @@
 
   --container-feed: 680px;
   --container-page: 1192px;
+}
+
+/*
+ * Dark theme, "the field at night": deep loam paper, warm off-white ink, paddy lifted for contrast; mustard keeps its
+ * meaning. It follows the system unless the reader chose (data-theme on <html>, set by src/lib/theme.ts).
+ */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --color-paper: #1b1a17;
+    --color-ink: #ece8df;
+    --color-ink-muted: #a8a397;
+    --color-rule: #36342e;
+    --color-field: #252821;
+    --color-paddy: #74c48a;
+    --color-paddy-deep: #95d6a7;
+    --color-danger: #f2766d;
+    --color-shade: #000000;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --color-paper: #1b1a17;
+  --color-ink: #ece8df;
+  --color-ink-muted: #a8a397;
+  --color-rule: #36342e;
+  --color-field: #252821;
+  --color-paddy: #74c48a;
+  --color-paddy-deep: #95d6a7;
+  --color-danger: #f2766d;
+  --color-shade: #000000;
+  color-scheme: dark;
 }
 
 @layer base {

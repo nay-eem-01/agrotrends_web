@@ -1,6 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { setLang, useLang, useT } from '../lib/i18n'
+import { setTheme, useTheme } from '../lib/theme'
 
 const YEAR = new Date().getFullYear()
 
@@ -15,6 +16,7 @@ export function Footer() {
           <Link to="/advisor" className="hover:text-ink">{t('AI advisor')}</Link>
           <Link to="/write" className="hover:text-ink">{t('Write')}</Link>
           <LanguageSwitch />
+          <ThemeSwitch />
         </nav>
       </div>
     </footer>
@@ -37,6 +39,17 @@ export function LanguageSwitch({ className }: { className?: string }) {
       className={className ?? 'hover:text-ink'}
     >
       {next === 'bn' ? 'বাংলা' : 'English'}
+    </button>
+  )
+}
+
+/** Light or dark, whichever isn't showing; the choice is remembered on this device. */
+export function ThemeSwitch({ className }: { className?: string }) {
+  const t = useT()
+  const theme = useTheme()
+  return (
+    <button type="button" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className={className ?? 'hover:text-ink'}>
+      {theme === 'dark' ? t('Light theme') : t('Dark theme')}
     </button>
   )
 }

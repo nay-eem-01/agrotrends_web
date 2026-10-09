@@ -18,12 +18,13 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   (`feat/ask`) and F4.4 AI draft answer (`feat/ai-draft-answer`) done. Phase F4 is complete.
 - Phase F5 AI advisor on `feat/ai-base` (stacked on F4): F5.1 advisor (`feat/advisor`) , F5.2 history (`feat/advisor-history`) and F5.3 related stories
   (`feat/related`) done. Phase F5 is complete.
-- Phase F6 polish on `feat/polish-base` (stacked on F5): F6.1 Bengali interface (`feat/bengali`) done.
+- Phase F6 polish on `feat/polish-base` (stacked on F5): F6.1 Bengali interface (`feat/bengali`) and F6.2 dark theme
+  (`feat/dark-theme`) done.
 
 ## Next up
 
 1. **Nayeem:** open and merge the F3 step PRs into `feat/writing-base` in order, then the base into `development`.
-2. F6.2 dark theme, F6.3 accessibility, F6.4 Playwright smoke tests, F6.5 performance, F6.6 admin categories.
+2. F6.3 accessibility, F6.4 Playwright smoke tests, F6.5 performance, F6.6 admin categories.
 
 ## Open items
 
@@ -36,6 +37,22 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Make `development` the default branch on GitHub and protect it | Nayeem | — |
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
+
+---
+
+## 2026-10-09 (F6.2 dark theme)
+
+**Done**
+- Dark tokens in `src/index.css` ("the field at night": loam `#1B1A17` paper, warm `#ECE8DF` ink, paddy lifted to
+  `#74C48A`, mustard unchanged), applied by the system setting or the reader's choice (`data-theme` on `<html>`).
+  Components needed no changes: they only use tokens. New `shade` token for the dialog veil.
+- `src/lib/theme.ts`; a Dark theme / Light theme switch in the footer, remembered on the device (choosing the
+  system's own theme forgets the choice). An inline script in `index.html` applies the saved theme and language
+  before the first paint; `theme-color` has a dark variant. The logo's stem uses the paper colour.
+- Tests: `theme.test.ts` (2). Looked at in Chromium (home at 1280, a story at 390).
+
+**Decisions**
+- Dark paper is a warm earth tone, not the usual near-black, to keep the farming character.
 
 ---
 

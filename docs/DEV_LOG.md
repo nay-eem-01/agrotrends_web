@@ -14,12 +14,13 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   publish sheet (`feat/publish`) , F3.4 AI help (`feat/ai-assist`) and F3.5 my stories
   (`feat/my-stories`) done. Phase F3 is complete.
 - Phase F4 questions and answers on `feat/qa-base` (stacked on F3's tip, as F3 isn't in `development` yet):
-  F4.1 questions list (`feat/questions`) and F4.2 question page (`feat/question-page`) done.
+  F4.1 questions list (`feat/questions`) , F4.2 question page (`feat/question-page`) and F4.3 ask
+  (`feat/ask`) done.
 
 ## Next up
 
 1. **Nayeem:** open and merge the F3 step PRs into `feat/writing-base` in order, then the base into `development`.
-2. F4.3 ask, F4.4 AI draft answer.
+2. F4.4 AI draft answer.
 
 ## Open items
 
@@ -31,6 +32,21 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Make `development` the default branch on GitHub and protect it | Nayeem | — |
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
+
+---
+
+## 2026-10-09 (F4.3 ask a question)
+
+**Done**
+- `/questions/ask` and `/questions/:id/edit` (asker only; anyone else gets not found), behind `RequireAuth`: one-line
+  question, details, farming details; Post question / Save question open the question.
+- Farming details (season strip picker, crop, region, soil) moved to `features/farming/FarmingFields.tsx`, shared
+  by the publish sheet and this form; `toAgri` leaves blank fields out.
+- Tests: `qa/ask.test.tsx` (4 cases). Create and delete checked on the local backend (it lower-cases crop).
+
+**Decisions**
+- Details are plain text (no rich editor; Tiptap stays in the writer's chunk). Older HTML questions are edited as
+  their text.
 
 ---
 

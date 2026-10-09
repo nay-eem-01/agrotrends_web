@@ -8,6 +8,7 @@ import { SignInPage } from './features/auth/SignInPage'
 import { SignUpPage } from './features/auth/SignUpPage'
 import { LibraryPage } from './features/library/LibraryPage'
 import { MyStoriesPage } from './features/mystories/MyStoriesPage'
+import { AskPage } from './features/qa/AskPage'
 import { QuestionPage } from './features/qa/QuestionPage'
 import { QuestionsPage } from './features/qa/QuestionsPage'
 import { NotFoundPage } from './features/errors/NotFoundPage'
@@ -54,6 +55,8 @@ export default function App() {
         <Route element={<RequireAuth />}>
           <Route path="/write" element={editor} />
           <Route path="/write/:blogId" element={editor} />
+          <Route path="/questions/ask" element={<AskPage />} />
+          <Route path="/questions/:questionId/edit" element={<AskPage />} />
           <Route path="/me/stories" element={<MyStoriesPage />} />
           <Route path="/library" element={<LibraryPage />} />
           <Route path="/settings" element={<SettingsPage />} />

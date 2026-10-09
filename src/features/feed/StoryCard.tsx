@@ -1,3 +1,4 @@
+import { formatNumber, useT } from '../../lib/i18n'
 import { HandsClapping } from '@phosphor-icons/react'
 import { Link } from 'react-router-dom'
 import type { BlogResponse } from '../../api/types'
@@ -9,12 +10,13 @@ import { BookmarkButton } from '../reactions/BookmarkButton'
 
 /** One story in a feed: text on the left, cover on the right, separated by a hairline rather than a box. */
 export function StoryCard({ story }: { story: BlogResponse }) {
+  const t = useT()
   const href = `/stories/${story.slug}`
   const author = story.author
   const preview = excerpt(htmlToText(story.content))
   const crop = story.agri?.crop
   const season = story.agri?.season
-  const meta = [storyDate(story.publishedAt), story.readingTimeMinutes ? `${story.readingTimeMinutes} min read` : null].filter(Boolean)
+  const meta = [storyDate(story.publishedAt), story.readingTimeMinutes ? t('{n} min read', { n: formatNumber(story.readingTimeMinutes) }) : null].filter(Boolean)
 
   return (
     <article className="border-b border-rule py-6">
@@ -47,8 +49,8 @@ export function StoryCard({ story }: { story: BlogResponse }) {
                 </Link>
               )}
               {season && (
-                <Link to={filterPath({ season })} className="rounded-full bg-field px-2 py-0.5 text-ink hover:bg-rule" aria-label={`${SEASON_LABELS[season]} season stories`}>
-                  {SEASON_LABELS[season]}
+                <Link to={filterPath({ season })} className="rounded-full bg-field px-2 py-0.5 text-ink hover:bg-rule" aria-label={t('{season} season stories', { season: t(SEASON_LABELS[season]) })}>
+                  {t(SEASON_LABELS[season])}
                 </Link>
               )}
             </div>

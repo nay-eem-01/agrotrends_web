@@ -1,3 +1,4 @@
+import { useT } from '../../lib/i18n'
 import { useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ApiError, errorMessage } from '../../api/errors'
@@ -18,12 +19,13 @@ export function AskPage() {
 }
 
 function EditQuestion({ questionId }: { questionId: number }) {
+  const t = useT()
   const { user } = useSession()
   const question = useQuestion(questionId)
   if (question.isPending) {
     return (
       <div className="flex justify-center py-24 text-ink-muted">
-        <Spinner label="Loading question" />
+        <Spinner label={t('Loading question')} />
       </div>
     )
   }
@@ -40,6 +42,7 @@ function EditQuestion({ questionId }: { questionId: number }) {
 }
 
 function QuestionForm({ question }: { question?: Question }) {
+  const t = useT()
   const navigate = useNavigate()
   const write = useQuestionWrite()
   const [title, setTitle] = useState(question?.title ?? '')
@@ -56,8 +59,8 @@ function QuestionForm({ question }: { question?: Question }) {
   function submit(event: FormEvent) {
     event.preventDefault()
     const found = {
-      title: title.trim() ? undefined : 'Write your question in a line.',
-      details: details.trim() ? undefined : 'Add what you have seen and tried.',
+      title: title.trim() ? undefined : t('Write your question in a line.'),
+      details: details.trim() ? undefined : t('Add what you have seen and tried.'),
     }
     setErrors(found)
     if (found.title || found.details) return
@@ -69,22 +72,22 @@ function QuestionForm({ question }: { question?: Question }) {
 
   return (
     <section className="mx-auto max-w-(--container-feed) px-4 pt-10 pb-20 sm:px-6">
-      <title>{question ? 'Edit question – AgroTrends' : 'Ask a question – AgroTrends'}</title>
-      <h1 className="text-2xl sm:text-3xl">{question ? 'Edit your question' : 'Ask a question'}</h1>
-      <p className="mt-2 text-ink-muted">Say what you grow, where, and what you have already tried. Specific questions get useful answers.</p>
+      <title>{question ? t('Edit question – AgroTrends') : t('Ask a question – AgroTrends')}</title>
+      <h1 className="text-2xl sm:text-3xl">{question ? t('Edit your question') : t('Ask a question')}</h1>
+      <p className="mt-2 text-ink-muted">{t('Say what you grow, where, and what you have already tried. Specific questions get useful answers.')}</p>
       <form onSubmit={submit} noValidate className="mt-8 flex flex-col gap-6">
         <TextField
-          label="Your question"
-          placeholder="Why are my boro seedlings turning yellow?"
+          label={t('Your question')}
+          placeholder={t('Why are my boro seedlings turning yellow?')}
           maxLength={200}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           error={errors.title}
         />
         <TextArea
-          label="Details"
+          label={t('Details')}
           rows={7}
-          placeholder="Variety, age of the crop, weather, what you applied and when…"
+          placeholder={t('Variety, age of the crop, weather, what you applied and when…')}
           value={details}
           onChange={(e) => setDetails(e.target.value)}
           error={errors.details}
@@ -97,10 +100,10 @@ function QuestionForm({ question }: { question?: Question }) {
         )}
         <div className="flex gap-3">
           <Button type="submit" loading={write.isPending}>
-            {question ? 'Save question' : 'Post question'}
+            {question ? t('Save question') : t('Post question')}
           </Button>
           <Button variant="quiet" onClick={() => navigate(-1)}>
-            Cancel
+            {t('Cancel')}
           </Button>
         </div>
       </form>

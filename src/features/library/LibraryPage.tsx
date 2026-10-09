@@ -1,3 +1,4 @@
+import { useT } from '../../lib/i18n'
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useFollowedAuthors, useReadingList, useToggleAuthorFollow, type AuthorSummary } from '../../api/follows'
@@ -14,14 +15,15 @@ type Tab = 'saved' | 'following'
 
 /** The reader's own shelf: saved stories, and the authors and topics they follow. Signed-in only. */
 export function LibraryPage() {
+  const t = useT()
   const [params] = useSearchParams()
   const tab: Tab = params.get('tab') === 'following' ? 'following' : 'saved'
 
   return (
     <section className="mx-auto max-w-(--container-feed) px-4 pt-12 pb-20 sm:px-6">
-      <title>Library – AgroTrends</title>
-      <h1 className="text-2xl sm:text-3xl">Your library</h1>
-      <nav aria-label="Library" className="mt-6 flex gap-6 border-b border-rule">
+      <title>{t('Library – AgroTrends')}</title>
+      <h1 className="text-2xl sm:text-3xl">{t('Your library')}</h1>
+      <nav aria-label={t('Library')} className="mt-6 flex gap-6 border-b border-rule">
         {(
           [
             ['saved', 'Reading list'],
@@ -47,6 +49,7 @@ export function LibraryPage() {
 }
 
 function ReadingList() {
+  const t = useT()
   const list = useReadingList()
   return (
     <StoryList
@@ -54,10 +57,10 @@ function ReadingList() {
       query={list}
       empty={
         <div className="py-16 text-center">
-          <h2 className="text-xl">Nothing saved yet</h2>
-          <p className="mt-2 text-ink-muted">Tap the bookmark on any story to keep it here for later.</p>
+          <h2 className="text-xl">{t('Nothing saved yet')}</h2>
+          <p className="mt-2 text-ink-muted">{t('Tap the bookmark on any story to keep it here for later.')}</p>
           <ButtonLink to="/?feed=latest" variant="secondary" size="sm" className="mt-6">
-            Find stories
+            {t('Find stories')}
           </ButtonLink>
         </div>
       }
@@ -66,6 +69,7 @@ function ReadingList() {
 }
 
 function Following() {
+  const t = useT()
   const tags = useFollowedTags(true)
   const authors = useFollowedAuthors()
   const authorList = authors.data?.pages.flatMap((page) => page.content) ?? []
@@ -74,16 +78,16 @@ function Following() {
     <div className="flex flex-col gap-10 pt-8">
       <section aria-labelledby="following-authors">
         <h2 id="following-authors" className="text-lg">
-          Authors
+          {t('Authors')}
         </h2>
         {authors.isPending ? (
-          <Spinner label="Loading authors" />
+          <Spinner label={t('Loading authors')} />
         ) : authors.isError ? (
           <p role="alert" className="mt-3 text-ink-muted">
             {errorMessage(authors.error)}
           </p>
         ) : authorList.length === 0 ? (
-          <p className="mt-3 text-ink-muted">You don't follow any authors yet. Follow one from their page or a story.</p>
+          <p className="mt-3 text-ink-muted">{t('You don\'t follow any authors yet. Follow one from their page or a story.')}</p>
         ) : (
           <ul className="mt-2">
             {authorList.map((author) => (
@@ -93,17 +97,17 @@ function Following() {
         )}
         {authors.hasNextPage && (
           <Button variant="secondary" size="sm" className="mt-4" loading={authors.isFetchingNextPage} onClick={() => void authors.fetchNextPage()}>
-            Show more authors
+            {t('Show more authors')}
           </Button>
         )}
       </section>
 
       <section aria-labelledby="following-topics">
         <h2 id="following-topics" className="text-lg">
-          Topics
+          {t('Topics')}
         </h2>
         {tags.isPending ? (
-          <Spinner label="Loading topics" />
+          <Spinner label={t('Loading topics')} />
         ) : tags.isError ? (
           <p role="alert" className="mt-3 text-ink-muted">
             {errorMessage(tags.error)}
@@ -112,7 +116,7 @@ function Following() {
           <p className="mt-3 text-ink-muted">
             You don't follow any topics yet.{' '}
             <Link to="/topics" className="text-paddy underline-offset-4 hover:underline">
-              Browse topics
+              {t('Browse topics')}
             </Link>
           </p>
         ) : (
@@ -134,9 +138,10 @@ function Following() {
 
 /** One followed author; Unfollow keeps the row (so it can be undone) and shows Follow again. */
 function AuthorRow({ author }: { author: AuthorSummary }) {
+  const t = useT()
   const toggle = useToggleAuthorFollow()
   const [following, setFollowing] = useState(true)
-  const name = author.name ?? 'Author'
+  const name = author.name ?? t('Author')
 
   return (
     <li className="flex items-center gap-3 border-b border-rule py-3">
@@ -148,13 +153,13 @@ function AuthorRow({ author }: { author: AuthorSummary }) {
         variant={following ? 'secondary' : 'primary'}
         size="sm"
         aria-pressed={following}
-        aria-label={`${following ? 'Following' : 'Follow'} ${name}`}
+        aria-label={`${following ? t('Following') : t('Follow')} ${name}`}
         onClick={() => {
           setFollowing(!following)
           toggle.mutate({ authorId: author.authorId ?? 0, follow: !following }, { onError: () => setFollowing(following) })
         }}
       >
-        {following ? 'Following' : 'Follow'}
+        {following ? t('Following') : t('Follow')}
       </Button>
     </li>
   )

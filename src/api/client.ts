@@ -1,3 +1,4 @@
+import { getLang } from '../lib/i18n'
 import { ApiError, NETWORK_ERROR_MESSAGE, SERVER_ERROR_MESSAGE } from './errors'
 import type { WebTokenResponse } from './types'
 
@@ -156,7 +157,9 @@ async function send(path: string, options: RequestOptions, withToken = true): Pr
   if (withToken && accessToken) headers.Authorization = `Bearer ${accessToken}`
 
   try {
-    return await fetch(BASE_URL + path + queryString(options.params), {
+    // The backend's messages follow the reader's language; English is its default, so only Bengali is sent.
+    const params = getLang() === 'bn' ? { ...options.params, lang: 'bn' } : options.params
+    return await fetch(BASE_URL + path + queryString(params), {
       method: options.method ?? 'GET',
       headers,
       body,

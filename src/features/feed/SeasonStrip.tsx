@@ -1,3 +1,4 @@
+import { useT } from '../../lib/i18n'
 import { useState } from 'react'
 import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { filterPath, readAgriFilters, seasonCalendar, SEASON_LABELS } from '../../lib/agri'
@@ -8,6 +9,7 @@ import { cx } from '../../ui/cx'
  * mustard. Each band filters the feed by its season; choosing it again clears the filter.
  */
 export function SeasonStrip() {
+  const t = useT()
   // Read once per visit; the season changes four times a year, not while the page is open.
   const [today] = useState(() => new Date())
   const [params] = useSearchParams()
@@ -35,9 +37,9 @@ export function SeasonStrip() {
                 >
                   <span className="flex items-baseline gap-2 truncate">
                     <span className={cx('text-sm font-semibold', isCurrent || selected ? 'text-ink' : 'text-ink-muted group-hover:text-ink')}>
-                      {SEASON_LABELS[segment.season]}
+                      {t(SEASON_LABELS[segment.season])}
                     </span>
-                    {isCurrent && <span className="sr-only text-xs text-paddy sm:not-sr-only">now</span>}
+                    {isCurrent && <span className="sr-only text-xs text-paddy sm:not-sr-only">{t('now')}</span>}
                   </span>
                   <span
                     aria-hidden="true"
@@ -54,7 +56,7 @@ export function SeasonStrip() {
                       />
                     )}
                   </span>
-                  <span className="hidden truncate text-xs text-ink-muted sm:block">{segment.months}</span>
+                  <span className="hidden truncate text-xs text-ink-muted sm:block">{t(segment.months)}</span>
                 </Link>
               </li>
             )

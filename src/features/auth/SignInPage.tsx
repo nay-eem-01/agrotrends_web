@@ -1,3 +1,4 @@
+import { useT } from '../../lib/i18n'
 import { useState, type FormEvent } from 'react'
 import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useSignIn } from '../../api/auth'
@@ -9,6 +10,7 @@ import { AuthPage, FormError } from './AuthPage'
 import { useSession } from './session'
 
 export function SignInPage() {
+  const t = useT()
   const [params] = useSearchParams()
   const next = safeNext(params.get('next'))
   const navigate = useNavigate()
@@ -24,8 +26,8 @@ export function SignInPage() {
   function submit(event: FormEvent) {
     event.preventDefault()
     const found = {
-      email: isEmail(email) ? undefined : 'Enter your e-mail address.',
-      password: password ? undefined : 'Enter your password.',
+      email: isEmail(email) ? undefined : t('Enter your e-mail address.'),
+      password: password ? undefined : t('Enter your password.'),
     }
     setErrors(found)
     if (found.email || found.password) return
@@ -43,14 +45,14 @@ export function SignInPage() {
   const signUpLink = next === '/' ? '/sign-up' : `/sign-up?next=${encodeURIComponent(next)}`
 
   return (
-    <AuthPage title="Sign in" intro="Welcome back. Sign in to write, clap, follow and ask the advisor.">
+    <AuthPage title={t('Sign in')} intro={t('Welcome back. Sign in to write, clap, follow and ask the advisor.')}>
       {notice && (
         <output className="mb-6 block rounded-lg bg-field px-3 py-2 text-sm text-paddy">{notice}</output>
       )}
       <form onSubmit={submit} noValidate className="flex flex-col gap-5">
-        <TextField label="E-mail" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} error={errors.email} />
+        <TextField label={t('E-mail')} type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} error={errors.email} />
         <TextField
-          label="Password"
+          label={t('Password')}
           type="password"
           autoComplete="current-password"
           value={password}
@@ -58,17 +60,17 @@ export function SignInPage() {
           error={errors.password}
         />
         <Link to="/forgot-password" className="-mt-2 self-start text-sm text-ink-muted underline-offset-4 hover:text-ink hover:underline">
-          Forgot your password?
+          {t('Forgot your password?')}
         </Link>
         <FormError message={signIn.isError ? errorMessage(signIn.error) : null} />
         <Button type="submit" loading={signIn.isPending} className="mt-1">
-          Sign in
+          {t('Sign in')}
         </Button>
       </form>
       <p className="mt-8 text-sm text-ink-muted">
         New to AgroTrends?{' '}
         <Link to={signUpLink} className="font-medium text-paddy underline-offset-4 hover:underline">
-          Create an account
+          {t('Create an account')}
         </Link>
       </p>
     </AuthPage>

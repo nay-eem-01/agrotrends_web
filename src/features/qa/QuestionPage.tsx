@@ -1,3 +1,4 @@
+import { useT } from '../../lib/i18n'
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ApiError, errorMessage } from '../../api/errors'
@@ -15,13 +16,14 @@ import { Thread } from '../threads/Thread'
 import { AiDraftAnswer } from './AiDraftAnswer'
 
 export function QuestionPage() {
+  const t = useT()
   const questionId = Number(useParams().questionId)
   const question = useQuestion(questionId)
 
   if (question.isPending) {
     return (
       <div className="flex justify-center py-24 text-ink-muted">
-        <Spinner label="Loading question" />
+        <Spinner label={t('Loading question')} />
       </div>
     )
   }
@@ -37,37 +39,38 @@ export function QuestionPage() {
 }
 
 function QuestionView({ question }: { question: Question }) {
+  const t = useT()
   const { user } = useSession()
   const own = user?.id != null && user.id === question.userId
   const id = question.questionId ?? 0
   const agri = question.agri ?? {}
   const chips = [
-    agri.crop && { name: 'Crop', label: agri.crop, to: filterPath({ crop: agri.crop }, '/questions') },
-    agri.season && { name: 'Season', label: SEASON_LABELS[agri.season], to: filterPath({ season: agri.season }, '/questions') },
-    agri.region && { name: 'Region', label: agri.region, to: filterPath({ region: agri.region }, '/questions') },
-    agri.soil && { name: 'Soil', label: SOIL_LABELS[agri.soil], to: filterPath({ soil: agri.soil }, '/questions') },
+    agri.crop && { name: t('Crop'), label: agri.crop, to: filterPath({ crop: agri.crop }, '/questions') },
+    agri.season && { name: t('Season'), label: t(SEASON_LABELS[agri.season]), to: filterPath({ season: agri.season }, '/questions') },
+    agri.region && { name: t('Region'), label: agri.region, to: filterPath({ region: agri.region }, '/questions') },
+    agri.soil && { name: t('Soil'), label: t(SOIL_LABELS[agri.soil]), to: filterPath({ soil: agri.soil }, '/questions') },
   ].filter((chip): chip is { name: string; label: string; to: string } => Boolean(chip))
 
   return (
     <article className="mx-auto max-w-(--container-feed) px-4 pt-10 pb-20 sm:px-6 sm:pt-14">
       <title>{`${question.title} – AgroTrends`}</title>
-      <p className="text-sm text-ink-muted">Question</p>
+      <p className="text-sm text-ink-muted">{t('Question')}</p>
       <h1 className="mt-1 text-2xl sm:text-3xl">{question.title}</h1>
       <div className="mt-5 flex items-center gap-3 text-sm">
         <Avatar name={question.authorName ?? '?'} size={36} />
         <div className="min-w-0 flex-1">
           <p className="font-medium">{question.authorName}</p>
-          <p className="text-ink-muted">Asked {storyDate(question.createdAt)}</p>
+          <p className="text-ink-muted">{t('Asked {date}', { date: storyDate(question.createdAt) })}</p>
         </div>
         {own && <OwnerActions questionId={id} />}
       </div>
       <SafeHtml html={question.content} className="story-body mt-8" />
       {chips.length > 0 && (
-        <ul aria-label="Farming context" className="mt-8 flex flex-wrap gap-2">
+        <ul aria-label={t('Farming context')} className="mt-8 flex flex-wrap gap-2">
           {chips.map((chip) => (
             <li key={chip.name}>
               <Chip to={chip.to}>
-                <span className="mr-1 text-ink-muted">{chip.name}</span>
+                <span className="mr-1 text-ink-muted">{t(chip.name)}</span>
                 {chip.label}
               </Chip>
             </li>
@@ -80,6 +83,7 @@ function QuestionView({ question }: { question: Question }) {
 }
 
 function OwnerActions({ questionId }: { questionId: number }) {
+  const t = useT()
   const [confirming, setConfirming] = useState(false)
   const remove = useQuestionWrite()
   const navigate = useNavigate()
@@ -87,17 +91,17 @@ function OwnerActions({ questionId }: { questionId: number }) {
   if (confirming) {
     return (
       <div className="flex flex-wrap items-center justify-end gap-2">
-        <span>Delete this question and its answers?</span>
+        <span>{t('Delete this question and its answers?')}</span>
         <Button
           variant="danger"
           size="sm"
           loading={remove.isPending}
           onClick={() => remove.mutate({ kind: 'delete', questionId }, { onSuccess: () => navigate('/questions', { replace: true }) })}
         >
-          Delete
+          {t('Delete')}
         </Button>
         <Button variant="quiet" size="sm" onClick={() => setConfirming(false)}>
-          Keep it
+          {t('Keep it')}
         </Button>
         {remove.isError && (
           <span role="alert" className="text-danger">
@@ -110,10 +114,10 @@ function OwnerActions({ questionId }: { questionId: number }) {
   return (
     <div className="flex gap-1">
       <ButtonLink to={`/questions/${questionId}/edit`} variant="quiet" size="sm">
-        Edit
+        {t('Edit')}
       </ButtonLink>
       <Button variant="quiet" size="sm" onClick={() => setConfirming(true)}>
-        Delete
+        {t('Delete')}
       </Button>
     </div>
   )

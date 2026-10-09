@@ -1,3 +1,4 @@
+import { useT } from '../../lib/i18n'
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useResetPassword } from '../../api/auth'
@@ -11,6 +12,7 @@ export const PASSWORD_RESET_NOTICE = 'Password changed. Sign in with your new pa
 
 /** Opened from the reset e-mail: `/reset-password?token=...`. */
 export function ResetPasswordPage() {
+  const t = useT()
   const [params] = useSearchParams()
   const token = params.get('token') ?? ''
   const navigate = useNavigate()
@@ -21,9 +23,9 @@ export function ResetPasswordPage() {
 
   if (!token) {
     return (
-      <AuthPage title="This link isn't complete" intro="Open the link from the e-mail again, or ask for a new one.">
+      <AuthPage title={t('This link isn\'t complete')} intro={t('Open the link from the e-mail again, or ask for a new one.')}>
         <Link to="/forgot-password" className="text-sm font-medium text-paddy underline-offset-4 hover:underline">
-          Send a new reset link
+          {t('Send a new reset link')}
         </Link>
       </AuthPage>
     )
@@ -44,10 +46,10 @@ export function ResetPasswordPage() {
   }
 
   return (
-    <AuthPage title="Set a new password" intro="Choose a password you don't use anywhere else.">
+    <AuthPage title={t('Set a new password')} intro={t('Choose a password you don\'t use anywhere else.')}>
       <form onSubmit={submit} noValidate className="flex flex-col gap-5">
         <TextField
-          label="New password"
+          label={t('New password')}
           type="password"
           autoComplete="new-password"
           hint="8 to 16 characters, with a capital letter, a number and a symbol."
@@ -56,7 +58,7 @@ export function ResetPasswordPage() {
           error={errors.password}
         />
         <TextField
-          label="Repeat new password"
+          label={t('Repeat new password')}
           type="password"
           autoComplete="new-password"
           value={confirm}
@@ -66,11 +68,11 @@ export function ResetPasswordPage() {
         <FormError message={reset.isError ? errorMessage(reset.error) : null} />
         {reset.isError && (
           <Link to="/forgot-password" className="text-sm font-medium text-paddy underline-offset-4 hover:underline">
-            Send a new reset link
+            {t('Send a new reset link')}
           </Link>
         )}
         <Button type="submit" loading={reset.isPending} className="mt-1">
-          Set new password
+          {t('Set new password')}
         </Button>
       </form>
     </AuthPage>

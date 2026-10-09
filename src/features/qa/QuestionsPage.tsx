@@ -1,3 +1,4 @@
+import { useT } from '../../lib/i18n'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useQuestions, type Question } from '../../api/questions'
 import { errorMessage } from '../../api/errors'
@@ -12,6 +13,7 @@ import { SeasonStrip } from '../feed/SeasonStrip'
 
 /** `/questions`: what people are asking, filterable by season (the strip) and by crop, region and soil. */
 export function QuestionsPage() {
+  const t = useT()
   const [params] = useSearchParams()
   const filters = readAgriFilters(params)
   const questions = useQuestions(filters)
@@ -19,15 +21,15 @@ export function QuestionsPage() {
 
   return (
     <>
-      <title>Questions – AgroTrends</title>
+      <title>{t('Questions – AgroTrends')}</title>
       <div className="mx-auto max-w-(--container-page) px-4 pt-10 sm:px-6">
         <div className="flex max-w-(--container-feed) items-end justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl">Questions</h1>
-            <p className="mt-1 text-ink-muted">Ask the community about your crop, your soil, your season.</p>
+            <h1 className="text-2xl sm:text-3xl">{t('Questions')}</h1>
+            <p className="mt-1 text-ink-muted">{t('Ask the community about your crop, your soil, your season.')}</p>
           </div>
           <ButtonLink to="/questions/ask" size="sm">
-            Ask a question
+            {t('Ask a question')}
           </ButtonLink>
         </div>
       </div>
@@ -39,7 +41,7 @@ export function QuestionsPage() {
           <AgriFilterBar filters={filters} />
           {questions.isPending ? (
             <div className="flex justify-center py-16 text-ink-muted">
-              <Spinner label="Loading questions" />
+              <Spinner label={t('Loading questions')} />
             </div>
           ) : questions.isError ? (
             <p role="alert" className="py-16 text-ink-muted">
@@ -47,10 +49,10 @@ export function QuestionsPage() {
             </p>
           ) : list.length === 0 ? (
             <div className="py-16 text-center">
-              <h2 className="text-xl">{hasAgriFilters(filters) ? 'No questions match these filters' : 'No questions yet'}</h2>
-              <p className="mt-2 text-ink-muted">Ask the first one. Farmers and agronomists answer here.</p>
+              <h2 className="text-xl">{hasAgriFilters(filters) ? t('No questions match these filters') : t('No questions yet')}</h2>
+              <p className="mt-2 text-ink-muted">{t('Ask the first one. Farmers and agronomists answer here.')}</p>
               <ButtonLink to="/questions/ask" size="sm" className="mt-6">
-                Ask a question
+                {t('Ask a question')}
               </ButtonLink>
             </div>
           ) : (
@@ -63,7 +65,7 @@ export function QuestionsPage() {
               {questions.hasNextPage && (
                 <div className="flex justify-center py-8">
                   <Button variant="secondary" size="sm" loading={questions.isFetchingNextPage} onClick={() => void questions.fetchNextPage()}>
-                    Show more questions
+                    {t('Show more questions')}
                   </Button>
                 </div>
               )}
@@ -76,12 +78,13 @@ export function QuestionsPage() {
 }
 
 function QuestionRow({ question }: { question: Question }) {
+  const t = useT()
   const agri = question.agri ?? {}
   const chips = [
     agri.crop && { label: agri.crop, to: filterPath({ crop: agri.crop }, '/questions') },
-    agri.season && { label: SEASON_LABELS[agri.season], to: filterPath({ season: agri.season }, '/questions') },
+    agri.season && { label: t(SEASON_LABELS[agri.season]), to: filterPath({ season: agri.season }, '/questions') },
     agri.region && { label: agri.region, to: filterPath({ region: agri.region }, '/questions') },
-    agri.soil && { label: SOIL_LABELS[agri.soil], to: filterPath({ soil: agri.soil }, '/questions') },
+    agri.soil && { label: t(SOIL_LABELS[agri.soil]), to: filterPath({ soil: agri.soil }, '/questions') },
   ].filter((chip): chip is { label: string; to: string } => Boolean(chip))
   const preview = excerpt(htmlToText(question.content), 180)
 

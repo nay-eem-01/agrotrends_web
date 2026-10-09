@@ -1,3 +1,4 @@
+import { useT } from '../../lib/i18n'
 import { useState, type FormEvent } from 'react'
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { useSignUp, type SignUpRequest } from '../../api/auth'
@@ -80,6 +81,7 @@ const ACCOUNT_TYPES: { value: AccountType; label: string; hint: string }[] = [
 ]
 
 export function SignUpPage() {
+  const t = useT()
   const [params] = useSearchParams()
   const next = safeNext(params.get('next'))
   const navigate = useNavigate()
@@ -110,20 +112,20 @@ export function SignUpPage() {
   const signInLink = next === '/' ? '/sign-in' : `/sign-in?next=${encodeURIComponent(next)}`
 
   return (
-    <AuthPage title="Create your account" intro="Join farmers, agronomists and students sharing what works in the field.">
+    <AuthPage title={t('Create your account')} intro={t('Join farmers, agronomists and students sharing what works in the field.')}>
       <form onSubmit={submit} noValidate className="flex flex-col gap-5">
-        <TextField label="Full name" autoComplete="name" value={form.name} onChange={(e) => set('name', e.target.value)} error={errors.name} />
-        <TextField label="E-mail" type="email" autoComplete="email" value={form.email} onChange={(e) => set('email', e.target.value)} error={errors.email} />
+        <TextField label={t('Full name')} autoComplete="name" value={form.name} onChange={(e) => set('name', e.target.value)} error={errors.name} />
+        <TextField label={t('E-mail')} type="email" autoComplete="email" value={form.email} onChange={(e) => set('email', e.target.value)} error={errors.email} />
         <div className="grid grid-cols-[6rem_1fr] gap-3">
           <TextField
-            label="Code"
+            label={t('Code')}
             autoComplete="tel-country-code"
             value={form.countryCode}
             onChange={(e) => set('countryCode', e.target.value)}
             error={errors.countryCode}
           />
           <TextField
-            label="Mobile number"
+            label={t('Mobile number')}
             type="tel"
             inputMode="numeric"
             autoComplete="tel-national"
@@ -134,7 +136,7 @@ export function SignUpPage() {
           />
         </div>
         <TextField
-          label="Password"
+          label={t('Password')}
           type="password"
           autoComplete="new-password"
           hint="8 to 16 characters, with a capital letter, a number and a symbol."
@@ -144,7 +146,7 @@ export function SignUpPage() {
         />
 
         <fieldset className="flex flex-col gap-2">
-          <legend className="mb-1.5 text-sm font-medium text-ink">I want to join as</legend>
+          <legend className="mb-1.5 text-sm font-medium text-ink">{t('I want to join as')}</legend>
           {ACCOUNT_TYPES.map((option) => (
             // oxlint-disable-next-line jsx-a11y/label-has-associated-control -- the text comes from option.label
             <label
@@ -163,8 +165,8 @@ export function SignUpPage() {
                 className="mt-1 size-4 accent-paddy"
               />
               <span>
-                <span className="block font-medium">{option.label}</span>
-                <span className="block text-sm text-ink-muted">{option.hint}</span>
+                <span className="block font-medium">{t(option.label)}</span>
+                <span className="block text-sm text-ink-muted">{t(option.hint)}</span>
               </span>
             </label>
           ))}
@@ -172,35 +174,35 @@ export function SignUpPage() {
 
         {form.type === 'author' && (
           <fieldset className="flex flex-col gap-5 border-l-2 border-field pl-4">
-            <legend className="sr-only">Professional details</legend>
+            <legend className="sr-only">{t('Professional details')}</legend>
             <TextField
-              label="Designation"
-              placeholder="Agronomist, Upazila Agriculture Officer"
+              label={t('Designation')}
+              placeholder={t('Agronomist, Upazila Agriculture Officer')}
               value={form.designation}
               onChange={(e) => set('designation', e.target.value)}
               error={errors.designation}
             />
             <TextField
-              label="Specialities"
-              hint="Separate with commas, for example: rice, soil health."
+              label={t('Specialities')}
+              hint={t('Separate with commas, for example: rice, soil health.')}
               value={form.specialities}
               onChange={(e) => set('specialities', e.target.value)}
               error={errors.specialities}
             />
-            <TextField label="Occupation (optional)" value={form.occupation} onChange={(e) => set('occupation', e.target.value)} />
-            <TextField label="Workplace or institution (optional)" value={form.institution} onChange={(e) => set('institution', e.target.value)} />
+            <TextField label={t('Occupation (optional)')} value={form.occupation} onChange={(e) => set('occupation', e.target.value)} />
+            <TextField label={t('Workplace or institution (optional)')} value={form.institution} onChange={(e) => set('institution', e.target.value)} />
           </fieldset>
         )}
 
         <FormError message={signUp.isError ? errorMessage(signUp.error) : null} />
         <Button type="submit" loading={signUp.isPending} className="mt-1">
-          Create account
+          {t('Create account')}
         </Button>
       </form>
       <p className="mt-8 text-sm text-ink-muted">
         Already have an account?{' '}
         <Link to={signInLink} className="font-medium text-paddy underline-offset-4 hover:underline">
-          Sign in
+          {t('Sign in')}
         </Link>
       </p>
     </AuthPage>

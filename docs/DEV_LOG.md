@@ -19,12 +19,13 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 - Phase F5 AI advisor on `feat/ai-base` (stacked on F4): F5.1 advisor (`feat/advisor`) , F5.2 history (`feat/advisor-history`) and F5.3 related stories
   (`feat/related`) done. Phase F5 is complete.
 - Phase F6 polish on `feat/polish-base` (stacked on F5): F6.1 Bengali interface (`feat/bengali`) , F6.2 dark theme
-  (`feat/dark-theme`) and F6.3 accessibility (`feat/a11y`) done.
+  (`feat/dark-theme`) , F6.3 accessibility (`feat/a11y`) and F6.4 smoke tests
+  (`feat/e2e`) done.
 
 ## Next up
 
 1. **Nayeem:** open and merge the F3 step PRs into `feat/writing-base` in order, then the base into `development`.
-2. F6.4 Playwright smoke tests, F6.5 performance, F6.6 admin categories.
+2. F6.5 performance, F6.6 admin categories.
 
 ## Open items
 
@@ -37,6 +38,20 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Make `development` the default branch on GitHub and protect it | Nayeem | — |
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
+
+---
+
+## 2026-10-09 (F6.4 Playwright smoke tests)
+
+**Done**
+- `npm run e2e` (`@playwright/test`, `playwright.config.ts`, `e2e/smoke.spec.ts`): starts the dev server on 5174
+  with `API_TARGET`, then: a visitor reads the feed and opens a story; questions, search and the advisor load; the
+  Bengali switch works both ways; signed in, an author writes, publishes and deletes a story, and asks and deletes a
+  question (both clean up after themselves).
+- Signed-in tests need `E2E_EMAIL` / `E2E_PASSWORD` and are skipped otherwise. `PW_CHANNEL=chrome` uses the
+  installed Chrome; without it, `npx playwright install chromium` once.
+- Vitest now only collects `src/**/*.test.*`; Playwright output is git-ignored; CLAUDE.md lists the command.
+- All 5 passed against the local backend (8081).
 
 ---
 

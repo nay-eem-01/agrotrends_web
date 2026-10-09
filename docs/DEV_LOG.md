@@ -18,13 +18,13 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   (`feat/ask`) and F4.4 AI draft answer (`feat/ai-draft-answer`) done. Phase F4 is complete.
 - Phase F5 AI advisor on `feat/ai-base` (stacked on F4): F5.1 advisor (`feat/advisor`) , F5.2 history (`feat/advisor-history`) and F5.3 related stories
   (`feat/related`) done. Phase F5 is complete.
-- Phase F6 polish on `feat/polish-base` (stacked on F5): F6.1 Bengali interface (`feat/bengali`) and F6.2 dark theme
-  (`feat/dark-theme`) done.
+- Phase F6 polish on `feat/polish-base` (stacked on F5): F6.1 Bengali interface (`feat/bengali`) , F6.2 dark theme
+  (`feat/dark-theme`) and F6.3 accessibility (`feat/a11y`) done.
 
 ## Next up
 
 1. **Nayeem:** open and merge the F3 step PRs into `feat/writing-base` in order, then the base into `development`.
-2. F6.3 accessibility, F6.4 Playwright smoke tests, F6.5 performance, F6.6 admin categories.
+2. F6.4 Playwright smoke tests, F6.5 performance, F6.6 admin categories.
 
 ## Open items
 
@@ -37,6 +37,24 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Make `development` the default branch on GitHub and protect it | Nayeem | — |
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
+
+---
+
+## 2026-10-09 (F6.3 accessibility pass)
+
+**Done**
+- axe-core (WCAG 2.1 A/AA rules) on 15 pages, signed in and out, light and dark, in Chromium: 7 findings, all
+  fixed; the re-run reports none. No colour-contrast findings in either theme.
+- Clap button: the action is screen-reader text before the visible count, so its name matches what's shown
+  ("Clap for this story, 12 claps"). Account button: screen-reader text instead of `aria-label` (the visible
+  initials). The editor has a level-one heading ("New story" / "Editing ...").
+- Escape closes the account menu and puts focus back on its button.
+- Already in place and re-checked: skip link, visible focus ring, 44px targets, labelled fields with described
+  errors, native `<dialog>` for the publish sheet, `prefers-reduced-motion`.
+- Tests: clap names updated, account menu Escape case.
+
+**Known limitations**
+- The editor's formatting toolbar is reached with Tab (no arrow-key roving focus).
 
 ---
 

@@ -5,18 +5,21 @@ import { defineConfig } from 'vitest/config'
 // In development the API is reached through this proxy, so the browser sees one origin. The proxy drops the
 // Origin header because the backend only allows its configured CORS origins (http://localhost:5173 today);
 // that keeps any dev port working. Uploaded images are served by the backend under /uploads.
+// API_TARGET points the proxy elsewhere when 8080 is taken (e.g. API_TARGET=http://localhost:8081 npm run dev).
+const apiTarget = process.env.API_TARGET ?? 'http://localhost:8080'
+
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
+        target: apiTarget,
         configure: (proxy) => {
           proxy.on('proxyReq', (proxyReq) => proxyReq.removeHeader('origin'))
         },
       },
-      '/uploads': 'http://localhost:8080',
+      '/uploads': apiTarget,
     },
   },
   test: {

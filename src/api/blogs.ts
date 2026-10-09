@@ -104,3 +104,13 @@ export function useMyDrafts() {
     getNextPageParam: (page) => (page.last ? undefined : page.number + 1),
   })
 }
+
+/** Stories on similar topics, by meaning (signed-in only). Empty until the backend has indexed stories. */
+export function useRelatedStories(blogId: number, enabled: boolean) {
+  return useQuery({
+    queryKey: ['blogs', 'related', blogId],
+    queryFn: ({ signal }) => api<Schemas['RelatedBlogResponse'][]>(`/api/blogs/id/${blogId}/related`, { params: { limit: 4 }, signal }),
+    enabled,
+    retry: false,
+  })
+}

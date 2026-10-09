@@ -15,6 +15,7 @@ import { ClapButton } from '../reactions/ClapButton'
 import { WrittenBy } from '../authors/AuthorPage'
 import { NotFoundPage } from '../errors/NotFoundPage'
 import { Thread } from '../threads/Thread'
+import { RelatedStories } from './RelatedStories'
 
 export function StoryPage() {
   const { slug = '' } = useParams()
@@ -93,6 +94,7 @@ function Story({ story }: { story: BlogResponse }) {
         <StoryFooter story={story} />
         <StoryActions story={story} />
         {author?.authorId != null && <WrittenBy authorId={author.authorId} fallbackName={author.name ?? ''} />}
+        {story.id != null && story.status === 'PUBLISHED' && <RelatedStories blogId={story.id} />}
         {story.id != null && story.status === 'PUBLISHED' && <Thread kind="comments" parentId={story.id} />}
       </div>
     </article>

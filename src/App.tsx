@@ -1,5 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { Route, Routes } from 'react-router-dom'
+import { AdvisorHistoryPage } from './features/ai/AdvisorHistoryPage'
+import { AdvisorPage } from './features/ai/AdvisorPage'
 import { AuthorPage } from './features/authors/AuthorPage'
 import { ForgotPasswordPage } from './features/auth/ForgotPasswordPage'
 import { ResetPasswordPage } from './features/auth/ResetPasswordPage'
@@ -46,6 +48,7 @@ export default function App() {
         <Route path="/s/:blogId" element={<StoryById />} />
         <Route path="/authors/:authorId" element={<AuthorPage />} />
         <Route path="/tags/:tagName" element={<TagPage />} />
+        <Route path="/advisor" element={<AdvisorPage />} />
         <Route path="/questions" element={<QuestionsPage />} />
         <Route path="/questions/:questionId" element={<QuestionPage />} />
         <Route path="/search" element={<SearchPage />} />
@@ -59,6 +62,7 @@ export default function App() {
           <Route path="/write/:blogId" element={editor} />
           <Route path="/questions/ask" element={<AskPage />} />
           <Route path="/questions/:questionId/edit" element={<AskPage />} />
+          <Route path="/advisor/history" element={<AdvisorHistoryPage />} />
           <Route path="/me/stories" element={<MyStoriesPage />} />
           <Route path="/library" element={<LibraryPage />} />
           <Route path="/settings" element={<SettingsPage />} />

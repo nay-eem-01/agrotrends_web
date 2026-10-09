@@ -137,6 +137,15 @@
   }
 }
 
+/* Tiptap's placeholder on an empty story. */
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+  color: color-mix(in srgb, var(--color-ink-muted) 60%, transparent);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

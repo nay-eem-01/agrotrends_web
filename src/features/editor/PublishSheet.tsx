@@ -1,6 +1,8 @@
-import { X } from '@phosphor-icons/react'
+import { Sparkle, X } from '@phosphor-icons/react'
 import { useEffect, useId, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
+import { useBlogAssist } from '../../api/ai'
 import { useCategories } from '../../api/categories'
+import { errorMessage } from '../../api/errors'
 import { useTags } from '../../api/topics'
 import { SEASON_LABELS, SOIL_LABELS, seasonCalendar, type Season, type Soil } from '../../lib/agri'
 import { Button } from '../../ui/Button'
@@ -27,13 +29,15 @@ interface PublishSheetProps {
   /** new: Publish now / Save as draft; draft: Publish / Save details; published: Save details / Unpublish. */
   mode: 'new' | 'draft' | 'published'
   initial: StoryDetails
+  /** The story, for AI suggestions. */
+  draft: { title: string; content: string }
   busy: boolean
   error: string | null
   onSubmit: (details: StoryDetails, action: PublishAction) => void
   onClose: () => void
 }
 
-export function PublishSheet({ open, mode, initial, busy, error, onSubmit, onClose }: PublishSheetProps) {
+export function PublishSheet({ open, mode, initial, draft, busy, error, onSubmit, onClose }: PublishSheetProps) {
   const dialog = useRef<HTMLDialogElement>(null)
   const titleId = useId()
 
@@ -51,12 +55,12 @@ export function PublishSheet({ open, mode, initial, busy, error, onSubmit, onClo
       onClose={onClose}
       className="m-0 mt-auto max-h-[92dvh] w-full max-w-none overflow-y-auto rounded-t-2xl bg-paper p-0 text-ink backdrop:bg-ink/40 sm:m-auto sm:max-w-xl sm:rounded-2xl"
     >
-      {open && <DetailsForm titleId={titleId} mode={mode} initial={initial} busy={busy} error={error} onSubmit={onSubmit} onClose={onClose} />}
+      {open && <DetailsForm titleId={titleId} mode={mode} initial={initial} draft={draft} busy={busy} error={error} onSubmit={onSubmit} onClose={onClose} />}
     </dialog>
   )
 }
 
-function DetailsForm({ titleId, mode, initial, busy, error, onSubmit, onClose }: Omit<PublishSheetProps, 'open'> & { titleId: string }) {
+function DetailsForm({ titleId, mode, initial, draft, busy, error, onSubmit, onClose }: Omit<PublishSheetProps, 'open'> & { titleId: string }) {
   const categories = useCategories()
   const [details, setDetails] = useState(initial)
   const [missingCategory, setMissingCategory] = useState(false)
@@ -103,6 +107,7 @@ function DetailsForm({ titleId, mode, initial, busy, error, onSubmit, onClose }:
       />
 
       <TagInput tags={details.tags} onChange={(tags) => set({ tags })} />
+      <AiHelp draft={draft} tags={details.tags} onAddTag={(tag) => details.tags.length < MAX_TAGS && set({ tags: [...details.tags, tag] })} />
 
       <fieldset className="flex flex-col gap-4">
         <legend className="mb-2 font-sans text-base font-semibold">Farming details</legend>
@@ -293,5 +298,63 @@ function SeasonPicker({ value, onChange }: { value?: Season; onChange: (season?:
         )
       })}
     </div>
+  )
+}
+
+/** Gemini's summary and topic ideas for the draft, clearly marked as suggestions. */
+function AiHelp({ draft, tags, onAddTag }: { draft: { title: string; content: string }; tags: string[]; onAddTag: (tag: string) => void }) {
+  const assist = useBlogAssist()
+  const [copied, setCopied] = useState(false)
+  const ideas = assist.data?.suggestedTags?.filter((tag) => !tags.includes(tag)) ?? []
+
+  return (
+    <section aria-label="AI suggestions" className="rounded-lg border border-dashed border-rule p-4">
+      {!assist.data ? (
+        <div className="flex flex-wrap items-center gap-3">
+          <Button variant="secondary" size="sm" loading={assist.isPending} onClick={() => assist.mutate(draft)}>
+            <Sparkle size={16} aria-hidden="true" />
+            Suggest topics and a summary
+          </Button>
+          {assist.isError ? (
+            <span role="alert" className="text-sm text-ink-muted">
+              {errorMessage(assist.error)}
+            </span>
+          ) : (
+            <span className="text-xs text-ink-muted">AI reads your draft; nothing is changed until you choose.</span>
+          )}
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3">
+          <p className="flex items-center gap-1.5 text-xs text-ink-muted">
+            <Sparkle size={14} aria-hidden="true" />
+            Suggested by AI. Check before you use it.
+          </p>
+          {assist.data.summary && (
+            <div>
+              <p className="font-serif text-base">{assist.data.summary}</p>
+              <Button
+                variant="quiet"
+                size="sm"
+                className="-ml-4"
+                onClick={() => navigator.clipboard?.writeText(assist.data.summary ?? '').then(() => setCopied(true))}
+              >
+                {copied ? 'Summary copied' : 'Copy summary'}
+              </Button>
+            </div>
+          )}
+          {ideas.length > 0 && (
+            <ul aria-label="Suggested by AI" className="flex flex-wrap gap-2">
+              {ideas.map((tag) => (
+                <li key={tag}>
+                  <button type="button" disabled={tags.length >= MAX_TAGS} onClick={() => onAddTag(tag)} className="h-8 rounded-full border border-paddy/40 px-3 text-sm text-paddy hover:bg-field disabled:opacity-50">
+                    + {tag}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+    </section>
   )
 }

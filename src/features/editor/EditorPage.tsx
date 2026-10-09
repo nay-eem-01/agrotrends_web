@@ -119,6 +119,7 @@ function NewStory() {
         open={sheetOpen}
         mode="new"
         initial={detailsOf()}
+        draft={{ title: draft.title, content: draft.html }}
         busy={write.isPending}
         error={write.isError ? errorMessage(write.error) : null}
         onSubmit={submit}
@@ -231,6 +232,7 @@ function StoryForm({ story }: { story: BlogResponse }) {
         open={sheetOpen}
         mode={published ? 'published' : 'draft'}
         initial={detailsOf(story)}
+        draft={{ title, content: html }}
         busy={sheetWrite.isPending}
         error={sheetWrite.isError ? errorMessage(sheetWrite.error) : null}
         onSubmit={submit}

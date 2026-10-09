@@ -56,9 +56,10 @@ function Page({ children }: { children: ReactNode }) {
   return <section className="mx-auto max-w-(--container-feed) px-4 pb-24 sm:px-6">{children}</section>
 }
 
-function StatusBar({ status, children }: { status: ReactNode; children?: ReactNode }) {
+function StatusBar({ status, children, heading }: { status: ReactNode; children?: ReactNode; heading: string }) {
   return (
     <div className="flex min-h-14 items-center justify-between gap-4 pt-4">
+      <h1 className="sr-only">{heading}</h1>
       <output aria-live="polite" className="text-sm text-ink-muted">
         {status}
       </output>
@@ -111,7 +112,7 @@ function NewStory() {
   return (
     <Page>
       <title>New story – AgroTrends</title>
-      <StatusBar status={savedAt && !isBlank(content) ? 'Draft saved on this device' : 'New story'}>
+      <StatusBar heading="New story" status={savedAt && !isBlank(content) ? 'Draft saved on this device' : 'New story'}>
         <Button size="sm" disabled={!ready} title={ready ? undefined : 'Add a title and some text first'} onClick={() => setSheetOpen(true)}>
           Publish
         </Button>
@@ -219,7 +220,7 @@ function StoryForm({ story }: { story: BlogResponse }) {
   return (
     <Page>
       <title>{`Editing ${story.title} – AgroTrends`}</title>
-      <StatusBar status={statusText}>
+      <StatusBar heading={`Editing ${story.title}`} status={statusText}>
         {published && (
           <Button size="sm" disabled={!dirty} loading={write.isPending} onClick={() => save(false)}>
             Save changes

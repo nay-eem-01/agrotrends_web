@@ -14,6 +14,7 @@ export function AccountMenu() {
   const [open, setOpen] = useState(false)
   const panelId = useId()
   const root = useRef<HTMLDivElement>(null)
+  const trigger = useRef<HTMLButtonElement>(null)
   const name = user?.name || t('Your account')
 
   useEffect(() => {
@@ -21,6 +22,8 @@ export function AccountMenu() {
     function close(event: MouseEvent | KeyboardEvent) {
       if (event instanceof KeyboardEvent ? event.key === 'Escape' : !root.current?.contains(event.target as Node)) {
         setOpen(false)
+        // Escape returns focus to the button that opened the menu.
+        if (event instanceof KeyboardEvent) trigger.current?.focus()
       }
     }
     document.addEventListener('mousedown', close)
@@ -40,13 +43,14 @@ export function AccountMenu() {
   return (
     <div ref={root} className="relative">
       <button
+        ref={trigger}
         type="button"
         aria-expanded={open}
         aria-controls={panelId}
-        aria-label={t('Account')}
         onClick={() => setOpen((value) => !value)}
         className="flex h-11 w-11 items-center justify-center rounded-full"
       >
+        <span className="sr-only">{t('Account')}</span>
         <Avatar name={name} size={32} />
       </button>
       {open && (

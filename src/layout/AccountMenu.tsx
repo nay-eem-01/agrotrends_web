@@ -1,7 +1,8 @@
 import { useT } from '../lib/i18n'
-import { BookmarksSimple, GearSix, NotePencil, SignOut } from '@phosphor-icons/react'
+import { BookmarksSimple, GearSix, NotePencil, SignOut, Tag } from '@phosphor-icons/react'
 import { useEffect, useId, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { isAdmin } from '../api/auth'
 import { useSession } from '../features/auth/session'
 import { Avatar } from '../ui/Avatar'
 import { LanguageSwitch } from './Footer'
@@ -63,6 +64,12 @@ export function AccountMenu() {
             <Link to="/me/stories" onClick={() => setOpen(false)} className="mt-1 flex h-11 items-center gap-2 px-4 text-sm text-ink-muted hover:bg-field hover:text-ink">
               <NotePencil size={18} aria-hidden="true" />
               {t('Your stories')}
+            </Link>
+          )}
+          {isAdmin(user) && (
+            <Link to="/admin/categories" onClick={() => setOpen(false)} className="flex h-11 items-center gap-2 px-4 text-sm text-ink-muted hover:bg-field hover:text-ink">
+              <Tag size={18} aria-hidden="true" />
+              {t('Categories')}
             </Link>
           )}
           <Link to="/library" onClick={() => setOpen(false)} className="flex h-11 items-center gap-2 px-4 text-sm text-ink-muted hover:bg-field hover:text-ink">

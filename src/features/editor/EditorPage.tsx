@@ -68,9 +68,9 @@ function useAutosave<T>(value: T, save: (value: T) => void, enabled: boolean) {
 }
 
 function NewStory() {
-  const [draft, setDraft] = useState(() => loadLocalDraft() ?? { title: '', html: '', savedAt: 0 })
+  const [draft, setDraft] = useState(() => loadLocalDraft() ?? { title: '', html: '', cover: '', savedAt: 0 })
   const [savedAt, setSavedAt] = useState(draft.savedAt)
-  const content = { title: draft.title, html: draft.html }
+  const content = { title: draft.title, html: draft.html, cover: draft.cover }
   useAutosave(JSON.stringify(content), () => setSavedAt(saveLocalDraft(content).savedAt), true)
 
   return (
@@ -80,8 +80,10 @@ function NewStory() {
       <StoryEditor
         title={draft.title}
         html={draft.html}
+        cover={draft.cover ?? ''}
         onTitleChange={(title) => setDraft((d) => ({ ...d, title }))}
         onHtmlChange={(html) => setDraft((d) => ({ ...d, html }))}
+        onCoverChange={(cover) => setDraft((d) => ({ ...d, cover }))}
       />
     </Page>
   )
@@ -116,6 +118,7 @@ function StoryForm({ story }: { story: BlogResponse }) {
   const write = useBlogWrite()
   const [title, setTitle] = useState(story.title ?? '')
   const [html, setHtml] = useState(story.content ?? '')
+  const [cover, setCover] = useState(story.imageUrl ?? '')
   const [dirty, setDirty] = useState(false)
   const published = story.status === 'PUBLISHED'
 
@@ -130,7 +133,7 @@ function StoryForm({ story }: { story: BlogResponse }) {
           title: title.trim(),
           content: html,
           categoryId: story.category?.id ?? 0,
-          imageUrl: story.imageUrl,
+          imageUrl: cover || undefined,
           tags: story.tags,
           agri: story.agri,
         },
@@ -138,7 +141,7 @@ function StoryForm({ story }: { story: BlogResponse }) {
       { onSuccess: () => setDirty(false) },
     )
   }
-  useAutosave(`${title}\u0000${html}`, () => save(true), !published)
+  useAutosave(`${title}\u0000${html}\u0000${cover}`, () => save(true), !published)
 
   const statusText = write.isPending
     ? 'Saving…'
@@ -167,6 +170,11 @@ function StoryForm({ story }: { story: BlogResponse }) {
       <StoryEditor
         title={title}
         html={html}
+        cover={cover}
+        onCoverChange={(value) => {
+          setCover(value)
+          setDirty(true)
+        }}
         onTitleChange={(value) => {
           setTitle(value)
           setDirty(true)

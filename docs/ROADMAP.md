@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend
 
-**Progress:** 27 of 36 steps done
+**Progress:** 28 of 36 steps done
 
 ---
 
@@ -69,7 +69,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 | # | Step | Status |
 |---|---|---|
 | F5.1 | Ask the advisor: answer with cited stories as links, daily quota shown, 503 handled | ✅ |
-| F5.2 | My AI history | ⬜ |
+| F5.2 | My AI history | ✅ |
 | F5.3 | Related stories at the end of a story page | ⬜ |
 
 ## Phase F6 — Polish (`feat/polish-base`)

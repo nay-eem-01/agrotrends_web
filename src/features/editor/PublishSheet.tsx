@@ -52,7 +52,7 @@ export function PublishSheet({ open, mode, initial, draft, busy, error, onSubmit
       ref={dialog}
       aria-labelledby={titleId}
       onClose={onClose}
-      className="m-0 mt-auto max-h-[92dvh] w-full max-w-none overflow-y-auto rounded-t-2xl bg-paper p-0 text-ink backdrop:bg-ink/40 sm:m-auto sm:max-w-xl sm:rounded-2xl"
+      className="m-0 mt-auto max-h-[92dvh] w-full max-w-none overflow-y-auto rounded-t-2xl bg-paper p-0 text-ink backdrop:bg-shade/50 sm:m-auto sm:max-w-xl sm:rounded-2xl"
     >
       {open && <DetailsForm titleId={titleId} mode={mode} initial={initial} draft={draft} busy={busy} error={error} onSubmit={onSubmit} onClose={onClose} />}
     </dialog>

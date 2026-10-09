@@ -20,6 +20,8 @@ export const BN: Record<string, string> = {
   Account: 'অ্যাকাউন্ট',
   'Your account': 'আপনার অ্যাকাউন্ট',
   Loading: 'লোড হচ্ছে',
+  'Light theme': 'হালকা রং',
+  'Dark theme': 'গাঢ় রং',
 
   // Home and feed
   'Farming knowledge from people who grow it.': 'যাঁরা ফসল ফলান, তাঁদের কাছ থেকে চাষের জ্ঞান।',

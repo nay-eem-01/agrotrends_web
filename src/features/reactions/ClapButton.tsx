@@ -99,7 +99,7 @@ export function ClapButton({ story }: { story: BlogResponse }) {
       <span className="inline-flex h-11 items-center gap-1.5 text-sm text-ink-muted">
         <HandsClapping size={22} aria-hidden="true" />
         <span>
-          {total} <span className="sr-only">claps</span>
+          {total} <span className="sr-only">{t('claps')}</span>
         </span>
       </span>
     )
@@ -115,7 +115,6 @@ export function ClapButton({ story }: { story: BlogResponse }) {
         onPointerLeave={stopHold}
         onContextMenu={(event) => event.preventDefault()}
         disabled={full && signedIn}
-        aria-label={signedIn ? (full ? t('You gave this story 50 claps') : t('Clap for this story')) : t('Sign in to clap')}
         className={cx(
           'inline-flex h-11 items-center gap-1.5 rounded-full pr-2 text-sm select-none touch-manipulation',
           mine > 0 ? 'text-ink' : 'text-ink-muted hover:text-ink',
@@ -124,7 +123,9 @@ export function ClapButton({ story }: { story: BlogResponse }) {
       >
         <HandsClapping size={22} weight={mine > 0 ? 'fill' : 'regular'} className={mine > 0 ? 'text-mustard' : undefined} aria-hidden="true" />
         <span aria-live="polite">
-          {total} <span className="sr-only">{total === 1 ? 'clap' : 'claps'}</span>
+          {/* The action first, then the count people see, so the name matches what's on screen. */}
+          <span className="sr-only">{signedIn ? (full ? t('You gave this story 50 claps') : t('Clap for this story')) : t('Sign in to clap')},</span>{' '}
+          {total} <span className="sr-only">{total === 1 ? t('clap') : t('claps')}</span>
         </span>
       </button>
       {pending > 0 && (

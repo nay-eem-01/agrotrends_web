@@ -93,6 +93,8 @@ export const BN: Record<string, string> = {
   Follow: 'অনুসরণ করুন',
   Following: 'অনুসরণ করছেন',
   'Clap for this story': 'এই লেখায় হাততালি দিন',
+  clap: 'হাততালি',
+  claps: 'হাততালি',
   'Sign in to clap': 'হাততালি দিতে সাইন ইন করুন',
   'Sign in to save': 'সংরক্ষণ করতে সাইন ইন করুন',
   'You gave this story 50 claps': 'আপনি এই লেখায় ৫০টি হাততালি দিয়েছেন',

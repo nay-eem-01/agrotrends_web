@@ -185,3 +185,16 @@ test('a protected screen waits for the session to restore', async () => {
   expect(await screen.findByRole('heading', { name: 'Settings' })).toBeInTheDocument()
   expect(screen.getByTestId('path')).toHaveTextContent('/settings')
 })
+
+test('Escape closes the account menu and returns focus to it', async () => {
+  localStorage.setItem('agrotrends.refreshToken', 'r0')
+  mockApi({ 'POST /api/auth/refresh-token': () => envelope(200, tokens), 'GET /api/feed/following': () => envelope(200, page([])), 'GET /api/tags': () => envelope(200, []) })
+  renderWithProviders(<App />, '/')
+
+  const button = await screen.findByRole('button', { name: 'Account' })
+  await userEvent.click(button)
+  expect(screen.getByRole('button', { name: 'Sign out' })).toBeInTheDocument()
+  await userEvent.keyboard('{Escape}')
+  expect(screen.queryByRole('button', { name: 'Sign out' })).not.toBeInTheDocument()
+  expect(button).toHaveFocus()
+})

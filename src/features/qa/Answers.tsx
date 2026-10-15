@@ -6,13 +6,13 @@ import { errorMessage } from '../../api/errors'
 import { useMyVotes } from '../../api/votes'
 import { storyDate } from '../../lib/dates'
 import { formatNumber, useT } from '../../lib/i18n'
-import { Avatar } from '../../ui/Avatar'
 import { Button } from '../../ui/Button'
 import { SafeHtml } from '../../ui/SafeHtml'
 import { Spinner } from '../../ui/Spinner'
 import { useSession } from '../auth/session'
 import { useRequireSignIn } from '../auth/useRequireSignIn'
 import { Composer } from '../threads/Composer'
+import { AuthorLine } from './AuthorLine'
 import { VoteControl } from './VoteControl'
 
 /** A question's answers as cards, in the backend's order, each with its replies on demand; then the answer form. */
@@ -206,13 +206,15 @@ function Post({ questionId, item, compact = false }: { questionId: number; item:
 
   return (
     <>
-      <header className="flex items-center gap-2 text-sm">
-        <Avatar name={item.authorName ?? '?'} size={compact ? 24 : 32} />
-        <span className="font-medium">{item.authorName}</span>
-        <span className="text-muted-foreground">
-          · {storyDate(item.createdAt)}
-          {edited && ` · ${t('edited')}`}
-        </span>
+      <header>
+        <AuthorLine
+          userId={item.userId}
+          name={item.authorName}
+          reputation={compact ? undefined : item.authorReputation}
+          badges={item.authorBadges}
+          meta={`${storyDate(item.createdAt)}${edited ? ` · ${t('edited')}` : ''}`}
+          size={compact ? 'sm' : 'md'}
+        />
       </header>
       {mode === 'edit' ? (
         <div className="mt-3">

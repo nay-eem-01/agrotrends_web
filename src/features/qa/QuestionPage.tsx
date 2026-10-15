@@ -5,7 +5,6 @@ import { ApiError, errorMessage } from '../../api/errors'
 import { useQuestion, useQuestionWrite, type Question } from '../../api/questions'
 import { filterPath, SEASON_LABELS, SOIL_LABELS } from '../../lib/agri'
 import { storyDate } from '../../lib/dates'
-import { Avatar } from '../../ui/Avatar'
 import { Button, ButtonLink } from '../../ui/Button'
 import { Chip } from '../../ui/Chip'
 import { SafeHtml } from '../../ui/SafeHtml'
@@ -14,6 +13,7 @@ import { useSession } from '../auth/session'
 import { NotFoundPage } from '../errors/NotFoundPage'
 import { useMyVotes } from '../../api/votes'
 import { Answers } from './Answers'
+import { AuthorLine } from './AuthorLine'
 import { VoteControl } from './VoteControl'
 
 export function QuestionPage() {
@@ -60,10 +60,14 @@ function QuestionView({ question }: { question: Question }) {
       <p className="text-sm text-ink-muted">{question.category?.categoryName ?? t('Question')}</p>
       <h1 className="mt-1 text-2xl sm:text-3xl">{question.title}</h1>
       <div className="mt-5 flex items-center gap-3 text-sm">
-        <Avatar name={question.authorName ?? '?'} size={36} />
         <div className="min-w-0 flex-1">
-          <p className="font-medium">{question.authorName}</p>
-          <p className="text-ink-muted">{t('Asked {date}', { date: storyDate(question.createdAt) })}</p>
+          <AuthorLine
+            userId={question.userId}
+            name={question.authorName}
+            reputation={question.authorReputation}
+            badges={question.authorBadges}
+            meta={t('Asked {date}', { date: storyDate(question.createdAt) })}
+          />
         </div>
         {own && <OwnerActions questionId={id} />}
       </div>

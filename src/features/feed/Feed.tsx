@@ -50,7 +50,7 @@ export function Feed() {
         {TABS.filter((tab) => signedIn || !tab.signedInOnly).map((tab) => (
           <Link
             key={tab.kind}
-            to={`/?feed=${tab.kind}`}
+            to={`/stories?feed=${tab.kind}`}
             aria-current={!filtered && tab.kind === kind ? 'page' : undefined}
             className={cx(
               '-mb-px flex h-12 items-center border-b text-sm',
@@ -137,7 +137,7 @@ function EmptyFeed({ kind }: { kind: FeedKind }) {
       <div className="py-16 text-center">
         <h2 className="text-xl">{t('Your feed is waiting for you')}</h2>
         <p className="mt-2 text-ink-muted">{t('Follow authors and topics, and their new stories show up here.')}</p>
-        <ButtonLink to="/?feed=latest" variant="secondary" size="sm" className="mt-6">
+        <ButtonLink to="/stories?feed=latest" variant="secondary" size="sm" className="mt-6">
           {t('Read the latest stories')}
         </ButtonLink>
       </div>

@@ -59,7 +59,7 @@ function ReadingList() {
         <div className="py-16 text-center">
           <h2 className="text-xl">{t('Nothing saved yet')}</h2>
           <p className="mt-2 text-ink-muted">{t('Tap the bookmark on any story to keep it here for later.')}</p>
-          <ButtonLink to="/?feed=latest" variant="secondary" size="sm" className="mt-6">
+          <ButtonLink to="/stories?feed=latest" variant="secondary" size="sm" className="mt-6">
             {t('Find stories')}
           </ButtonLink>
         </div>

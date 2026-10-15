@@ -1,16 +1,13 @@
 import { Sparkle, X } from '@phosphor-icons/react'
-import { useEffect, useId, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
+import { useEffect, useId, useRef, useState, type FormEvent } from 'react'
 import { useBlogAssist } from '../../api/ai'
 import { useCategories } from '../../api/categories'
 import { errorMessage } from '../../api/errors'
-import { useTags } from '../../api/topics'
 import type { Season, Soil } from '../../lib/agri'
 import { Button } from '../../ui/Button'
 import { FarmingFields, Select } from '../farming/FarmingFields'
+import { MAX_TAGS, TagInput } from '../topics/TagInput'
 
-/** The backend's limits (AppConstants.MAX_TAGS_PER_BLOG, MAX_TAG_LENGTH). */
-export const MAX_TAGS = 5
-const MAX_TAG_LENGTH = 40
 
 export interface StoryDetails {
   categoryId?: number
@@ -97,12 +94,12 @@ function DetailsForm({ titleId, mode, initial, draft, busy, error, onSubmit, onC
       </header>
 
       <Select
-        label="Category"
+        label="Topic"
         value={details.categoryId == null ? '' : String(details.categoryId)}
-        error={missingCategory && details.categoryId == null ? 'Choose a category.' : undefined}
+        error={missingCategory && details.categoryId == null ? 'Choose a topic.' : undefined}
         onChange={(value) => set({ categoryId: value ? Number(value) : undefined })}
         options={(categories.data ?? []).map((c) => ({ value: String(c.id), label: c.categoryName ?? '' }))}
-        placeholder={categories.isPending ? 'Loading…' : 'Choose a category'}
+        placeholder={categories.isPending ? 'Loading…' : 'Choose a topic'}
       />
 
       <TagInput tags={details.tags} onChange={(tags) => set({ tags })} />
@@ -130,74 +127,6 @@ function DetailsForm({ titleId, mode, initial, draft, busy, error, onSubmit, onC
         </Button>
       </div>
     </form>
-  )
-}
-
-/** Tags as chips: Enter or comma adds one; suggestions come from existing topics. */
-function TagInput({ tags, onChange }: { tags: string[]; onChange: (tags: string[]) => void }) {
-  const [text, setText] = useState('')
-  const q = text.trim().toLowerCase()
-  const suggestions = useTags(q).data?.filter((tag) => !tags.includes(tag)).slice(0, 6) ?? []
-  const full = tags.length >= MAX_TAGS
-  const hintId = useId()
-  const inputId = useId()
-
-  function add(raw: string) {
-    const tag = raw.trim().toLowerCase().slice(0, MAX_TAG_LENGTH)
-    if (tag && !tags.includes(tag) && !full) onChange([...tags, tag])
-    setText('')
-  }
-
-  function onKeyDown(event: KeyboardEvent<HTMLInputElement>) {
-    if (event.key === 'Enter' || event.key === ',') {
-      event.preventDefault()
-      add(text)
-    } else if (event.key === 'Backspace' && !text && tags.length) {
-      onChange(tags.slice(0, -1))
-    }
-  }
-
-  return (
-    <div className="flex flex-col gap-1.5">
-      <label htmlFor={inputId} className="text-sm font-medium">
-        Topics
-      </label>
-      <div className="flex flex-wrap items-center gap-2 rounded-lg border border-rule px-2 py-1.5 focus-within:border-paddy">
-        {tags.map((tag) => (
-          <span key={tag} className="inline-flex h-8 items-center gap-1 rounded-full bg-field pr-1 pl-3 text-sm">
-            {tag}
-            <button type="button" aria-label={`Remove topic ${tag}`} onClick={() => onChange(tags.filter((t) => t !== tag))} className="flex size-7 items-center justify-center rounded-full hover:bg-rule">
-              <X size={12} />
-            </button>
-          </span>
-        ))}
-        <input
-          id={inputId}
-          value={text}
-          disabled={full}
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={onKeyDown}
-          onBlur={() => add(text)}
-          aria-describedby={hintId}
-          placeholder={full ? '' : tags.length ? 'Add another' : 'rice, pest control…'}
-          className="h-8 min-w-32 flex-1 bg-transparent px-1 text-base focus:outline-none"
-        />
-      </div>
-      <p id={hintId} className="text-xs text-ink-muted">
-        {full ? `That's the most a story can have (${MAX_TAGS}).` : `Up to ${MAX_TAGS}. Press Enter after each.`}
-      </p>
-      {q && !full && suggestions.length > 0 && (
-        <ul aria-label="Suggested topics" className="flex flex-wrap gap-2">
-          {suggestions.map((tag) => (
-            <li key={tag}>
-              <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => add(tag)} className="h-8 rounded-full border border-rule px-3 text-sm hover:bg-field">
-                {tag}
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
   )
 }
 

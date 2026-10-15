@@ -2,10 +2,10 @@ import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/rea
 import { api } from './client'
 
 /**
- * Story responses (comments) and question answers work the same way: top-level items, one level of replies, owner
- * edit and delete. The backend's two DTOs aren't in the OpenAPI document, so they are mirrored and made one shape.
+ * Story responses (comments): top-level items, one level of replies, owner edit and delete. The backend's DTO isn't
+ * in the OpenAPI document, so it is mirrored here. (Question answers live in answers.ts.)
  */
-export type ThreadKind = 'comments' | 'answers'
+export type ThreadKind = 'comments'
 
 export interface ThreadItem {
   id: number
@@ -17,8 +17,7 @@ export interface ThreadItem {
 }
 
 interface Raw {
-  commentId?: number
-  answerId?: number
+  commentId: number
   userId: number
   authorName: string
   content: string
@@ -34,18 +33,10 @@ const routes = {
     reply: (parentId: number, id: number, content: string) => ({ path: '/api/comments/reply', body: { blogId: parentId, parentCommentId: id, content } }),
     update: (parentId: number, id: number, content: string) => ({ path: '/api/comments/update', body: { commentId: id, blogId: parentId, content } }),
     remove: (id: number) => `/api/comments/id/${id}`,
-  },
-  answers: {
-    list: (parentId: number) => `/api/answers/question/${parentId}`,
-    replies: (id: number) => `/api/answers/replies/${id}`,
-    create: (parentId: number, content: string) => ({ path: '/api/answers/create', body: { questionId: parentId, content } }),
-    reply: (parentId: number, id: number, content: string) => ({ path: '/api/answers/reply', body: { questionId: parentId, parentAnswerId: id, content } }),
-    update: (_parentId: number, id: number, content: string) => ({ path: '/api/answers/update/', body: { answerId: id, content } }),
-    remove: (id: number) => `/api/answers/delete/id/${id}`,
-  },
+  }
 }
 
-const normalise = (raw: Raw): ThreadItem => ({ ...raw, id: (raw.commentId ?? raw.answerId)! })
+const normalise = (raw: Raw): ThreadItem => ({ ...raw, id: raw.commentId })
 const oldestFirst = (a: ThreadItem, b: ThreadItem) => a.createdAt.localeCompare(b.createdAt)
 
 async function read(path: string, signal: AbortSignal): Promise<ThreadItem[]> {

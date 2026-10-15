@@ -12,7 +12,7 @@ import { SafeHtml } from '../../ui/SafeHtml'
 import { Spinner } from '../../ui/Spinner'
 import { useSession } from '../auth/session'
 import { NotFoundPage } from '../errors/NotFoundPage'
-import { Thread } from '../threads/Thread'
+import { Answers } from './Answers'
 
 export function QuestionPage() {
   const t = useT()
@@ -53,7 +53,7 @@ function QuestionView({ question }: { question: Question }) {
   return (
     <article className="mx-auto max-w-(--container-feed) px-4 pt-10 pb-20 sm:px-6 sm:pt-14">
       <title>{`${question.title} – AgroTrends`}</title>
-      <p className="text-sm text-ink-muted">{t('Question')}</p>
+      <p className="text-sm text-ink-muted">{question.category?.categoryName ?? t('Question')}</p>
       <h1 className="mt-1 text-2xl sm:text-3xl">{question.title}</h1>
       <div className="mt-5 flex items-center gap-3 text-sm">
         <Avatar name={question.authorName ?? '?'} size={36} />
@@ -63,7 +63,27 @@ function QuestionView({ question }: { question: Question }) {
         </div>
         {own && <OwnerActions questionId={id} />}
       </div>
-      <SafeHtml html={question.content} className="story-body mt-8" />
+      <SafeHtml html={question.content} className="story-body mt-8 whitespace-pre-line" />
+      {(question.imageUrls?.length ?? 0) > 0 && (
+        <ul aria-label={t('Photos')} className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {question.imageUrls!.map((url, index) => (
+            <li key={url}>
+              <a href={url} target="_blank" rel="noopener noreferrer" className="block overflow-hidden rounded-xl ring-1 ring-border">
+                <img src={url} alt={t('Photo {n} of the question', { n: index + 1 })} loading="lazy" className="aspect-square w-full object-cover transition-transform duration-200 ease-(--ease-out) hover:scale-[1.02]" />
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+      {(question.tags?.length ?? 0) > 0 && (
+        <ul aria-label={t('Tags')} className="mt-6 flex flex-wrap gap-2">
+          {question.tags!.map((tag) => (
+            <li key={tag}>
+              <Chip to={`/questions?tag=${encodeURIComponent(tag)}`}>{tag}</Chip>
+            </li>
+          ))}
+        </ul>
+      )}
       {chips.length > 0 && (
         <ul aria-label={t('Farming context')} className="mt-8 flex flex-wrap gap-2">
           {chips.map((chip) => (
@@ -76,7 +96,7 @@ function QuestionView({ question }: { question: Question }) {
           ))}
         </ul>
       )}
-      <Thread kind="answers" parentId={id} />
+      <Answers questionId={id} />
     </article>
   )
 }

@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import { Outlet } from 'react-router-dom'
 import { Toaster } from '@/components/ui/sonner'
-import { ConfirmEmailDialog, EmailBanner } from '../features/auth/confirmEmail'
+import { ConfirmEmailHost, EmailBanner } from '../features/auth/confirmEmail'
 import { Spinner } from '../ui/Spinner'
 import { Footer } from './Footer'
 import { TopBar } from './TopBar'
@@ -26,7 +26,7 @@ export function AppLayout() {
         </Suspense>
       </main>
       <Footer />
-      <ConfirmEmailDialog />
+      <ConfirmEmailHost />
       <Toaster position="bottom-center" />
     </div>
   )

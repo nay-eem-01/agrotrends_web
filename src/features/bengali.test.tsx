@@ -24,14 +24,14 @@ const story = { id: 1, slug: 's', title: 'বোরো ধানের চার
 
 test('switching to Bengali changes the interface and asks the API in Bengali', async () => {
   const api = mockApi({ 'GET /api/feed/latest': () => envelope(200, page([story])), 'GET /api/tags': () => envelope(200, []) })
-  renderWithProviders(<App />, '/')
+  renderWithProviders(<App />, '/stories')
   await screen.findByRole('link', { name: 'বোরো ধানের চারা' })
 
   await userEvent.click(screen.getByRole('button', { name: 'বাংলা' }))
 
   expect(document.documentElement.lang).toBe('bn')
   expect(screen.getAllByRole('link', { name: 'প্রশ্ন' }).length).toBeGreaterThan(0)
-  expect(screen.getByRole('heading', { name: 'যাঁরা ফসল ফলান, তাঁদের কাছ থেকে চাষের জ্ঞান।' })).toBeInTheDocument()
+  expect(screen.getByRole('heading', { name: 'চাষের প্রশ্ন, উত্তর দেন যাঁরা ফসল ফলান।' })).toBeInTheDocument()
   const card = screen.getByRole('link', { name: 'বোরো ধানের চারা' }).closest('article')!
   expect(within(card).getByText(/৪ মিনিটে পড়া/)).toBeInTheDocument()
   expect(within(card).getByText(/৭ অক্টো/)).toBeInTheDocument()

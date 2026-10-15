@@ -1,50 +1,73 @@
+import { ChatCircleText, Newspaper } from '@phosphor-icons/react'
+import { NavLink } from 'react-router-dom'
+import { cn } from 'cn'
 import { useT } from '../../lib/i18n'
 import { ButtonLink } from '../../ui/Button'
 import { useSession } from '../auth/session'
-import { Feed } from '../feed/Feed'
-import { TopicsRail } from '../topics/TopicsPage'
+import { QuestionsPage } from '../qa/QuestionsPage'
 
-/** Visitors get a short welcome above the feed; signed-in readers go straight to it. */
+/** `/`: questions first (the product is Q&A-first); visitors get a short welcome above. */
 export function HomePage() {
-  const t = useT()
-  const { status } = useSession()
   return (
     <>
-      {status === 'anonymous' && (
-        <section className="border-b border-rule">
-          <div className="mx-auto max-w-(--container-page) px-4 pt-14 pb-12 sm:px-6 sm:pt-20">
-            <h1 className="max-w-3xl text-3xl sm:text-[3.5rem] sm:leading-[1.05]">
-              {t('Farming knowledge from people who grow it.')}
-            </h1>
-            <p className="mt-6 max-w-xl font-serif text-lg text-ink-muted">
-              {t(
-                'Stories from farmers and agronomists across Bangladesh, answers to the questions you have this season, and an advisor that shows you where its advice came from.',
-              )}
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <ButtonLink to="/sign-up">{t('Join AgroTrends')}</ButtonLink>
-              <ButtonLink to="/questions" variant="secondary">
-                {t('Ask a question')}
-              </ButtonLink>
-            </div>
-          </div>
-        </section>
-      )}
-      <div className="mx-auto max-w-(--container-page) px-4 pt-2 pb-16 sm:px-6">
-        <div className="lg:flex lg:gap-16">
-          <div className="max-w-(--container-feed) min-w-0 flex-1">
-            {status === 'anonymous' ? (
-              <h2 className="sr-only">{t('Stories')}</h2>
-            ) : (
-              <h1 className="sr-only">{t('Stories')}</h1>
-            )}
-            <Feed />
-          </div>
-          <aside className="hidden w-80 shrink-0 pt-6 lg:block">
-            <TopicsRail />
-          </aside>
+      <Welcome />
+      <HomeTabs />
+      <QuestionsPage heading={false} />
+    </>
+  )
+}
+
+export function Welcome() {
+  const t = useT()
+  const { status } = useSession()
+  if (status !== 'anonymous') return null
+  return (
+    <section className="border-b border-border bg-card">
+      <div className="mx-auto max-w-(--container-page) px-4 pt-12 pb-10 sm:px-6 sm:pt-16">
+        <h1 className="max-w-3xl text-3xl sm:text-[3.25rem] sm:leading-[1.05]">{t('Farming questions, answered by people who grow.')}</h1>
+        <p className="mt-5 max-w-xl font-serif text-lg text-muted-foreground">
+          {t('Ask about your crop, your soil, your season. Farmers, agronomists and verified experts answer; an AI answer arrives first, and experts check it.')}
+        </p>
+        <div className="mt-7 flex flex-wrap gap-3">
+          <ButtonLink to="/questions/ask">{t('Ask a question')}</ButtonLink>
+          <ButtonLink to="/sign-up" variant="secondary">
+            {t('Join AgroTrends')}
+          </ButtonLink>
         </div>
       </div>
-    </>
+    </section>
+  )
+}
+
+/** Questions | Stories, as links so each has its own URL. */
+export function HomeTabs() {
+  const t = useT()
+  const { status } = useSession()
+  const tabs = [
+    { to: '/', label: t('Questions'), icon: ChatCircleText },
+    { to: '/stories', label: t('Stories'), icon: Newspaper },
+  ]
+  return (
+    <div className="mx-auto max-w-(--container-page) px-4 pt-6 sm:px-6">
+      {status !== 'anonymous' && <h1 className="sr-only">{t('Home')}</h1>}
+      <nav aria-label={t('Home sections')} className="flex gap-6 border-b border-border">
+        {tabs.map(({ to, label, icon: Icon }) => (
+          <NavLink
+            key={to}
+            to={to}
+            end
+            className={({ isActive }) =>
+              cn(
+                '-mb-px flex h-12 items-center gap-2 border-b-2 text-base transition-colors duration-150',
+                isActive ? 'border-primary font-semibold text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground',
+              )
+            }
+          >
+            <Icon size={20} aria-hidden="true" />
+            {label}
+          </NavLink>
+        ))}
+      </nav>
+    </div>
   )
 }

@@ -40,7 +40,7 @@ test('AI suggests a summary and topics the author can add', async () => {
   expect(sheet.getByText('Suggested by AI. Check before you use it.')).toBeInTheDocument()
 
   await userEvent.click(sheet.getByRole('button', { name: '+ monsoon' }))
-  expect(sheet.getByRole('button', { name: 'Remove topic monsoon' })).toBeInTheDocument()
+  expect(sheet.getByRole('button', { name: 'Remove tag monsoon' })).toBeInTheDocument()
   expect(sheet.queryByRole('button', { name: '+ monsoon' })).not.toBeInTheDocument()
 
   const sent = JSON.parse(api.mock.calls.find(([url]) => url === '/api/ai/blog-assist')![1]!.body as string)

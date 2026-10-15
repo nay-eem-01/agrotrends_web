@@ -34,7 +34,7 @@ test('questions are listed newest first with their farming context', async () =>
   expect(within(row).getByText('Leaves turned yellow after the cold week.')).toBeInTheDocument()
   expect(within(row).getByRole('link', { name: 'boro rice' })).toHaveAttribute('href', '/questions?crop=boro+rice')
   expect(within(row).getByRole('link', { name: 'Rabi' })).toHaveAttribute('href', '/questions?season=RABI')
-  const sent = new URL(String(api.mock.calls[0][0]), 'http://x')
+  const sent = api.mock.calls.map(([url]) => new URL(String(url), 'http://x')).find((url) => url.pathname === '/api/questions/all')!
   expect(sent.searchParams.get('ascOrDesc')).toBe('desc')
 })
 
@@ -66,4 +66,56 @@ test('more questions load on request', async () => {
 
   await userEvent.click(await screen.findByRole('button', { name: 'Show more questions' }))
   expect(await screen.findByRole('link', { name: 'Second page question' })).toBeInTheDocument()
+})
+
+function lastQuery(api: ReturnType<typeof mockApi>) {
+  return api.mock.calls
+    .map(([url]) => new URL(String(url), 'http://x'))
+    .filter((url) => url.pathname === '/api/questions/all')
+    .at(-1)!.searchParams
+}
+
+test('home lands on questions, with stories as the second tab', async () => {
+  mockApi({ 'GET /api/questions/all': () => envelope(200, page([question])), 'GET /api/categories/all': () => envelope(200, page([])) })
+  renderWithProviders(<App />, '/')
+
+  expect(await screen.findByRole('link', { name: 'Why are my boro seedlings yellow?' })).toBeInTheDocument()
+  const tabs = screen.getByRole('navigation', { name: 'Home sections' })
+  expect(within(tabs).getByRole('link', { name: 'Questions' })).toHaveAttribute('aria-current', 'page')
+  expect(within(tabs).getByRole('link', { name: 'Stories' })).toHaveAttribute('href', '/stories')
+})
+
+test('cards show votes, answers and an accepted answer', async () => {
+  mockApi({
+    'GET /api/questions/all': () =>
+      envelope(200, page([{ ...question, score: 7, answerCount: 3, acceptedAnswerId: 40, category: { id: 2, categoryName: 'Crops' }, tags: ['cold'] }])),
+  })
+  renderWithProviders(<App />, '/questions')
+
+  const row = (await screen.findByRole('link', { name: 'Why are my boro seedlings yellow?' })).closest('li')!
+  expect(within(row).getByText('7')).toBeInTheDocument()
+  expect(within(row).getByText('3')).toBeInTheDocument()
+  expect(within(row).getByText('An answer was accepted')).toBeInTheDocument()
+  expect(within(row).getByRole('link', { name: 'Crops' })).toHaveAttribute('href', '/questions?categoryId=2')
+  expect(within(row).getByRole('link', { name: '#cold' })).toHaveAttribute('href', '/questions?tag=cold')
+})
+
+test('Unanswered, topic and tag combine with the farming filters', async () => {
+  const api = mockApi({
+    'GET /api/questions/all': () => envelope(200, page([question])),
+    'GET /api/categories/all': () => envelope(200, page([{ id: 2, categoryName: 'Crops' }])),
+  })
+  renderWithProviders(<App />, '/questions?tag=cold&crop=jute')
+  await screen.findByRole('link', { name: 'Why are my boro seedlings yellow?' })
+  expect(lastQuery(api).get('tag')).toBe('cold')
+
+  await userEvent.click(screen.getByRole('link', { name: 'Unanswered' }))
+  await waitFor(() => expect(lastQuery(api).get('unanswered')).toBe('true'))
+  await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Topic' }), 'Crops')
+  await waitFor(() => expect(lastQuery(api).get('categoryId')).toBe('2'))
+  expect(Object.fromEntries(['crop', 'tag', 'unanswered'].map((key) => [key, lastQuery(api).get(key)]))).toEqual({ crop: 'jute', tag: 'cold', unanswered: 'true' })
+
+  await userEvent.click(screen.getByRole('link', { name: 'Remove tag cold' }))
+  await waitFor(() => expect(lastQuery(api).get('tag')).toBeNull())
+  expect(lastQuery(api).get('categoryId')).toBe('2')
 })

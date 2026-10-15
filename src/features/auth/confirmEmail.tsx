@@ -1,6 +1,5 @@
 import { EnvelopeSimple } from '@phosphor-icons/react'
-import { useSyncExternalStore } from 'react'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { lazy, Suspense, useState, useSyncExternalStore } from 'react'
 import { useResendVerification } from '../../api/auth'
 import { ApiError, errorMessage } from '../../api/errors'
 import { useT } from '../../lib/i18n'
@@ -76,27 +75,17 @@ export function EmailBanner() {
   )
 }
 
-/** Explains why a write was refused, with the resend button. */
-export function ConfirmEmailDialog() {
-  const t = useT()
+const ConfirmEmailDialog = lazy(() => import('./ConfirmEmailDialog').then((m) => ({ default: m.ConfirmEmailDialog })))
+
+/** Mounts the confirm dialog the first time it is needed, so its code (Base UI's dialog) stays out of the main bundle. */
+export function ConfirmEmailHost() {
   const isOpen = useDialogOpen()
-  const { user } = useSession()
+  const [needed, setNeeded] = useState(false)
+  if (isOpen && !needed) setNeeded(true)
+  if (!needed) return null
   return (
-    <Dialog open={isOpen} onOpenChange={(value) => setOpen(value)}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle className="font-serif text-xl font-bold">{t('Confirm your e-mail first')}</DialogTitle>
-          <DialogDescription className="text-base">
-            {t('Open the link we sent to {email}. Until then you can read everything, but not post, vote or publish.', { email: user?.email ?? '' })}
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter className="items-center sm:justify-between">
-          {user?.email && <ResendLink email={user.email} />}
-          <Button variant="quiet" size="sm" onClick={() => setOpen(false)}>
-            {t('Not now')}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <Suspense fallback={null}>
+      <ConfirmEmailDialog open={isOpen} onOpenChange={setOpen} />
+    </Suspense>
   )
 }

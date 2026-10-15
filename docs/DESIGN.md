@@ -88,7 +88,7 @@ Checked with Lighthouse (mobile, simulated slow 4G) on a production build; re-ch
 
 | Measure | Budget | 2026-10-09 |
 |---|---|---|
-| Main JS (gzip) | <= 120 kB | 106 kB (every page but home and story is lazy; the editor alone is 139 kB) |
+| Main JS (gzip) | <= 120 kB | 105 kB on 2026-10-15 (home is now the questions; stories, the confirm dialog and every other page are lazy) |
 | Lighthouse performance (home, questions) | >= 80 | 85, 89 |
 | Accessibility / best practices / SEO | 100 | 100 / 100 / 100 |
 | CLS | < 0.1 | 0.07 (fonts swapping in) |

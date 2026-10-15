@@ -1,5 +1,5 @@
 import { useT } from '../../lib/i18n'
-import { useEffect, useId, useState, type FormEvent, type ReactNode } from 'react'
+import { useId, useState, type ReactNode } from 'react'
 import { useThread, useThreadReplies, useThreadWrite, type ThreadItem, type ThreadKind } from '../../api/threads'
 import { errorMessage } from '../../api/errors'
 import { storyDate } from '../../lib/dates'
@@ -7,9 +7,9 @@ import { Avatar } from '../../ui/Avatar'
 import { Button } from '../../ui/Button'
 import { SafeHtml } from '../../ui/SafeHtml'
 import { Spinner } from '../../ui/Spinner'
-import { TextArea } from '../../ui/TextArea'
 import { useSession } from '../auth/session'
 import { useRequireSignIn } from '../auth/useRequireSignIn'
+import { Composer } from './Composer'
 
 const COPY = {
   comments: {
@@ -23,19 +23,7 @@ const COPY = {
     edit: 'Edit your response',
     remove: 'Delete this response?',
     empty: "No responses yet. Share what worked, or what didn't, on your farm.",
-  },
-  answers: {
-    heading: 'Answers',
-    item: 'Answer',
-    compose: 'Your answer',
-    placeholder: 'What has worked for you?',
-    submit: 'Post answer',
-    posted: 'Answer posted',
-    signIn: 'Sign in to answer',
-    edit: 'Edit your answer',
-    remove: 'Delete this answer?',
-    empty: 'No answers yet. If you have grown this, your answer helps.',
-  },
+  }
 }
 
 type Copy = (typeof COPY)[ThreadKind]
@@ -44,11 +32,11 @@ interface ThreadProps {
   kind: ThreadKind
   /** The story or question the thread belongs to. */
   parentId: number
-  /** Shown under the empty message, e.g. the AI draft offer on an unanswered question. */
+  /** Shown under the empty message. */
   whenEmpty?: ReactNode
 }
 
-/** Responses under a story or answers under a question: one level of replies, like Medium; owners edit and delete. */
+/** Responses under a story: one level of replies, like Medium; owners edit and delete. Answers have their own component. */
 export function Thread({ kind, parentId, whenEmpty }: ThreadProps) {
   const t = useT()
   const copy = COPY[kind]
@@ -56,12 +44,9 @@ export function Thread({ kind, parentId, whenEmpty }: ThreadProps) {
   const { status } = useSession()
   const thread = useThread(kind, parentId)
   const requireSignIn = useRequireSignIn()
-  const all = thread.data ?? []
-  const replies = useThreadReplies(kind, all.map((item) => item.id))
-  // The answers list also returns replies (with no parent field); anything that is someone's reply isn't top-level.
-  const replyIds = new Set(replies.flatMap((thread) => thread.data?.map((reply) => reply.id) ?? []))
-  const list = all.filter((item) => !replyIds.has(item.id))
-  const replyCount = replyIds.size
+  const list = thread.data ?? []
+  const replies = useThreadReplies(kind, list.map((item) => item.id))
+  const replyCount = replies.reduce((sum, query) => sum + (query.data?.length ?? 0), 0)
 
   return (
     <section aria-labelledby={headingId} className="mt-14">
@@ -71,7 +56,7 @@ export function Thread({ kind, parentId, whenEmpty }: ThreadProps) {
       </h2>
       <div className="mt-6">
         {status === 'signed-in' ? (
-          <Composer kind={kind} parentId={parentId} placeholder={t(copy.placeholder)} label={t(copy.compose)} submitLabel={t(copy.submit)} doneLabel={t(copy.posted)} />
+          <ThreadComposer kind={kind} parentId={parentId} placeholder={t(copy.placeholder)} label={t(copy.compose)} submitLabel={t(copy.submit)} doneLabel={t(copy.posted)} />
         ) : (
           <Button variant="secondary" size="sm" onClick={() => requireSignIn(() => {})}>
             {t(copy.signIn)}
@@ -95,7 +80,7 @@ export function Thread({ kind, parentId, whenEmpty }: ThreadProps) {
         <ol className="mt-4">
           {list.map((item) => (
             <li key={item.id} className="border-b border-rule py-6">
-              <Conversation kind={kind} parentId={parentId} copy={copy} item={item} replies={replies[all.indexOf(item)]?.data ?? []} />
+              <Conversation kind={kind} parentId={parentId} copy={copy} item={item} replies={replies[list.indexOf(item)]?.data ?? []} />
             </li>
           ))}
         </ol>
@@ -127,7 +112,7 @@ function Conversation({ kind, parentId, copy, item, replies }: ItemProps & { ite
           ))}
           {replying && status === 'signed-in' && (
             <li>
-              <Composer
+              <ThreadComposer
                 kind={kind}
                 parentId={parentId}
                 replyTo={item.id}
@@ -167,7 +152,7 @@ function Item({ kind, parentId, copy, item, onReply }: ItemProps & { item: Threa
 
       {mode === 'edit' ? (
         <div className="mt-3">
-          <Composer
+          <ThreadComposer
             kind={kind}
             parentId={parentId}
             editing={item.id}
@@ -229,7 +214,7 @@ function Item({ kind, parentId, copy, item, onReply }: ItemProps & { item: Threa
   )
 }
 
-interface ComposerProps {
+interface ThreadComposerProps {
   kind: ThreadKind
   parentId: number
   /** Set to reply to that item. */
@@ -241,77 +226,27 @@ interface ComposerProps {
   label: string
   submitLabel: string
   doneLabel: string
-  /** Move focus into the field when it appears (it was opened by Reply or Edit). */
   focusOnOpen?: boolean
   onCancel?: () => void
   onDone?: () => void
 }
 
-function Composer({ kind, parentId, replyTo, editing, initial = '', placeholder, label, submitLabel, doneLabel, focusOnOpen, onCancel, onDone }: ComposerProps) {
-  const t = useT()
-  const fieldId = useId()
+function ThreadComposer({ kind, parentId, replyTo, editing, ...rest }: ThreadComposerProps) {
   const write = useThreadWrite(kind, parentId)
-  const [text, setText] = useState(initial)
-  const [error, setError] = useState<string>()
-  const [done, setDone] = useState(false)
-
-  useEffect(() => {
-    if (focusOnOpen) document.getElementById(fieldId)?.focus()
-  }, [focusOnOpen, fieldId])
-
-  function submit(event: FormEvent) {
-    event.preventDefault()
-    const content = text.trim()
-    if (!content) {
-      setError('Write something first.')
-      return
-    }
-    setError(undefined)
-    const request =
-      editing != null
-        ? { action: 'update' as const, id: editing, content }
-        : replyTo != null
-          ? { action: 'reply' as const, id: replyTo, content }
-          : { action: 'create' as const, content }
-    write.mutate(request, {
-      onSuccess: () => {
-        setText('')
-        setDone(true)
-        onDone?.()
-      },
-    })
-  }
-
   return (
-    <form onSubmit={submit} noValidate className="flex flex-col gap-3">
-      <TextArea
-        id={fieldId}
-        label={label}
-        rows={3}
-        placeholder={placeholder}
-        value={text}
-        onChange={(event) => {
-          setText(event.target.value)
-          setDone(false)
-        }}
-        error={error}
-      />
-      {write.isError && (
-        <p role="alert" className="text-sm text-danger">
-          {errorMessage(write.error)}
-        </p>
-      )}
-      <div className="flex items-center gap-3">
-        <Button type="submit" size="sm" loading={write.isPending}>
-          {submitLabel}
-        </Button>
-        {onCancel && (
-          <Button variant="quiet" size="sm" onClick={onCancel}>
-            {t('Cancel')}
-          </Button>
-        )}
-        {done && !onDone && <output className="text-sm text-paddy">{doneLabel}</output>}
-      </div>
-    </form>
+    <Composer
+      {...rest}
+      pending={write.isPending}
+      error={write.isError ? write.error : null}
+      onSubmit={(content, done) => {
+        const request =
+          editing != null
+            ? { action: 'update' as const, id: editing, content }
+            : replyTo != null
+              ? { action: 'reply' as const, id: replyTo, content }
+              : { action: 'create' as const, content }
+        write.mutate(request, { onSuccess: done })
+      }}
+    />
   )
 }

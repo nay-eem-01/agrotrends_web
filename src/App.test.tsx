@@ -7,7 +7,7 @@ import { renderWithProviders } from './test/render'
 
 beforeEach(() => {
   localStorage.clear()
-  mockApi({ 'GET /api/feed/latest': () => envelope(200, page([])) })
+  mockApi({ 'GET /api/feed/latest': () => envelope(200, page([])), 'GET /api/questions/all': () => envelope(200, page([])), 'GET /api/categories/all': () => envelope(200, page([])) })
 })
 
 afterEach(() => vi.unstubAllGlobals())
@@ -19,7 +19,7 @@ function renderAt(path: string) {
 test('home renders inside the shell', async () => {
   renderAt('/')
   expect(screen.getByRole('link', { name: 'AgroTrends home' })).toBeInTheDocument()
-  expect(screen.getByRole('heading', { level: 1, name: /farming knowledge/i })).toBeInTheDocument()
+  expect(screen.getByRole('heading', { level: 1, name: /farming questions/i })).toBeInTheDocument()
   expect(screen.getByRole('link', { name: 'Skip to content' })).toHaveAttribute('href', '#main')
 })
 

@@ -94,3 +94,48 @@ test("someone else's question can't be edited", async () => {
   renderWithProviders(<App />, '/questions/5/edit')
   expect(await screen.findByRole('heading', { name: 'Page not found' })).toBeInTheDocument()
 })
+
+test('a question carries tags and photos', async () => {
+  const api = mockApi({
+    ...signedInAs({ id: 9, name: 'Karim' }),
+    ...categories,
+    'GET /api/tags': () => envelope(200, []),
+    'POST /api/images': () => envelope(200, { url: '/uploads/leaf.webp' }),
+    'POST /api/questions/create': () => envelope(200, { ...question, questionId: 12 }),
+    'GET /api/questions/id/12': () => envelope(200, { ...question, questionId: 12 }),
+    'GET /api/answers/question/12': () => envelope(200, []),
+  })
+  renderWithProviders(<App />, '/questions/ask')
+
+  await userEvent.type(await screen.findByLabelText('Your question'), 'Spots on leaves')
+  await userEvent.type(screen.getByLabelText('Details'), 'Brown spots after rain.')
+  await userEvent.selectOptions(await screen.findByLabelText('Topic'), 'Crops')
+  await userEvent.type(screen.getByLabelText('Tags'), 'Rice Blast{Enter}')
+  await userEvent.upload(screen.getByLabelText('Add a photo', { selector: 'input' }), new File(['img'], 'leaf.webp', { type: 'image/webp' }))
+  expect(await screen.findByRole('img', { name: 'Photo 1' })).toHaveAttribute('src', '/uploads/leaf.webp')
+  await userEvent.click(screen.getByRole('button', { name: 'Post question' }))
+
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/questions/12'))
+  expect(body(api, '/api/questions/create')).toMatchObject({ categoryId: 1, tags: ['rice blast'], imageUrls: ['/uploads/leaf.webp'] })
+})
+
+test('editing keeps untouched tags and photos by leaving them out, and sends changed ones', async () => {
+  const withExtras = { ...question, tags: ['rice'], imageUrls: ['/uploads/a.webp', '/uploads/b.webp'] }
+  const api = mockApi({
+    ...signedInAs({ id: 9, name: 'Karim' }),
+    ...categories,
+    'GET /api/tags': () => envelope(200, []),
+    'GET /api/questions/id/5': () => envelope(200, withExtras),
+    'PUT /api/questions/update': () => envelope(200, withExtras),
+    'GET /api/answers/question/5': () => envelope(200, []),
+  })
+  renderWithProviders(<App />, '/questions/5/edit')
+
+  await userEvent.click(await screen.findByRole('button', { name: 'Remove photo 2' }))
+  await userEvent.click(screen.getByRole('button', { name: 'Save question' }))
+
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/questions/5'))
+  const sent = body(api, '/api/questions/update')
+  expect(sent).not.toHaveProperty('tags')
+  expect(sent.imageUrls).toEqual(['/uploads/a.webp'])
+})

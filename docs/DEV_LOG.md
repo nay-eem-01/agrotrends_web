@@ -25,10 +25,11 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   (`feat/expert-admin`) done. Phase F11 is complete.
 - Phase F12 on `feat/notifications-base` (stacked on F11's tip): F12.1 bell (`feat/notification-bell`) and F12.2 page
   (`feat/notifications-page`) done. Phase F12 is complete.
+- Phase F13 on `feat/moderation-base` (stacked on F12's tip): F13.1 report (`feat/report`) done.
 
 ## Next up
 
-1. Phase F13 reports and moderation: F13.1 report dialog, F13.2 admin reports, F13.3 ban and hidden states.
+1. F13.2 admin reports, F13.3 ban and hidden states.
 2. F12–F14 need the backend's Phase 8 branch until it is merged.
 
 ## Open items
@@ -46,6 +47,25 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-15 (F13.1 report)
+
+**Done**
+- **Report** on stories, questions, answers and replies, story responses, the AI answer (sent with the question's
+  id) and profiles; never on your own post or profile. Visitors sign in first.
+- The dialog asks why (harmful advice, spam, abuse, false credentials, something else, each with a hint) and for
+  optional details (up to 500), then `POST /api/reports`. It says "Thanks, moderators will look at it." and never
+  whether the post got hidden; a 409 counts as reported; a 404 says the post is gone. Send is disabled while sending
+  (a double tap races on the backend). The button then reads **Reported**.
+- The dialog (Base UI) loads on first use, so the story page doesn't carry it in the main bundle.
+- Live: three accounts reporting a question hid it (404 for everyone).
+- Tests: `reports/report.test.tsx` (reason required, the exact request, Reported afterwards; a 409; no button on your
+  own posts; visitors to sign-in).
+
+**Decisions**
+- The threshold is never shown or hard-coded: the dialog says "several reports from different people".
 
 ---
 

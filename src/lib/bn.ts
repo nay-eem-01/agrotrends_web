@@ -218,6 +218,21 @@ export const BN: Record<string, string> = {
   'Tell people what you grow or what you work on. It shows next to your answers and stories, so they know whose advice they read. You can skip this and add it later in Settings.':
     'আপনি কী চাষ করেন বা কী নিয়ে কাজ করেন, জানান। এটি আপনার উত্তর ও লেখার পাশে দেখা যায়, যাতে মানুষ জানে কার পরামর্শ পড়ছে। চাইলে এখন বাদ দিয়ে পরে সেটিংসে যোগ করতে পারেন।',
   'Skip for now': 'এখন থাক',
+  'Confirm your e-mail': 'আপনার ই-মেইল নিশ্চিত করুন',
+  'Confirm your e-mail first': 'আগে আপনার ই-মেইল নিশ্চিত করুন',
+  'Confirm your e-mail to ask, answer, vote and publish. We sent a link to {email}.':
+    'প্রশ্ন, উত্তর, ভোট ও প্রকাশ করতে ই-মেইল নিশ্চিত করুন। {email}-এ একটি লিংক পাঠানো হয়েছে।',
+  'Open the link we sent to {email}. Until then you can read everything, but not post, vote or publish.':
+    '{email}-এ পাঠানো লিংকটি খুলুন। ততক্ষণ সব পড়তে পারবেন, কিন্তু পোস্ট, ভোট বা প্রকাশ করতে পারবেন না।',
+  'Send a new link': 'নতুন লিংক পাঠান',
+  'Not now': 'এখন নয়',
+  'If the address is registered, a new link is on its way.': 'ঠিকানাটি নিবন্ধিত হলে নতুন লিংক আসছে।',
+  'This link is invalid or has expired': 'লিংকটি ভুল বা মেয়াদোত্তীর্ণ',
+  'Links work once and only for a while. Ask for a new one below.': 'লিংক একবারই ও কিছুক্ষণের জন্য কাজ করে। নিচে নতুন লিংক চান।',
+  'Confirming your e-mail': 'ই-মেইল নিশ্চিত করা হচ্ছে',
+  'E-mail confirmed': 'ই-মেইল নিশ্চিত হয়েছে',
+  'You can now ask, answer, vote and publish.': 'এখন আপনি প্রশ্ন, উত্তর, ভোট ও প্রকাশ করতে পারেন।',
+  'Go to questions': 'প্রশ্নে যান',
   'Create your account': 'আপনার অ্যাকাউন্ট খুলুন',
   'Join farmers, agronomists and students sharing what works in the field.': 'মাঠে যা কাজ করে তা ভাগ করে নেওয়া কৃষক, কৃষিবিদ ও শিক্ষার্থীদের সঙ্গে যোগ দিন।',
   'Full name': 'পুরো নাম',

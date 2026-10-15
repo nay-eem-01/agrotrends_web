@@ -1,4 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { signOut as signOutRequest } from '../../api/auth'
 import { clearSession, hasStoredSession, restoreSession, setSessionLostHandler, startSession } from '../../api/client'
@@ -42,7 +43,15 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }, [queryClient])
 
   useEffect(() => {
-    setSessionLostHandler(becomeAnonymous)
+    // Ends once, without retrying; a suspended account's message is shown on public pages too (as a toast) and on
+    // sign-in when a guarded page sends the reader there.
+    setSessionLostHandler((notice) => {
+      if (notice) {
+        setEndNotice(notice)
+        toast.error(notice)
+      }
+      becomeAnonymous()
+    })
     return () => setSessionLostHandler(() => {})
   }, [becomeAnonymous])
 

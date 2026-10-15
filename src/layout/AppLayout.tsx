@@ -1,5 +1,7 @@
 import { Suspense } from 'react'
 import { Outlet } from 'react-router-dom'
+import { Toaster } from '@/components/ui/sonner'
+import { ConfirmEmailDialog, EmailBanner } from '../features/auth/confirmEmail'
 import { Spinner } from '../ui/Spinner'
 import { Footer } from './Footer'
 import { TopBar } from './TopBar'
@@ -11,6 +13,7 @@ export function AppLayout() {
         Skip to content
       </a>
       <TopBar />
+      <EmailBanner />
       <main id="main" className="flex-1">
         <Suspense
           fallback={
@@ -23,6 +26,8 @@ export function AppLayout() {
         </Suspense>
       </main>
       <Footer />
+      <ConfirmEmailDialog />
+      <Toaster position="bottom-center" />
     </div>
   )
 }

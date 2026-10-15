@@ -17,10 +17,11 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   e-mail confirmation (`feat/email-confirm`) and F7.3 excerpts (`feat/excerpts`) done. Phase F7 is complete.
 - Phase F8 on `feat/questions-first-base` (stacked on F7's tip): F8.1 ask form (`feat/ask-form`) F8.2 questions home (`feat/questions-home`) and F8.3
   question answers (`feat/question-answers`) done. Phase F8 is complete.
+- Phase F9 on `feat/reputation-base` (stacked on F8's tip): F9.1 votes (`feat/votes`) done.
 
 ## Next up
 
-1. Phase F9 votes and reputation: F9.1 votes, F9.2 accept, F9.3 reputation and badges.
+1. F9.2 accept, F9.3 reputation and badges.
 2. F12–F14 need the backend's Phase 8 branch until it is merged.
 
 ## Open items
@@ -36,6 +37,27 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-15 (F9.1 votes)
+
+**Done**
+- `VoteControl` (up arrow, score, down arrow) on the question and on every answer: `PUT …/vote?direction=UP|DOWN`
+  casts or switches, the same arrow again withdraws (`DELETE`). The score moves at once and rolls back if the
+  backend refuses; the arrows are disabled while a vote is in flight (the backend can 500 on a double tap).
+- `GET /api/questions/id/{id}/my-votes` marks the reader's votes on the question and all its answers in one call.
+- Your own question or answer shows its score without arrows. A refused vote (the 50-point downvote rule) shows the
+  backend's message in a bubble beside the arrows for four seconds; an unconfirmed e-mail opens the F7.2 dialog
+  instead. Visitors are sent to sign in.
+- Layout: on the question page the vote column hangs in the left margin on wide screens; in answer cards it's the
+  first column.
+- Tests: `api/votes.test.ts` (next vote, optimistic score) and `qa/votes.test.tsx` (vote and withdraw, a refused
+  downvote rolls back with the message, my votes marked and no arrows on my own answer, visitors to sign-in).
+
+**Decisions**
+- The refusal is an inline bubble (`role="alert"`) rather than a hover tooltip: it has to appear on a tap, on a phone,
+  without hovering.
 
 ---
 

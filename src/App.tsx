@@ -32,6 +32,7 @@ const StoryById = page(() => import('./features/story/StoryById'), 'StoryById')
 const TagPage = page(() => import('./features/topics/TagPage'), 'TagPage')
 const UserPage = page(() => import('./features/users/UserPage'), 'UserPage')
 const ExpertApplyPage = page(() => import('./features/experts/ExpertApplyPage'), 'ExpertApplyPage')
+const ReviewQueuePage = page(() => import('./features/experts/ReviewQueuePage'), 'ReviewQueuePage')
 const TopicsPage = page(() => import('./features/topics/TopicsPage'), 'TopicsPage')
 const AdminCategoriesPage = page(() => import('./features/admin/AdminCategoriesPage'), 'AdminCategoriesPage')
 const EditorPage = page(() => import('./features/editor/EditorPage'), 'EditorPage')
@@ -69,6 +70,7 @@ export default function App() {
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/welcome" element={<WelcomePage />} />
           <Route path="/experts/apply" element={<ExpertApplyPage />} />
+          <Route path="/review" element={<ReviewQueuePage />} />
         </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Route>

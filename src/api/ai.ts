@@ -36,3 +36,19 @@ export function useAdvisorHistory(enabled = true) {
     enabled,
   })
 }
+
+/** Titles longer than this are cut; the backend uses the first 120 characters when none is given. */
+export const MAX_ASK_EXPERTS_TITLE = 120
+
+/**
+ * Turns a private ask into a public question carrying that AI answer, for experts in the topic to review. 409 when it
+ * was published already; the history then says where.
+ */
+export function useAskExperts() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ aiAnswerId, categoryId, title }: { aiAnswerId: number; categoryId: number; title?: string }) =>
+      api<Schemas['QuestionResponse']>(`/api/ai/history/${aiAnswerId}/ask-experts`, { method: 'POST', body: { categoryId, title: title || undefined } }),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['ai', 'history'] }),
+  })
+}

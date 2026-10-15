@@ -5,6 +5,7 @@ import { storyDate } from '../../lib/dates'
 import { Button, ButtonLink } from '../../ui/Button'
 import { SafeHtml } from '../../ui/SafeHtml'
 import { Spinner } from '../../ui/Spinner'
+import { AskExperts } from './AskExperts'
 import { Sources } from './Sources'
 
 /** `/advisor/history`: the reader's earlier questions, newest first; each answer opens in place. */
@@ -39,12 +40,13 @@ export function AdvisorHistoryPage() {
               <li key={item.id} className="border-b border-rule">
                 <details className="group py-5">
                   <summary className="cursor-pointer list-none">
-                    <span className="block font-medium group-open:font-semibold">{item.question}</span>
+                    <span className="block font-medium whitespace-pre-line group-open:font-semibold">{item.question}</span>
                     <span className="mt-1 block text-sm text-ink-muted">{t('Asked {date}', { date: storyDate(item.askedAt) })}</span>
                   </summary>
                   <div className="mt-4 border-l-2 border-paddy pl-5">
                     <SafeHtml html={item.answer} className="font-serif text-base whitespace-pre-line [&>p+p]:mt-3" />
                     <Sources sources={item.sources} />
+                    <AskExperts item={item} />
                   </div>
                 </details>
               </li>

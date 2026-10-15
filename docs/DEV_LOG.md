@@ -12,13 +12,13 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   experts reviewing AI answers, notifications, moderation). `docs/BACKEND_CATCHUP_PLAN.md` is the plan; phases
   F7–F14 in `docs/ROADMAP.md` follow it. Checked against the backend code on 2026-10-15: every endpoint, shape and
   enum in the plan matches (backend `fix/phase8-review-3b`).
-- Phase F7 on `feat/backend-catchup-base`: F7.0 design system (`feat/design-system`) done.
+- Phase F7 on `feat/backend-catchup-base`: F7.0 design system (`feat/design-system`) and F7.0b no season strip
+  (`feat/no-season-strip`) done.
 
 ## Next up
 
-1. F7.0b: the season strip goes (season becomes a filter and a form select).
-2. F7.1 one account type, F7.2 e-mail confirmation, F7.3 excerpts on story cards.
-3. F12–F14 need the backend's Phase 8 branch until it is merged.
+1. F7.1 one account type, F7.2 e-mail confirmation, F7.3 excerpts on story cards.
+2. F12–F14 need the backend's Phase 8 branch until it is merged.
 
 ## Open items
 
@@ -33,6 +33,23 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-15 (F7.0b the season strip goes)
+
+**Done**
+- `SeasonStrip` deleted from home and the questions page. Season is now a select in the filter form ("Filter by
+  crop, season, region or soil", applied with "Apply filters") and a removable chip like the other filters.
+- The publish sheet and the ask form choose a season from a select next to soil (`FarmingFields`), built on shadcn's
+  native select inside a `Field`; the radio-strip `SeasonPicker` is gone. `seasonCalendar` stays for the advisor's
+  seasonal examples.
+- Bengali strings: the filter button, "Apply filters" and "Any season"; "Crop seasons" removed.
+- Tests: season filtering through the form on home and questions; publish and ask pick the season from the select.
+
+**Decisions**
+- Native `<select>` (shadcn `native-select`) rather than the Base UI Select: four options, phone-first, and the
+  system picker is what a farmer's phone already does well.
 
 ---
 

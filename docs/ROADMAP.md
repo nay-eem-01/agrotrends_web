@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend · ➡ moved to a later step
 
-**Progress:** 55 of 60 steps done
+**Progress:** 56 of 60 steps done
 
 ---
 
@@ -145,7 +145,7 @@ the season strip goes, shadcn/ui replaces the hand-made primitives, staff see th
 
 | # | Step | Status |
 |---|---|---|
-| F13.1 | Report dialog on stories, questions, answers, comments, the AI answer and profiles; 409 shows "Reported" | ⬜ |
+| F13.1 | Report dialog on stories, questions, answers, comments, the AI answer and profiles; 409 shows "Reported" | ✅ |
 | F13.2 | Admin reports page: status tabs, open reports grouped by post, snapshot for hidden posts, remove and dismiss with confirm dialogs, 409 refetch | ⬜ |
 | F13.3 | Ban and unban (staff); hidden and removed states: an editor that gets 409, a thread that turns 404 | ⬜ |
 

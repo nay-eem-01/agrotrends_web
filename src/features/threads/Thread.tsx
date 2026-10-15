@@ -9,6 +9,7 @@ import { SafeHtml } from '../../ui/SafeHtml'
 import { Spinner } from '../../ui/Spinner'
 import { useSession } from '../auth/session'
 import { useRequireSignIn } from '../auth/useRequireSignIn'
+import { ReportButton } from '../reports/ReportButton'
 import { Composer } from './Composer'
 
 const COPY = {
@@ -197,6 +198,7 @@ function Item({ kind, parentId, copy, item, onReply }: ItemProps & { item: Threa
                 {t('Reply')}
               </Button>
             )}
+            {!own && <ReportButton targetType="COMMENT" targetId={item.id} what={t('this response')} />}
             {own && (
               <>
                 <Button variant="quiet" size="sm" onClick={() => setMode('edit')}>

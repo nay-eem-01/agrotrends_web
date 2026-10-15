@@ -27,12 +27,14 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   (`feat/notifications-page`) done. Phase F12 is complete.
 - Phase F13 on `feat/moderation-base` (stacked on F12's tip): F13.1 report (`feat/report`) F13.2 moderation queue (`feat/moderation-queue`) and
   F13.3 ban and hidden states (`feat/ban-hidden`) done. Phase F13 is complete.
-- Phase F14 on `feat/launch-polish-base` (stacked on F13's tip): F14.1 Bengali and accessibility (`feat/bengali-a11y`) done.
+- Phase F14 on `feat/launch-polish-base` (stacked on F13's tip): F14.1 Bengali and accessibility (`feat/bengali-a11y`) and F14.2 community smoke tests
+  (`feat/smoke-community`) done. Phase F14 is complete: every step of F7–F14 is built.
 
 ## Next up
 
-1. F14.2 smoke tests.
-2. F12–F14 need the backend's Phase 8 branch until it is merged.
+1. **Nayeem:** open and merge the F7–F14 step PRs in order (each phase base into `development` after its steps).
+2. Run the admin smoke step (`E2E_ADMIN_EMAIL` / `E2E_ADMIN_PASSWORD`) and the admin screens live once an admin login is at hand.
+3. Merge the backend's Phase 8 so F12–F14 run against its `development`.
 
 ## Open items
 
@@ -49,6 +51,25 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-15 (F14.2 community smoke tests)
+
+**Done**
+- `e2e/community.spec.ts`, serial, against a running backend with dev mail: two people sign up through the UI and
+  confirm through the logged link (`E2E_MAIL_LOG`); one asks (topic, tag), the other answers; the asker's bell shows
+  the notification; the asker upvotes (still pressed, Score 1 after a reload) and accepts; three new accounts report
+  the question and a visitor then gets "Page not found"; with `E2E_ADMIN_EMAIL` / `E2E_ADMIN_PASSWORD`, an admin
+  dismisses the reports and the question is back.
+- `e2e/smoke.spec.ts` follows the new home (questions first, Stories tab), "Topic" on publish and ask, and the
+  account menu's name.
+- Run: `PW_CHANNEL=chrome API_TARGET=http://localhost:8081 E2E_MAIL_LOG=<backend log> E2E_EMAIL=… E2E_PASSWORD=…
+  npm run e2e`: 9 passed, the admin step skipped (no admin login here), against the backend's `fix/phase8-review-3b`.
+
+**Known limitations**
+- Each run leaves its accounts, question and reports in the database (`smoke-*@example.com`); the backend has no
+  self-delete that works for them (F6.4's note still holds).
 
 ---
 

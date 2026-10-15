@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend · ➡ moved to a later step
 
-**Progress:** 41 of 60 steps done
+**Progress:** 42 of 60 steps done
 
 ---
 
@@ -106,7 +106,7 @@ the season strip goes, shadcn/ui replaces the hand-made primitives, staff see th
 
 | # | Step | Status |
 |---|---|---|
-| F8.1 | Ask form: topic (required), up to 5 tags, up to 4 photos, agri details; edit keeps tags and photos when untouched | ⬜ |
+| F8.1 | Ask form: topic (required), up to 5 tags, up to 4 photos, agri details; edit keeps tags and photos when untouched | ✅ |
 | F8.2 | Questions list: topic and tag filters, Unanswered tab, `answerCount` and `score` on cards; question search; home lands on questions, stories second | ⬜ |
 | F8.3 | Question page: direct answers in backend order, replies loaded per answer, reply form; the client-side reply filter removed | ⬜ |
 

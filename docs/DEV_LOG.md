@@ -25,11 +25,11 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   (`feat/expert-admin`) done. Phase F11 is complete.
 - Phase F12 on `feat/notifications-base` (stacked on F11's tip): F12.1 bell (`feat/notification-bell`) and F12.2 page
   (`feat/notifications-page`) done. Phase F12 is complete.
-- Phase F13 on `feat/moderation-base` (stacked on F12's tip): F13.1 report (`feat/report`) done.
+- Phase F13 on `feat/moderation-base` (stacked on F12's tip): F13.1 report (`feat/report`) and F13.2 moderation queue (`feat/moderation-queue`) done.
 
 ## Next up
 
-1. F13.2 admin reports, F13.3 ban and hidden states.
+1. F13.3 ban and hidden states.
 2. F12–F14 need the backend's Phase 8 branch until it is merged.
 
 ## Open items
@@ -47,6 +47,26 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-15 (F13.2 moderation queue)
+
+**Done**
+- `/admin/reports` (staff; a new section of the admin frame): **Open**, **Removed** and **Dismissed** tabs over
+  `GET /api/admin/reports?status=`.
+- Open reports are grouped by post (`groupReports`): the reasons with counts, each reporter with their details, and
+  either the snapshot with a **Hidden** badge (the live page is 404 even for staff) or **Open the post** (answers and
+  comments are found through `GET /api/answers/id/{id}` and `GET /api/comments/id/{id}`).
+- One decision covers the group: **Remove the post** (for an AI answer, **Hide the AI answer**), behind a dialog that
+  says it can't be undone and takes the post's reputation and AI index with it; **Dismiss**, which restores a hidden
+  post. Profile reports offer Dismiss only (banning is F13.3). A 409 (someone acted first) is shown and the queue
+  reloads.
+- Tests: `api/moderation.test.ts` (grouping keeps the snapshot) and `admin/admin-reports.test.tsx` (snapshot and
+  removal; the live link and dismiss; a 409; closed reports by status).
+
+**Known limitations**
+- Not live-tested: no admin login here.
 
 ---
 

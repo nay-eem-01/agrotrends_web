@@ -12,18 +12,18 @@ import { TextArea } from '../../ui/TextArea'
 import { TextField } from '../../ui/TextField'
 import { FormError } from '../auth/AuthPage'
 
-/** Loads the signed-in author's profile, then shows the editor filled with it. */
-export function AuthorProfileForm({ name }: { name: string }) {
+/** Loads the signed-in user's profile, then shows the editor filled with it. `onSaved` runs after a save. */
+export function AuthorProfileForm({ name, onSaved }: { name: string; onSaved?: () => void }) {
   const profile = useMyAuthorProfile(true)
 
   if (profile.isPending) return <Spinner />
   if (profile.isError) return <FormError message={errorMessage(profile.error)} />
-  return <ProfileEditor profile={profile.data} name={name} />
+  return <ProfileEditor profile={profile.data} name={name} onSaved={onSaved} />
 }
 
 type Errors = Partial<Record<'designation' | 'specialities' | 'photo', string>>
 
-function ProfileEditor({ profile, name }: { profile: AuthorProfileResponse; name: string }) {
+function ProfileEditor({ profile, name, onSaved }: { profile: AuthorProfileResponse; name: string; onSaved?: () => void }) {
   const update = useUpdateMyAuthorProfile()
   const upload = useUploadImage()
   const fileInput = useRef<HTMLInputElement>(null)
@@ -66,7 +66,7 @@ function ProfileEditor({ profile, name }: { profile: AuthorProfileResponse; name
       workPlaceOrInstitution: form.workPlaceOrInstitution.trim() || undefined,
       bio: form.bio.trim() || undefined,
       profileImageUrl: form.profileImageUrl || undefined,
-    })
+    }, { onSuccess: () => onSaved?.() })
   }
 
   const photoError = errors.photo ?? (upload.isError ? errorMessage(upload.error) : undefined)

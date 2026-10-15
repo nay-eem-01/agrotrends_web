@@ -1,12 +1,13 @@
 import { useT } from '../../lib/i18n'
 import { useState, type FormEvent } from 'react'
-import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, Navigate, useSearchParams } from 'react-router-dom'
 import { useSignUp, type SignUpRequest } from '../../api/auth'
 import { errorMessage } from '../../api/errors'
 import { isEmail, passwordProblem, safeNext } from '../../lib/auth'
 import { Button } from '../../ui/Button'
 import { TextField } from '../../ui/TextField'
 import { AuthPage, FormError } from './AuthPage'
+import { GoogleSignIn } from './GoogleSignIn'
 import { useSession } from './session'
 
 interface Form {
@@ -53,13 +54,13 @@ export function SignUpPage() {
   const t = useT()
   const [params] = useSearchParams()
   const next = safeNext(params.get('next'))
-  const navigate = useNavigate()
   const session = useSession()
   const signUp = useSignUp()
   const [form, setForm] = useState<Form>(EMPTY)
   const [errors, setErrors] = useState<Errors>({})
 
-  if (session.status === 'signed-in') return <Navigate to={next} replace />
+  // A new account goes to the optional profile step first; someone already signed in goes straight on.
+  if (session.status === 'signed-in') return <Navigate to={signUp.isSuccess ? `/welcome?next=${encodeURIComponent(next)}` : next} replace />
 
   function set<K extends keyof Form>(key: K, value: Form[K]) {
     setForm((current) => ({ ...current, [key]: value }))
@@ -71,10 +72,7 @@ export function SignUpPage() {
     setErrors(found)
     if (Object.keys(found).length > 0) return
     signUp.mutate(toSignUpRequest(form), {
-      onSuccess: (tokens) => {
-        session.signedIn(tokens)
-        navigate(next, { replace: true })
-      },
+      onSuccess: (tokens) => session.signedIn(tokens),
     })
   }
 
@@ -119,6 +117,7 @@ export function SignUpPage() {
           {t('Create account')}
         </Button>
       </form>
+      <GoogleSignIn next={next} />
       <p className="mt-8 text-sm text-ink-muted">
         Already have an account?{' '}
         <Link to={signInLink} className="font-medium text-paddy underline-offset-4 hover:underline">

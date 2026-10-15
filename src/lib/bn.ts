@@ -212,6 +212,12 @@ export const BN: Record<string, string> = {
   'Enter your password.': 'আপনার পাসওয়ার্ড দিন।',
   Password: 'পাসওয়ার্ড',
   'Create account': 'অ্যাকাউন্ট খুলুন',
+  or: 'অথবা',
+  'Welcome – AgroTrends': 'স্বাগতম – অ্যাগ্রোট্রেন্ডস',
+  'Welcome to AgroTrends': 'অ্যাগ্রোট্রেন্ডসে স্বাগতম',
+  'Tell people what you grow or what you work on. It shows next to your answers and stories, so they know whose advice they read. You can skip this and add it later in Settings.':
+    'আপনি কী চাষ করেন বা কী নিয়ে কাজ করেন, জানান। এটি আপনার উত্তর ও লেখার পাশে দেখা যায়, যাতে মানুষ জানে কার পরামর্শ পড়ছে। চাইলে এখন বাদ দিয়ে পরে সেটিংসে যোগ করতে পারেন।',
+  'Skip for now': 'এখন থাক',
   'Create your account': 'আপনার অ্যাকাউন্ট খুলুন',
   'Join farmers, agronomists and students sharing what works in the field.': 'মাঠে যা কাজ করে তা ভাগ করে নেওয়া কৃষক, কৃষিবিদ ও শিক্ষার্থীদের সঙ্গে যোগ দিন।',
   'Full name': 'পুরো নাম',

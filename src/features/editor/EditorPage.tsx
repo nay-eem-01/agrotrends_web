@@ -4,7 +4,7 @@ import { useBlogById, useBlogWrite } from '../../api/blogs'
 import { ApiError, errorMessage } from '../../api/errors'
 import type { BlogResponse } from '../../api/types'
 import { clearLocalDraft, isBlank, loadLocalDraft, saveLocalDraft } from '../../lib/draft'
-import { Button, ButtonLink } from '../../ui/Button'
+import { Button } from '../../ui/Button'
 import { Spinner } from '../../ui/Spinner'
 import { useSession } from '../auth/session'
 import { NotFoundPage } from '../errors/NotFoundPage'
@@ -30,25 +30,9 @@ function detailFields(details: StoryDetails) {
   }
 }
 
-/** `/write` starts a story; `/write/:blogId` edits one of yours. Authors only (RequireAuth handles visitors). */
+/** `/write` starts a story; `/write/:blogId` edits one of yours. Any signed-in account (RequireAuth handles visitors). */
 export function EditorPage() {
-  const { user } = useSession()
   const { blogId } = useParams()
-
-  if (user?.authorId == null) {
-    return (
-      <Page>
-        <h1 className="mt-16 text-2xl">Publishing is for authors</h1>
-        <p className="mt-3 max-w-prose text-ink-muted">
-          Your account reads, asks and answers. To publish stories, create an author account with your professional
-          details.
-        </p>
-        <ButtonLink to="/questions" variant="secondary" className="mt-8">
-          Ask a question instead
-        </ButtonLink>
-      </Page>
-    )
-  }
   return blogId ? <EditStory blogId={Number(blogId)} /> : <NewStory />
 }
 

@@ -13,11 +13,11 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   F7–F14 in `docs/ROADMAP.md` follow it. Checked against the backend code on 2026-10-15: every endpoint, shape and
   enum in the plan matches (backend `fix/phase8-review-3b`).
 - Phase F7 on `feat/backend-catchup-base`: F7.0 design system (`feat/design-system`) F7.0b no season strip
-  (`feat/no-season-strip`) and F7.1a API types (`feat/api-types`) done.
+  (`feat/no-season-strip`) F7.1a API types (`feat/api-types`) and F7.1b one account (`feat/one-account`) done.
 
 ## Next up
 
-1. F7.1b one account type, F7.2 e-mail confirmation, F7.3 excerpts on story cards.
+1. F7.2 e-mail confirmation, F7.3 excerpts on story cards.
 2. F12–F14 need the backend's Phase 8 branch until it is merged.
 
 ## Open items
@@ -33,6 +33,30 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-15 (F7.1b one account type)
+
+**Done**
+- Every signed-in account can write: the editor's "Publishing is for authors" gate, My stories' reader message and
+  the account menu's author check are gone. My stories reads the author id for the Published tab from
+  `GET /api/authors/me` (the backend creates the author record on first use; `UserResponse.authorId` stays null until
+  then).
+- Settings shows the profile (designation, specialities, bio, photo) to everyone, as "Profile", marked optional.
+- `/welcome?next=`: after sign-up, an optional profile step with "Skip for now"; saving or skipping goes on to `next`.
+- Google sign-in (`POST /api/auth/google {idToken}`) on the sign-in and sign-up pages, through Google Identity
+  Services. It only appears when `VITE_GOOGLE_CLIENT_ID` is set; the backend's `GOOGLE_CLIENT_ID` must match.
+- Tests: `auth/welcome.test.tsx` (skip, save, no Google without a client id, Google sends the ID token); editor,
+  My stories, profile and sign-up tests follow the single account type.
+
+**Decisions**
+- The Google script is loaded only on the auth pages and only with a client id, so other visitors never fetch it.
+- The welcome step reuses the Settings profile form, so its rules (designation and a speciality, required by the
+  backend) are the same in both places.
+
+**Known limitations**
+- Google sign-in isn't live-tested: the local backend has no `GOOGLE_CLIENT_ID`.
 
 ---
 

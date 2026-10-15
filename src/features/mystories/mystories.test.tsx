@@ -36,7 +36,11 @@ test('drafts list the server drafts and the one on this device', async () => {
 })
 
 test('published lists the author’s live stories', async () => {
-  mockApi({ ...signedInAs(author), 'GET /api/blogs/all/author/3': () => envelope(200, page([live])) })
+  mockApi({
+    ...signedInAs(author),
+    'GET /api/authors/me': () => envelope(200, { authorId: 3, name: 'Nasrin' }),
+    'GET /api/blogs/all/author/3': () => envelope(200, page([live])),
+  })
   renderWithProviders(<App />, '/me/stories?tab=published')
 
   expect(await screen.findByRole('link', { name: 'Hilsa runs' })).toHaveAttribute('href', '/stories/live-one')
@@ -65,8 +69,8 @@ test('deleting asks first, then removes the story', async () => {
   await waitFor(() => expect(screen.getByText(/No drafts/)).toBeInTheDocument())
 })
 
-test('readers are pointed to their library', async () => {
-  mockApi(signedInAs({ id: 10, name: 'Karim' }))
-  renderWithProviders(<App />, '/me/stories')
-  expect(await screen.findByRole('link', { name: 'Open your library' })).toHaveAttribute('href', '/library')
+test('an account with nothing published yet sees an empty published tab', async () => {
+  mockApi({ ...signedInAs({ id: 10, name: 'Karim', authorId: null }), 'GET /api/authors/me': () => envelope(200, { name: 'Karim' }) })
+  renderWithProviders(<App />, '/me/stories?tab=published')
+  expect(await screen.findByText('Nothing published yet. Your published stories appear here.')).toBeInTheDocument()
 })

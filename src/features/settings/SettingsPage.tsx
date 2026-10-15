@@ -19,11 +19,9 @@ export function SettingsPage() {
       <Section title="Account" intro="Your name is shown on your stories, questions and answers.">
         <AccountForm />
       </Section>
-      {user?.authorId != null && (
-        <Section title="Author profile" intro="Readers see this next to your stories and on your author page.">
-          <AuthorProfileForm name={user.name ?? ''} />
-        </Section>
-      )}
+      <Section title="Profile" intro="Optional. People see it next to your stories and answers, and on your profile page.">
+        <AuthorProfileForm name={user?.name ?? ''} />
+      </Section>
       <Section title="Password" intro="Changing it signs you out on every device.">
         <PasswordForm />
       </Section>

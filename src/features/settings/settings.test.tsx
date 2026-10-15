@@ -17,7 +17,10 @@ const user = { id: 1, name: 'Nasrin Akter', email: 'nasrin@farm.bd', mobileNumbe
 const fetchMock = vi.fn<typeof fetch>()
 
 beforeEach(() => {
-  vi.stubGlobal('fetch', fetchMock)
+  // The profile section loads on its own; the account and password tests count the other calls.
+  vi.stubGlobal('fetch', (input: RequestInfo | URL, init?: RequestInit) =>
+    String(input).startsWith('/api/authors/me') ? Promise.resolve(envelope(200, { name: user.name, specialities: [] })) : fetchMock(input, init),
+  )
   localStorage.clear()
   clearSession()
   localStorage.setItem('agrotrends.refreshToken', 'r0')

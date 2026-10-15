@@ -26,6 +26,11 @@ export function useSignIn() {
   return useMutation({ mutationFn: signIn })
 }
 
+/** Google's ID token for our tokens; the backend creates the account on first use and counts the e-mail as confirmed. */
+export function useGoogleSignIn() {
+  return useMutation({ mutationFn: (idToken: string) => api<WebTokenResponse>('/api/auth/google', { method: 'POST', body: { idToken } }) })
+}
+
 /** Sign up, then sign in with the same e-mail and password. */
 export function useSignUp() {
   return useMutation({

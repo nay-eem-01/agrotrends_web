@@ -38,15 +38,16 @@ beforeEach(() => {
 
 afterEach(() => vi.unstubAllGlobals())
 
-test('visitors are sent to sign-in and readers are told only authors publish', async () => {
+test('visitors are sent to sign-in; any account may write', async () => {
   mockApi({})
   const { unmount } = renderWithProviders(<App />, '/write')
   await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/sign-in?next=%2Fwrite'))
   unmount()
 
-  mockApi(signedInAs({ id: 9, name: 'Karim' }))
+  // No author record yet: the backend creates it with the first story.
+  mockApi(signedInAs({ id: 9, name: 'Karim', authorId: null }))
   renderWithProviders(<App />, '/write')
-  expect(await screen.findByRole('heading', { name: 'Publishing is for authors' })).toBeInTheDocument()
+  expect(await screen.findByRole('textbox', { name: 'Title' })).toBeInTheDocument()
 })
 
 test('a new story is kept on this device and comes back after a reload', async () => {

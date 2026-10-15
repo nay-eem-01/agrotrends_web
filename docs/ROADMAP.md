@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend · ➡ moved to a later step
 
-**Progress:** 38 of 60 steps done
+**Progress:** 39 of 60 steps done
 
 ---
 
@@ -98,7 +98,7 @@ the season strip goes, shadcn/ui replaces the hand-made primitives, staff see th
 | F7.0 | Design system: shadcn/ui (`base-maia` on Base UI), AgroTrends tokens in light and dark, Emil's motion rules; app primitives rebuilt on it | ✅ |
 | F7.0b | The season strip goes: season becomes a filter and a select in the publish and ask forms | ✅ |
 | F7.1a | Regenerate OpenAPI types and fix what they break: sign-up without reader/author or professional info; a required topic on the ask form; the removed AI-draft endpoint's button | ✅ |
-| F7.1b | One account type: "Write" and My stories for every signed-in user; profile details as an optional step after sign-up; Google sign-in | ⬜ |
+| F7.1b | One account type: "Write" and My stories for every signed-in user; profile details as an optional step after sign-up; Google sign-in | ✅ |
 | F7.2 | E-mail confirmation: `/verify-email?token=` page, resend, unconfirmed banner, a dialog on write attempts. A 403 from refresh ends the session with its message; no refresh loop | ⬜ |
 | F7.3 | Story cards read `excerpt`; the editor always loads by id; staff no longer expect others' drafts | ⬜ |
 

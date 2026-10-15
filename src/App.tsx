@@ -18,6 +18,7 @@ const ForgotPasswordPage = page(() => import('./features/auth/ForgotPasswordPage
 const ResetPasswordPage = page(() => import('./features/auth/ResetPasswordPage'), 'ResetPasswordPage')
 const SignInPage = page(() => import('./features/auth/SignInPage'), 'SignInPage')
 const SignUpPage = page(() => import('./features/auth/SignUpPage'), 'SignUpPage')
+const WelcomePage = page(() => import('./features/auth/WelcomePage'), 'WelcomePage')
 const LibraryPage = page(() => import('./features/library/LibraryPage'), 'LibraryPage')
 const MyStoriesPage = page(() => import('./features/mystories/MyStoriesPage'), 'MyStoriesPage')
 const AskPage = page(() => import('./features/qa/AskPage'), 'AskPage')
@@ -59,6 +60,7 @@ export default function App() {
           <Route path="/me/stories" element={<MyStoriesPage />} />
           <Route path="/library" element={<LibraryPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/welcome" element={<WelcomePage />} />
         </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Route>

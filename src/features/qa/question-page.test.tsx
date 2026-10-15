@@ -33,14 +33,11 @@ beforeEach(() => {
 
 afterEach(() => vi.unstubAllGlobals())
 
-test('a question shows its text, context and answers, with replies under their answer only', async () => {
-  mockApi({
+test('a question shows its text, context and answers in the backend order', async () => {
+  const api = mockApi({
     'GET /api/questions/id/5': () => envelope(200, question),
-    // The backend lists replies among the answers too.
-    'GET /api/answers/question/5': () => envelope(200, [answer(1), answer(2), answer(3, { authorName: 'Salma', content: 'A reply' })]),
-    'GET /api/answers/replies/1': () => envelope(200, [answer(3, { authorName: 'Salma', content: 'A reply' })]),
-    'GET /api/answers/replies/2': () => envelope(200, []),
-    'GET /api/answers/replies/3': () => envelope(200, []),
+    // Direct answers only, accepted first, then by score: the page keeps this order.
+    'GET /api/answers/question/5': () => envelope(200, [answer(2, { accepted: true }), answer(1)]),
   })
   renderWithProviders(<App />, '/questions/5')
 
@@ -49,9 +46,36 @@ test('a question shows its text, context and answers, with replies under their a
   expect(document.querySelector('script')).toBeNull()
   expect(within(screen.getByRole('list', { name: 'Farming context' })).getByRole('link', { name: /Crop\s*boro rice/ })).toHaveAttribute('href', '/questions?crop=boro+rice')
 
-  await waitFor(() => expect(screen.getByRole('heading', { name: 'Answers (3)' })).toBeInTheDocument())
-  expect(screen.getAllByRole('article', { name: 'Answer by Salma' })).toHaveLength(1)
+  expect(await screen.findByRole('heading', { name: '2 answers' })).toBeInTheDocument()
+  const cards = screen.getAllByRole('article', { name: 'Answer by Nasrin' })
+  expect(cards.map((card) => within(card).getByText(/^Answer \d$/).textContent)).toEqual(['Answer 2', 'Answer 1'])
   expect(screen.getByRole('button', { name: 'Sign in to answer' })).toBeInTheDocument()
+  // Replies are read only when opened.
+  expect(api.mock.calls.some(([url]) => String(url).startsWith('/api/answers/replies'))).toBe(false)
+})
+
+test('replies load when opened and stay under their answer', async () => {
+  const api = mockApi({
+    ...signedInAs({ id: 9, name: 'Karim' }),
+    'GET /api/questions/id/5': () => envelope(200, question),
+    'GET /api/answers/question/5': () => envelope(200, [answer(1), answer(2)]),
+    'GET /api/answers/replies/1': () => envelope(200, [answer(3, { authorName: 'Salma', content: 'Same here' })]),
+    'POST /api/answers/reply': () => envelope(200, answer(4, { userId: 9, authorName: 'Karim' })),
+  })
+  renderWithProviders(<App />, '/questions/5')
+
+  const [first, second] = await screen.findAllByRole('article', { name: 'Answer by Nasrin' })
+  await userEvent.click(within(first).getByRole('button', { name: 'Show replies' }))
+  expect(await within(first).findByRole('article', { name: 'Reply by Salma' })).toHaveTextContent('Same here')
+  expect(within(second).queryByRole('article', { name: 'Reply by Salma' })).not.toBeInTheDocument()
+  expect(api.mock.calls.some(([url]) => url === '/api/answers/replies/2')).toBe(false)
+
+  await userEvent.click(within(first).getByRole('button', { name: 'Reply' }))
+  await userEvent.type(within(first).getByLabelText('Reply to Nasrin'), 'Thanks, it worked.')
+  await userEvent.click(within(first).getByRole('button', { name: 'Reply' }))
+  await waitFor(() => expect(api.mock.calls.some(([url]) => url === '/api/answers/reply')).toBe(true))
+  const sent = api.mock.calls.find(([url]) => url === '/api/answers/reply')!
+  expect(JSON.parse(sent[1]!.body as string)).toEqual({ questionId: 5, parentAnswerId: 1, content: 'Thanks, it worked.' })
 })
 
 test('answering posts to the question', async () => {
@@ -60,7 +84,6 @@ test('answering posts to the question', async () => {
     ...signedInAs({ id: 9, name: 'Nasrin' }),
     'GET /api/questions/id/5': () => envelope(200, question),
     'GET /api/answers/question/5': () => envelope(200, answers),
-    'GET /api/answers/replies/4': () => envelope(200, []),
     'POST /api/answers/create': () => {
       answers = [answer(4, { userId: 9, content: 'Drain the cold water.' })]
       return envelope(200, answers[0])
@@ -82,7 +105,6 @@ test('editing an answer uses the answer endpoint', async () => {
     ...signedInAs({ id: 7, name: 'Nasrin' }),
     'GET /api/questions/id/5': () => envelope(200, question),
     'GET /api/answers/question/5': () => envelope(200, [answer(1)]),
-    'GET /api/answers/replies/1': () => envelope(200, []),
     'PUT /api/answers/update/': () => envelope(200, answer(1, { content: 'Better' })),
   })
   renderWithProviders(<App />, '/questions/5')

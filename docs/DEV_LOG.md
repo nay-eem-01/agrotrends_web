@@ -15,11 +15,12 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 - Phase F7 on `feat/backend-catchup-base`: F7.0 design system (`feat/design-system`) F7.0b no season strip
   (`feat/no-season-strip`) F7.1a API types (`feat/api-types`) F7.1b one account (`feat/one-account`) F7.2
   e-mail confirmation (`feat/email-confirm`) and F7.3 excerpts (`feat/excerpts`) done. Phase F7 is complete.
-- Phase F8 on `feat/questions-first-base` (stacked on F7's tip): F8.1 ask form (`feat/ask-form`) and F8.2 questions home (`feat/questions-home`) done.
+- Phase F8 on `feat/questions-first-base` (stacked on F7's tip): F8.1 ask form (`feat/ask-form`) F8.2 questions home (`feat/questions-home`) and F8.3
+  question answers (`feat/question-answers`) done. Phase F8 is complete.
 
 ## Next up
 
-1. F8.3 question page.
+1. Phase F9 votes and reputation: F9.1 votes, F9.2 accept, F9.3 reputation and badges.
 2. F12–F14 need the backend's Phase 8 branch until it is merged.
 
 ## Open items
@@ -35,6 +36,26 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-15 (F8.3 question answers)
+
+**Done**
+- Answers have their own module (`api/answers.ts`, typed from the backend's `AnswerResponse`) and component
+  (`qa/Answers.tsx`): cards in the backend's order (accepted first, then score, then oldest), "N answers", the answer
+  form below them, owner edit and delete.
+- Replies are read per answer when the reader opens them ("Show replies", `GET /api/answers/replies/{id}`), shown in
+  a rule under that answer only, with a reply form. The client-side filter that dropped replies from the answer list
+  is gone (the backend lists direct answers only now).
+- Story responses keep the `Thread` component, now comments-only; posting, replying and editing in both use one
+  `threads/Composer`.
+- Tests: answers keep the backend order and replies aren't fetched until opened; replies stay under their answer and
+  a reply posts `parentAnswerId`.
+
+**Known limitations**
+- F8.2 (`feat/questions-home`) went to 27 files, over the 20-file rule: the home, list, search and the tests that
+  moved with `/stories` were one change. Split such a step next time.
 
 ---
 

@@ -12,7 +12,7 @@ import { SafeHtml } from '../../ui/SafeHtml'
 import { Spinner } from '../../ui/Spinner'
 import { useSession } from '../auth/session'
 import { NotFoundPage } from '../errors/NotFoundPage'
-import { Thread } from '../threads/Thread'
+import { Answers } from './Answers'
 
 export function QuestionPage() {
   const t = useT()
@@ -96,7 +96,7 @@ function QuestionView({ question }: { question: Question }) {
           ))}
         </ul>
       )}
-      <Thread kind="answers" parentId={id} />
+      <Answers questionId={id} />
     </article>
   )
 }

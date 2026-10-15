@@ -25,11 +25,12 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   (`feat/expert-admin`) done. Phase F11 is complete.
 - Phase F12 on `feat/notifications-base` (stacked on F11's tip): F12.1 bell (`feat/notification-bell`) and F12.2 page
   (`feat/notifications-page`) done. Phase F12 is complete.
-- Phase F13 on `feat/moderation-base` (stacked on F12's tip): F13.1 report (`feat/report`) and F13.2 moderation queue (`feat/moderation-queue`) done.
+- Phase F13 on `feat/moderation-base` (stacked on F12's tip): F13.1 report (`feat/report`) F13.2 moderation queue (`feat/moderation-queue`) and
+  F13.3 ban and hidden states (`feat/ban-hidden`) done. Phase F13 is complete.
 
 ## Next up
 
-1. F13.3 ban and hidden states.
+1. Phase F14 launch polish: F14.1 Bengali and a11y pass, F14.2 smoke tests.
 2. F12–F14 need the backend's Phase 8 branch until it is merged.
 
 ## Open items
@@ -47,6 +48,26 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-15 (F13.3 ban and hidden states)
+
+**Done**
+- `admin/BanControls` for staff, on profile reports in the moderation queue and on profiles: **Ban the account**
+  (a reason is required, up to 500; the dialog says they are signed out everywhere, their open reports close, their
+  posts stay, and ended sessions can't come back) and **Lift a ban** (`POST` / `DELETE /api/admin/users/{id}/ban`).
+  Both are offered as there's no "is banned" read; the backend's refusals (e.g. an admin account) are shown.
+- The banned side was done in F7.2: the next refresh is a 403 whose message is shown once, and the session ends.
+- A hidden story's editor: the 409 on save or publish locks it, with an alert explaining why; autosave stops and the
+  publish sheet won't open until moderators decide.
+- A comment thread, an answer list or a reply thread that turns 404 says "This conversation is no longer available."
+  instead of an error.
+- Tests: `admin/ban-hidden.test.tsx` (ban with a reason and lift it; no controls for non-staff; the editor locks on a
+  409 and stops sending; a 404 thread).
+
+**Known limitations**
+- Not live-tested: no admin login here.
 
 ---
 

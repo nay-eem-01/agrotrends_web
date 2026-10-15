@@ -2,14 +2,18 @@ import { CheckCircleIcon, InfoIcon, SpinnerIcon, WarningIcon, XCircleIcon } from
 import type { CSSProperties } from "react"
 import { Toaster as Sonner, type ToasterProps } from "sonner"
 import { useTheme } from "@/lib/theme"
+import { useT } from "@/lib/i18n"
 
 // AgroTrends keeps its own theme store (src/lib/theme.ts) instead of next-themes.
 const Toaster = ({ ...props }: ToasterProps) => {
   const theme = useTheme()
+  const t = useT()
 
   return (
     <Sonner
       theme={theme}
+      // Sonner's default region name is "Notifications", which is the bell's panel; toasts are messages.
+      containerAriaLabel={t('Messages')}
       className="toaster group"
       icons={{
         success: <CheckCircleIcon className="size-4" />,

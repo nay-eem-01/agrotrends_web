@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend · ➡ moved to a later step
 
-**Progress:** 58 of 60 steps done
+**Progress:** 60 of 64 steps done
 
 ---
 
@@ -153,8 +153,20 @@ the season strip goes, shadcn/ui replaces the hand-made primitives, staff see th
 
 | # | Step | Status |
 |---|---|---|
-| F14.1 | Bengali strings for every new screen; keyboard and screen-reader pass on them | ⬜ |
-| F14.2 | Playwright smoke: sign up, confirm, ask, answer, vote, accept, three reports hide, admin dismisses, notifications arrive | ⬜ |
+| F14.1 | Bengali strings for every new screen; keyboard and screen-reader pass on them | ✅ |
+| F14.2 | Playwright smoke: sign up, confirm, ask, answer, vote, accept, three reports hide, admin dismisses, notifications arrive | ✅ |
+
+## Phase F15 — Admin dashboard (`feat/admin-dashboard-base`)
+
+Backend Phase 9 (`feat/admin-dashboard-base` on the backend) adds users with ban state, overview counts and admin roles.
+Endpoints and rules: `docs/BACKEND_CATCHUP_PLAN.md` § Admin dashboard.
+
+| # | Step | Status |
+|---|---|---|
+| F15.1 | Admin home: overview cards from `/api/admin/stats` linking to their pages; nav gains Overview, Users, Roles | ⬜ |
+| F15.2 | Users page: search, All / Banned / Active tabs, table, paging | ⬜ |
+| F15.3 | User page: counts, expert topics with revoke, Ban or Unban from the known state, grant and remove admin roles | ⬜ |
+| F15.4 | Roles page: create, edit and delete admin roles with privilege checkboxes; Bengali strings; smoke grants a moderator | ⬜ |
 
 ## Needs from the backend
 

@@ -341,6 +341,7 @@ export const BN: Record<string, string> = {
   Admin: 'অ্যাডমিন',
   Notifications: 'বিজ্ঞপ্তি',
   Report: 'অভিযোগ করুন',
+  'This conversation is no longer available.': 'এই আলোচনা আর দেখা যাচ্ছে না।',
   Reported: 'অভিযোগ করা হয়েছে',
   'Report {what}': '{what} নিয়ে অভিযোগ',
   'this question': 'এই প্রশ্ন',

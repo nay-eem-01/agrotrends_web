@@ -1,4 +1,6 @@
+import { EyeSlash } from '@phosphor-icons/react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useBlogById, useBlogWrite } from '../../api/blogs'
 import { ApiError, errorMessage } from '../../api/errors'
@@ -185,7 +187,9 @@ function StoryForm({ story }: { story: BlogResponse }) {
       },
     )
   }
-  useAutosave(`${title}\u0000${html}\u0000${cover}`, () => save(true), !published)
+  // 409: the story is hidden while moderators review reports; nothing more is sent until they decide.
+  const locked = [write.error, sheetWrite.error].some((error) => error instanceof ApiError && error.status === 409)
+  useAutosave(`${title}\u0000${html}\u0000${cover}`, () => save(true), !published && !locked)
 
   const statusText = write.isPending
     ? 'Saving…'
@@ -214,8 +218,15 @@ function StoryForm({ story }: { story: BlogResponse }) {
           {published ? 'Details' : 'Publish'}
         </Button>
       </StatusBar>
+      {locked && (
+        <Alert variant="destructive" className="mb-4">
+          <EyeSlash aria-hidden="true" />
+          <AlertTitle>This story is hidden while moderators review reports about it</AlertTitle>
+          <AlertDescription>Changes can't be saved or published until they decide. Copy anything you want to keep.</AlertDescription>
+        </Alert>
+      )}
       <PublishSheet
-        open={sheetOpen}
+        open={sheetOpen && !locked}
         mode={published ? 'published' : 'draft'}
         initial={detailsOf(story)}
         draft={{ title, content: html }}

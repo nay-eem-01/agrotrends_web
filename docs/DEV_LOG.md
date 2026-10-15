@@ -23,11 +23,12 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   experts (`feat/ask-experts`) done. Phase F10 is complete.
 - Phase F11 on `feat/experts-base` (stacked on F10's tip): F11.1 apply (`feat/expert-apply`) F11.2 review (`feat/expert-review`) and F11.3 admin
   (`feat/expert-admin`) done. Phase F11 is complete.
-- Phase F12 on `feat/notifications-base` (stacked on F11's tip): F12.1 bell (`feat/notification-bell`) done.
+- Phase F12 on `feat/notifications-base` (stacked on F11's tip): F12.1 bell (`feat/notification-bell`) and F12.2 page
+  (`feat/notifications-page`) done. Phase F12 is complete.
 
 ## Next up
 
-1. F12.2 notifications page (backend Phase 8 branch).
+1. Phase F13 reports and moderation: F13.1 report dialog, F13.2 admin reports, F13.3 ban and hidden states.
 2. F12–F14 need the backend's Phase 8 branch until it is merged.
 
 ## Open items
@@ -45,6 +46,16 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-15 (F12.2 notifications page)
+
+**Done**
+- `/notifications`: **All** and **Unread (n)** tabs (`unreadOnly=true`), newest first, "Show older notifications"
+  for the next page, **Mark all read**. Rows are the bell's (same words, same links, no link for hidden or removed
+  posts); the bell's panel ends with **See all notifications**.
+- Tests: `notifications/notifications.test.tsx` (types in words and paging, the unread tab's request, the bell's link).
 
 ---
 

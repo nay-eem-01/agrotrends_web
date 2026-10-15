@@ -47,3 +47,23 @@ test('the choice is remembered', async () => {
   expect(await screen.findByRole('heading', { level: 1, name: 'প্রশ্ন' })).toBeInTheDocument()
   expect(await screen.findByRole('heading', { name: 'এখনো কোনো প্রশ্ন নেই' })).toBeInTheDocument()
 })
+
+test('the question page reads in Bengali: answers, votes, the AI answer and reporting', async () => {
+  localStorage.setItem('agrotrends.lang', 'bn')
+  setLang('bn')
+  mockApi({
+    'GET /api/questions/id/5': () =>
+      envelope(200, { questionId: 5, userId: 2, title: 'চারা হলুদ', content: 'ঠান্ডার পর', authorName: 'করিম', authorReputation: 12, category: { id: 1, categoryName: 'ফসল' } }),
+    'GET /api/answers/question/5': () =>
+      envelope(200, [{ answerId: 1, questionId: 5, userId: 8, authorName: 'রহিম', content: 'পানি রাখুন', score: 3, accepted: true, authorBadges: ['VERIFIED_EXPERT'] }]),
+    'GET /api/questions/id/5/ai-answer': () => envelope(200, { id: 1, questionId: 5, answer: 'ঠান্ডাজনিত ক্ষতি', status: 'UNCHECKED', disclaimer: 'AI answers can be wrong.' }),
+  })
+  renderWithProviders(<App />, '/questions/5')
+
+  expect(await screen.findByRole('heading', { name: '১টি উত্তর' })).toBeInTheDocument()
+  expect(screen.getByText('প্রশ্নকারী গ্রহণ করেছেন')).toBeInTheDocument()
+  expect(screen.getByText('যাচাই করা বিশেষজ্ঞ')).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'এই প্রশ্নে ভালো ভোট দিন' })).toBeInTheDocument()
+  expect(await screen.findByText('বিশেষজ্ঞ এখনো যাচাই করেননি')).toBeInTheDocument()
+  expect(screen.getAllByRole('button', { name: 'অভিযোগ করুন' }).length).toBeGreaterThan(0)
+})

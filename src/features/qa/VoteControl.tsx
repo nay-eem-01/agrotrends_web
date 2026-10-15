@@ -58,7 +58,6 @@ export function VoteControl({ target, id, score, myVote, own }: VoteControlProps
     })
   }
 
-  const label = target === 'questions' ? t('question') : t('answer')
   const scoreText = (
     <span className="text-lg font-semibold tabular-nums" aria-live="polite">
       <span className="sr-only">{t('Score')} </span>
@@ -72,9 +71,9 @@ export function VoteControl({ target, id, score, myVote, own }: VoteControlProps
 
   return (
     <div className="relative flex w-11 flex-col items-center">
-      <Arrow direction="UP" pressed={state.myVote === 'UP'} disabled={vote.isPending} label={t('Upvote this {what}', { what: label })} onClick={() => cast('UP')} />
+      <Arrow direction="UP" pressed={state.myVote === 'UP'} disabled={vote.isPending} label={target === 'questions' ? t('Upvote this question') : t('Upvote this answer')} onClick={() => cast('UP')} />
       {scoreText}
-      <Arrow direction="DOWN" pressed={state.myVote === 'DOWN'} disabled={vote.isPending} label={t('Downvote this {what}', { what: label })} onClick={() => cast('DOWN')} />
+      <Arrow direction="DOWN" pressed={state.myVote === 'DOWN'} disabled={vote.isPending} label={target === 'questions' ? t('Downvote this question') : t('Downvote this answer')} onClick={() => cast('DOWN')} />
       {refusal && (
         <p role="alert" className="absolute top-1/2 left-full z-20 ml-2 w-56 -translate-y-1/2 rounded-2xl bg-foreground px-3 py-2 text-xs text-background shadow-md transition-opacity duration-150 starting:opacity-0">
           {refusal}

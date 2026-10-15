@@ -3,12 +3,14 @@ import { defineConfig } from '@playwright/test'
 /**
  * Smoke tests against a running backend: `npm run e2e`.
  * - API_TARGET: the backend (default http://localhost:8080), passed to the dev server's proxy.
- * - E2E_EMAIL / E2E_PASSWORD: an author account for the signed-in tests (skipped without them).
+ * - E2E_EMAIL / E2E_PASSWORD: a confirmed account for the signed-in tests (skipped without them).
+ * - E2E_MAIL_LOG: the backend's log file (dev mail logs confirmation links) for the community flow in community.spec.ts.
+ * - E2E_ADMIN_EMAIL / E2E_ADMIN_PASSWORD: an admin with CONTENT_MODERATE for its last step.
  * - PW_CHANNEL=chrome: use the installed Chrome instead of Playwright's Chromium (`npx playwright install chromium`).
  */
 export default defineConfig({
   testDir: './e2e',
-  timeout: 30_000,
+  timeout: 60_000,
   retries: 0,
   reporter: 'list',
   use: {

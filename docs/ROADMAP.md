@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend · ➡ moved to a later step
 
-**Progress:** 54 of 60 steps done
+**Progress:** 55 of 60 steps done
 
 ---
 
@@ -139,7 +139,7 @@ the season strip goes, shadcn/ui replaces the hand-made primitives, staff see th
 | # | Step | Status |
 |---|---|---|
 | F12.1 | Bell with the unread count (60 s poll while visible, and on focus), dropdown of the latest 10, mark read on open, mark all read | ✅ |
-| F12.2 | Notifications page with an unread filter and paging; text and links for all 9 types; no actor for moderation and decisions | ⬜ |
+| F12.2 | Notifications page with an unread filter and paging; text and links for all 9 types; no actor for moderation and decisions | ✅ |
 
 ## Phase F13 — Reports and moderation (`feat/moderation-base`)
 

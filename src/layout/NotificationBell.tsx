@@ -1,6 +1,6 @@
 import { Bell } from '@phosphor-icons/react'
 import { useEffect, useId, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { cn } from 'cn'
 import { errorMessage } from '../api/errors'
 import { useMarkRead, useNotifications, useUnreadCount, type Notification } from '../api/notifications'
@@ -97,6 +97,9 @@ function Panel({ id, hasUnread, onClose }: { id: string; hasUnread: boolean; onC
           ))}
         </ul>
       )}
+      <Link to="/notifications" onClick={onClose} className="block border-t border-border px-4 py-3 text-center text-sm font-medium text-primary hover:bg-muted">
+        {t('See all notifications')}
+      </Link>
     </section>
   )
 }

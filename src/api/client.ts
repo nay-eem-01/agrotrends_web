@@ -29,7 +29,7 @@ const REFRESH_AHEAD_MS = 60_000
 let accessToken: string | null = null
 let accessTokenExpiresAt: number | null = null
 let refreshing: Promise<WebTokenResponse> | null = null
-let onSessionLost: () => void = () => {}
+let onSessionLost: (notice?: string) => void = () => {}
 
 export function getAccessToken(): string | null {
   return accessToken
@@ -52,8 +52,11 @@ export function clearSession(): void {
   writeRefreshToken(null)
 }
 
-/** Called when the session can't be refreshed any more (expired, revoked, signed out elsewhere). */
-export function setSessionLostHandler(handler: () => void): void {
+/**
+ * Called when the session can't be refreshed any more (expired, revoked, signed out elsewhere). A 403 from the
+ * refresh carries a message for the reader (a suspended account), passed on as `notice`.
+ */
+export function setSessionLostHandler(handler: (notice?: string) => void): void {
   onSessionLost = handler
 }
 
@@ -141,7 +144,7 @@ async function doRefresh(): Promise<WebTokenResponse> {
     // Expired, revoked or reused refresh token: the session is over. A 5xx leaves it for another try.
     if (error instanceof ApiError && error.status < 500) {
       clearSession()
-      onSessionLost()
+      onSessionLost(error.status === 403 ? error.message : undefined)
     }
     throw error
   }

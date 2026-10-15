@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend · ➡ moved to a later step
 
-**Progress:** 51 of 60 steps done
+**Progress:** 52 of 60 steps done
 
 ---
 
@@ -131,7 +131,7 @@ the season strip goes, shadcn/ui replaces the hand-made primitives, staff see th
 | # | Step | Status |
 |---|---|---|
 | F11.1 | Apply page and status card: topics, field, credential type, institution, proof uploads and links; pending / approved / rejected with the note; no reviewer name | ✅ |
-| F11.2 | Review queue page; confirm / correct / flag on the question page for badge holders; 409 refetches | ⬜ |
+| F11.2 | Review queue page; confirm / correct / flag on the question page for badge holders; 409 refetches | ✅ |
 | F11.3 | Admin: applications list, approve all or some topics, reject with a note, revoke a badge | ⬜ |
 
 ## Phase F12 — Notifications (`feat/notifications-base`, replaces F6.7)

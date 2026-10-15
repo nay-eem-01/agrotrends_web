@@ -21,11 +21,11 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   (`feat/reputation`) done. Phase F9 is complete.
 - Phase F10 on `feat/ai-answers-base` (stacked on F9's tip): F10.1 AI answer card (`feat/ai-answer-card`) F10.2 sources (`feat/ai-sources`) and F10.3 ask the
   experts (`feat/ask-experts`) done. Phase F10 is complete.
-- Phase F11 on `feat/experts-base` (stacked on F10's tip): F11.1 apply (`feat/expert-apply`) done.
+- Phase F11 on `feat/experts-base` (stacked on F10's tip): F11.1 apply (`feat/expert-apply`) and F11.2 review (`feat/expert-review`) done.
 
 ## Next up
 
-1. F11.2 review, F11.3 admin.
+1. F11.3 admin.
 2. F12–F14 need the backend's Phase 8 branch until it is merged.
 
 ## Open items
@@ -42,6 +42,28 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-15 (F11.2 expert review)
+
+**Done**
+- On the question page, an unchecked AI answer shows **Review as an expert** to people with a badge in the question's
+  topic: Verified Experts get **Confirm**, **Correct** (their corrected answer, up to 5000 characters, posted on the
+  question) and **Flag**; Top Contributors get **Flag** only. Flag asks first ("It will be hidden from everyone").
+- `/review`: the review queue (`GET /api/review-queue`, oldest first) with the question, its topic, the AI answer and
+  the same actions. A 403 explains the queue is for verified experts and links to applying.
+- The account menu shows **Review queue** only to Verified Experts.
+- Whatever happens (success or 409 "already reviewed"), the AI answer, the answers and the queue reload; the 409's
+  message is shown as written.
+- Badges come from `GET /api/users/{me}/reputation` (`experts/useMyBadges`), as the backend has no "am I an expert
+  here" read.
+- Tests: `experts/review.test.tsx` (confirm on the question page; a correction's body; a top contributor flags only
+  and sees a 409; no buttons without a badge in that topic; the queue and the menu entry; 403 on the queue).
+
+**Known limitations**
+- Not live-tested: approving an expert needs an admin account with `EXPERT_REVIEW` (the seeded admin's password
+  isn't known here).
 
 ---
 

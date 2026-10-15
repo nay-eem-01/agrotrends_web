@@ -80,7 +80,8 @@ function QuestionForm({ question }: { question?: Question }) {
       : { tags: tags.length ? tags : undefined, imageUrls: imageUrls.length ? imageUrls : undefined }
     const request = { ...fields, ...extras }
     write.mutate(question ? { kind: 'update', request: { questionId: question.questionId ?? 0, ...request } } : { kind: 'create', request }, {
-      onSuccess: (saved) => navigate(`/questions/${saved?.questionId ?? question?.questionId}`, { replace: true }),
+      // A new question gets an AI answer in the background; the question page waits for it (askedAt).
+      onSuccess: (saved) => navigate(`/questions/${saved?.questionId ?? question?.questionId}`, { replace: true, state: question ? undefined : { askedAt: Date.now() } }),
     })
   }
 

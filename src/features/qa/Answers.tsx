@@ -87,8 +87,9 @@ function AnswerCard({ questionId, answer, asker }: { questionId: number; answer:
 
   return (
     <article
+      id={`answer-${id}`}
       aria-label={t('Answer by {name}', { name: answer.authorName ?? '' })}
-      className={cn('flex gap-2 rounded-2xl bg-card p-4 ring-1 sm:gap-4 sm:p-5', answer.accepted ? 'ring-2 ring-mustard' : 'ring-border')}
+      className={cn('flex scroll-mt-24 gap-2 rounded-2xl bg-card p-4 ring-1 sm:gap-4 sm:p-5', answer.accepted ? 'ring-2 ring-mustard' : 'ring-border')}
     >
       <VoteControl target="answers" id={id} score={answer.score ?? 0} myVote={myVotes.data?.answers?.[String(id)]} own={user?.id != null && user.id === answer.userId} />
       <div className="min-w-0 flex-1">

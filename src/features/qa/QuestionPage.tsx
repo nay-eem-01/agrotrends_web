@@ -1,6 +1,6 @@
 import { useT } from '../../lib/i18n'
 import { useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { ApiError, errorMessage } from '../../api/errors'
 import { useQuestion, useQuestionWrite, type Question } from '../../api/questions'
 import { filterPath, SEASON_LABELS, SOIL_LABELS } from '../../lib/agri'
@@ -13,6 +13,7 @@ import { useSession } from '../auth/session'
 import { NotFoundPage } from '../errors/NotFoundPage'
 import { useMyVotes } from '../../api/votes'
 import { Answers } from './Answers'
+import { AiAnswerCard } from './AiAnswerCard'
 import { AuthorLine } from './AuthorLine'
 import { VoteControl } from './VoteControl'
 
@@ -46,6 +47,7 @@ function QuestionView({ question }: { question: Question }) {
   const own = user?.id != null && user.id === question.userId
   const id = question.questionId ?? 0
   const myVotes = useMyVotes(id, status === 'signed-in')
+  const askedAt = (useLocation().state as { askedAt?: number } | null)?.askedAt
   const agri = question.agri ?? {}
   const chips = [
     agri.crop && { name: t('Crop'), label: agri.crop, to: filterPath({ crop: agri.crop }, '/questions') },
@@ -111,6 +113,7 @@ function QuestionView({ question }: { question: Question }) {
         )}
         </div>
       </div>
+      <AiAnswerCard questionId={id} askedAt={askedAt} />
       <Answers questionId={id} askerId={question.userId} />
     </article>
   )

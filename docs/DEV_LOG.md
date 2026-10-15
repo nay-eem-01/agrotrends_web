@@ -13,11 +13,12 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   F7–F14 in `docs/ROADMAP.md` follow it. Checked against the backend code on 2026-10-15: every endpoint, shape and
   enum in the plan matches (backend `fix/phase8-review-3b`).
 - Phase F7 on `feat/backend-catchup-base`: F7.0 design system (`feat/design-system`) F7.0b no season strip
-  (`feat/no-season-strip`) F7.1a API types (`feat/api-types`) and F7.1b one account (`feat/one-account`) done.
+  (`feat/no-season-strip`) F7.1a API types (`feat/api-types`) F7.1b one account (`feat/one-account`) and F7.2
+  e-mail confirmation (`feat/email-confirm`) done.
 
 ## Next up
 
-1. F7.2 e-mail confirmation, F7.3 excerpts on story cards.
+1. F7.3 excerpts on story cards.
 2. F12–F14 need the backend's Phase 8 branch until it is merged.
 
 ## Open items
@@ -33,6 +34,29 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-15 (F7.2 e-mail confirmation)
+
+**Done**
+- `/verify-email?token=` confirms the address (`POST /api/auth/verify-email`, one request per token even under
+  React's double effects), then refetches `/api/user/me` so the banner goes. An invalid or expired link offers a new
+  one: the signed-in account's address, or an e-mail field when signed out.
+- Resend (`POST /api/auth/resend-verification`) always says "If the address is registered, a new link is on its way".
+- A mustard-soft strip under the top bar while `emailVerified` is false, with "Send a new link".
+- Any write refused with 403 "Confirm your e-mail…" opens one dialog explaining the confirm step (React Query's
+  `MutationCache.onError`), wherever the write came from.
+- A 403 from the refresh (a suspended account) ends the session once, without retrying, and shows the backend's
+  message as a toast and on sign-in. Sonner's `Toaster` is mounted in the layout.
+- Live: a new account's banner, the dev mail-log link, and `emailVerified: true` afterwards, against the backend.
+- Tests: `auth/confirm-email.test.tsx` (banner and resend, no banner when confirmed, the dialog on a refused write,
+  the link confirms once, an expired link resends, a suspended account's single refresh and message).
+
+**Decisions**
+- Write buttons send and the dialog explains the backend's refusal, rather than every button checking first: one
+  place covers every write, and the backend stays the judge. Matching the message text is confined to
+  `isConfirmEmailError` until the backend has error codes.
 
 ---
 

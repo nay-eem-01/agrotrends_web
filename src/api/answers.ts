@@ -57,3 +57,16 @@ export function useAnswerWrite(questionId: number) {
     },
   })
 }
+
+/** The asker accepts an answer (`accept`) or takes it back; the list reorders (accepted first) and the question updates. */
+export function useAcceptAnswer(questionId: number) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ answerId, accept }: { answerId: number; accept: boolean }) =>
+      api<Answer>(`/api/answers/id/${answerId}/accept`, { method: accept ? 'PUT' : 'DELETE' }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: answerKeys.list(questionId) })
+      void queryClient.invalidateQueries({ queryKey: ['questions', 'id', questionId] })
+    },
+  })
+}

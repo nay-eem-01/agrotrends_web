@@ -1,5 +1,7 @@
+import { CheckCircle } from '@phosphor-icons/react'
 import { useId, useState } from 'react'
-import { useAnswerReplies, useAnswers, useAnswerWrite, type Answer } from '../../api/answers'
+import { cn } from 'cn'
+import { useAcceptAnswer, useAnswerReplies, useAnswers, useAnswerWrite, type Answer } from '../../api/answers'
 import { errorMessage } from '../../api/errors'
 import { useMyVotes } from '../../api/votes'
 import { storyDate } from '../../lib/dates'
@@ -14,10 +16,10 @@ import { Composer } from '../threads/Composer'
 import { VoteControl } from './VoteControl'
 
 /** A question's answers as cards, in the backend's order, each with its replies on demand; then the answer form. */
-export function Answers({ questionId }: { questionId: number }) {
+export function Answers({ questionId, askerId }: { questionId: number; askerId?: number }) {
   const t = useT()
   const headingId = useId()
-  const { status } = useSession()
+  const { status, user } = useSession()
   const requireSignIn = useRequireSignIn()
   const answers = useAnswers(questionId)
   const write = useAnswerWrite(questionId)
@@ -42,14 +44,13 @@ export function Answers({ questionId }: { questionId: number }) {
         <ol className="mt-5 flex flex-col gap-4">
           {list.map((answer) => (
             <li key={answer.answerId}>
-              <AnswerCard questionId={questionId} answer={answer} />
+              <AnswerCard questionId={questionId} answer={answer} asker={user?.id != null && user.id === askerId} />
             </li>
           ))}
         </ol>
       )}
       <div className="mt-10">
-        <h3 className="font-sans text-base font-semibold">{t('Your answer')}</h3>
-        <div className="mt-3">
+        <div>
           {status === 'signed-in' ? (
             <Composer
               label={t('Your answer')}
@@ -72,7 +73,7 @@ export function Answers({ questionId }: { questionId: number }) {
   )
 }
 
-function AnswerCard({ questionId, answer }: { questionId: number; answer: Answer }) {
+function AnswerCard({ questionId, answer, asker }: { questionId: number; answer: Answer; asker: boolean }) {
   const t = useT()
   const id = answer.answerId ?? 0
   const { status, user } = useSession()
@@ -85,9 +86,18 @@ function AnswerCard({ questionId, answer }: { questionId: number; answer: Answer
   const write = useAnswerWrite(questionId)
 
   return (
-    <article aria-label={t('Answer by {name}', { name: answer.authorName ?? '' })} className="flex gap-2 rounded-2xl bg-card p-4 ring-1 ring-border sm:gap-4 sm:p-5">
+    <article
+      aria-label={t('Answer by {name}', { name: answer.authorName ?? '' })}
+      className={cn('flex gap-2 rounded-2xl bg-card p-4 ring-1 sm:gap-4 sm:p-5', answer.accepted ? 'ring-2 ring-mustard' : 'ring-border')}
+    >
       <VoteControl target="answers" id={id} score={answer.score ?? 0} myVote={myVotes.data?.answers?.[String(id)]} own={user?.id != null && user.id === answer.userId} />
       <div className="min-w-0 flex-1">
+        {answer.accepted && (
+          <p className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-mustard-soft px-3 py-1 text-sm font-medium">
+            <CheckCircle size={16} weight="fill" className="text-mustard" aria-hidden="true" />
+            {t('Accepted by the asker')}
+          </p>
+        )}
         <Post questionId={questionId} item={answer} />
         <div className="mt-2 -ml-3 flex flex-wrap gap-1">
           <Button
@@ -99,6 +109,7 @@ function AnswerCard({ questionId, answer }: { questionId: number; answer: Answer
           >
             {open ? t('Hide replies') : t('Show replies')}
           </Button>
+          {asker && <AcceptButton questionId={questionId} answerId={id} accepted={Boolean(answer.accepted)} />}
           {!replying && (
             <Button
               variant="quiet"
@@ -154,6 +165,32 @@ function AnswerCard({ questionId, answer }: { questionId: number; answer: Answer
         )}
       </div>
     </article>
+  )
+}
+
+/** The asker's accept (or take back) on an answer. One answer at a time; the backend moves the mark. */
+function AcceptButton({ questionId, answerId, accepted }: { questionId: number; answerId: number; accepted: boolean }) {
+  const t = useT()
+  const accept = useAcceptAnswer(questionId)
+  return (
+    <>
+      <Button
+        variant="quiet"
+        size="sm"
+        aria-pressed={accepted}
+        loading={accept.isPending}
+        onClick={() => accept.mutate({ answerId, accept: !accepted })}
+        className={accepted ? 'text-foreground' : undefined}
+      >
+        <CheckCircle size={18} weight={accepted ? 'fill' : 'regular'} className={accepted ? 'text-mustard' : undefined} aria-hidden="true" />
+        {accepted ? t('Accepted') : t('Accept answer')}
+      </Button>
+      {accept.isError && (
+        <span role="alert" className="self-center text-sm text-destructive">
+          {errorMessage(accept.error)}
+        </span>
+      )}
+    </>
   )
 }
 

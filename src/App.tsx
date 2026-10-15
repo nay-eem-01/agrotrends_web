@@ -37,6 +37,7 @@ const NotificationsPage = page(() => import('./features/notifications/Notificati
 const TopicsPage = page(() => import('./features/topics/TopicsPage'), 'TopicsPage')
 const AdminCategoriesPage = page(() => import('./features/admin/AdminCategoriesPage'), 'AdminCategoriesPage')
 const AdminExpertsPage = page(() => import('./features/admin/AdminExpertsPage'), 'AdminExpertsPage')
+const AdminReportsPage = page(() => import('./features/admin/AdminReportsPage'), 'AdminReportsPage')
 const EditorPage = page(() => import('./features/editor/EditorPage'), 'EditorPage')
 
 export default function App() {
@@ -53,6 +54,7 @@ export default function App() {
         <Route path="/advisor" element={<AdvisorPage />} />
         <Route path="/admin/categories" element={<AdminCategoriesPage />} />
         <Route path="/admin/experts" element={<AdminExpertsPage />} />
+        <Route path="/admin/reports" element={<AdminReportsPage />} />
         <Route path="/questions" element={<QuestionsPage />} />
         <Route path="/questions/:questionId" element={<QuestionPage />} />
         <Route path="/search" element={<SearchPage />} />

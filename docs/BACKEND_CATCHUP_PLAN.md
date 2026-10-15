@@ -1,6 +1,6 @@
 # AgroTrends Web — Frontend Build Plan
 
-Backend snapshot: 2026-10-14 · Live doc: https://claude.ai/code/artifact/52133120-e49b-4f95-b9b8-6030c8fc9545
+Backend snapshot: 2026-10-15 (Phase 9 admin dashboard added) · Live doc: https://claude.ai/code/artifact/52133120-e49b-4f95-b9b8-6030c8fc9545
 
 ## Purpose
 
@@ -16,7 +16,7 @@ Rules for the agent:
 
 ## Backend state
 
-Phases 5, 6 and 7 are on the backend's `development`. Phase 8 (notifications and moderation) is finished on `feat/notifications-moderation-base` but not merged yet. Until it is, run the backend from that branch to build F12–F14.
+Phases 5–8 are on the backend's `development` (merged 2026-10-15, PR #110). Phase 9 (admin dashboard endpoints) is finished on `feat/admin-dashboard-base` but not merged yet. Until it is, run the backend from that branch to build F15.
 
 | Item | Value |
 | --- | --- |
@@ -239,6 +239,33 @@ Report flow: Visible → (3 different users report) → Hidden for review → ad
 
 Below the threshold an admin can still remove or dismiss straight from the queue; a dismissed post that was never hidden simply stays.
 
+## Admin dashboard
+
+Backend Phase 9 adds what the dashboard was missing: a users list with ban state, one user's activity, overview counts and role management. Everything is under `/api/admin` in the usual envelope; lists return a Spring page (`content`, `totalElements`, `totalPages`, `number`).
+
+| Endpoint | Privilege | Returns |
+| --- | --- | --- |
+| `GET /api/admin/stats` | any of `USER_READ`, `CONTENT_MODERATE`, `EXPERT_REVIEW` | `users`, `newUsers`, `bannedUsers`, `questions`, `newQuestions`, `answers`, `publishedStories`, `openReports`, `pendingExpertApplications`, `uncheckedAiAnswers` ("new" = last 7 days) |
+| `GET /api/admin/users?q=&banned=&pageNo=&pageSize=` | `USER_READ` | page of `AdminUserResponse`: `id, name, email, mobileNumber, roles[], emailVerified, banned, bannedAt, banReason, createdAt`, newest first. `q` matches inside the name or e-mail, any case; no `banned` = everyone |
+| `GET /api/admin/users/{id}` | `USER_READ` | `{user, questions, answers, publishedStories, openReports, expertTopics: [{id, name}]}`; counts include hidden posts, `openReports` are reports about the account itself |
+| `GET /api/admin/privileges` | `ROLE_READ` | `[{id, name, description}]`, grantable ones only |
+| `GET /api/admin/roles` | `ROLE_READ` | `[{id, name, type, privileges[]}]`; `type` is `USER`, `ADMIN` or `SUPER_ADMIN` |
+| `POST /api/admin/roles` | `ROLE_CREATE` | body `{roleName, roleType: "ADMIN", privilegeIds[]}` → the role |
+| `PUT /api/admin/roles` | `ROLE_UPDATE` | body `{id, roleName, roleType: "ADMIN", privilegeIds[]}` → the role |
+| `DELETE /api/admin/roles/{id}` | `ROLE_DELETE` | 400 while anyone holds it |
+| `POST` / `DELETE /api/admin/users/{userId}/roles/{roleId}` | `ROLE_UPDATE` | the updated `AdminUserResponse` |
+
+Rules the UI follows:
+
+- Only `ADMIN` roles can be created, edited, deleted, granted or removed. Show the `USER` and `SUPER_ADMIN` roles read-only; the backend answers 400 otherwise.
+- `ROLE_*` privileges are never grantable, so only the super-admin can use the Roles page. Show the Roles link only when `GET /api/admin/roles` loads; everyone else gets 403.
+- A grant or removal applies on the user's next request, with no new sign-in. A granted user can also use the admin sign-in.
+- `banned` is now known: show Ban or Unban, not both (ends the F13.3 workaround). An account with any role besides `USER` can't be banned (403), so offer Ban only when `roles` is just `USER`.
+- Revoke a badge from the user page with `DELETE /api/admin/users/{id}/expert-badges/{categoryId}`, using `expertTopics[].id`.
+- `GET /api/user/paginated` is gone; use `GET /api/admin/users`.
+
+Who moderates is now a setting, not a code change: the super-admin creates a role such as "Moderator" (`CONTENT_MODERATE`, `USER_READ`) or "Expert reviewer" (`EXPERT_REVIEW`) and grants it.
+
 ## Errors the UI must handle
 
 The backend sends no machine-readable error codes, only a status and a human `message`. Branch on the status plus the endpoint, show `message` as written, and never match on message text except where this table says so.
@@ -324,12 +351,21 @@ The plan is 22 steps in 8 phases. Build them in order: F7 makes the existing app
 | F14.1 | Bengali strings for every new screen; a keyboard and screen-reader pass on them | `bengali.test.tsx` covers the new keys |
 | F14.2 | Playwright smoke against a running backend: sign up, confirm, ask, answer, vote, accept, three reports hide, admin dismisses, notifications arrive | The run passes against the local database |
 
+### F15 — Admin dashboard (`feat/admin-dashboard-base`)
+
+| # | Step | Done when |
+| --- | --- | --- |
+| F15.1 | Admin home `/admin`: cards from `/api/admin/stats`, each linking to its page (open reports → Reports, pending applications → Expert applications, banned → Users on the Banned tab); admin nav gains Overview, Users and Roles (Roles only when `/api/admin/roles` loads) | Cards show the backend numbers; a 403 card area shows the message as written |
+| F15.2 | Users page `/admin/users`: debounced search (`q`), All / Banned / Active tabs (`banned` omitted / `true` / `false`), table of name, e-mail, roles, confirmed, joined, banned, with paging and empty states | Search, tabs and paging hit the right query; tests cover them |
+| F15.3 | User page `/admin/users/:id`: counts, link to the public profile, expert topics with Revoke, Ban or Unban from the known state, role chips with grant and remove for the super-admin | `BanControls` shows one action; revoke and role changes refetch the user |
+| F15.4 | Roles page `/admin/roles`: roles with their privileges, create and edit an admin role with privilege checkboxes, delete with a confirm (400 shown as written), `USER` and `SUPER_ADMIN` rows read-only; Bengali strings for F15 | `bengali.test.tsx` covers the new keys; the Playwright smoke grants a moderator role and that user opens Reports |
+
 ## Open items
 
 **Decisions for Nayeem** (the agent asks before building these steps)
 
-- [ ] F8.2: should the home page land on questions (the plan says Q&A-first) with stories as the second tab, or keep the stories feed first?
-- [ ] F11.3 and F13.2: who on the team gets `EXPERT_REVIEW` and `CONTENT_MODERATE`? Today only the super-admin role holds them.
+- [x] F8.2: home lands on questions, stories second (decided 2026-10-15).
+- [x] F11.3 and F13.2: who gets `EXPERT_REVIEW` and `CONTENT_MODERATE` is now a setting. The super-admin creates an admin role and grants it from the F15 pages.
 
 **Still missing on the backend** (carry these in the web roadmap's "Needs from the backend")
 
@@ -344,5 +380,5 @@ The plan is 22 steps in 8 phases. Build them in order: F7 makes the existing app
 
 **Backend timing**
 
-- Backend Phase 8 is not merged into `development` yet; F12–F14 build against `feat/notifications-moderation-base` until it is.
+- Backend Phase 9 is not merged into `development` yet; F15 builds against `feat/admin-dashboard-base` until it is.
 - Backend Phase 4 (profiles, Flyway, Docker, CI) comes next on the backend. After that, deploy both and live-test before launch.

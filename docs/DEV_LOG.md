@@ -34,7 +34,8 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 
 1. **Nayeem:** open and merge the F7–F14 step PRs in order (each phase base into `development` after its steps).
 2. Run the admin smoke step (`E2E_ADMIN_EMAIL` / `E2E_ADMIN_PASSWORD`) and the admin screens live once an admin login is at hand.
-3. Merge the backend's Phase 8 so F12–F14 run against its `development`.
+3. Merge the backend's Phase 8 so F12–F14 run against its `development`. (Done 2026-10-15, backend PR #110.)
+4. **F15 admin dashboard** (2026-10-15): backend Phase 9 added `/api/admin/stats`, `/api/admin/users`, `/api/admin/users/{id}` and admin roles. Read `docs/BACKEND_CATCHUP_PLAN.md` § Admin dashboard and build F15.1–F15.4 (`docs/ROADMAP.md`) against the backend's `feat/admin-dashboard-base` until it is merged.
 
 ## Open items
 

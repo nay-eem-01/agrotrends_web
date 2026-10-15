@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend · ➡ moved to a later step
 
-**Progress:** 44 of 60 steps done
+**Progress:** 47 of 60 steps done
 
 ---
 
@@ -114,9 +114,9 @@ the season strip goes, shadcn/ui replaces the hand-made primitives, staff see th
 
 | # | Step | Status |
 |---|---|---|
-| F9.1 | Vote arrows on questions and answers with `my-votes`; optimistic with rollback; none on your own posts; the 50-point downvote message | ⬜ |
-| F9.2 | Accept and un-accept (asker only), accepted mark and position | ⬜ |
-| F9.3 | Author line: reputation and `authorBadges`; profile page: reputation by topic, badges, expert field, the user's questions | ⬜ |
+| F9.1 | Vote arrows on questions and answers with `my-votes`; optimistic with rollback; none on your own posts; the 50-point downvote message | ✅ |
+| F9.2 | Accept and un-accept (asker only), accepted mark and position | ✅ |
+| F9.3 | Author line: reputation and `authorBadges`; profile page: reputation by topic, badges, expert field, the user's questions | ✅ |
 
 ## Phase F10 — AI answers (`feat/ai-answers-base`)
 
@@ -173,5 +173,6 @@ the season strip goes, shadcn/ui replaces the hand-made primitives, staff see th
 | Notifications API | F12 | ✅ backend Phase 8 (`feat/notifications-moderation-base`, not merged yet) |
 | Machine-readable error codes in the error envelope | branching without matching message text (F7.2, F9.1) | ⏸ |
 | "Am I an expert in this topic" without reading the full reputation | showing review buttons (F11.2) | ⏸ |
+| A public user summary (name, and author photo if any) by user id | profile pages opened directly show "Member" when the user has asked nothing (F9.3) | ⏸ |
 | A way for an author to see their own hidden post | the author can't read what was reported (F13.3) | ⏸ |
 | A working Gemini key | live checks of F3.4, F5, F10 | ⏸ |

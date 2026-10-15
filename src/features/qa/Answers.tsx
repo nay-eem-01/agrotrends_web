@@ -1,21 +1,25 @@
+import { CheckCircle } from '@phosphor-icons/react'
 import { useId, useState } from 'react'
-import { useAnswerReplies, useAnswers, useAnswerWrite, type Answer } from '../../api/answers'
+import { cn } from 'cn'
+import { useAcceptAnswer, useAnswerReplies, useAnswers, useAnswerWrite, type Answer } from '../../api/answers'
 import { errorMessage } from '../../api/errors'
+import { useMyVotes } from '../../api/votes'
 import { storyDate } from '../../lib/dates'
 import { formatNumber, useT } from '../../lib/i18n'
-import { Avatar } from '../../ui/Avatar'
 import { Button } from '../../ui/Button'
 import { SafeHtml } from '../../ui/SafeHtml'
 import { Spinner } from '../../ui/Spinner'
 import { useSession } from '../auth/session'
 import { useRequireSignIn } from '../auth/useRequireSignIn'
 import { Composer } from '../threads/Composer'
+import { AuthorLine } from './AuthorLine'
+import { VoteControl } from './VoteControl'
 
 /** A question's answers as cards, in the backend's order, each with its replies on demand; then the answer form. */
-export function Answers({ questionId }: { questionId: number }) {
+export function Answers({ questionId, askerId }: { questionId: number; askerId?: number }) {
   const t = useT()
   const headingId = useId()
-  const { status } = useSession()
+  const { status, user } = useSession()
   const requireSignIn = useRequireSignIn()
   const answers = useAnswers(questionId)
   const write = useAnswerWrite(questionId)
@@ -40,14 +44,13 @@ export function Answers({ questionId }: { questionId: number }) {
         <ol className="mt-5 flex flex-col gap-4">
           {list.map((answer) => (
             <li key={answer.answerId}>
-              <AnswerCard questionId={questionId} answer={answer} />
+              <AnswerCard questionId={questionId} answer={answer} asker={user?.id != null && user.id === askerId} />
             </li>
           ))}
         </ol>
       )}
       <div className="mt-10">
-        <h3 className="font-sans text-base font-semibold">{t('Your answer')}</h3>
-        <div className="mt-3">
+        <div>
           {status === 'signed-in' ? (
             <Composer
               label={t('Your answer')}
@@ -70,10 +73,11 @@ export function Answers({ questionId }: { questionId: number }) {
   )
 }
 
-function AnswerCard({ questionId, answer }: { questionId: number; answer: Answer }) {
+function AnswerCard({ questionId, answer, asker }: { questionId: number; answer: Answer; asker: boolean }) {
   const t = useT()
   const id = answer.answerId ?? 0
-  const { status } = useSession()
+  const { status, user } = useSession()
+  const myVotes = useMyVotes(questionId, status === 'signed-in')
   const requireSignIn = useRequireSignIn()
   const [open, setOpen] = useState(false)
   const [replying, setReplying] = useState(false)
@@ -82,72 +86,111 @@ function AnswerCard({ questionId, answer }: { questionId: number; answer: Answer
   const write = useAnswerWrite(questionId)
 
   return (
-    <article aria-label={t('Answer by {name}', { name: answer.authorName ?? '' })} className="rounded-2xl bg-card p-5 ring-1 ring-border">
-      <Post questionId={questionId} item={answer} />
-      <div className="mt-2 -ml-3 flex flex-wrap gap-1">
-        <Button
-          variant="quiet"
-          size="sm"
-          aria-expanded={open}
-          aria-controls={repliesId}
-          onClick={() => setOpen((value) => !value)}
-        >
-          {open ? t('Hide replies') : t('Show replies')}
-        </Button>
-        {!replying && (
+    <article
+      aria-label={t('Answer by {name}', { name: answer.authorName ?? '' })}
+      className={cn('flex gap-2 rounded-2xl bg-card p-4 ring-1 sm:gap-4 sm:p-5', answer.accepted ? 'ring-2 ring-mustard' : 'ring-border')}
+    >
+      <VoteControl target="answers" id={id} score={answer.score ?? 0} myVote={myVotes.data?.answers?.[String(id)]} own={user?.id != null && user.id === answer.userId} />
+      <div className="min-w-0 flex-1">
+        {answer.accepted && (
+          <p className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-mustard-soft px-3 py-1 text-sm font-medium">
+            <CheckCircle size={16} weight="fill" className="text-mustard" aria-hidden="true" />
+            {t('Accepted by the asker')}
+          </p>
+        )}
+        <Post questionId={questionId} item={answer} />
+        <div className="mt-2 -ml-3 flex flex-wrap gap-1">
           <Button
             variant="quiet"
             size="sm"
-            onClick={() =>
-              requireSignIn(() => {
-                setOpen(true)
-                setReplying(true)
-              })
-            }
+            aria-expanded={open}
+            aria-controls={repliesId}
+            onClick={() => setOpen((value) => !value)}
           >
-            {t('Reply')}
+            {open ? t('Hide replies') : t('Show replies')}
           </Button>
-        )}
-      </div>
-      {open && (
-        <div id={repliesId} className="mt-3 ml-2 border-l-2 border-border pl-5">
-          {replies.isPending ? (
-            <Spinner size={16} label={t('Loading replies')} />
-          ) : replies.isError ? (
-            <p role="alert" className="text-sm text-muted-foreground">
-              {errorMessage(replies.error)}
-            </p>
-          ) : replies.data.length === 0 && !replying ? (
-            <p className="text-sm text-muted-foreground">{t('No replies yet.')}</p>
-          ) : (
-            <ol className="flex flex-col gap-5">
-              {replies.data.map((reply) => (
-                <li key={reply.answerId}>
-                  <article aria-label={t('Reply by {name}', { name: reply.authorName ?? '' })}>
-                    <Post questionId={questionId} item={reply} compact />
-                  </article>
-                </li>
-              ))}
-            </ol>
-          )}
-          {replying && status === 'signed-in' && (
-            <div className="mt-4">
-              <Composer
-                label={t('Reply to {name}', { name: answer.authorName ?? '' })}
-                submitLabel={t('Reply')}
-                doneLabel={t('Reply posted')}
-                focusOnOpen
-                pending={write.isPending}
-                error={write.isError ? write.error : null}
-                onSubmit={(content, done) => write.mutate({ action: 'reply', answerId: id, content }, { onSuccess: done })}
-                onCancel={() => setReplying(false)}
-                onDone={() => setReplying(false)}
-              />
-            </div>
+          {asker && <AcceptButton questionId={questionId} answerId={id} accepted={Boolean(answer.accepted)} />}
+          {!replying && (
+            <Button
+              variant="quiet"
+              size="sm"
+              onClick={() =>
+                requireSignIn(() => {
+                  setOpen(true)
+                  setReplying(true)
+                })
+              }
+            >
+              {t('Reply')}
+            </Button>
           )}
         </div>
-      )}
+        {open && (
+          <div id={repliesId} className="mt-3 ml-2 border-l-2 border-border pl-5">
+            {replies.isPending ? (
+              <Spinner size={16} label={t('Loading replies')} />
+            ) : replies.isError ? (
+              <p role="alert" className="text-sm text-muted-foreground">
+                {errorMessage(replies.error)}
+              </p>
+            ) : replies.data.length === 0 && !replying ? (
+              <p className="text-sm text-muted-foreground">{t('No replies yet.')}</p>
+            ) : (
+              <ol className="flex flex-col gap-5">
+                {replies.data.map((reply) => (
+                  <li key={reply.answerId}>
+                    <article aria-label={t('Reply by {name}', { name: reply.authorName ?? '' })}>
+                      <Post questionId={questionId} item={reply} compact />
+                    </article>
+                  </li>
+                ))}
+              </ol>
+            )}
+            {replying && status === 'signed-in' && (
+              <div className="mt-4">
+                <Composer
+                  label={t('Reply to {name}', { name: answer.authorName ?? '' })}
+                  submitLabel={t('Reply')}
+                  doneLabel={t('Reply posted')}
+                  focusOnOpen
+                  pending={write.isPending}
+                  error={write.isError ? write.error : null}
+                  onSubmit={(content, done) => write.mutate({ action: 'reply', answerId: id, content }, { onSuccess: done })}
+                  onCancel={() => setReplying(false)}
+                  onDone={() => setReplying(false)}
+                />
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </article>
+  )
+}
+
+/** The asker's accept (or take back) on an answer. One answer at a time; the backend moves the mark. */
+function AcceptButton({ questionId, answerId, accepted }: { questionId: number; answerId: number; accepted: boolean }) {
+  const t = useT()
+  const accept = useAcceptAnswer(questionId)
+  return (
+    <>
+      <Button
+        variant="quiet"
+        size="sm"
+        aria-pressed={accepted}
+        loading={accept.isPending}
+        onClick={() => accept.mutate({ answerId, accept: !accepted })}
+        className={accepted ? 'text-foreground' : undefined}
+      >
+        <CheckCircle size={18} weight={accepted ? 'fill' : 'regular'} className={accepted ? 'text-mustard' : undefined} aria-hidden="true" />
+        {accepted ? t('Accepted') : t('Accept answer')}
+      </Button>
+      {accept.isError && (
+        <span role="alert" className="self-center text-sm text-destructive">
+          {errorMessage(accept.error)}
+        </span>
+      )}
+    </>
   )
 }
 
@@ -163,13 +206,15 @@ function Post({ questionId, item, compact = false }: { questionId: number; item:
 
   return (
     <>
-      <header className="flex items-center gap-2 text-sm">
-        <Avatar name={item.authorName ?? '?'} size={compact ? 24 : 32} />
-        <span className="font-medium">{item.authorName}</span>
-        <span className="text-muted-foreground">
-          · {storyDate(item.createdAt)}
-          {edited && ` · ${t('edited')}`}
-        </span>
+      <header>
+        <AuthorLine
+          userId={item.userId}
+          name={item.authorName}
+          reputation={compact ? undefined : item.authorReputation}
+          badges={item.authorBadges}
+          meta={`${storyDate(item.createdAt)}${edited ? ` · ${t('edited')}` : ''}`}
+          size={compact ? 'sm' : 'md'}
+        />
       </header>
       {mode === 'edit' ? (
         <div className="mt-3">

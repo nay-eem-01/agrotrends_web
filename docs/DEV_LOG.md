@@ -19,11 +19,11 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   question answers (`feat/question-answers`) done. Phase F8 is complete.
 - Phase F9 on `feat/reputation-base` (stacked on F8's tip): F9.1 votes (`feat/votes`) F9.2 accept (`feat/accept`) and F9.3 reputation
   (`feat/reputation`) done. Phase F9 is complete.
-- Phase F10 on `feat/ai-answers-base` (stacked on F9's tip): F10.1 AI answer card (`feat/ai-answer-card`) done.
+- Phase F10 on `feat/ai-answers-base` (stacked on F9's tip): F10.1 AI answer card (`feat/ai-answer-card`) and F10.2 sources (`feat/ai-sources`) done.
 
 ## Next up
 
-1. F10.2 sources, F10.3 ask the experts.
+1. F10.3 ask the experts.
 2. F12–F14 need the backend's Phase 8 branch until it is merged.
 
 ## Open items
@@ -40,6 +40,16 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-15 (F10.2 sources)
+
+**Done**
+- One `ai/Sources` for the backend's `{type, blogId, questionId, title}`: `blog` links to the story (`/s/{id}`, which
+  redirects to its slug), `answer` to the question ("Community answer to: …"), each with its own icon. Sources with
+  no usable id are left out. Used by the AI answer card, the advisor and, new, each item of the advisor history.
+- Tests: a community-answer source on the AI card; stories and community answers in the history.
 
 ---
 

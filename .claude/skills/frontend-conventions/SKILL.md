@@ -1,21 +1,22 @@
 ---
 name: frontend-conventions
-description: React/TypeScript conventions for AgroTrends web - folder layout, API access through TanStack Query hooks, the HttpResponse envelope and ApiError, auth/token rules, safe HTML rendering, styling with Tailwind tokens from docs/DESIGN.md, copy rules and tests. Use whenever writing or changing code in this repo.
+description: React/TypeScript conventions for AgroTrends web - folder layout, API access through TanStack Query hooks, the HttpResponse envelope and ApiError, auth/token rules, safe HTML rendering, styling with shadcn/ui and the tokens from docs/DESIGN.md, copy rules and tests. Use whenever writing or changing code in this repo.
 ---
 
 # Frontend conventions (AgroTrends web)
 
 ## Stack
 
-Vite + React 19 + TypeScript (strict), React Router 7, TanStack Query 5, Tailwind 4 (tokens in `src/index.css`
-`@theme`), Phosphor icons, DOMPurify, Vitest + Testing Library, oxlint.
+Vite + React 19 + TypeScript (strict), React Router 7, TanStack Query 5, Tailwind 4 (tokens in `src/index.css`),
+shadcn/ui (`base-maia` style on Base UI), Phosphor icons, Sonner toasts, DOMPurify, Vitest + Testing Library, oxlint.
 
 ## Layout
 
 | Folder | Holds |
 |---|---|
 | `src/api/` | `client.ts` (fetch, envelope, refresh), `errors.ts`, one module per resource (`blogs.ts`, `auth.ts`, ...) exporting typed calls and Query hooks; `schema.d.ts` is generated |
-| `src/ui/` | design-system primitives (Button, TextField, Avatar, Chip, Spinner, ...) — no data fetching |
+| `src/components/ui/` | shadcn components (`npx shadcn@latest add <name>`); our source now, edited to fit DESIGN.md |
+| `src/ui/` | the app's own primitives (Button, TextField, Avatar, Chip, Spinner, SafeHtml), built on the shadcn ones — no data fetching |
 | `src/layout/` | app shell: top bar, footer, page containers |
 | `src/features/<area>/` | screens and their components (`feed`, `story`, `editor`, `auth`, `qa`, `ai`, ...) |
 | `src/lib/` | pure helpers (dates, seasons, html) with unit tests next to them |
@@ -42,9 +43,16 @@ else. No other `dangerouslySetInnerHTML`.
 
 ## Styling
 
-Use the Tailwind tokens (`bg-paper`, `text-ink`, `text-ink-muted`, `border-rule`, `bg-field`, `text-paddy`,
-`bg-mustard`, `font-serif`, `font-sans`). No raw hex in components. Follow `docs/DESIGN.md`. Visible focus ring on
-everything interactive; respect `prefers-reduced-motion`.
+- Reach for a shadcn component before writing styled markup (Dialog, AlertDialog, DropdownMenu, Tabs, Tooltip,
+  Badge, Card, Empty, Skeleton, Field). Check `src/components/ui/` first; add missing ones with the CLI. shadcn only:
+  HeroUI was considered and dropped (its theme variables clash with shadcn's).
+- Semantic tokens: `bg-background`, `bg-card`, `text-foreground`, `text-muted-foreground`, `border-border`,
+  `bg-muted`, `bg-primary`, `text-primary`, `text-destructive`, `bg-mustard` / `bg-mustard-soft`. The F0–F6 names
+  (`paper`, `ink`, `ink-muted`, `rule`, `field`, `paddy`, `danger`) are aliases for old screens; new code uses the
+  semantic names. No raw hex; no `dark:` colour overrides (tokens switch themselves). Join classes with `cn()`.
+- Motion follows Emil Kowalski's rules (`docs/DESIGN.md`, Motion): ease-out curves from the `--ease-*` tokens, under
+  300ms, press feedback `scale(0.97)`, nothing animated on keyboard actions, `prefers-reduced-motion` respected.
+- Follow `docs/DESIGN.md`. Visible focus ring on everything interactive.
 
 ## Copy
 

@@ -38,12 +38,14 @@ test('questions are listed newest first with their farming context', async () =>
   expect(sent.searchParams.get('ascOrDesc')).toBe('desc')
 })
 
-test('the season strip and filters stay on the questions page', async () => {
+test('season and farming filters stay on the questions page', async () => {
   const api = mockApi({ 'GET /api/questions/all': () => envelope(200, page([])) })
   renderWithProviders(<App />, '/questions?crop=jute')
 
   expect(await screen.findByRole('heading', { name: 'No questions match these filters' })).toBeInTheDocument()
-  await userEvent.click(within(screen.getByRole('navigation', { name: 'Crop seasons' })).getByRole('link', { name: /Kharif-1/ }))
+  await userEvent.click(screen.getByRole('button', { name: 'Filter by crop, season, region or soil' }))
+  await userEvent.selectOptions(screen.getByLabelText('Season'), 'Kharif-1')
+  await userEvent.click(screen.getByRole('button', { name: 'Apply filters' }))
   await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/questions?crop=jute&season=KHARIF_1'))
   const last = new URL(String(api.mock.calls.at(-1)![0]), 'http://x')
   expect(last.searchParams.get('season')).toBe('KHARIF_1')

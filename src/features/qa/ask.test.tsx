@@ -45,7 +45,7 @@ test('a question is checked, posted with its farming details and opened', async 
 
   await userEvent.type(screen.getByLabelText('Your question'), ' Why are seedlings yellow? ')
   await userEvent.type(screen.getByLabelText('Details'), 'BRRI dhan29, 30 days old.')
-  await userEvent.click(screen.getByRole('radio', { name: /Rabi/ }))
+  await userEvent.selectOptions(screen.getByLabelText('Season'), 'Rabi')
   await userEvent.type(screen.getByLabelText('Crop'), 'boro rice')
   await userEvent.click(screen.getByRole('button', { name: 'Post question' }))
 

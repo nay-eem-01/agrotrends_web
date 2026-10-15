@@ -9,9 +9,8 @@ import { Avatar } from '../../ui/Avatar'
 import { Button, ButtonLink } from '../../ui/Button'
 import { Spinner } from '../../ui/Spinner'
 import { AgriFilterBar } from '../feed/AgriFilterBar'
-import { SeasonStrip } from '../feed/SeasonStrip'
 
-/** `/questions`: what people are asking, filterable by season (the strip) and by crop, region and soil. */
+/** `/questions`: what people are asking, filterable by crop, season, region and soil. */
 export function QuestionsPage() {
   const t = useT()
   const [params] = useSearchParams()
@@ -34,8 +33,7 @@ export function QuestionsPage() {
         </div>
       </div>
       <div className="mt-6">
-        <SeasonStrip />
-      </div>
+        </div>
       <div className="mx-auto max-w-(--container-page) px-4 pb-16 sm:px-6">
         <div className="max-w-(--container-feed)">
           <AgriFilterBar filters={filters} />

@@ -2,7 +2,8 @@ import { useT } from '../../lib/i18n'
 import { Faders, X } from '@phosphor-icons/react'
 import { useId, useState, type FormEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { filterPath, SEASON_LABELS, SOIL_LABELS, type AgriFilters, type Soil } from '../../lib/agri'
+import { filterPath, SEASON_LABELS, SOIL_LABELS, type AgriFilters, type Season, type Soil } from '../../lib/agri'
+import { Select } from '../farming/FarmingFields'
 import { Button } from '../../ui/Button'
 import { TextField } from '../../ui/TextField'
 
@@ -54,7 +55,7 @@ export function AgriFilterBar({ filters }: { filters: AgriFilters }) {
           className="ml-auto inline-flex h-11 items-center gap-1.5 px-1 text-sm text-ink-muted hover:text-ink"
         >
           <Faders size={18} aria-hidden="true" />
-          {t('Filter by crop, region or soil')}
+          {t('Filter by crop, season, region or soil')}
         </button>
       </div>
       {open && <FilterForm id={formId} filters={filters} onDone={() => setOpen(false)} />}
@@ -68,40 +69,36 @@ function FilterForm({ id, filters, onDone }: { id: string; filters: AgriFilters;
   const { pathname } = useLocation()
   const [crop, setCrop] = useState(filters.crop ?? '')
   const [region, setRegion] = useState(filters.region ?? '')
+  const [season, setSeason] = useState<Season | ''>(filters.season ?? '')
   const [soil, setSoil] = useState<Soil | ''>(filters.soil ?? '')
-  const soilId = useId()
 
   function submit(event: FormEvent) {
     event.preventDefault()
-    navigate(filterPath({ season: filters.season, crop: crop.trim() || undefined, region: region.trim() || undefined, soil: soil || undefined }, pathname))
+    navigate(filterPath({ season: season || undefined, crop: crop.trim() || undefined, region: region.trim() || undefined, soil: soil || undefined }, pathname))
     onDone()
   }
 
   return (
-    <form id={id} onSubmit={submit} className="mt-3 grid gap-4 sm:grid-cols-3">
+    <form id={id} onSubmit={submit} className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <TextField label={t('Crop')} placeholder="boro rice" value={crop} onChange={(e) => setCrop(e.target.value)} />
       <TextField label={t('Region')} placeholder="rangpur" value={region} onChange={(e) => setRegion(e.target.value)} />
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor={soilId} className="text-sm font-medium text-ink">
-          {t('Soil')}
-        </label>
-        <select
-          id={soilId}
-          value={soil}
-          onChange={(e) => setSoil(e.target.value as Soil | '')}
-          className="h-11 rounded-lg border border-rule bg-paper px-3 text-base text-ink focus:border-paddy focus:outline-none"
-        >
-          <option value="">{t('Any soil')}</option>
-          {(Object.keys(SOIL_LABELS) as Soil[]).map((value) => (
-            <option key={value} value={value}>
-              {t(SOIL_LABELS[value])}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="sm:col-span-3">
+      <Select
+        label={t('Season')}
+        value={season}
+        onChange={(value) => setSeason(value as Season | '')}
+        options={(Object.keys(SEASON_LABELS) as Season[]).map((value) => ({ value, label: t(SEASON_LABELS[value]) }))}
+        placeholder={t('Any season')}
+      />
+      <Select
+        label={t('Soil')}
+        value={soil}
+        onChange={(value) => setSoil(value as Soil | '')}
+        options={(Object.keys(SOIL_LABELS) as Soil[]).map((value) => ({ value, label: t(SOIL_LABELS[value]) }))}
+        placeholder={t('Any soil')}
+      />
+      <div className="sm:col-span-2 lg:col-span-4">
         <Button type="submit" size="sm">
-          {t('Show stories')}
+          {t('Apply filters')}
         </Button>
       </div>
     </form>

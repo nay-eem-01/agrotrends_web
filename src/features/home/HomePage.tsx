@@ -2,7 +2,6 @@ import { useT } from '../../lib/i18n'
 import { ButtonLink } from '../../ui/Button'
 import { useSession } from '../auth/session'
 import { Feed } from '../feed/Feed'
-import { SeasonStrip } from '../feed/SeasonStrip'
 import { TopicsRail } from '../topics/TopicsPage'
 
 /** Visitors get a short welcome above the feed; signed-in readers go straight to it. */
@@ -31,7 +30,6 @@ export function HomePage() {
           </div>
         </section>
       )}
-      <SeasonStrip />
       <div className="mx-auto max-w-(--container-page) px-4 pt-2 pb-16 sm:px-6">
         <div className="lg:flex lg:gap-16">
           <div className="max-w-(--container-feed) min-w-0 flex-1">

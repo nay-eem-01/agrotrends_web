@@ -1,7 +1,7 @@
 import { useT } from '../../lib/i18n'
 import { useId, useState, type ReactNode } from 'react'
 import { useThread, useThreadReplies, useThreadWrite, type ThreadItem, type ThreadKind } from '../../api/threads'
-import { errorMessage } from '../../api/errors'
+import { ApiError, errorMessage } from '../../api/errors'
 import { storyDate } from '../../lib/dates'
 import { Avatar } from '../../ui/Avatar'
 import { Button } from '../../ui/Button'
@@ -70,7 +70,7 @@ export function Thread({ kind, parentId, whenEmpty }: ThreadProps) {
         </div>
       ) : thread.isError ? (
         <p role="alert" className="py-8 text-ink-muted">
-          {errorMessage(thread.error)}
+          {thread.error instanceof ApiError && thread.error.isNotFound ? t('This conversation is no longer available.') : errorMessage(thread.error)}
         </p>
       ) : list.length === 0 ? (
         <div className="py-8">

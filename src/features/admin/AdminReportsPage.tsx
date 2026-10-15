@@ -19,6 +19,7 @@ import { storyDate } from '../../lib/dates'
 import { Button } from '../../ui/Button'
 import { Spinner } from '../../ui/Spinner'
 import { AdminPage } from './AdminPage'
+import { BanControls } from './BanControls'
 
 const TABS: { status: ReportStatus; label: string }[] = [
   { status: 'OPEN', label: 'Open' },
@@ -158,6 +159,7 @@ function OpenGroup({ group }: { group: ReportGroup }) {
         <Button variant="secondary" size="sm" disabled={moderate.isPending} onClick={() => setConfirm('dismiss')}>
           Dismiss
         </Button>
+        {isUser && <BanControls userId={group.targetId} name={`Profile #${group.targetId}`} />}
       </div>
       <Confirm
         open={confirm === 'remove-content'}

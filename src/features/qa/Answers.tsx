@@ -2,7 +2,7 @@ import { CheckCircle } from '@phosphor-icons/react'
 import { useId, useState } from 'react'
 import { cn } from 'cn'
 import { useAcceptAnswer, useAnswerReplies, useAnswers, useAnswerWrite, type Answer } from '../../api/answers'
-import { errorMessage } from '../../api/errors'
+import { ApiError, errorMessage } from '../../api/errors'
 import { useMyVotes } from '../../api/votes'
 import { storyDate } from '../../lib/dates'
 import { formatNumber, useT } from '../../lib/i18n'
@@ -15,6 +15,9 @@ import { Composer } from '../threads/Composer'
 import { ReportButton } from '../reports/ReportButton'
 import { AuthorLine } from './AuthorLine'
 import { VoteControl } from './VoteControl'
+
+/** A 404 on a thread the reader had open: hidden or removed, not an error. */
+const gone = (error: unknown) => error instanceof ApiError && error.isNotFound
 
 /** A question's answers as cards, in the backend's order, each with its replies on demand; then the answer form. */
 export function Answers({ questionId, askerId }: { questionId: number; askerId?: number }) {
@@ -37,7 +40,7 @@ export function Answers({ questionId, askerId }: { questionId: number; askerId?:
         </div>
       ) : answers.isError ? (
         <p role="alert" className="py-8 text-muted-foreground">
-          {errorMessage(answers.error)}
+          {gone(answers.error) ? t('This conversation is no longer available.') : errorMessage(answers.error)}
         </p>
       ) : list.length === 0 ? (
         <p className="py-6 text-muted-foreground">{t('No answers yet. If you have grown this, your answer helps.')}</p>
@@ -133,7 +136,7 @@ function AnswerCard({ questionId, answer, asker }: { questionId: number; answer:
               <Spinner size={16} label={t('Loading replies')} />
             ) : replies.isError ? (
               <p role="alert" className="text-sm text-muted-foreground">
-                {errorMessage(replies.error)}
+                {gone(replies.error) ? t('This conversation is no longer available.') : errorMessage(replies.error)}
               </p>
             ) : replies.data.length === 0 && !replying ? (
               <p className="text-sm text-muted-foreground">{t('No replies yet.')}</p>

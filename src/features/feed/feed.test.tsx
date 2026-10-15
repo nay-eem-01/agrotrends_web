@@ -37,7 +37,7 @@ test('visitors see the latest stories without a For you tab', async () => {
     'GET /api/feed/latest': () =>
       envelope(200, page([story(1, { title: 'Boro rice in Rangpur', clapCount: 12, agri: { crop: 'boro rice', season: 'RABI' }, imageUrl: '/uploads/a.jpg' })])),
   })
-  renderWithProviders(<App />, '/')
+  renderWithProviders(<App />, '/stories')
 
   const card = (await screen.findByRole('link', { name: 'Boro rice in Rangpur' })).closest('article')!
   expect(card).toHaveAttribute('class', expect.stringContaining('border-b'))
@@ -61,7 +61,7 @@ test('signed-in readers start on For you, sent with their token', async () => {
     'POST /api/auth/refresh-token': () => envelope(200, { accessToken: 'a1', refreshToken: 'r1', user: reader }),
     'GET /api/feed/following': () => envelope(200, page([story(2, { title: 'From someone you follow' })])),
   })
-  renderWithProviders(<App />, '/')
+  renderWithProviders(<App />, '/stories')
 
   expect(await screen.findByRole('link', { name: 'From someone you follow' })).toBeInTheDocument()
   expect(screen.getByRole('link', { name: 'For you' })).toHaveAttribute('aria-current', 'page')
@@ -76,7 +76,7 @@ test('an empty For you feed points to the latest stories', async () => {
     'GET /api/feed/following': () => envelope(200, page([])),
     'GET /api/feed/latest': () => envelope(200, page([story(3)])),
   })
-  renderWithProviders(<App />, '/')
+  renderWithProviders(<App />, '/stories')
 
   expect(await screen.findByRole('heading', { name: 'Your feed is waiting for you' })).toBeInTheDocument()
   await userEvent.click(screen.getByRole('link', { name: 'Read the latest stories' }))
@@ -88,17 +88,17 @@ test('switching to Trending loads that feed', async () => {
     'GET /api/feed/latest': () => envelope(200, page([story(1)])),
     'GET /api/feed/trending': () => envelope(200, page([story(9, { title: 'Most clapped' })])),
   })
-  renderWithProviders(<App />, '/')
+  renderWithProviders(<App />, '/stories')
 
   await screen.findByRole('link', { name: 'Story 1' })
   await userEvent.click(screen.getByRole('link', { name: 'Trending' }))
   expect(await screen.findByRole('link', { name: 'Most clapped' })).toBeInTheDocument()
-  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/?feed=trending'))
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/stories?feed=trending'))
 })
 
 test('a visitor asking for For you gets Latest', async () => {
   mockApi({ 'GET /api/feed/latest': () => envelope(200, page([story(1)])) })
-  renderWithProviders(<App />, '/?feed=following')
+  renderWithProviders(<App />, '/stories?feed=following')
   expect(await screen.findByRole('link', { name: 'Story 1' })).toBeInTheDocument()
 })
 
@@ -109,7 +109,7 @@ test('more stories load page by page until the end', async () => {
         ? envelope(200, page([story(1), story(2)], 0, false))
         : envelope(200, page([story(3)], 1, true)),
   })
-  renderWithProviders(<App />, '/')
+  renderWithProviders(<App />, '/stories')
 
   await screen.findByRole('link', { name: 'Story 2' })
   await userEvent.click(screen.getByRole('button', { name: 'Show more stories' }))
@@ -120,7 +120,7 @@ test('more stories load page by page until the end', async () => {
 test('a failed feed can be retried', async () => {
   let calls = 0
   mockApi({ 'GET /api/feed/latest': () => (++calls === 1 ? envelope(500, null) : envelope(200, page([story(1)]))) })
-  renderWithProviders(<App />, '/')
+  renderWithProviders(<App />, '/stories')
 
   expect(await screen.findByRole('alert')).toHaveTextContent('Something went wrong on our side')
   await userEvent.click(screen.getByRole('button', { name: 'Try again' }))

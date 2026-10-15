@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { AgriFilters } from '../lib/agri'
+import type { QuestionFilters } from '../lib/agri'
 import { api } from './client'
 import { ApiError } from './errors'
 import { FEED_PAGE_SIZE } from './feed'
@@ -9,8 +9,8 @@ export type Question = Schemas['QuestionResponse']
 export type CreateQuestionRequest = Schemas['CreateQuestionRequest']
 export type UpdateQuestionRequest = Schemas['UpdateQuestionRequest']
 
-/** Questions, newest first, optionally filtered by crop, season, region and soil. Public. */
-export function useQuestions(filters: AgriFilters) {
+/** Questions, newest first, filtered by topic, tag, unanswered and farming context (all combinable). Public. */
+export function useQuestions(filters: QuestionFilters) {
   return useInfiniteQuery({
     queryKey: ['questions', 'list', filters],
     queryFn: ({ pageParam, signal }) =>
@@ -20,6 +20,17 @@ export function useQuestions(filters: AgriFilters) {
       }),
     initialPageParam: 0,
     getNextPageParam: (page) => (page.last ? undefined : page.number + 1),
+  })
+}
+
+/** Question search: quoted phrases and -exclusions work; a blank query is never sent (the backend refuses it). */
+export function useQuestionSearch(q: string) {
+  return useInfiniteQuery({
+    queryKey: ['questions', 'search', q],
+    queryFn: ({ pageParam, signal }) => api<Page<Question>>('/api/questions/search', { params: { q, pageNo: pageParam, pageSize: FEED_PAGE_SIZE }, signal }),
+    initialPageParam: 0,
+    getNextPageParam: (page) => (page.last ? undefined : page.number + 1),
+    enabled: q.trim() !== '',
   })
 }
 

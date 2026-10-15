@@ -90,9 +90,9 @@ test('home shows topics to follow', async () => {
     'GET /api/feed/latest': () => envelope(200, page([])),
     'GET /api/tags': () => envelope(200, ['rice', 'jute']),
   })
-  renderWithProviders(<App />, '/')
+  renderWithProviders(<App />, '/stories')
 
-  const rail = await screen.findByRole('region', { name: 'Topics to follow' })
+  const rail = await screen.findByRole('region', { name: 'Tags to follow' })
   expect(within(rail).getByRole('link', { name: 'rice' })).toHaveAttribute('href', '/tags/rice')
-  expect(within(rail).getByRole('link', { name: 'See all topics' })).toHaveAttribute('href', '/topics')
+  expect(within(rail).getByRole('link', { name: 'See all tags' })).toHaveAttribute('href', '/topics')
 })

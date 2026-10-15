@@ -6,11 +6,12 @@ import { HomePage } from './features/home/HomePage'
 import { StoryPage } from './features/story/StoryPage'
 import { AppLayout } from './layout/AppLayout'
 
-// Home and the story page load with the app (most visits start there); every other page is fetched when first
+// Home (the questions) and the story page load with the app (most visits start there); every other page is fetched when first
 // opened. The editor (Tiptap) is the largest of them. AppLayout's Suspense shows a spinner meanwhile.
 const page = <K extends string>(load: () => Promise<Record<K, ComponentType>>, name: K) =>
   lazy(() => load().then((m) => ({ default: m[name] })))
 
+const StoriesPage = page(() => import('./features/home/StoriesPage'), 'StoriesPage')
 const AdvisorHistoryPage = page(() => import('./features/ai/AdvisorHistoryPage'), 'AdvisorHistoryPage')
 const AdvisorPage = page(() => import('./features/ai/AdvisorPage'), 'AdvisorPage')
 const AuthorPage = page(() => import('./features/authors/AuthorPage'), 'AuthorPage')
@@ -38,6 +39,7 @@ export default function App() {
     <Routes>
       <Route element={<AppLayout />}>
         <Route path="/" element={<HomePage />} />
+        <Route path="/stories" element={<StoriesPage />} />
         <Route path="/stories/:slug" element={<StoryPage />} />
         <Route path="/s/:blogId" element={<StoryById />} />
         <Route path="/authors/:authorId" element={<AuthorPage />} />

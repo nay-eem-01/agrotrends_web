@@ -1,4 +1,4 @@
-import { filterPath, readAgriFilters, seasonCalendar } from './agri'
+import { filterPath, readAgriFilters, readQuestionFilters, seasonCalendar } from './agri'
 
 test('the season follows the DAE calendar', () => {
   expect(seasonCalendar(new Date(2026, 9, 8)).current).toBe('KHARIF_2')
@@ -27,7 +27,14 @@ test('filters are read from the URL and unknown values dropped', () => {
 
 test('filter paths round-trip', () => {
   const path = filterPath({ crop: 'boro rice', season: 'RABI', soil: 'CLAY_LOAM' })
-  expect(path).toBe('/?crop=boro+rice&season=RABI&soil=CLAY_LOAM')
-  expect(readAgriFilters(new URLSearchParams(path.slice(2)))).toEqual({ crop: 'boro rice', season: 'RABI', soil: 'CLAY_LOAM' })
-  expect(filterPath({})).toBe('/')
+  expect(path).toBe('/stories?crop=boro+rice&season=RABI&soil=CLAY_LOAM')
+  expect(readAgriFilters(new URLSearchParams(path.split('?')[1]))).toEqual({ crop: 'boro rice', season: 'RABI', soil: 'CLAY_LOAM' })
+  expect(filterPath({})).toBe('/stories')
+})
+
+test('farming filters keep the other parameters of a list', () => {
+  const keep = new URLSearchParams('crop=jute&categoryId=3&tag=pests&unanswered=true')
+  expect(filterPath({ season: 'RABI' }, '/', keep)).toBe('/?season=RABI&categoryId=3&tag=pests&unanswered=true')
+  expect(readQuestionFilters(keep)).toEqual({ crop: 'jute', categoryId: 3, tag: 'pests', unanswered: true })
+  expect(readQuestionFilters(new URLSearchParams('categoryId=x&unanswered=1'))).toEqual({})
 })

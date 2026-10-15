@@ -96,13 +96,38 @@ export function hasAgriFilters(filters: AgriFilters): boolean {
   return Object.keys(filters).length > 0
 }
 
-/** The URL of `base` (home by default) filtered by `filters`. */
-export function filterPath(filters: AgriFilters, base = '/'): string {
+const AGRI_KEYS = ['crop', 'season', 'region', 'soil'] as const
+
+/**
+ * The URL of `base` (the stories feed by default) filtered by `filters`. Other parameters in `keep` (a topic, a tag,
+ * the Unanswered tab) follow the farming ones, so changing a farming filter doesn't drop them.
+ */
+export function filterPath(filters: AgriFilters, base = '/stories', keep?: URLSearchParams): string {
   const params = new URLSearchParams()
-  for (const key of ['crop', 'season', 'region', 'soil'] as const) {
+  for (const key of AGRI_KEYS) {
     const value = filters[key]
     if (value) params.set(key, value)
   }
+  keep?.forEach((value, key) => {
+    if (!(AGRI_KEYS as readonly string[]).includes(key)) params.append(key, value)
+  })
   const query = params.toString()
   return query ? `${base}?${query}` : base
+}
+
+/** The questions list's filters: farming context plus topic (`categoryId`), tag and the Unanswered tab. */
+export interface QuestionFilters extends AgriFilters {
+  categoryId?: number
+  tag?: string
+  unanswered?: boolean
+}
+
+export function readQuestionFilters(params: URLSearchParams): QuestionFilters {
+  const filters: QuestionFilters = readAgriFilters(params)
+  const categoryId = Number(params.get('categoryId'))
+  const tag = params.get('tag')?.trim().toLowerCase()
+  if (Number.isInteger(categoryId) && categoryId > 0) filters.categoryId = categoryId
+  if (tag) filters.tag = tag
+  if (params.get('unanswered') === 'true') filters.unanswered = true
+  return filters
 }

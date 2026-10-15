@@ -1,7 +1,7 @@
 import { useT } from '../../lib/i18n'
 import { Faders, X } from '@phosphor-icons/react'
 import { useId, useState, type FormEvent } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { filterPath, SEASON_LABELS, SOIL_LABELS, type AgriFilters, type Season, type Soil } from '../../lib/agri'
 import { Select } from '../farming/FarmingFields'
 import { Button } from '../../ui/Button'
@@ -20,6 +20,7 @@ export function AgriFilterBar({ filters }: { filters: AgriFilters }) {
   const t = useT()
   const [open, setOpen] = useState(false)
   const { pathname } = useLocation()
+  const [params] = useSearchParams()
   const formId = useId()
   const active = (Object.keys(FILTER_NAMES) as (keyof AgriFilters)[]).filter((key) => filters[key])
 
@@ -33,7 +34,7 @@ export function AgriFilterBar({ filters }: { filters: AgriFilters }) {
               <span className="sr-only">{t(FILTER_NAMES[key])}: </span>
               {label(key, filters, t)}
               <Link
-                to={filterPath(rest, pathname)}
+                to={filterPath(rest, pathname, params)}
                 aria-label={`Remove filter ${FILTER_NAMES[key].toLowerCase()} ${label(key, filters, t)}`}
                 className="flex size-7 items-center justify-center rounded-full hover:bg-paper/20"
               >
@@ -43,7 +44,7 @@ export function AgriFilterBar({ filters }: { filters: AgriFilters }) {
           )
         })}
         {active.length > 1 && (
-          <Link to={pathname} className="px-2 text-sm text-ink-muted underline-offset-4 hover:text-ink hover:underline">
+          <Link to={filterPath({}, pathname, params)} className="px-2 text-sm text-ink-muted underline-offset-4 hover:text-ink hover:underline">
             {t('Clear all')}
           </Link>
         )}
@@ -67,6 +68,7 @@ function FilterForm({ id, filters, onDone }: { id: string; filters: AgriFilters;
   const t = useT()
   const navigate = useNavigate()
   const { pathname } = useLocation()
+  const [params] = useSearchParams()
   const [crop, setCrop] = useState(filters.crop ?? '')
   const [region, setRegion] = useState(filters.region ?? '')
   const [season, setSeason] = useState<Season | ''>(filters.season ?? '')
@@ -74,7 +76,7 @@ function FilterForm({ id, filters, onDone }: { id: string; filters: AgriFilters;
 
   function submit(event: FormEvent) {
     event.preventDefault()
-    navigate(filterPath({ season: season || undefined, crop: crop.trim() || undefined, region: region.trim() || undefined, soil: soil || undefined }, pathname))
+    navigate(filterPath({ season: season || undefined, crop: crop.trim() || undefined, region: region.trim() || undefined, soil: soil || undefined }, pathname, params))
     onDone()
   }
 

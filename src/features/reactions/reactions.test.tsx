@@ -167,7 +167,7 @@ test('feed cards show which stories are saved', async () => {
     'GET /api/feed/following': () => envelope(200, page([story, { ...story, id: 403, slug: 'other', title: 'Other' }])),
     'GET /api/bookmarks': () => envelope(200, page([story])),
   })
-  renderWithProviders(<App />, '/')
+  renderWithProviders(<App />, '/stories')
 
   const card = (await screen.findByRole('link', { name: 'Rice blast' })).closest('article')!
   await waitFor(() => expect(within(card).getByRole('button', { name: 'Save “Rice blast”' })).toHaveAttribute('aria-pressed', 'true'))

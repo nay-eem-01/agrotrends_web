@@ -73,7 +73,7 @@ export function TopicsRail() {
   return (
     <section aria-labelledby="rail-topics" className="sticky top-24">
       <h2 id="rail-topics" className="font-sans text-base font-semibold">
-        {t('Topics to follow')}
+        {t('Tags to follow')}
       </h2>
       <ul className="mt-4 flex flex-wrap gap-2">
         {tags.data.slice(0, 12).map((tag) => (
@@ -83,7 +83,7 @@ export function TopicsRail() {
         ))}
       </ul>
       <Link to="/topics" className="mt-4 inline-block text-sm text-paddy underline-offset-4 hover:underline">
-        {t('See all topics')}
+        {t('See all tags')}
       </Link>
     </section>
   )

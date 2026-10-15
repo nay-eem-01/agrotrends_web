@@ -1,56 +1,18 @@
 import { useState, type FormEvent } from 'react'
-import { isAdmin, useAdminSignIn } from '../../api/auth'
 import { useCategories, useCategoryWrite, type Category } from '../../api/categories'
 import { errorMessage } from '../../api/errors'
-import { isEmail } from '../../lib/auth'
 import { Button } from '../../ui/Button'
 import { Spinner } from '../../ui/Spinner'
 import { TextField } from '../../ui/TextField'
 import { FormError } from '../auth/AuthPage'
-import { useSession } from '../auth/session'
+import { AdminPage } from './AdminPage'
 
 /** `/admin/categories`: staff add, rename and delete story categories. Others get the admin sign-in. */
 export function AdminCategoriesPage() {
-  const { status, user } = useSession()
   return (
-    <section className="mx-auto max-w-(--container-feed) px-4 pt-10 pb-20 sm:px-6">
-      <title>Categories – Admin – AgroTrends</title>
-      <p className="text-sm text-ink-muted">Admin</p>
-      <h1 className="mt-1 text-2xl sm:text-3xl">Categories</h1>
-      {status === 'restoring' ? <Spinner /> : isAdmin(user) ? <Categories /> : <AdminSignIn signedInAsReader={status === 'signed-in'} />}
-    </section>
-  )
-}
-
-function AdminSignIn({ signedInAsReader }: { signedInAsReader: boolean }) {
-  const session = useSession()
-  const signIn = useAdminSignIn()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState<string>()
-
-  function submit(event: FormEvent) {
-    event.preventDefault()
-    if (!isEmail(email) || !password) {
-      setError('Enter your admin e-mail and password.')
-      return
-    }
-    setError(undefined)
-    signIn.mutate({ email: email.trim(), password }, { onSuccess: (tokens) => session.signedIn(tokens) })
-  }
-
-  return (
-    <form onSubmit={submit} noValidate className="mt-8 flex max-w-md flex-col gap-5">
-      <p className="text-ink-muted">
-        {signedInAsReader ? 'Your account has no admin access. Sign in with an admin account.' : 'Sign in with an admin account.'}
-      </p>
-      <TextField label="Admin e-mail" type="email" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} />
-      <TextField label="Password" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
-      <FormError message={error ?? (signIn.isError ? errorMessage(signIn.error) : null)} />
-      <Button type="submit" loading={signIn.isPending} className="self-start">
-        Sign in as admin
-      </Button>
-    </form>
+    <AdminPage title="Categories">
+      <Categories />
+    </AdminPage>
   )
 }
 

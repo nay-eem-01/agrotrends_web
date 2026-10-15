@@ -338,6 +338,7 @@ export const BN: Record<string, string> = {
   'The review queue is for verified experts.': 'যাচাইয়ের তালিকা শুধু যাচাই করা বিশেষজ্ঞদের জন্য।',
   'Nothing to review. Every AI answer in your topics has been checked.': 'যাচাই করার কিছু নেই। আপনার বিষয়ের সব এআই-উত্তর যাচাই হয়ে গেছে।',
   'Show more': 'আরও দেখুন',
+  Admin: 'অ্যাডমিন',
   Sources: 'সূত্র',
   'Show older questions': 'আগের প্রশ্ন দেখুন',
   'Your questions to the advisor – AgroTrends': 'পরামর্শককে আপনার প্রশ্ন – অ্যাগ্রোট্রেন্ডস',

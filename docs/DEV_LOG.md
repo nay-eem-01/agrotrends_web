@@ -19,10 +19,11 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   question answers (`feat/question-answers`) done. Phase F8 is complete.
 - Phase F9 on `feat/reputation-base` (stacked on F8's tip): F9.1 votes (`feat/votes`) F9.2 accept (`feat/accept`) and F9.3 reputation
   (`feat/reputation`) done. Phase F9 is complete.
+- Phase F10 on `feat/ai-answers-base` (stacked on F9's tip): F10.1 AI answer card (`feat/ai-answer-card`) done.
 
 ## Next up
 
-1. Phase F10 AI answers: F10.1 AI answer card, F10.2 sources, F10.3 ask the experts.
+1. F10.2 sources, F10.3 ask the experts.
 2. F12–F14 need the backend's Phase 8 branch until it is merged.
 
 ## Open items
@@ -39,6 +40,25 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-15 (F10.1 AI answer card)
+
+**Done**
+- `GET /api/questions/id/{id}/ai-answer` as its own card above the people's answers: "AI answer" with its state
+  (not yet checked; **Confirmed by** the expert with the date, in a mustard ring; **Corrected by** the expert with a
+  link to their answer, `#answer-{id}`, now on every answer card), its sources and the backend's disclaimer, always.
+  An unchecked answer sits in a dashed card, so it never reads as a person's answer.
+- A 404 (none yet, failed, flagged, hidden question) shows nothing. Right after posting a question the page says an AI
+  answer is being written and polls every 3 s for up to a minute (`askedAt` in the navigation state), then goes quiet.
+- The F4.4 AI-draft button was already removed with its endpoint in F7.1a.
+- Live: the seeded CONFIRMED and UNCHECKED rows render.
+- Tests: `qa/ai-answer.test.tsx` (unchecked with sources and disclaimer; confirmed and corrected with the link and
+  anchor; 404 shows nothing; after asking it waits and shows the answer when it arrives).
+
+**Decisions**
+- The AI answer is plain text (`white-space: pre-line`), not HTML, so it never goes through `SafeHtml`.
 
 ---
 

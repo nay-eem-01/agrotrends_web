@@ -30,9 +30,12 @@ export function VoteControl({ target, id, score, myVote, own }: VoteControlProps
   const vote = useVote(target, id)
   const [state, setState] = useState({ score, myVote })
   const [refusal, setRefusal] = useState<string | null>(null)
-
-  // Follow fresh server data (a refetch, or my-votes arriving after the page).
-  useEffect(() => setState({ score, myVote }), [score, myVote])
+  // Follow fresh server data (a refetch, or my-votes arriving after the page), adjusting state during render.
+  const [synced, setSynced] = useState({ score, myVote })
+  if (synced.score !== score || synced.myVote !== myVote) {
+    setSynced({ score, myVote })
+    setState({ score, myVote })
+  }
   useEffect(() => {
     if (!refusal) return
     const timer = setTimeout(() => setRefusal(null), 4000)

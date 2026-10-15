@@ -5,6 +5,7 @@ import { storyDate } from '../../lib/dates'
 import { Button, ButtonLink } from '../../ui/Button'
 import { SafeHtml } from '../../ui/SafeHtml'
 import { Spinner } from '../../ui/Spinner'
+import { Sources } from './Sources'
 
 /** `/advisor/history`: the reader's earlier questions, newest first; each answer opens in place. */
 export function AdvisorHistoryPage() {
@@ -43,6 +44,7 @@ export function AdvisorHistoryPage() {
                   </summary>
                   <div className="mt-4 border-l-2 border-paddy pl-5">
                     <SafeHtml html={item.answer} className="font-serif text-base whitespace-pre-line [&>p+p]:mt-3" />
+                    <Sources sources={item.sources} />
                   </div>
                 </details>
               </li>

@@ -102,3 +102,10 @@ test('after asking, the page waits for the AI answer and shows it when it arrive
   })
   await waitFor(() => expect(screen.getByRole('region', { name: 'AI answer' })).toBeInTheDocument())
 })
+
+test('a community-answer source links to its question', async () => {
+  mockApi(routes(() => envelope(200, ai())))
+  renderWithProviders(<App />, '/questions/5')
+  const card = await screen.findByRole('region', { name: 'AI answer' })
+  expect(within(card).getByRole('link', { name: 'Community answer to: Seedlings yellow after fog' })).toHaveAttribute('href', '/questions/40')
+})

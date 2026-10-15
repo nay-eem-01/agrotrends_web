@@ -272,7 +272,7 @@ export const BN: Record<string, string> = {
   'This conversation': 'এই কথোপকথন',
   'Bangla or English: what you grow, where, and what you are seeing': 'বাংলা বা ইংরেজিতে: কী চাষ করছেন, কোথায়, আর কী দেখছেন',
   'For this {season} season': 'এই {season} মৌসুমের জন্য',
-  'From these stories': 'এই লেখাগুলো থেকে',
+  'Community answer to: {title}': 'কমিউনিটির উত্তর: {title}',
   Sources: 'সূত্র',
   'Show older questions': 'আগের প্রশ্ন দেখুন',
   'Your questions to the advisor – AgroTrends': 'পরামর্শককে আপনার প্রশ্ন – অ্যাগ্রোট্রেন্ডস',

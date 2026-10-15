@@ -52,3 +52,31 @@ test('history needs sign-in', async () => {
   renderWithProviders(<App />, '/advisor/history')
   await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/sign-in?next=%2Fadvisor%2Fhistory'))
 })
+
+test('an earlier answer lists its sources, stories and community answers alike', async () => {
+  mockApi(
+    signedIn({
+      'GET /api/ai/history': () =>
+        envelope(
+          200,
+          page([
+            {
+              id: 3,
+              question: 'Fog and seedlings?',
+              answer: 'Drain at dawn.',
+              askedAt: '2026-10-08T06:00:00Z',
+              sources: [
+                { type: 'blog', blogId: 12, title: 'Boro in a cold snap' },
+                { type: 'answer', questionId: 40, title: 'Seedlings yellow after fog' },
+              ],
+            },
+          ]),
+        ),
+    }),
+  )
+  renderWithProviders(<App />, '/advisor/history')
+
+  await userEvent.click(await screen.findByText('Fog and seedlings?'))
+  expect(screen.getByRole('link', { name: 'Boro in a cold snap' })).toHaveAttribute('href', '/s/12')
+  expect(screen.getByRole('link', { name: 'Community answer to: Seedlings yellow after fog' })).toHaveAttribute('href', '/questions/40')
+})

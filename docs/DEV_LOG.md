@@ -23,10 +23,12 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   experts (`feat/ask-experts`) done. Phase F10 is complete.
 - Phase F11 on `feat/experts-base` (stacked on F10's tip): F11.1 apply (`feat/expert-apply`) F11.2 review (`feat/expert-review`) and F11.3 admin
   (`feat/expert-admin`) done. Phase F11 is complete.
+- Phase F12 on `feat/notifications-base` (stacked on F11's tip): F12.1 bell (`feat/notification-bell`) and F12.2 page
+  (`feat/notifications-page`) done. Phase F12 is complete.
 
 ## Next up
 
-1. Phase F12 notifications: F12.1 bell, F12.2 notifications page (backend Phase 8 branch).
+1. Phase F13 reports and moderation: F13.1 report dialog, F13.2 admin reports, F13.3 ban and hidden states.
 2. F12–F14 need the backend's Phase 8 branch until it is merged.
 
 ## Open items
@@ -44,6 +46,36 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-15 (F12.2 notifications page)
+
+**Done**
+- `/notifications`: **All** and **Unread (n)** tabs (`unreadOnly=true`), newest first, "Show older notifications"
+  for the next page, **Mark all read**. Rows are the bell's (same words, same links, no link for hidden or removed
+  posts); the bell's panel ends with **See all notifications**.
+- Tests: `notifications/notifications.test.tsx` (types in words and paging, the unread tab's request, the bell's link).
+
+---
+
+## 2026-10-15 (F12.1 notification bell)
+
+**Done**
+- A bell in the top bar for signed-in users: the unread count (`GET /api/notifications/unread-count`), polled every
+  60 s while the tab is visible and again on focus, as a red badge (99+ beyond that).
+- Its panel lists the latest ten (`GET /api/notifications?pageSize=10`), unread ones dotted and named "Unread" for
+  screen readers; opening one marks it read (`POST …/{id}/read`) and goes to its page; **Mark all read**
+  (`POST …/read-all`). Escape or a click outside closes it. It grows out of the bell (origin top right, 150 ms
+  ease-out, `@starting-style`).
+- `lib/notifications.ts` words and links every type: actor types name the actor ("A member" when the name is gone),
+  moderation and application decisions name no one, hidden and removed posts have no link, unknown future types get a
+  generic line linked by target type.
+- Fixed `buttonClass` (F7.0): a screen's classes were appended by cva instead of merged with `cn`, so conflicting ones
+  (the top bar's `hidden` on phones) lost to the variant's. It made the phone top bar overflow once the bell was in.
+- Live: the asker sees "Rahim answered your question" with a count of 1.
+- Tests: `lib/notifications.test.ts` (every type, no names or links where there must be none, unknown types) and
+  `layout/bell.test.tsx` (count and list, open marks read and navigates, mark all read, polling).
 
 ---
 

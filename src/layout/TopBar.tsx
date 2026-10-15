@@ -1,11 +1,15 @@
 import { useT } from '../lib/i18n'
 import { MagnifyingGlass, NotePencil } from '@phosphor-icons/react'
 import { useState, type FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { cn } from 'cn'
 import { useSession } from '../features/auth/session'
 import { ButtonLink } from '../ui/Button'
 import { AccountMenu } from './AccountMenu'
 import { Logo } from './Logo'
+
+const navClass = ({ isActive }: { isActive: boolean }) =>
+  cn('hidden h-11 items-center px-2 text-sm transition-colors duration-150 md:flex', isActive ? 'font-medium text-foreground' : 'text-muted-foreground hover:text-foreground')
 
 export function TopBar() {
   const t = useT()
@@ -27,7 +31,7 @@ export function TopBar() {
           <form onSubmit={search}>
             <label className="flex h-10 items-center gap-2 rounded-full bg-field px-3 text-ink-muted focus-within:ring-2 focus-within:ring-paddy">
               <MagnifyingGlass size={18} aria-hidden="true" />
-              <span className="sr-only">{t('Search stories')}</span>
+              <span className="sr-only">{t('Search questions and stories')}</span>
               <input
                 type="search"
                 value={query}
@@ -42,12 +46,15 @@ export function TopBar() {
           <Link to="/search" className="flex h-11 w-11 items-center justify-center rounded-full text-ink-muted hover:text-ink sm:hidden" aria-label={t('Search')}>
             <MagnifyingGlass size={22} />
           </Link>
-          <Link to="/questions" className="hidden h-11 items-center px-2 text-sm text-ink-muted hover:text-ink md:flex">
+          <NavLink to="/" end className={navClass}>
             {t('Questions')}
-          </Link>
-          <Link to="/advisor" className="hidden h-11 items-center px-2 text-sm text-ink-muted hover:text-ink md:flex">
+          </NavLink>
+          <NavLink to="/stories" className={navClass}>
+            {t('Stories')}
+          </NavLink>
+          <NavLink to="/advisor" className={navClass}>
             {t('Advisor')}
-          </Link>
+          </NavLink>
           <Link to="/write" className="hidden h-11 items-center gap-1.5 px-2 text-sm text-ink-muted hover:text-ink md:flex">
             <NotePencil size={20} aria-hidden="true" />
             {t('Write')}
@@ -57,6 +64,9 @@ export function TopBar() {
               <Link to="/write" className="flex h-11 w-11 items-center justify-center rounded-full text-ink-muted hover:text-ink md:hidden" aria-label={t('Write')}>
                 <NotePencil size={22} />
               </Link>
+              <ButtonLink to="/questions/ask" size="sm" className="ml-1 hidden sm:inline-flex">
+                {t('Ask')}
+              </ButtonLink>
               <AccountMenu />
             </>
           )}

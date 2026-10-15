@@ -60,9 +60,9 @@ test('farming context and tags link to filtered lists', async () => {
   renderWithProviders(<App />, '/stories/rice-blast-and-nitrogen')
 
   const farming = await screen.findByRole('region', { name: 'Farming context' })
-  expect(within(farming).getByRole('link', { name: /Crop\s*boro rice/ })).toHaveAttribute('href', '/?crop=boro+rice')
-  expect(within(farming).getByRole('link', { name: /Season\s*Rabi/ })).toHaveAttribute('href', '/?season=RABI')
-  expect(within(farming).getByRole('link', { name: /Soil\s*Clay loam/ })).toHaveAttribute('href', '/?soil=CLAY_LOAM')
+  expect(within(farming).getByRole('link', { name: /Crop\s*boro rice/ })).toHaveAttribute('href', '/stories?crop=boro+rice')
+  expect(within(farming).getByRole('link', { name: /Season\s*Rabi/ })).toHaveAttribute('href', '/stories?season=RABI')
+  expect(within(farming).getByRole('link', { name: /Soil\s*Clay loam/ })).toHaveAttribute('href', '/stories?soil=CLAY_LOAM')
   const tags = screen.getByRole('region', { name: 'Tags' })
   expect(within(tags).getByRole('link', { name: 'rice blast' })).toHaveAttribute('href', '/tags/rice%20blast')
 })

@@ -23,12 +23,11 @@ test('results show matching topics and stories', async () => {
     'GET /api/blogs/search': () => envelope(200, { ...page([story(1, 'Rice blast and nitrogen'), story(2, 'Boro rice')]), totalElements: 2 }),
     'GET /api/tags': () => envelope(200, ['rice', 'rice blast']),
   })
-  renderWithProviders(<App />, '/search?q=Rice')
+  renderWithProviders(<App />, '/search?q=Rice&type=stories')
 
   expect(await screen.findByRole('link', { name: 'Rice blast and nitrogen' })).toBeInTheDocument()
   expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Results for Rice')
-  expect(screen.getByText('2 stories')).toBeInTheDocument()
-  const topics = await screen.findByRole('region', { name: 'Matching topics' })
+  const topics = await screen.findByRole('region', { name: 'Matching tags' })
   expect(within(topics).getByRole('link', { name: 'rice blast' })).toHaveAttribute('href', '/tags/rice%20blast')
   const searchCall = api.mock.calls.map(([url]) => new URL(String(url), 'http://x')).find((url) => url.pathname === '/api/blogs/search')!
   expect(searchCall.searchParams.get('q')).toBe('Rice')
@@ -37,10 +36,10 @@ test('results show matching topics and stories', async () => {
 
 test('no results suggest asking instead', async () => {
   mockApi({ 'GET /api/blogs/search': () => envelope(200, page([])), 'GET /api/tags': () => envelope(200, []) })
-  renderWithProviders(<App />, '/search?q=quinoa')
+  renderWithProviders(<App />, '/search?q=quinoa&type=stories')
 
   expect(await screen.findByRole('heading', { name: 'No stories match “quinoa”' })).toBeInTheDocument()
-  expect(screen.getByRole('link', { name: 'Ask a question' })).toHaveAttribute('href', '/questions')
+  expect(screen.getByRole('link', { name: 'Ask a question' })).toHaveAttribute('href', '/questions/ask')
 })
 
 test('an empty search asks for words and offers topics, without searching', async () => {
@@ -57,14 +56,29 @@ test('searching again from the page updates the URL and results', async () => {
     'GET /api/blogs/search': (url) => envelope(200, page([story(1, `About ${url.searchParams.get('q')}`)])),
     'GET /api/tags': () => envelope(200, []),
   })
-  renderWithProviders(<App />, '/search?q=rice')
+  renderWithProviders(<App />, '/search?q=rice&type=stories')
   await screen.findByRole('link', { name: 'About rice' })
 
-  const field = within(screen.getByRole('main')).getByRole('searchbox', { name: 'Search stories' })
+  const field = within(screen.getByRole('main')).getByRole('searchbox', { name: 'Search questions and stories' })
   expect(field).toHaveValue('rice')
   await userEvent.clear(field)
   await userEvent.type(field, 'jute aphids{Enter}')
 
-  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/search?q=jute%20aphids'))
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/search?q=jute%20aphids&type=stories'))
   await waitFor(() => expect(screen.getByRole('link', { name: 'About jute aphids' })).toBeInTheDocument())
+})
+
+test('questions come first, found by phrase', async () => {
+  const api = mockApi({
+    'GET /api/questions/search': () =>
+      envelope(200, page([{ questionId: 4, title: 'Yellow boro seedlings', content: 'After the cold', authorName: 'Karim', answerCount: 2, score: 3 }])),
+    'GET /api/tags': () => envelope(200, []),
+  })
+  renderWithProviders(<App />, '/search?q=%22yellow%20seedlings%22')
+
+  const link = await screen.findByRole('link', { name: 'Yellow boro seedlings' })
+  expect(link).toHaveAttribute('href', '/questions/4')
+  expect(screen.getByRole('link', { name: 'Questions', current: 'page' })).toBeInTheDocument()
+  const sent = api.mock.calls.map(([url]) => new URL(String(url), 'http://x')).find((url) => url.pathname === '/api/questions/search')!
+  expect(sent.searchParams.get('q')).toBe('"yellow seedlings"')
 })

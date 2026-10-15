@@ -60,7 +60,6 @@ export const BN: Record<string, string> = {
   'Mid-Oct to mid-Mar': 'মধ্য অক্টোবর থেকে মধ্য মার্চ',
   'Mid-Mar to mid-Jul': 'মধ্য মার্চ থেকে মধ্য জুলাই',
   'Mid-Jul to mid-Oct': 'মধ্য জুলাই থেকে মধ্য অক্টোবর',
-  'Crop seasons': 'ফসলের মৌসুম',
   '{season} season stories': '{season} মৌসুমের লেখা',
   Clay: 'এঁটেল',
   Loam: 'দোআঁশ',
@@ -76,11 +75,12 @@ export const BN: Record<string, string> = {
   Region: 'এলাকা',
   Soil: 'মাটি',
   'Any soil': 'যেকোনো মাটি',
+  'Any season': 'যেকোনো মৌসুম',
   'Farming details': 'চাষের তথ্য',
   'Farming context': 'চাষের প্রসঙ্গ',
   'Clear all': 'সব মুছুন',
-  'Filter by crop, region or soil': 'ফসল, এলাকা বা মাটি দিয়ে বাছুন',
-  'Show stories': 'লেখা দেখুন',
+  'Filter by crop, season, region or soil': 'ফসল, মৌসুম, এলাকা বা মাটি দিয়ে বাছুন',
+  'Apply filters': 'বাছাই করুন',
 
   // Story
   'Edit story': 'লেখা সম্পাদনা',

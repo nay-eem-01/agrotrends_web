@@ -1,7 +1,8 @@
 import { useT } from '../../lib/i18n'
-import { useId, useState } from 'react'
-import { SEASON_LABELS, SOIL_LABELS, seasonCalendar, type Season, type Soil } from '../../lib/agri'
-import { cx } from '../../ui/cx'
+import { useId } from 'react'
+import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
+import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
+import { SEASON_LABELS, SOIL_LABELS, type Season, type Soil } from '../../lib/agri'
 import { TextField } from '../../ui/TextField'
 
 export interface Farming {
@@ -11,13 +12,12 @@ export interface Farming {
   soil?: Soil
 }
 
-/** Season (drawn as the season strip), crop, region and soil: the farming a story or question is about. */
+/** Season, crop, region and soil: the farming a story or question is about. */
 export function FarmingFields({ value, onChange }: { value: Farming; onChange: (changes: Partial<Farming>) => void }) {
   const t = useT()
   return (
     <fieldset className="flex flex-col gap-4">
       <legend className="mb-2 font-sans text-base font-semibold">{t('Farming details')}</legend>
-      <SeasonPicker value={value.season} onChange={(season) => onChange({ season })} />
       <div className="grid gap-4 sm:grid-cols-2">
         <TextField
           label={t('Crop')}
@@ -31,14 +31,21 @@ export function FarmingFields({ value, onChange }: { value: Farming; onChange: (
           value={value.region}
           onChange={(e) => onChange({ region: e.target.value })}
         />
+        <Select
+          label={t('Season')}
+          value={value.season ?? ''}
+          onChange={(season) => onChange({ season: (season || undefined) as Season | undefined })}
+          options={(Object.keys(SEASON_LABELS) as Season[]).map((season) => ({ value: season, label: t(SEASON_LABELS[season]) }))}
+          placeholder={t('Any season')}
+        />
+        <Select
+          label={t('Soil')}
+          value={value.soil ?? ''}
+          onChange={(soil) => onChange({ soil: (soil || undefined) as Soil | undefined })}
+          options={(Object.keys(SOIL_LABELS) as Soil[]).map((soil) => ({ value: soil, label: t(SOIL_LABELS[soil]) }))}
+          placeholder={t('Any soil')}
+        />
       </div>
-      <Select
-        label={t('Soil')}
-        value={value.soil ?? ''}
-        onChange={(soil) => onChange({ soil: (soil || undefined) as Soil | undefined })}
-        options={(Object.keys(SOIL_LABELS) as Soil[]).map((soil) => ({ value: soil, label: t(SOIL_LABELS[soil]) }))}
-        placeholder={t('Any soil')}
-      />
     </fieldset>
   )
 }
@@ -70,90 +77,28 @@ export function Select({
 }) {
   const id = useId()
   return (
-    <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-sm font-medium">
-        {label}
-      </label>
-      <select
+    <Field data-invalid={error ? true : undefined}>
+      <FieldLabel htmlFor={id}>{label}</FieldLabel>
+      <NativeSelect
         id={id}
         value={value}
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? `${id}-error` : undefined}
         onChange={(e) => onChange(e.target.value)}
-        className={cx(
-          'h-11 rounded-lg border bg-paper px-3 text-base focus:border-paddy focus:outline-none',
-          error ? 'border-danger' : 'border-rule',
-        )}
+        className="w-full"
       >
-        <option value="">{placeholder}</option>
+        <NativeSelectOption value="">{placeholder}</NativeSelectOption>
         {options.map((option) => (
-          <option key={option.value} value={option.value}>
+          <NativeSelectOption key={option.value} value={option.value}>
             {option.label}
-          </option>
+          </NativeSelectOption>
         ))}
-      </select>
+      </NativeSelect>
       {error && (
-        <p id={`${id}-error`} className="text-xs text-danger">
+        <FieldDescription id={`${id}-error`} className="text-destructive">
           {error}
-        </p>
+        </FieldDescription>
       )}
-    </div>
-  )
-}
-
-/** The season strip again, as a choice: the three seasons sized by length, plus Year-round. */
-function SeasonPicker({ value, onChange }: { value?: Season; onChange: (season?: Season) => void }) {
-  const t = useT()
-  const [today] = useState(() => new Date())
-  const { segments, current } = seasonCalendar(today)
-  const options: { season: Season; share: number }[] = [
-    ...segments.map((s) => ({ season: s.season as Season, share: s.share })),
-    { season: 'YEAR_ROUND', share: 0.22 },
-  ]
-
-  return (
-    <div role="radiogroup" aria-label={t('Season')} className="flex gap-2">
-      {options.map(({ season, share }) => {
-        const selected = value === season
-        return (
-          <label
-            key={season}
-            style={{ flexGrow: share, flexBasis: 0 }}
-            className="group flex min-w-0 cursor-pointer flex-col gap-1.5 pt-1"
-          >
-            <input
-              type="radio"
-              name="season"
-              value={season}
-              checked={selected}
-              // Choosing the selected season again clears it (a story needn't have one).
-              onClick={() => selected && onChange(undefined)}
-              onChange={() => onChange(season)}
-              className="peer sr-only"
-            />
-            <span
-              className={cx(
-                'truncate text-sm',
-                selected ? 'font-semibold text-ink' : 'text-ink-muted group-hover:text-ink',
-              )}
-            >
-              {t(SEASON_LABELS[season])}
-              {season === current && <span className="sr-only"> (now)</span>}
-            </span>
-            <span
-              aria-hidden="true"
-              className={cx(
-                'h-2 rounded-full transition-colors peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-paddy',
-                selected
-                  ? 'bg-paddy'
-                  : season === 'YEAR_ROUND'
-                    ? 'bg-[repeating-linear-gradient(90deg,var(--color-rule)_0_6px,transparent_6px_10px)]'
-                    : 'bg-rule group-hover:bg-ink-muted/40',
-              )}
-            />
-          </label>
-        )
-      })}
-    </div>
+    </Field>
   )
 }

@@ -21,11 +21,12 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   (`feat/reputation`) done. Phase F9 is complete.
 - Phase F10 on `feat/ai-answers-base` (stacked on F9's tip): F10.1 AI answer card (`feat/ai-answer-card`) F10.2 sources (`feat/ai-sources`) and F10.3 ask the
   experts (`feat/ask-experts`) done. Phase F10 is complete.
-- Phase F11 on `feat/experts-base` (stacked on F10's tip): F11.1 apply (`feat/expert-apply`) and F11.2 review (`feat/expert-review`) done.
+- Phase F11 on `feat/experts-base` (stacked on F10's tip): F11.1 apply (`feat/expert-apply`) F11.2 review (`feat/expert-review`) and F11.3 admin
+  (`feat/expert-admin`) done. Phase F11 is complete.
 
 ## Next up
 
-1. F11.3 admin.
+1. Phase F12 notifications: F12.1 bell, F12.2 notifications page (backend Phase 8 branch).
 2. F12–F14 need the backend's Phase 8 branch until it is merged.
 
 ## Open items
@@ -41,7 +42,30 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
+| The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-15 (F11.3 expert applications admin)
+
+**Done**
+- `/admin/experts` (staff; the account menu's **Admin**): Waiting / Approved / Rejected tabs over
+  `GET /api/admin/expert-applications?status=`. Each application shows the applicant (linking to their profile),
+  field, institution, proof type, requested topics, proof photos and links (both open in a new tab,
+  `rel="noopener noreferrer"`).
+- Waiting: tick the topics to approve (all ticked sends no `categoryIds`, i.e. every requested topic) with an optional
+  note; **Reject** needs a reason (up to 500). A second decision's 409 is shown as written and the lists reload.
+- Approved: **Revoke {topic}** per badge, behind an alert dialog that says the expert's confirmed AI answers in that
+  topic go back to unchecked (`DELETE /api/admin/users/{id}/expert-badges/{topicId}`).
+- `admin/AdminPage`: one frame for admin pages (sections nav and the admin sign-in), now used by categories too.
+  Staff see every section; a missing privilege shows the backend's 403.
+- Tests: `admin/admin-experts.test.tsx` (proofs open safely and approve-all sends no topics; approve some with a note;
+  reject needs a reason and shows a 409; revoke asks first; a 403 is shown).
+
+**Known limitations**
+- Admin pages stay in English, as in F6.6.
+- Not live-tested: no admin login here.
 
 ---
 

@@ -2,7 +2,7 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tansta
 import { api } from './client'
 import { ApiError } from './errors'
 import { FEED_PAGE_SIZE } from './feed'
-import type { AuthorProfileResponse, BlogResponse, Page, Schemas } from './types'
+import type { AuthorProfileResponse, Page, Schemas, StorySummary } from './types'
 
 export type UpdateAuthorProfileRequest = Schemas['UpdateAuthorProfileRequest']
 
@@ -27,7 +27,7 @@ export function useAuthorStories(authorId: number) {
   return useInfiniteQuery({
     queryKey: authorKeys.stories(authorId),
     queryFn: ({ pageParam, signal }) =>
-      api<Page<BlogResponse>>(`/api/blogs/all/author/${authorId}`, {
+      api<Page<StorySummary>>(`/api/blogs/all/author/${authorId}`, {
         params: { pageNo: pageParam, pageSize: FEED_PAGE_SIZE, sortBy: 'creationDate', ascOrDesc: 'desc' },
         signal,
       }),

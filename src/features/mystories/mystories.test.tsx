@@ -2,7 +2,7 @@ import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { clearSession } from '../../api/client'
-import type { BlogResponse } from '../../api/types'
+import type { StorySummary } from '../../api/types'
 import App from '../../App'
 import { saveLocalDraft } from '../../lib/draft'
 import { envelope, mockApi, page } from '../../test/api'
@@ -13,8 +13,8 @@ function signedInAs(user: object) {
   return { 'POST /api/auth/refresh-token': () => envelope(200, { accessToken: 'a1', refreshToken: 'r1', user }) }
 }
 const author = { id: 9, name: 'Nasrin', authorId: 3 }
-const draft: BlogResponse = { id: 80, slug: 'd', title: 'Jute retting', status: 'DRAFT', updatedAt: '2026-10-08T06:00:00Z', readingTimeMinutes: 2 }
-const live: BlogResponse = { id: 81, slug: 'live-one', title: 'Hilsa runs', status: 'PUBLISHED', publishedAt: '2026-10-07T06:00:00Z' }
+const draft: StorySummary = { id: 80, slug: 'd', title: 'Jute retting', status: 'DRAFT', updatedAt: '2026-10-08T06:00:00Z', readingTimeMinutes: 2 }
+const live: StorySummary = { id: 81, slug: 'live-one', title: 'Hilsa runs', status: 'PUBLISHED', publishedAt: '2026-10-07T06:00:00Z' }
 
 beforeEach(() => {
   localStorage.clear()
@@ -36,7 +36,11 @@ test('drafts list the server drafts and the one on this device', async () => {
 })
 
 test('published lists the author’s live stories', async () => {
-  mockApi({ ...signedInAs(author), 'GET /api/blogs/all/author/3': () => envelope(200, page([live])) })
+  mockApi({
+    ...signedInAs(author),
+    'GET /api/authors/me': () => envelope(200, { authorId: 3, name: 'Nasrin' }),
+    'GET /api/blogs/all/author/3': () => envelope(200, page([live])),
+  })
   renderWithProviders(<App />, '/me/stories?tab=published')
 
   expect(await screen.findByRole('link', { name: 'Hilsa runs' })).toHaveAttribute('href', '/stories/live-one')
@@ -65,8 +69,20 @@ test('deleting asks first, then removes the story', async () => {
   await waitFor(() => expect(screen.getByText(/No drafts/)).toBeInTheDocument())
 })
 
-test('readers are pointed to their library', async () => {
-  mockApi(signedInAs({ id: 10, name: 'Karim' }))
+test('an account with nothing published yet sees an empty published tab', async () => {
+  mockApi({ ...signedInAs({ id: 10, name: 'Karim', authorId: null }), 'GET /api/authors/me': () => envelope(200, { name: 'Karim' }) })
+  renderWithProviders(<App />, '/me/stories?tab=published')
+  expect(await screen.findByText('Nothing published yet. Your published stories appear here.')).toBeInTheDocument()
+})
+
+test('a draft opened from the list loads its body by id, as lists carry only an excerpt', async () => {
+  mockApi({
+    ...signedInAs(author),
+    'GET /api/blogs/me/drafts': () => envelope(200, page([{ ...draft, excerpt: 'Retting starts…' }])),
+    'GET /api/blogs/id/80': () => envelope(200, { ...draft, content: '<p>Retting starts when the stems soften.</p>' }),
+  })
   renderWithProviders(<App />, '/me/stories')
-  expect(await screen.findByRole('link', { name: 'Open your library' })).toHaveAttribute('href', '/library')
+
+  await userEvent.click(await screen.findByRole('link', { name: 'Jute retting' }))
+  expect(await screen.findByRole('textbox', { name: 'Story' })).toHaveTextContent('Retting starts when the stems soften.')
 })

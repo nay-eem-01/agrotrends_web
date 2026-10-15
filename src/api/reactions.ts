@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './client'
-import type { BlogResponse, Page } from './types'
+import type { Page, StorySummary } from './types'
 
 export interface ClapState {
   totalClaps: number
@@ -42,7 +42,7 @@ export function useBookmarkedIds(enabled: boolean) {
   return useQuery({
     queryKey: reactionKeys.bookmarkIds,
     queryFn: async ({ signal }) => {
-      const saved = await api<Page<BlogResponse>>('/api/bookmarks', { params: { pageNo: 0, pageSize: 100 }, signal })
+      const saved = await api<Page<StorySummary>>('/api/bookmarks', { params: { pageNo: 0, pageSize: 100 }, signal })
       return new Set(saved.content.map((story) => story.id))
     },
     enabled,

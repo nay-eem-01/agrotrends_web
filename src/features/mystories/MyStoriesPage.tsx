@@ -1,36 +1,22 @@
 import type { InfiniteData, UseInfiniteQueryResult } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { useAuthorStories } from '../../api/authors'
+import { useAuthorStories, useMyAuthorProfile } from '../../api/authors'
 import { useBlogWrite, useMyDrafts } from '../../api/blogs'
 import { errorMessage } from '../../api/errors'
-import type { BlogResponse, Page } from '../../api/types'
+import type { Page, StorySummary } from '../../api/types'
 import { storyDate } from '../../lib/dates'
 import { isBlank, loadLocalDraft } from '../../lib/draft'
 import { Button, ButtonLink } from '../../ui/Button'
 import { cx } from '../../ui/cx'
 import { Spinner } from '../../ui/Spinner'
-import { useSession } from '../auth/session'
 
 type Tab = 'drafts' | 'published'
 
 /** `/me/stories`: the author's drafts and published stories, to edit or delete. */
 export function MyStoriesPage() {
-  const { user } = useSession()
   const [params] = useSearchParams()
   const tab: Tab = params.get('tab') === 'published' ? 'published' : 'drafts'
-
-  if (user?.authorId == null) {
-    return (
-      <section className="mx-auto max-w-(--container-feed) px-4 py-16 sm:px-6">
-        <h1 className="text-2xl">Your stories</h1>
-        <p className="mt-3 text-ink-muted">Only authors publish stories. Your saved stories are in your library.</p>
-        <ButtonLink to="/library" variant="secondary" className="mt-8">
-          Open your library
-        </ButtonLink>
-      </section>
-    )
-  }
 
   return (
     <section className="mx-auto max-w-(--container-feed) px-4 pt-12 pb-20 sm:px-6">
@@ -58,7 +44,7 @@ export function MyStoriesPage() {
           </Link>
         ))}
       </nav>
-      {tab === 'drafts' ? <Drafts /> : <Published authorId={user.authorId} />}
+      {tab === 'drafts' ? <Drafts /> : <Published />}
     </section>
   )
 }
@@ -86,11 +72,27 @@ function Drafts() {
   )
 }
 
-function Published({ authorId }: { authorId: number }) {
+/** Published stories are listed by author id, which the backend creates with the first story; read it from the profile. */
+function Published() {
+  const profile = useMyAuthorProfile(true)
+  const authorId = profile.data?.authorId
+  if (authorId == null) {
+    return profile.isPending ? (
+      <div className="flex justify-center py-16 text-ink-muted">
+        <Spinner label="Loading stories" />
+      </div>
+    ) : (
+      <p className="py-16 text-center text-ink-muted">Nothing published yet. Your published stories appear here.</p>
+    )
+  }
+  return <PublishedList authorId={authorId} />
+}
+
+function PublishedList({ authorId }: { authorId: number }) {
   return <StoryRows query={useAuthorStories(authorId)} empty="Nothing published yet. Your published stories appear here." />
 }
 
-function StoryRows({ query, empty }: { query: UseInfiniteQueryResult<InfiniteData<Page<BlogResponse>>>; empty: string | null }) {
+function StoryRows({ query, empty }: { query: UseInfiniteQueryResult<InfiniteData<Page<StorySummary>>>; empty: string | null }) {
   const stories = query.data?.pages.flatMap((page) => page.content) ?? []
   if (query.isPending) return <Spinner label="Loading stories" />
   if (query.isError) {
@@ -117,7 +119,7 @@ function StoryRows({ query, empty }: { query: UseInfiniteQueryResult<InfiniteDat
   )
 }
 
-function StoryRow({ story }: { story: BlogResponse }) {
+function StoryRow({ story }: { story: StorySummary }) {
   const [confirming, setConfirming] = useState(false)
   const remove = useBlogWrite()
   const draft = story.status === 'DRAFT'

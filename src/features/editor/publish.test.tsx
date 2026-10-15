@@ -58,7 +58,7 @@ test('publishing a new story sends its details and opens it', async () => {
   await userEvent.type(topics, 'Ri')
   await userEvent.click(await sheet.findByRole('button', { name: 'rice blast' }))
   await userEvent.type(topics, 'Cold Stress{Enter}')
-  await userEvent.click(sheet.getByRole('radio', { name: /Rabi/ }))
+  await userEvent.selectOptions(sheet.getByLabelText('Season'), 'Rabi')
   await userEvent.type(sheet.getByLabelText('Crop'), ' boro rice ')
   await userEvent.selectOptions(sheet.getByLabelText('Soil'), 'Clay loam')
   await userEvent.click(sheet.getByRole('button', { name: 'Publish now' }))

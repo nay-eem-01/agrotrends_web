@@ -4,12 +4,12 @@ The frontend's plan and progress. The API it talks to is the backend repo (`../A
 `docs/ROADMAP.md` there). Design decisions live in `docs/DESIGN.md`; the running log is `docs/DEV_LOG.md`.
 Update this file in the same PR that finishes a step.
 
-Each step is **one small PR** (aim for <= 15 files). Steps of a phase are stacked: each step branch is taken from the
+Each step is **one small PR** (at most 20 files; generated shadcn components are listed but not counted). Steps of a phase are stacked: each step branch is taken from the
 previous one and PRs into the phase's base branch (see `.claude/skills/git-workflow`).
 
-**Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend
+**Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend · ➡ moved to a later step
 
-**Progress:** 35 of 36 steps done
+**Progress:** 41 of 60 steps done
 
 ---
 
@@ -82,7 +82,79 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 | F6.4 | Playwright smoke tests against a running backend | ✅ |
 | F6.5 | Performance: route-level code splitting, image sizes, Lighthouse budget | ✅ |
 | F6.6 | Admin: categories (create / edit / delete) | ✅ |
-| F6.7 | Notifications bell (needs backend Phase 5) | ⏸ |
+| F6.7 | Notifications bell — replaced by F12 | ➡ |
+
+## Catching up with the backend (F7–F14)
+
+On 2026-10-14 the backend became a Q&A-first community: one account type, e-mail confirmation, votes and reputation,
+verified experts who review AI answers, notifications and moderation. `docs/BACKEND_CATCHUP_PLAN.md` is the full plan
+(endpoints, shapes, error handling); OpenAPI wins where they differ. Decisions (2026-10-15): home lands on questions,
+the season strip goes, shadcn/ui replaces the hand-made primitives, staff see the admin pages and the backend decides.
+
+## Phase F7 — Catch up with the backend (`feat/backend-catchup-base`)
+
+| # | Step | Status |
+|---|---|---|
+| F7.0 | Design system: shadcn/ui (`base-maia` on Base UI), AgroTrends tokens in light and dark, Emil's motion rules; app primitives rebuilt on it | ✅ |
+| F7.0b | The season strip goes: season becomes a filter and a select in the publish and ask forms | ✅ |
+| F7.1a | Regenerate OpenAPI types and fix what they break: sign-up without reader/author or professional info; a required topic on the ask form; the removed AI-draft endpoint's button | ✅ |
+| F7.1b | One account type: "Write" and My stories for every signed-in user; profile details as an optional step after sign-up; Google sign-in | ✅ |
+| F7.2 | E-mail confirmation: `/verify-email?token=` page, resend, unconfirmed banner, a dialog on write attempts. A 403 from refresh ends the session with its message; no refresh loop | ✅ |
+| F7.3 | Story cards read `excerpt`; the editor always loads by id; staff no longer expect others' drafts | ✅ |
+
+## Phase F8 — Questions first (`feat/questions-first-base`)
+
+| # | Step | Status |
+|---|---|---|
+| F8.1 | Ask form: topic (required), up to 5 tags, up to 4 photos, agri details; edit keeps tags and photos when untouched | ⬜ |
+| F8.2 | Questions list: topic and tag filters, Unanswered tab, `answerCount` and `score` on cards; question search; home lands on questions, stories second | ⬜ |
+| F8.3 | Question page: direct answers in backend order, replies loaded per answer, reply form; the client-side reply filter removed | ⬜ |
+
+## Phase F9 — Votes and reputation (`feat/reputation-base`)
+
+| # | Step | Status |
+|---|---|---|
+| F9.1 | Vote arrows on questions and answers with `my-votes`; optimistic with rollback; none on your own posts; the 50-point downvote message | ⬜ |
+| F9.2 | Accept and un-accept (asker only), accepted mark and position | ⬜ |
+| F9.3 | Author line: reputation and `authorBadges`; profile page: reputation by topic, badges, expert field, the user's questions | ⬜ |
+
+## Phase F10 — AI answers (`feat/ai-answers-base`)
+
+| # | Step | Status |
+|---|---|---|
+| F10.1 | Remove the F4.4 AI-draft button; AI answer card on the question page: polling after asking, disclaimer, status labels, "Corrected by" link | ⬜ |
+| F10.2 | One `Sources` component for both source types (story, community answer), used by the AI card, advisor and history | ⬜ |
+| F10.3 | Advisor history: "Ask the experts" (topic, optional title), then a link to the new question; 409 handled | ⬜ |
+
+## Phase F11 — Verified experts (`feat/experts-base`)
+
+| # | Step | Status |
+|---|---|---|
+| F11.1 | Apply page and status card: topics, field, credential type, institution, proof uploads and links; pending / approved / rejected with the note; no reviewer name | ⬜ |
+| F11.2 | Review queue page; confirm / correct / flag on the question page for badge holders; 409 refetches | ⬜ |
+| F11.3 | Admin: applications list, approve all or some topics, reject with a note, revoke a badge | ⬜ |
+
+## Phase F12 — Notifications (`feat/notifications-base`, replaces F6.7)
+
+| # | Step | Status |
+|---|---|---|
+| F12.1 | Bell with the unread count (60 s poll while visible, and on focus), dropdown of the latest 10, mark read on open, mark all read | ⬜ |
+| F12.2 | Notifications page with an unread filter and paging; text and links for all 9 types; no actor for moderation and decisions | ⬜ |
+
+## Phase F13 — Reports and moderation (`feat/moderation-base`)
+
+| # | Step | Status |
+|---|---|---|
+| F13.1 | Report dialog on stories, questions, answers, comments, the AI answer and profiles; 409 shows "Reported" | ⬜ |
+| F13.2 | Admin reports page: status tabs, open reports grouped by post, snapshot for hidden posts, remove and dismiss with confirm dialogs, 409 refetch | ⬜ |
+| F13.3 | Ban and unban (staff); hidden and removed states: an editor that gets 409, a thread that turns 404 | ⬜ |
+
+## Phase F14 — Launch polish (`feat/launch-polish-base`)
+
+| # | Step | Status |
+|---|---|---|
+| F14.1 | Bengali strings for every new screen; keyboard and screen-reader pass on them | ⬜ |
+| F14.2 | Playwright smoke: sign up, confirm, ask, answer, vote, accept, three reports hide, admin dismisses, notifications arrive | ⬜ |
 
 ## Needs from the backend
 
@@ -92,11 +164,14 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 | "Saved by me" per story (`bookmarkedByMe` on `BlogResponse`, or `GET /api/blogs/id/{id}/bookmark`) | exact saved state past the 100 most recent saves (F2.4) | ⏸ |
 | Category rename to take JSON (`PUT /api/categories/update/categoryId/{id}` reads a raw text body; create takes a query parameter) | consistent requests (F6.6) | ⏸ |
 | The advisor's remaining daily questions (e.g. on `AiAnswerResponse` or `GET /api/ai/quota`) | showing the quota before it runs out (F5.1) | ⏸ |
-| Answers: `/api/answers/question/{id}` also returns replies and `AnswerResponse` has no `parentAnswerId` | the client filters replies out of the answer list (F4.2) | ⏸ |
+| Answers: `/api/answers/question/{id}` also returns replies | the client filters replies out of the answer list (F4.2) | ✅ backend Phase 6 (direct answers only; F8.3 drops the filter) |
 | Comments: `CommentResponse` in the OpenAPI document and a reply count per comment (or replies nested) | typed comments without a hand-written type; one request per story instead of one per thread (F2.5) | ⏸ |
 | `GET /api/authors/me` and `authorId` on `UserResponse` | F1.4 | ✅ (backend `feat/author-me`) |
 | Public GET access to published content | anonymous reading (F2) | ✅ backend 2.13 |
 | Refresh token as an `HttpOnly` cookie instead of in the JSON body | keeping the refresh token out of script reach | ⏸ |
 | CORS origins from a property (backend 4.1) | a deployed split origin | ⏸ |
-| Notifications API (backend Phase 5) | F6.7 | ⏸ |
-| A working Gemini key | live checks of F3.4, F4.4, F5 | ⏸ |
+| Notifications API | F12 | ✅ backend Phase 8 (`feat/notifications-moderation-base`, not merged yet) |
+| Machine-readable error codes in the error envelope | branching without matching message text (F7.2, F9.1) | ⏸ |
+| "Am I an expert in this topic" without reading the full reputation | showing review buttons (F11.2) | ⏸ |
+| A way for an author to see their own hidden post | the author can't read what was reported (F13.3) | ⏸ |
+| A working Gemini key | live checks of F3.4, F5, F10 | ⏸ |

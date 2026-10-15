@@ -26,6 +26,11 @@ export function useSignIn() {
   return useMutation({ mutationFn: signIn })
 }
 
+/** Google's ID token for our tokens; the backend creates the account on first use and counts the e-mail as confirmed. */
+export function useGoogleSignIn() {
+  return useMutation({ mutationFn: (idToken: string) => api<WebTokenResponse>('/api/auth/google', { method: 'POST', body: { idToken } }) })
+}
+
 /** Sign up, then sign in with the same e-mail and password. */
 export function useSignUp() {
   return useMutation({
@@ -40,6 +45,20 @@ export function useSignUp() {
       }
     },
   })
+}
+
+/** Confirms the e-mail address with the token from the link the backend mailed; 400 when invalid or expired. */
+export function verifyEmail(token: string): Promise<null> {
+  return api<null>('/api/auth/verify-email', { method: 'POST', body: { token } })
+}
+
+/** Always 200, so accounts can't be discovered; at most three links an hour per address. */
+export function useResendVerification() {
+  return useMutation({ mutationFn: (email: string) => api<null>('/api/auth/resend-verification', { method: 'POST', body: { email } }) })
+}
+
+export function fetchMe(): Promise<UserResponse> {
+  return api<UserResponse>('/api/user/me')
 }
 
 /** Always succeeds for a well-formed e-mail, so accounts can't be discovered; the e-mail holds the reset link. */

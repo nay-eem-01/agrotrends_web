@@ -7,38 +7,164 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 
 ## Where we are
 
-- New frontend, built from scratch (the old `AGROTRENDS- FrontEnd` repo is retired: it called the pre-hardening API,
-  sent `userId` in URLs and called Gemini from the browser with a key).
-- Phases F0 (foundation), F1 (accounts) and F2 (reading) are in `development`.
-- Phase F3 writing on `feat/writing-base`: F3.1 editor (`feat/editor`), F3.2 images (`feat/images`) , F3.3
-  publish sheet (`feat/publish`) , F3.4 AI help (`feat/ai-assist`) and F3.5 my stories
-  (`feat/my-stories`) done. Phase F3 is complete.
-- Phase F4 questions and answers on `feat/qa-base` (stacked on F3's tip, as F3 isn't in `development` yet):
-  F4.1 questions list (`feat/questions`) , F4.2 question page (`feat/question-page`) , F4.3 ask
-  (`feat/ask`) and F4.4 AI draft answer (`feat/ai-draft-answer`) done. Phase F4 is complete.
-- Phase F5 AI advisor on `feat/ai-base` (stacked on F4): F5.1 advisor (`feat/advisor`) , F5.2 history (`feat/advisor-history`) and F5.3 related stories
-  (`feat/related`) done. Phase F5 is complete.
-- Phase F6 polish on `feat/polish-base` (stacked on F5): F6.1 Bengali interface (`feat/bengali`) , F6.2 dark theme
-  (`feat/dark-theme`) , F6.3 accessibility (`feat/a11y`) , F6.4 smoke tests
-  (`feat/e2e`) , F6.5 performance (`feat/perf`) and F6.6 admin categories
-  (`feat/admin-categories`) done. Only F6.7 notifications remains; it waits for the backend's notifications API.
+- Phases F0–F6 are in `development` (F6.7 notifications moved to F12).
+- 2026-10-14: the backend became Q&A-first (one account type, e-mail confirmation, votes and reputation, verified
+  experts reviewing AI answers, notifications, moderation). `docs/BACKEND_CATCHUP_PLAN.md` is the plan; phases
+  F7–F14 in `docs/ROADMAP.md` follow it. Checked against the backend code on 2026-10-15: every endpoint, shape and
+  enum in the plan matches (backend `fix/phase8-review-3b`).
+- Phase F7 on `feat/backend-catchup-base`: F7.0 design system (`feat/design-system`) F7.0b no season strip
+  (`feat/no-season-strip`) F7.1a API types (`feat/api-types`) F7.1b one account (`feat/one-account`) F7.2
+  e-mail confirmation (`feat/email-confirm`) and F7.3 excerpts (`feat/excerpts`) done. Phase F7 is complete.
 
 ## Next up
 
-1. **Nayeem:** open and merge the F3 step PRs into `feat/writing-base` in order, then the base into `development`.
-2. F6.7 notifications once the backend has them (backend Phase 5).
+1. Phase F8 questions first: F8.1 ask form (tags, photos), F8.2 questions list and home, F8.3 question page.
+2. F12–F14 need the backend's Phase 8 branch until it is merged.
 
 ## Open items
 
 | Item | Needs | Blocks |
 |---|---|---|
-| The answers list also returns replies, with no parent field; the page drops anything that is someone's reply | backend | — |
-| The backend takes `lang` but has no Bengali messages yet, so its errors stay English in the Bengali interface | backend: message files | — |
-| Comment endpoints aren't typed in OpenAPI and have no reply counts: `CommentResponse` is hand-written and every thread is fetched | backend | — |
+| Backend Phase 8 (notifications, moderation) is not merged into its `development` | backend | F12–F14 against `development` |
+| No machine-readable error codes: the unconfirmed-e-mail 403 is told apart by its message text | backend | — |
+| The backend takes `lang` but has no Bengali messages, so its errors stay English in the Bengali interface | backend: message files | — |
+| Comment endpoints aren't typed in OpenAPI and have no reply counts | backend | — |
 | No per-story "saved by me": the app reads the 100 most recent saves to mark Save buttons | backend: `bookmarkedByMe` | exact saved state for heavy savers |
 | Make `development` the default branch on GitHub and protect it | Nayeem | — |
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
+| Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-15 (F7.3 excerpts)
+
+**Done**
+- Story lists (feeds, search, tag, author, drafts, bookmarks) are typed as `StorySummary` (the backend's
+  `BlogSummaryResponse`), and story cards show its plain-text `excerpt` instead of cutting the body down.
+- The editor already loads a story by id (`GET /api/blogs/id/{id}`), never from a list item; a test now covers
+  opening a draft from My stories and getting its full body.
+- Staff views of other people's drafts never existed here, so nothing to remove.
+- Live: feed items carry `excerpt` and the cards show it.
+
+**Decisions**
+- List types are changed in the components too: `BlogSummaryResponse` is structurally compatible with
+  `BlogResponse` (every field optional), so without the explicit type a card would silently read an absent `content`.
+
+---
+
+## 2026-10-15 (F7.2 e-mail confirmation)
+
+**Done**
+- `/verify-email?token=` confirms the address (`POST /api/auth/verify-email`, one request per token even under
+  React's double effects), then refetches `/api/user/me` so the banner goes. An invalid or expired link offers a new
+  one: the signed-in account's address, or an e-mail field when signed out.
+- Resend (`POST /api/auth/resend-verification`) always says "If the address is registered, a new link is on its way".
+- A mustard-soft strip under the top bar while `emailVerified` is false, with "Send a new link".
+- Any write refused with 403 "Confirm your e-mail…" opens one dialog explaining the confirm step (React Query's
+  `MutationCache.onError`), wherever the write came from.
+- A 403 from the refresh (a suspended account) ends the session once, without retrying, and shows the backend's
+  message as a toast and on sign-in. Sonner's `Toaster` is mounted in the layout.
+- Live: a new account's banner, the dev mail-log link, and `emailVerified: true` afterwards, against the backend.
+- Tests: `auth/confirm-email.test.tsx` (banner and resend, no banner when confirmed, the dialog on a refused write,
+  the link confirms once, an expired link resends, a suspended account's single refresh and message).
+
+**Decisions**
+- Write buttons send and the dialog explains the backend's refusal, rather than every button checking first: one
+  place covers every write, and the backend stays the judge. Matching the message text is confined to
+  `isConfirmEmailError` until the backend has error codes.
+
+---
+
+## 2026-10-15 (F7.1b one account type)
+
+**Done**
+- Every signed-in account can write: the editor's "Publishing is for authors" gate, My stories' reader message and
+  the account menu's author check are gone. My stories reads the author id for the Published tab from
+  `GET /api/authors/me` (the backend creates the author record on first use; `UserResponse.authorId` stays null until
+  then).
+- Settings shows the profile (designation, specialities, bio, photo) to everyone, as "Profile", marked optional.
+- `/welcome?next=`: after sign-up, an optional profile step with "Skip for now"; saving or skipping goes on to `next`.
+- Google sign-in (`POST /api/auth/google {idToken}`) on the sign-in and sign-up pages, through Google Identity
+  Services. It only appears when `VITE_GOOGLE_CLIENT_ID` is set; the backend's `GOOGLE_CLIENT_ID` must match.
+- Tests: `auth/welcome.test.tsx` (skip, save, no Google without a client id, Google sends the ID token); editor,
+  My stories, profile and sign-up tests follow the single account type.
+
+**Decisions**
+- The Google script is loaded only on the auth pages and only with a client id, so other visitors never fetch it.
+- The welcome step reuses the Settings profile form, so its rules (designation and a speciality, required by the
+  backend) are the same in both places.
+
+**Known limitations**
+- Google sign-in isn't live-tested: the local backend has no `GOOGLE_CLIENT_ID`.
+
+---
+
+## 2026-10-15 (F7.1a API types)
+
+**Done**
+- `src/api/schema.d.ts` regenerated from the backend's `fix/phase8-review-3b` (Phases 5–8). F7.1 split in two to stay
+  under 20 files; this half fixes what the new types break.
+- Sign-up: no reader/author choice and no professional details; the request is name, e-mail, mobile and password.
+- Ask and edit question: a required **Topic** (the backend's `categoryId`), prefilled when editing.
+- The AI draft answer under unanswered questions is gone with its endpoint; F10.1 brings the AI answer card.
+- Tests: sign-up sends one kind of account; the ask form needs a topic and sends `categoryId`.
+
+**Decisions**
+- Sign-up still signs in straight away: an unconfirmed account can sign in and read; F7.2 adds the confirm banner.
+
+---
+
+## 2026-10-15 (F7.0b the season strip goes)
+
+**Done**
+- `SeasonStrip` deleted from home and the questions page. Season is now a select in the filter form ("Filter by
+  crop, season, region or soil", applied with "Apply filters") and a removable chip like the other filters.
+- The publish sheet and the ask form choose a season from a select next to soil (`FarmingFields`), built on shadcn's
+  native select inside a `Field`; the radio-strip `SeasonPicker` is gone. `seasonCalendar` stays for the advisor's
+  seasonal examples.
+- Bengali strings: the filter button, "Apply filters" and "Any season"; "Crop seasons" removed.
+- Tests: season filtering through the form on home and questions; publish and ask pick the season from the select.
+
+**Decisions**
+- Native `<select>` (shadcn `native-select`) rather than the Base UI Select: four options, phone-first, and the
+  system picker is what a farmer's phone already does well.
+
+---
+
+## 2026-10-15 (F7.0 design system on shadcn)
+
+**Done**
+- Read `docs/BACKEND_CATCHUP_PLAN.md` and checked it against the backend source (controllers, DTOs, enums): it
+  matches. Two read endpoints it doesn't list exist (`GET /api/comments/replies/{id}`, `GET /api/answers/id/{id}`).
+  Added phases F7–F14 to the roadmap (59 steps).
+- shadcn/ui set up: `base-maia` style on Base UI, Phosphor icons, `@/` import alias, `cn` (shadcn's own
+  clsx + tailwind-merge). Components added to `src/components/ui/`: alert, alert-dialog, avatar, badge, button, card,
+  dialog, dropdown-menu, empty, field, input, label, native-select, popover, select, separator, skeleton, sonner,
+  spinner, tabs, textarea, toggle, toggle-group, tooltip.
+- `src/index.css`: AgroTrends colours as shadcn's semantic tokens in light and dark (a faint leaf floor with white
+  cards; paddy primary; mustard kept for trust marks); the F0–F6 names (`paper`, `ink`, …) alias the new ones so
+  old screens keep working. Dark mode still follows the system unless chosen (`data-theme`), now also for shadcn's
+  `dark:` variant.
+- Motion per Emil Kowalski (`emil-design-eng` skill): `--ease-out` / `--ease-in-out` / `--ease-drawer` tokens;
+  buttons press to `scale(0.97)` and name their transitions instead of `transition-all`.
+- `src/ui` Button, TextField and TextArea now render shadcn's button classes, Field, Input and Textarea with the same
+  props, so every screen takes the new look without edits. Controls are 44px tall where they're tapped.
+- `docs/DESIGN.md` rewritten for the Q&A-first product; the conventions skill names shadcn and the motion rules.
+
+**Decisions**
+- shadcn only. HeroUI was asked for too, but its theme variables share names with shadcn's and mean different things
+  (`--muted` is a surface in shadcn and grey text in HeroUI; `--accent` is a hover wash vs the brand colour); Nayeem
+  chose shadcn only.
+- Base UI rather than Radix (shadcn's default base; its `data-starting-style` hooks suit the motion rules).
+- Sonner (from shadcn) for toasts, reading our own theme store instead of `next-themes`.
+- `src/components/ui` is left out of oxlint like the generated schema: its warnings are false positives in generic
+  wrappers (a `Label` gets `htmlFor` from props).
+
+**Known limitations**
+- Screens still use the old token names and hand-made markup; they move to shadcn components as each step touches
+  them (F7–F13).
+- The step is over the 20-file limit only through the generated components.
 
 ---
 

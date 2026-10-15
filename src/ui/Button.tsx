@@ -1,29 +1,17 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 import { Link, type LinkProps } from 'react-router-dom'
-import { cx } from './cx'
+import { buttonVariants } from '@/components/ui/button'
 import { Spinner } from './Spinner'
 
 type Variant = 'primary' | 'secondary' | 'quiet' | 'danger'
 type Size = 'sm' | 'md'
 
-const base =
-  'inline-flex items-center justify-center gap-2 rounded-full font-sans font-medium whitespace-nowrap ' +
-  'transition-colors disabled:cursor-not-allowed disabled:opacity-50'
-
-const variants: Record<Variant, string> = {
-  primary: 'bg-paddy text-paper hover:bg-paddy-deep',
-  secondary: 'border border-ink/80 text-ink hover:bg-field',
-  quiet: 'text-ink-muted hover:text-ink',
-  danger: 'bg-danger text-paper hover:bg-danger/90',
-}
-
-const sizes: Record<Size, string> = {
-  sm: 'h-9 px-4 text-sm',
-  md: 'h-11 px-5 text-base',
-}
+// The app's button names over shadcn's variants, so screens keep their wording while the look comes from one place.
+const variants = { primary: 'default', secondary: 'outline', quiet: 'ghost', danger: 'destructive' } as const
+const sizes = { sm: 'default', md: 'lg' } as const
 
 export function buttonClass(variant: Variant = 'primary', size: Size = 'md', className?: string): string {
-  return cx(base, variants[variant], sizes[size], className)
+  return buttonVariants({ variant: variants[variant], size: sizes[size], className })
 }
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -35,7 +23,14 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 export function Button({ variant, size, loading = false, disabled, className, children, type = 'button', ...rest }: ButtonProps) {
   return (
-    <button type={type} disabled={disabled || loading} aria-busy={loading || undefined} className={buttonClass(variant, size, className)} {...rest}>
+    <button
+      type={type}
+      data-slot="button"
+      disabled={disabled || loading}
+      aria-busy={loading || undefined}
+      className={buttonClass(variant, size, className)}
+      {...rest}
+    >
       {loading && <Spinner size={16} label="" />}
       {children}
     </button>

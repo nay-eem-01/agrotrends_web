@@ -13,7 +13,6 @@ import { Spinner } from '../../ui/Spinner'
 import { useSession } from '../auth/session'
 import { NotFoundPage } from '../errors/NotFoundPage'
 import { Thread } from '../threads/Thread'
-import { AiDraftAnswer } from './AiDraftAnswer'
 
 export function QuestionPage() {
   const t = useT()
@@ -77,7 +76,7 @@ function QuestionView({ question }: { question: Question }) {
           ))}
         </ul>
       )}
-      <Thread kind="answers" parentId={id} whenEmpty={<AiDraftAnswer questionId={id} />} />
+      <Thread kind="answers" parentId={id} />
     </article>
   )
 }

@@ -32,8 +32,6 @@ test('switching to Bengali changes the interface and asks the API in Bengali', a
   expect(document.documentElement.lang).toBe('bn')
   expect(screen.getAllByRole('link', { name: 'প্রশ্ন' }).length).toBeGreaterThan(0)
   expect(screen.getByRole('heading', { name: 'যাঁরা ফসল ফলান, তাঁদের কাছ থেকে চাষের জ্ঞান।' })).toBeInTheDocument()
-  const strip = screen.getByRole('navigation', { name: 'Crop seasons' })
-  expect(within(strip).getByText('খরিফ-২')).toBeInTheDocument()
   const card = screen.getByRole('link', { name: 'বোরো ধানের চারা' }).closest('article')!
   expect(within(card).getByText(/৪ মিনিটে পড়া/)).toBeInTheDocument()
   expect(within(card).getByText(/৭ অক্টো/)).toBeInTheDocument()

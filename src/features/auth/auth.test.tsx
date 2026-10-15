@@ -71,7 +71,7 @@ test('an empty sign-in form is checked before anything is sent', async () => {
   expect(fetchMock).not.toHaveBeenCalled()
 })
 
-test('signing up as an author sends the professional details, then signs in', async () => {
+test('signing up sends one kind of account, then signs in', async () => {
   fetchMock.mockResolvedValueOnce(envelope(200, tokens.user)).mockResolvedValueOnce(envelope(200, tokens))
   renderWithProviders(<App />, '/sign-up')
 
@@ -79,12 +79,11 @@ test('signing up as an author sends the professional details, then signs in', as
   await userEvent.type(screen.getByLabelText('E-mail'), 'nasrin@farm.bd')
   await userEvent.type(screen.getByLabelText('Mobile number'), '1712345678')
   await userEvent.type(screen.getByLabelText('Password'), 'Paddy2026!')
-  await userEvent.click(screen.getByRole('radio', { name: /author/i }))
-  await userEvent.type(screen.getByLabelText('Designation'), 'Agronomist')
-  await userEvent.type(screen.getByLabelText('Specialities'), 'rice, soil health,')
+  expect(screen.queryByRole('radio')).not.toBeInTheDocument()
   await userEvent.click(screen.getByRole('button', { name: 'Create account' }))
 
-  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent(/^\/$/))
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/welcome?next=%2F'))
+  expect(getAccessToken()).toBe('a1')
   expect(fetchMock.mock.calls[0][0]).toBe('/api/auth/sign-up')
   expect(body(0)).toEqual({
     name: 'Nasrin Akter',
@@ -92,27 +91,21 @@ test('signing up as an author sends the professional details, then signs in', as
     countryCode: '+880',
     mobileNumber: '1712345678',
     password: 'Paddy2026!',
-    userType: ['AUTHOR'],
-    professionalInfoRequest: { designation: 'Agronomist', specialities: ['rice', 'soil health'] },
   })
   expect(body(1)).toEqual({ email: 'nasrin@farm.bd', password: 'Paddy2026!' })
-  expect(getAccessToken()).toBe('a1')
 })
 
-test('sign-up checks the password rule and author fields before sending', async () => {
+test('sign-up checks the password rule before sending', async () => {
   renderWithProviders(<App />, '/sign-up')
 
   await userEvent.type(await screen.findByLabelText('Password'), 'paddy2026')
-  await userEvent.click(screen.getByRole('radio', { name: /author/i }))
   await userEvent.click(screen.getByRole('button', { name: 'Create account' }))
 
   expect(screen.getByLabelText('Password')).toHaveAccessibleDescription('Include a capital letter, a number and a symbol.')
-  expect(screen.getByLabelText('Designation')).toHaveAccessibleDescription('Enter your designation.')
-  expect(screen.getByLabelText('Specialities')).toHaveAccessibleDescription('Enter at least one speciality.')
   expect(fetchMock).not.toHaveBeenCalled()
 })
 
-test('a reader signs up without professional details', async () => {
+test('an account that was created but not signed in says so', async () => {
   fetchMock.mockResolvedValueOnce(envelope(200, tokens.user)).mockResolvedValueOnce(envelope(500, null))
   renderWithProviders(<App />, '/sign-up')
 
@@ -123,8 +116,6 @@ test('a reader signs up without professional details', async () => {
   await userEvent.click(screen.getByRole('button', { name: 'Create account' }))
 
   expect(await screen.findByRole('alert')).toHaveTextContent(SIGNED_UP_BUT_NOT_IN)
-  expect(body(0)).toMatchObject({ userType: ['CONSUMER'] })
-  expect(body(0)).not.toHaveProperty('professionalInfoRequest')
 })
 
 test('a stored session is restored on load', async () => {

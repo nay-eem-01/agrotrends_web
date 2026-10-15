@@ -1,7 +1,7 @@
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from './client'
 import { feedKeys } from './feed'
-import type { AuthorProfileResponse, BlogResponse, Page, Schemas } from './types'
+import type { AuthorProfileResponse, Page, Schemas, StorySummary } from './types'
 
 export type AuthorSummary = Schemas['AuthorSummaryResponse']
 
@@ -16,7 +16,7 @@ export const followKeys = {
 export function useReadingList() {
   return useInfiniteQuery({
     queryKey: followKeys.readingList,
-    queryFn: ({ pageParam, signal }) => api<Page<BlogResponse>>('/api/bookmarks', { params: { pageNo: pageParam, pageSize: 10 }, signal }),
+    queryFn: ({ pageParam, signal }) => api<Page<StorySummary>>('/api/bookmarks', { params: { pageNo: pageParam, pageSize: 10 }, signal }),
     initialPageParam: 0,
     getNextPageParam: (page) => (page.last ? undefined : page.number + 1),
   })

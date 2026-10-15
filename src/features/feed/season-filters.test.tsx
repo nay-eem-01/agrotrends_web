@@ -1,4 +1,4 @@
-import { screen, within, waitFor } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { clearSession } from '../../api/client'
@@ -30,22 +30,7 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
-test('the strip marks the current season', async () => {
-  mockApi({ 'GET /api/feed/latest': () => envelope(200, page([])) })
-  renderWithProviders(<App />, '/')
-
-  const strip = screen.getByRole('navigation', { name: 'Crop seasons' })
-  const links = within(strip).getAllByRole('link')
-  expect(links.map((link) => link.textContent)).toEqual([
-    expect.stringMatching(/^Rabi/),
-    expect.stringMatching(/^Kharif-1/),
-    expect.stringMatching(/^Kharif-2now/),
-  ])
-  expect(within(links[2]).getByTestId('today-marker')).toBeInTheDocument()
-  expect(within(links[0]).queryByTestId('today-marker')).not.toBeInTheDocument()
-})
-
-test('choosing a season filters the stories, and choosing it again clears it', async () => {
+test('choosing a season filters the stories, and removing it clears it', async () => {
   const api = mockApi({
     'GET /api/feed/latest': () => envelope(200, page([story(1)])),
     'GET /api/blogs/all': () => envelope(200, page([story(2, { title: 'Aman transplanting', agri: { season: 'KHARIF_2' } })])),
@@ -53,8 +38,9 @@ test('choosing a season filters the stories, and choosing it again clears it', a
   renderWithProviders(<App />, '/')
   await screen.findByRole('link', { name: 'Story 1' })
 
-  const strip = screen.getByRole('navigation', { name: 'Crop seasons' })
-  await userEvent.click(within(strip).getByRole('link', { name: /Kharif-2/ }))
+  await userEvent.click(screen.getByRole('button', { name: 'Filter by crop, season, region or soil' }))
+  await userEvent.selectOptions(screen.getByLabelText('Season'), 'Kharif-2')
+  await userEvent.click(screen.getByRole('button', { name: 'Apply filters' }))
 
   expect(await screen.findByRole('link', { name: 'Aman transplanting' })).toBeInTheDocument()
   await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/?season=KHARIF_2'))
@@ -62,10 +48,9 @@ test('choosing a season filters the stories, and choosing it again clears it', a
   expect(sent.get('season')).toBe('KHARIF_2')
   expect(sent.get('sortBy')).toBe('creationDate')
   expect(sent.get('ascOrDesc')).toBe('desc')
-  expect(within(strip).getByRole('link', { name: /Kharif-2/ })).toHaveAttribute('aria-current', 'true')
   expect(screen.getByRole('link', { name: 'Latest' })).not.toHaveAttribute('aria-current')
 
-  await userEvent.click(within(strip).getByRole('link', { name: /Kharif-2/ }))
+  await userEvent.click(screen.getByRole('link', { name: 'Remove filter season Kharif-2' }))
   await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent(/^\/$/))
 })
 
@@ -74,11 +59,11 @@ test('crop, region and soil filters combine with the season', async () => {
   renderWithProviders(<App />, '/?season=RABI')
   await screen.findByRole('link', { name: 'Boro on clay loam' })
 
-  await userEvent.click(screen.getByRole('button', { name: 'Filter by crop, region or soil' }))
+  await userEvent.click(screen.getByRole('button', { name: 'Filter by crop, season, region or soil' }))
   await userEvent.type(screen.getByLabelText('Crop'), ' boro rice ')
   await userEvent.type(screen.getByLabelText('Region'), 'Rangpur')
   await userEvent.selectOptions(screen.getByLabelText('Soil'), 'Clay loam')
-  await userEvent.click(screen.getByRole('button', { name: 'Show stories' }))
+  await userEvent.click(screen.getByRole('button', { name: 'Apply filters' }))
 
   await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/?crop=boro+rice&season=RABI&region=Rangpur&soil=CLAY_LOAM'))
   const last = query(api, '/api/blogs/all').at(-1)!

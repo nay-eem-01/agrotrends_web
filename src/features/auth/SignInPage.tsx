@@ -7,6 +7,7 @@ import { isEmail, safeNext } from '../../lib/auth'
 import { Button } from '../../ui/Button'
 import { TextField } from '../../ui/TextField'
 import { AuthPage, FormError } from './AuthPage'
+import { GoogleSignIn } from './GoogleSignIn'
 import { useSession } from './session'
 
 export function SignInPage() {
@@ -67,6 +68,7 @@ export function SignInPage() {
           {t('Sign in')}
         </Button>
       </form>
+      <GoogleSignIn next={next} />
       <p className="mt-8 text-sm text-ink-muted">
         New to AgroTrends?{' '}
         <Link to={signUpLink} className="font-medium text-paddy underline-offset-4 hover:underline">

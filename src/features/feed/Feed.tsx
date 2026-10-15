@@ -5,7 +5,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { useBlogs } from '../../api/blogs'
 import { errorMessage } from '../../api/errors'
 import { useFeed, type FeedKind } from '../../api/feed'
-import type { BlogResponse, Page } from '../../api/types'
+import type { Page, StorySummary } from '../../api/types'
 import { hasAgriFilters, readAgriFilters } from '../../lib/agri'
 import { Button, ButtonLink } from '../../ui/Button'
 import { cx } from '../../ui/cx'
@@ -71,7 +71,7 @@ export function Feed() {
   )
 }
 
-type StoryQuery = UseInfiniteQueryResult<InfiniteData<Page<BlogResponse>>>
+type StoryQuery = UseInfiniteQueryResult<InfiniteData<Page<StorySummary>>>
 
 /** Stories from any paged query, with loading, error, empty and load-more states. */
 export function StoryList({ ready, query, empty }: { ready: boolean; query: StoryQuery; empty: ReactNode }) {

@@ -1,5 +1,7 @@
 import { useId, type TextareaHTMLAttributes } from 'react'
-import { cx } from './cx'
+import { Field, FieldLabel } from '@/components/ui/field'
+import { Textarea } from '@/components/ui/textarea'
+import { Message } from './TextField'
 
 interface TextAreaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   label: string
@@ -14,33 +16,17 @@ export function TextArea({ label, hint, error, id, className, rows = 4, ...rest 
   const describedBy = error ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined
 
   return (
-    <div className={cx('flex flex-col gap-1.5', className)}>
-      <label htmlFor={inputId} className="text-sm font-medium text-ink">
-        {label}
-      </label>
-      <textarea
+    <Field data-invalid={error ? true : undefined} className={className}>
+      <FieldLabel htmlFor={inputId}>{label}</FieldLabel>
+      <Textarea
         id={inputId}
         rows={rows}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy}
-        className={cx(
-          'rounded-lg border bg-paper px-3 py-2.5 text-base text-ink placeholder:text-ink-muted/70',
-          'focus:border-paddy focus:outline-none focus-visible:outline-none',
-          error ? 'border-danger' : 'border-rule',
-        )}
+        className="field-sizing-fixed resize-y"
         {...rest}
       />
-      {error ? (
-        <p id={`${inputId}-error`} className="text-xs text-danger">
-          {error}
-        </p>
-      ) : (
-        hint && (
-          <p id={`${inputId}-hint`} className="text-xs text-ink-muted">
-            {hint}
-          </p>
-        )
-      )}
-    </div>
+      <Message inputId={inputId} hint={hint} error={error} />
+    </Field>
   )
 }

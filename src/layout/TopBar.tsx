@@ -6,6 +6,7 @@ import { cn } from 'cn'
 import { useSession } from '../features/auth/session'
 import { ButtonLink } from '../ui/Button'
 import { AccountMenu } from './AccountMenu'
+import { NotificationBell } from './NotificationBell'
 import { Logo } from './Logo'
 
 const navClass = ({ isActive }: { isActive: boolean }) =>
@@ -67,6 +68,7 @@ export function TopBar() {
               <ButtonLink to="/questions/ask" size="sm" className="ml-1 hidden sm:inline-flex">
                 {t('Ask')}
               </ButtonLink>
+              <NotificationBell />
               <AccountMenu />
             </>
           )}

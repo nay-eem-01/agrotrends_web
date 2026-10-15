@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend · ➡ moved to a later step
 
-**Progress:** 49 of 60 steps done
+**Progress:** 50 of 60 steps done
 
 ---
 
@@ -124,7 +124,7 @@ the season strip goes, shadcn/ui replaces the hand-made primitives, staff see th
 |---|---|---|
 | F10.1 | Remove the F4.4 AI-draft button; AI answer card on the question page: polling after asking, disclaimer, status labels, "Corrected by" link | ✅ |
 | F10.2 | One `Sources` component for both source types (story, community answer), used by the AI card, advisor and history | ✅ |
-| F10.3 | Advisor history: "Ask the experts" (topic, optional title), then a link to the new question; 409 handled | ⬜ |
+| F10.3 | Advisor history: "Ask the experts" (topic, optional title), then a link to the new question; 409 handled | ✅ |
 
 ## Phase F11 — Verified experts (`feat/experts-base`)
 

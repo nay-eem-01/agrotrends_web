@@ -107,7 +107,7 @@ function QuestionView({ question }: { question: Question }) {
         )}
         </div>
       </div>
-      <Answers questionId={id} />
+      <Answers questionId={id} askerId={question.userId} />
     </article>
   )
 }

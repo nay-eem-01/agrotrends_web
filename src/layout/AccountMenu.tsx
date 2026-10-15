@@ -1,5 +1,5 @@
 import { useT } from '../lib/i18n'
-import { BookmarksSimple, GearSix, NotePencil, SealCheck, SignOut, Tag } from '@phosphor-icons/react'
+import { BookmarksSimple, GearSix, NotePencil, SealCheck, ShieldCheck, SignOut } from '@phosphor-icons/react'
 import { useEffect, useId, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { isAdmin } from '../api/auth'
@@ -74,9 +74,9 @@ export function AccountMenu() {
             </Link>
           )}
           {isAdmin(user) && (
-            <Link to="/admin/categories" onClick={() => setOpen(false)} className="flex h-11 items-center gap-2 px-4 text-sm text-ink-muted hover:bg-field hover:text-ink">
-              <Tag size={18} aria-hidden="true" />
-              {t('Categories')}
+            <Link to="/admin/experts" onClick={() => setOpen(false)} className="flex h-11 items-center gap-2 px-4 text-sm text-ink-muted hover:bg-field hover:text-ink">
+              <ShieldCheck size={18} aria-hidden="true" />
+              {t('Admin')}
             </Link>
           )}
           <Link to="/library" onClick={() => setOpen(false)} className="flex h-11 items-center gap-2 px-4 text-sm text-ink-muted hover:bg-field hover:text-ink">

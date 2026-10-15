@@ -80,3 +80,56 @@ test('an earlier answer lists its sources, stories and community answers alike',
   expect(screen.getByRole('link', { name: 'Boro in a cold snap' })).toHaveAttribute('href', '/s/12')
   expect(screen.getByRole('link', { name: 'Community answer to: Seedlings yellow after fog' })).toHaveAttribute('href', '/questions/40')
 })
+
+const privateAsk = { id: 7, question: 'Calf has a cough.\nWhat now?', answer: 'Keep it warm.', askedAt: '2026-10-08T06:00:00Z' }
+const categories = { 'GET /api/categories/all': () => envelope(200, page([{ id: 3, categoryName: 'Livestock' }])) }
+
+test('a private ask is posted for the experts with a topic and title, then links to the question', async () => {
+  let published: number | undefined
+  const api = mockApi(
+    signedIn({
+      ...categories,
+      'GET /api/ai/history': () => envelope(200, page([{ ...privateAsk, publishedQuestionId: published }])),
+      'POST /api/ai/history/7/ask-experts': () => {
+        published = 88
+        return envelope(200, { questionId: 88, title: 'Calf cough' })
+      },
+    }),
+  )
+  renderWithProviders(<App />, '/advisor/history')
+
+  await userEvent.click(await screen.findByText(/Calf has a cough/))
+  await userEvent.click(screen.getByRole('button', { name: 'Ask the experts' }))
+  await userEvent.click(screen.getByRole('button', { name: 'Post for the experts' }))
+  expect(screen.getByLabelText('Topic')).toHaveAccessibleDescription('Choose a topic.')
+
+  await userEvent.selectOptions(await screen.findByLabelText('Topic'), 'Livestock')
+  await userEvent.type(screen.getByLabelText('Title (optional)'), 'Calf cough')
+  await userEvent.click(screen.getByRole('button', { name: 'Post for the experts' }))
+
+  expect(await screen.findByRole('link', { name: 'Open the question' })).toHaveAttribute('href', '/questions/88')
+  const sent = api.mock.calls.find(([url]) => url === '/api/ai/history/7/ask-experts')!
+  expect(JSON.parse(sent[1]!.body as string)).toEqual({ categoryId: 3, title: 'Calf cough' })
+})
+
+test('already published: a 409 says so and the refetched history links to the question', async () => {
+  let published: number | undefined
+  mockApi(
+    signedIn({
+      ...categories,
+      'GET /api/ai/history': () => envelope(200, page([{ ...privateAsk, publishedQuestionId: published }])),
+      'POST /api/ai/history/7/ask-experts': () => {
+        published = 91
+        return envelope(409, null, 'This answer was already published as a question.')
+      },
+    }),
+  )
+  renderWithProviders(<App />, '/advisor/history')
+
+  await userEvent.click(await screen.findByText(/Calf has a cough/))
+  await userEvent.click(screen.getByRole('button', { name: 'Ask the experts' }))
+  await userEvent.selectOptions(await screen.findByLabelText('Topic'), 'Livestock')
+  await userEvent.click(screen.getByRole('button', { name: 'Post for the experts' }))
+
+  expect(await screen.findByRole('link', { name: 'Open the question' })).toHaveAttribute('href', '/questions/91')
+})

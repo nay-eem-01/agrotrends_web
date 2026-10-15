@@ -1,5 +1,6 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 import { Link, type LinkProps } from 'react-router-dom'
+import { cn } from 'cn'
 import { buttonVariants } from '@/components/ui/button'
 import { Spinner } from './Spinner'
 
@@ -11,7 +12,8 @@ const variants = { primary: 'default', secondary: 'outline', quiet: 'ghost', dan
 const sizes = { sm: 'default', md: 'lg' } as const
 
 export function buttonClass(variant: Variant = 'primary', size: Size = 'md', className?: string): string {
-  return buttonVariants({ variant: variants[variant], size: sizes[size], className })
+  // cn, not cva's className: a screen's classes must win over the variant's (e.g. `hidden` over `inline-flex`).
+  return cn(buttonVariants({ variant: variants[variant], size: sizes[size] }), className)
 }
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {

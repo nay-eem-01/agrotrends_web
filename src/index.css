@@ -1,22 +1,197 @@
 @import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
 
-/* Tokens from docs/DESIGN.md. Components use these names, never raw hex. */
-@theme {
-  --color-paper: #ffffff;
-  --color-ink: #242424;
-  --color-ink-muted: #6b6b6b;
-  --color-rule: #e6e6e6;
-  --color-field: #f2f5ef;
-  --color-paddy: #1f6b3a;
-  --color-paddy-deep: #154d29;
-  --color-mustard: #e2b007;
-  --color-danger: #b3261e;
-  /* Dialog veil: stays dark in both themes. */
-  --color-shade: #242424;
+/*
+ * Dark mode follows the system unless the reader chose (data-theme on <html>, set by src/lib/theme.ts).
+ * shadcn components use `dark:`, so the variant has to know both.
+ */
+@custom-variant dark {
+  &:where([data-theme='dark'], [data-theme='dark'] *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme='light']), :root:not([data-theme='light']) *) {
+      @slot;
+    }
+  }
+}
+
+/* Tokens from docs/DESIGN.md: shadcn's semantic roles, AgroTrends' colours. Components never use raw hex. */
+:root {
+  --background: #f6f7f3;
+  --foreground: #1d211b;
+  --card: #ffffff;
+  --card-foreground: #1d211b;
+  --popover: #ffffff;
+  --popover-foreground: #1d211b;
+  --primary: #1f6b3a;
+  --primary-foreground: #ffffff;
+  --primary-active: #154d29;
+  --secondary: #eaf0e5;
+  --secondary-foreground: #1d211b;
+  --muted: #eef1ea;
+  --muted-foreground: #5c6356;
+  --accent: #eaf0e5;
+  --accent-foreground: #1d211b;
+  --destructive: #b3261e;
+  --border: #e1e5dc;
+  --input: #d5dacf;
+  --ring: #1f6b3a;
+  --mustard: #e2b007;
+  --mustard-soft: #fbf3d6;
+  --shade: #1d211b;
+  --radius: 0.625rem;
+  --chart-1: #1f6b3a;
+  --chart-2: #e2b007;
+  --chart-3: #5c6356;
+  --chart-4: #74c48a;
+  --chart-5: #154d29;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #1d211b;
+  --sidebar-primary: #1f6b3a;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #eaf0e5;
+  --sidebar-accent-foreground: #1d211b;
+  --sidebar-border: #e1e5dc;
+  --sidebar-ring: #1f6b3a;
+
+  /* Motion (Emil Kowalski's curves): enter and exit with ease-out, move on screen with ease-in-out. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* Dark, "the field at night": deep loam, warm off-white ink, paddy lifted for contrast. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --background: #141512;
+    --foreground: #ecede6;
+    --card: #1c1e1a;
+    --card-foreground: #ecede6;
+    --popover: #1f221d;
+    --popover-foreground: #ecede6;
+    --primary: #74c48a;
+    --primary-foreground: #0d1a10;
+    --primary-active: #95d6a7;
+    --secondary: #262b23;
+    --secondary-foreground: #ecede6;
+    --muted: #23261f;
+    --muted-foreground: #a3a898;
+    --accent: #262b23;
+    --accent-foreground: #ecede6;
+    --destructive: #f2766d;
+    --border: #2e322b;
+    --input: #3a3f36;
+    --ring: #74c48a;
+    --mustard-soft: #3a3214;
+    --shade: #000000;
+    --sidebar: #1c1e1a;
+    --sidebar-foreground: #ecede6;
+    --sidebar-primary: #74c48a;
+    --sidebar-primary-foreground: #0d1a10;
+    --sidebar-accent: #262b23;
+    --sidebar-accent-foreground: #ecede6;
+    --sidebar-border: #2e322b;
+    --sidebar-ring: #74c48a;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --background: #141512;
+  --foreground: #ecede6;
+  --card: #1c1e1a;
+  --card-foreground: #ecede6;
+  --popover: #1f221d;
+  --popover-foreground: #ecede6;
+  --primary: #74c48a;
+  --primary-foreground: #0d1a10;
+  --primary-active: #95d6a7;
+  --secondary: #262b23;
+  --secondary-foreground: #ecede6;
+  --muted: #23261f;
+  --muted-foreground: #a3a898;
+  --accent: #262b23;
+  --accent-foreground: #ecede6;
+  --destructive: #f2766d;
+  --border: #2e322b;
+  --input: #3a3f36;
+  --ring: #74c48a;
+  --mustard-soft: #3a3214;
+  --shade: #000000;
+  --sidebar: #1c1e1a;
+  --sidebar-foreground: #ecede6;
+  --sidebar-primary: #74c48a;
+  --sidebar-primary-foreground: #0d1a10;
+  --sidebar-accent: #262b23;
+  --sidebar-accent-foreground: #ecede6;
+  --sidebar-border: #2e322b;
+  --sidebar-ring: #74c48a;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-active: var(--primary-active);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-mustard: var(--mustard);
+  --color-mustard-soft: var(--mustard-soft);
+  --color-shade: var(--shade);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* The F0–F6 names, kept as aliases while screens move to the semantic ones. */
+  --color-paper: var(--background);
+  --color-ink: var(--foreground);
+  --color-ink-muted: var(--muted-foreground);
+  --color-rule: var(--border);
+  --color-field: var(--muted);
+  --color-paddy: var(--primary);
+  --color-paddy-deep: var(--primary-active);
+  --color-danger: var(--destructive);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 
   --font-serif: 'Literata Variable', 'Noto Serif Bengali Variable', Georgia, serif;
   --font-sans: 'Hind Siliguri', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-heading: var(--font-sans);
+}
 
+@theme {
   /* Type scale: 13 · 15 · 17 · 20 · 24 · 32 · 42 */
   --text-xs: 0.8125rem;
   --text-xs--line-height: 1.4;
@@ -37,38 +212,6 @@
   --container-page: 1192px;
 }
 
-/*
- * Dark theme, "the field at night": deep loam paper, warm off-white ink, paddy lifted for contrast; mustard keeps its
- * meaning. It follows the system unless the reader chose (data-theme on <html>, set by src/lib/theme.ts).
- */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    --color-paper: #1b1a17;
-    --color-ink: #ece8df;
-    --color-ink-muted: #a8a397;
-    --color-rule: #36342e;
-    --color-field: #252821;
-    --color-paddy: #74c48a;
-    --color-paddy-deep: #95d6a7;
-    --color-danger: #f2766d;
-    --color-shade: #000000;
-    color-scheme: dark;
-  }
-}
-
-:root[data-theme='dark'] {
-  --color-paper: #1b1a17;
-  --color-ink: #ece8df;
-  --color-ink-muted: #a8a397;
-  --color-rule: #36342e;
-  --color-field: #252821;
-  --color-paddy: #74c48a;
-  --color-paddy-deep: #95d6a7;
-  --color-danger: #f2766d;
-  --color-shade: #000000;
-  color-scheme: dark;
-}
-
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
@@ -76,7 +219,11 @@
   }
 
   body {
-    @apply bg-paper font-sans text-base text-ink antialiased;
+    @apply bg-background font-sans text-base text-foreground antialiased;
+  }
+
+  * {
+    @apply border-border outline-ring/50;
   }
 
   h1,
@@ -188,3 +335,4 @@
     transition-duration: 0.01ms !important;
   }
 }
+

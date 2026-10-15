@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { clearSession } from '../../api/client'
 import App from '../../App'
-import { envelope, mockApi } from '../../test/api'
+import { envelope, mockApi, page } from '../../test/api'
 import { renderWithProviders } from '../../test/render'
 
 function signedInAs(user: object) {
@@ -11,7 +11,16 @@ function signedInAs(user: object) {
   return { 'POST /api/auth/refresh-token': () => envelope(200, { accessToken: 'a1', refreshToken: 'r1', user }) }
 }
 
-const question = { questionId: 5, userId: 9, title: 'Yellow seedlings', content: '<p>After the cold.</p><p>Week two.</p>', authorName: 'Karim', agri: { crop: 'boro rice', season: 'RABI' } }
+const question = {
+  questionId: 5,
+  userId: 9,
+  title: 'Yellow seedlings',
+  content: '<p>After the cold.</p><p>Week two.</p>',
+  authorName: 'Karim',
+  category: { id: 1, categoryName: 'Crops' },
+  agri: { crop: 'boro rice', season: 'RABI' },
+}
+const categories = { 'GET /api/categories/all': () => envelope(200, page([{ id: 1, categoryName: 'Crops' }, { id: 2, categoryName: 'Fisheries' }])) }
 
 function body(api: ReturnType<typeof mockApi>, path: string) {
   return JSON.parse(api.mock.calls.find(([url]) => url === path)![1]!.body as string)
@@ -33,6 +42,7 @@ test('asking needs sign-in', async () => {
 test('a question is checked, posted with its farming details and opened', async () => {
   const api = mockApi({
     ...signedInAs({ id: 9, name: 'Karim' }),
+    ...categories,
     'POST /api/questions/create': () => envelope(200, { ...question, questionId: 12 }),
     'GET /api/questions/id/12': () => envelope(200, { ...question, questionId: 12 }),
     'GET /api/answers/question/12': () => envelope(200, []),
@@ -42,9 +52,11 @@ test('a question is checked, posted with its farming details and opened', async 
   await userEvent.click(await screen.findByRole('button', { name: 'Post question' }))
   expect(screen.getByLabelText('Your question')).toHaveAccessibleDescription('Write your question in a line.')
   expect(screen.getByLabelText('Details')).toHaveAccessibleDescription('Add what you have seen and tried.')
+  expect(screen.getByLabelText('Topic')).toHaveAccessibleDescription('Choose a topic.')
 
   await userEvent.type(screen.getByLabelText('Your question'), ' Why are seedlings yellow? ')
   await userEvent.type(screen.getByLabelText('Details'), 'BRRI dhan29, 30 days old.')
+  await userEvent.selectOptions(await screen.findByLabelText('Topic'), 'Crops')
   await userEvent.selectOptions(screen.getByLabelText('Season'), 'Rabi')
   await userEvent.type(screen.getByLabelText('Crop'), 'boro rice')
   await userEvent.click(screen.getByRole('button', { name: 'Post question' }))
@@ -53,6 +65,7 @@ test('a question is checked, posted with its farming details and opened', async 
   expect(body(api, '/api/questions/create')).toEqual({
     title: 'Why are seedlings yellow?',
     content: 'BRRI dhan29, 30 days old.',
+    categoryId: 1,
     agri: { crop: 'boro rice', season: 'RABI' },
   })
 })
@@ -60,6 +73,7 @@ test('a question is checked, posted with its farming details and opened', async 
 test('the asker edits their question as plain text', async () => {
   const api = mockApi({
     ...signedInAs({ id: 9, name: 'Karim' }),
+    ...categories,
     'GET /api/questions/id/5': () => envelope(200, question),
     'PUT /api/questions/update': () => envelope(200, question),
     'GET /api/answers/question/5': () => envelope(200, []),
@@ -72,7 +86,7 @@ test('the asker edits their question as plain text', async () => {
   await userEvent.click(screen.getByRole('button', { name: 'Save question' }))
 
   await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/questions/5'))
-  expect(body(api, '/api/questions/update')).toMatchObject({ questionId: 5, title: 'Yellow seedlings', agri: { crop: 'boro rice', season: 'RABI' } })
+  expect(body(api, '/api/questions/update')).toMatchObject({ questionId: 5, title: 'Yellow seedlings', categoryId: 1, agri: { crop: 'boro rice', season: 'RABI' } })
 })
 
 test("someone else's question can't be edited", async () => {

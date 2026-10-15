@@ -12,7 +12,9 @@ import { SafeHtml } from '../../ui/SafeHtml'
 import { Spinner } from '../../ui/Spinner'
 import { useSession } from '../auth/session'
 import { NotFoundPage } from '../errors/NotFoundPage'
+import { useMyVotes } from '../../api/votes'
 import { Answers } from './Answers'
+import { VoteControl } from './VoteControl'
 
 export function QuestionPage() {
   const t = useT()
@@ -40,8 +42,10 @@ export function QuestionPage() {
 function QuestionView({ question }: { question: Question }) {
   const t = useT()
   const { user } = useSession()
+  const { status } = useSession()
   const own = user?.id != null && user.id === question.userId
   const id = question.questionId ?? 0
+  const myVotes = useMyVotes(id, status === 'signed-in')
   const agri = question.agri ?? {}
   const chips = [
     agri.crop && { name: t('Crop'), label: agri.crop, to: filterPath({ crop: agri.crop }, '/questions') },
@@ -63,39 +67,46 @@ function QuestionView({ question }: { question: Question }) {
         </div>
         {own && <OwnerActions questionId={id} />}
       </div>
-      <SafeHtml html={question.content} className="story-body mt-8 whitespace-pre-line" />
-      {(question.imageUrls?.length ?? 0) > 0 && (
-        <ul aria-label={t('Photos')} className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {question.imageUrls!.map((url, index) => (
-            <li key={url}>
-              <a href={url} target="_blank" rel="noopener noreferrer" className="block overflow-hidden rounded-xl ring-1 ring-border">
-                <img src={url} alt={t('Photo {n} of the question', { n: index + 1 })} loading="lazy" className="aspect-square w-full object-cover transition-transform duration-200 ease-(--ease-out) hover:scale-[1.02]" />
-              </a>
-            </li>
-          ))}
-        </ul>
-      )}
-      {(question.tags?.length ?? 0) > 0 && (
-        <ul aria-label={t('Tags')} className="mt-6 flex flex-wrap gap-2">
-          {question.tags!.map((tag) => (
-            <li key={tag}>
-              <Chip to={`/questions?tag=${encodeURIComponent(tag)}`}>{tag}</Chip>
-            </li>
-          ))}
-        </ul>
-      )}
-      {chips.length > 0 && (
-        <ul aria-label={t('Farming context')} className="mt-8 flex flex-wrap gap-2">
-          {chips.map((chip) => (
-            <li key={chip.name}>
-              <Chip to={chip.to}>
-                <span className="mr-1 text-ink-muted">{t(chip.name)}</span>
-                {chip.label}
-              </Chip>
-            </li>
-          ))}
-        </ul>
-      )}
+      <div className="mt-8 flex gap-2 sm:gap-4">
+        <div className="-ml-2 sm:-ml-14">
+          <VoteControl target="questions" id={id} score={question.score ?? 0} myVote={myVotes.data?.question} own={own} />
+        </div>
+        <div className="min-w-0 flex-1">
+        <SafeHtml html={question.content} className="story-body whitespace-pre-line" />
+        {(question.imageUrls?.length ?? 0) > 0 && (
+          <ul aria-label={t('Photos')} className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {question.imageUrls!.map((url, index) => (
+              <li key={url}>
+                <a href={url} target="_blank" rel="noopener noreferrer" className="block overflow-hidden rounded-xl ring-1 ring-border">
+                  <img src={url} alt={t('Photo {n} of the question', { n: index + 1 })} loading="lazy" className="aspect-square w-full object-cover transition-transform duration-200 ease-(--ease-out) hover:scale-[1.02]" />
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
+        {(question.tags?.length ?? 0) > 0 && (
+          <ul aria-label={t('Tags')} className="mt-6 flex flex-wrap gap-2">
+            {question.tags!.map((tag) => (
+              <li key={tag}>
+                <Chip to={`/questions?tag=${encodeURIComponent(tag)}`}>{tag}</Chip>
+              </li>
+            ))}
+          </ul>
+        )}
+        {chips.length > 0 && (
+          <ul aria-label={t('Farming context')} className="mt-8 flex flex-wrap gap-2">
+            {chips.map((chip) => (
+              <li key={chip.name}>
+                <Chip to={chip.to}>
+                  <span className="mr-1 text-ink-muted">{t(chip.name)}</span>
+                  {chip.label}
+                </Chip>
+              </li>
+            ))}
+          </ul>
+        )}
+        </div>
+      </div>
       <Answers questionId={id} />
     </article>
   )

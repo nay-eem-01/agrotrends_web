@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend · ➡ moved to a later step
 
-**Progress:** 44 of 60 steps done
+**Progress:** 45 of 60 steps done
 
 ---
 
@@ -114,7 +114,7 @@ the season strip goes, shadcn/ui replaces the hand-made primitives, staff see th
 
 | # | Step | Status |
 |---|---|---|
-| F9.1 | Vote arrows on questions and answers with `my-votes`; optimistic with rollback; none on your own posts; the 50-point downvote message | ⬜ |
+| F9.1 | Vote arrows on questions and answers with `my-votes`; optimistic with rollback; none on your own posts; the 50-point downvote message | ✅ |
 | F9.2 | Accept and un-accept (asker only), accepted mark and position | ⬜ |
 | F9.3 | Author line: reputation and `authorBadges`; profile page: reputation by topic, badges, expert field, the user's questions | ⬜ |
 

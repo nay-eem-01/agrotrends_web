@@ -27,10 +27,11 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   (`feat/notifications-page`) done. Phase F12 is complete.
 - Phase F13 on `feat/moderation-base` (stacked on F12's tip): F13.1 report (`feat/report`) F13.2 moderation queue (`feat/moderation-queue`) and
   F13.3 ban and hidden states (`feat/ban-hidden`) done. Phase F13 is complete.
+- Phase F14 on `feat/launch-polish-base` (stacked on F13's tip): F14.1 Bengali and accessibility (`feat/bengali-a11y`) done.
 
 ## Next up
 
-1. Phase F14 launch polish: F14.1 Bengali and a11y pass, F14.2 smoke tests.
+1. F14.2 smoke tests.
 2. F12–F14 need the backend's Phase 8 branch until it is merged.
 
 ## Open items
@@ -48,6 +49,28 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-15 (F14.1 Bengali and accessibility)
+
+**Done**
+- `lib/bn-coverage.test.ts` reads every source file and fails if any `t('…')` literal lacks a Bengali string; it
+  found one ("Author", dropped in F7.1a but still used). New screens were translated as they were built.
+- `bengali.test.tsx` now also renders the question page in Bengali: answer count, accepted mark, expert badge, vote
+  buttons, the AI answer's state and Report.
+- Vote buttons use whole sentences per target ("Upvote this question / answer") so Bengali reads naturally instead of
+  a templated noun.
+- axe-core (WCAG 2 A/AA and best practices) in a real browser on home, stories, search, question pages (with and
+  without an AI answer), the report dialog, verify-email and profiles signed out, and home, the bell panel,
+  notifications, ask, apply, settings, welcome, review and My stories signed in: no violations.
+- Keyboard: the bell opens with Enter and closes with Escape returning focus to it; the report dialog takes focus and
+  Escape returns it to Report; vote arrows are in the tab order.
+- Found and fixed: Sonner's toast region was named "Notifications", the same as the bell's panel; it is now
+  "Messages".
+
+**Known limitations**
+- Admin pages, the editor, My stories and form validation messages in older screens are still English (as before).
 
 ---
 

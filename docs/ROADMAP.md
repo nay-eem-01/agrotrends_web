@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend · ➡ moved to a later step
 
-**Progress:** 58 of 60 steps done
+**Progress:** 59 of 60 steps done
 
 ---
 
@@ -153,7 +153,7 @@ the season strip goes, shadcn/ui replaces the hand-made primitives, staff see th
 
 | # | Step | Status |
 |---|---|---|
-| F14.1 | Bengali strings for every new screen; keyboard and screen-reader pass on them | ⬜ |
+| F14.1 | Bengali strings for every new screen; keyboard and screen-reader pass on them | ✅ |
 | F14.2 | Playwright smoke: sign up, confirm, ask, answer, vote, accept, three reports hide, admin dismisses, notifications arrive | ⬜ |
 
 ## Needs from the backend

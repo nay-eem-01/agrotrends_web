@@ -21,10 +21,11 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   (`feat/reputation`) done. Phase F9 is complete.
 - Phase F10 on `feat/ai-answers-base` (stacked on F9's tip): F10.1 AI answer card (`feat/ai-answer-card`) F10.2 sources (`feat/ai-sources`) and F10.3 ask the
   experts (`feat/ask-experts`) done. Phase F10 is complete.
+- Phase F11 on `feat/experts-base` (stacked on F10's tip): F11.1 apply (`feat/expert-apply`) done.
 
 ## Next up
 
-1. Phase F11 verified experts: F11.1 apply, F11.2 review, F11.3 admin.
+1. F11.2 review, F11.3 admin.
 2. F12–F14 need the backend's Phase 8 branch until it is merged.
 
 ## Open items
@@ -41,6 +42,25 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-15 (F11.1 apply to be a verified expert)
+
+**Done**
+- `/experts/apply`: topics (1–3, as toggle chips), field, institution, credential type, proof photos (up to 4, through
+  `POST /api/images`, with a warning that they live at a public, unguessable address) and up to 3 `http(s)` links;
+  at least one proof. Sent to `POST /api/experts/applications`.
+- Status from `GET /api/experts/applications/me` (newest first): waiting, approved (mustard) or not approved, with the
+  admin's note; the deciding admin is never shown. A pending application replaces the form (a 409 says so); after a
+  decision, **Apply again**.
+- Settings has a **Verified expert** section with the same status card, or the way to apply.
+- `qa/PhotoPicker` takes a label, hint and limit, so proofs reuse it.
+- Fixed a lint warning from F9.1 (`VoteControl` synced props into state in an effect; it now adjusts during
+  render). Lint is now run with `--max-warnings 0`: plain `oxlint` exits 0 on warnings, which hid it.
+- Live: an application sent through the API shows as waiting.
+- Tests: `experts/apply.test.tsx` (validation, then the exact request; pending shows status; a rejection's note and
+  Apply again; the Settings card).
 
 ---
 

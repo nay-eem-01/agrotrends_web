@@ -9,14 +9,22 @@ import { Button } from '../../ui/Button'
 /** The backend's limit (AppConstants.MAX_IMAGES_PER_QUESTION). */
 export const MAX_PHOTOS = 4
 
-/** Photos of the crop for a question: uploaded one at a time through POST /api/images, up to four. */
-export function PhotoPicker({ urls, onChange }: { urls: string[]; onChange: (urls: string[]) => void }) {
+interface PhotoPickerProps {
+  urls: string[]
+  onChange: (urls: string[]) => void
+  label?: string
+  hint?: string
+  max?: number
+}
+
+/** Photos uploaded one at a time through POST /api/images: a question's crop photos, an expert's proofs. */
+export function PhotoPicker({ urls, onChange, label, hint, max = MAX_PHOTOS }: PhotoPickerProps) {
   const t = useT()
   const upload = useUploadImage()
   const input = useRef<HTMLInputElement>(null)
   const [problem, setProblem] = useState<string | null>(null)
   const hintId = useId()
-  const full = urls.length >= MAX_PHOTOS
+  const full = urls.length >= max
 
   function choose(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
@@ -31,7 +39,7 @@ export function PhotoPicker({ urls, onChange }: { urls: string[]; onChange: (url
 
   return (
     <fieldset className="flex flex-col gap-2" aria-describedby={hintId}>
-      <legend className="mb-1.5 text-sm font-medium">{t('Photos (optional)')}</legend>
+      <legend className="mb-1.5 text-sm font-medium">{label ?? t('Photos (optional)')}</legend>
       {urls.length > 0 && (
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {urls.map((url, index) => (
@@ -56,7 +64,7 @@ export function PhotoPicker({ urls, onChange }: { urls: string[]; onChange: (url
         </Button>
         <input ref={input} type="file" accept={IMAGE_TYPES.join(',')} onChange={choose} className="sr-only" tabIndex={-1} aria-label={t('Add a photo')} />
         <span id={hintId} className="text-xs text-muted-foreground">
-          {full ? t("That's the most you can add ({n}).", { n: MAX_PHOTOS }) : t('A clear photo of the leaves, roots or pests helps. Up to {n}.', { n: MAX_PHOTOS })}
+          {full ? t("That's the most you can add ({n}).", { n: max }) : (hint ?? t('A clear photo of the leaves, roots or pests helps. Up to {n}.', { n: max }))}
         </span>
       </div>
       {error && (

@@ -15,10 +15,11 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 - Phase F7 on `feat/backend-catchup-base`: F7.0 design system (`feat/design-system`) F7.0b no season strip
   (`feat/no-season-strip`) F7.1a API types (`feat/api-types`) F7.1b one account (`feat/one-account`) F7.2
   e-mail confirmation (`feat/email-confirm`) and F7.3 excerpts (`feat/excerpts`) done. Phase F7 is complete.
+- Phase F8 on `feat/questions-first-base` (stacked on F7's tip): F8.1 ask form (`feat/ask-form`) done.
 
 ## Next up
 
-1. Phase F8 questions first: F8.1 ask form (tags, photos), F8.2 questions list and home, F8.3 question page.
+1. F8.2 questions list and home, F8.3 question page.
 2. F12–F14 need the backend's Phase 8 branch until it is merged.
 
 ## Open items
@@ -34,6 +35,25 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-15 (F8.1 ask form: tags and photos)
+
+**Done**
+- Ask and edit question: up to 5 tags (the story editor's tag input, now shared as `topics/TagInput`) and up to 4
+  photos (`qa/PhotoPicker`, uploaded one by one through `POST /api/images`, removable, type and size checked first).
+- Editing leaves `tags` and `imageUrls` out when they weren't touched, so the backend keeps them; a change (even
+  removing all) is sent. A new question leaves out empty lists.
+- The question page shows its topic above the title, its photos (open full size in a new tab) and its tags (linking
+  to the questions list filtered by tag, which F8.2 reads).
+- Words: tags are "Tags" and categories are "Topic" everywhere, matching the backend's Q&A wording (the story publish
+  sheet's "Category" is now "Topic" too).
+- Tests: tags and a photo on a new question; an edit sends only the changed photos; the question page shows topic,
+  photos and tags.
+
+**Known limitations**
+- The `/topics` page and the home rail still call tags "topics"; F8.2's home rework renames them.
 
 ---
 

@@ -12,6 +12,8 @@ import { TextField } from '../../ui/TextField'
 import { useSession } from '../auth/session'
 import { NotFoundPage } from '../errors/NotFoundPage'
 import { FarmingFields, Select, toAgri, type Farming } from '../farming/FarmingFields'
+import { TagInput } from '../topics/TagInput'
+import { PhotoPicker } from './PhotoPicker'
 
 /** `/questions/ask`, and `/questions/:questionId/edit` for the asker. */
 export function AskPage() {
@@ -48,6 +50,8 @@ function QuestionForm({ question }: { question?: Question }) {
   const write = useQuestionWrite()
   const categories = useCategories()
   const [categoryId, setCategoryId] = useState<number | undefined>(question?.category?.id)
+  const [tags, setTags] = useState<string[]>(question?.tags ?? [])
+  const [imageUrls, setImageUrls] = useState<string[]>(question?.imageUrls ?? [])
   const [title, setTitle] = useState(question?.title ?? '')
   // Older questions were saved as HTML; they are edited as plain text.
   const [details, setDetails] = useState(() => htmlToText(question?.content))
@@ -69,7 +73,13 @@ function QuestionForm({ question }: { question?: Question }) {
     setErrors(found)
     if (found.title || found.details || categoryId == null) return
     const fields = { title: title.trim(), content: details.trim(), categoryId, agri: toAgri(farming) }
-    write.mutate(question ? { kind: 'update', request: { questionId: question.questionId ?? 0, ...fields } } : { kind: 'create', request: fields }, {
+    // On an edit, tags and photos left as they were are omitted: the backend keeps the old ones.
+    const same = (a: string[], b: string[] = []) => a.length === b.length && a.every((value, i) => value === b[i])
+    const extras = question
+      ? { tags: same(tags, question.tags) ? undefined : tags, imageUrls: same(imageUrls, question.imageUrls) ? undefined : imageUrls }
+      : { tags: tags.length ? tags : undefined, imageUrls: imageUrls.length ? imageUrls : undefined }
+    const request = { ...fields, ...extras }
+    write.mutate(question ? { kind: 'update', request: { questionId: question.questionId ?? 0, ...request } } : { kind: 'create', request }, {
       onSuccess: (saved) => navigate(`/questions/${saved?.questionId ?? question?.questionId}`, { replace: true }),
     })
   }
@@ -104,6 +114,8 @@ function QuestionForm({ question }: { question?: Question }) {
           options={(categories.data ?? []).map((c) => ({ value: String(c.id), label: c.categoryName ?? '' }))}
           placeholder={categories.isPending ? t('Loading…') : t('Choose a topic')}
         />
+        <TagInput tags={tags} onChange={setTags} />
+        <PhotoPicker urls={imageUrls} onChange={setImageUrls} />
         <FarmingFields value={farming} onChange={(changes) => setFarming((f) => ({ ...f, ...changes }))} />
         {write.isError && (
           <p role="alert" className="text-sm text-danger">

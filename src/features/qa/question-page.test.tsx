@@ -118,3 +118,16 @@ test('a missing question is not found', async () => {
   renderWithProviders(<App />, '/questions/99')
   expect(await screen.findByRole('heading', { name: 'Page not found' })).toBeInTheDocument()
 })
+
+test('the question shows its topic, photos and tags', async () => {
+  mockApi({
+    'GET /api/questions/id/5': () =>
+      envelope(200, { ...question, category: { id: 1, categoryName: 'Crops' }, tags: ['rice blast'], imageUrls: ['/uploads/leaf.webp'] }),
+    'GET /api/answers/question/5': () => envelope(200, []),
+  })
+  renderWithProviders(<App />, '/questions/5')
+
+  expect(await screen.findByText('Crops')).toBeInTheDocument()
+  expect(screen.getByRole('img', { name: 'Photo 1 of the question' })).toHaveAttribute('src', '/uploads/leaf.webp')
+  expect(screen.getByRole('link', { name: 'rice blast' })).toHaveAttribute('href', '/questions?tag=rice%20blast')
+})

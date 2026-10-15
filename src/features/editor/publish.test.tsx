@@ -50,11 +50,11 @@ test('publishing a new story sends its details and opens it', async () => {
   const sheet = within(await screen.findByRole('dialog', { name: 'Ready to publish?' }))
 
   await userEvent.click(sheet.getByRole('button', { name: 'Publish now' }))
-  expect(sheet.getByLabelText('Category')).toHaveAccessibleDescription('Choose a category.')
+  expect(sheet.getByLabelText('Topic')).toHaveAccessibleDescription('Choose a topic.')
   expect(bodies(api, 'POST', '/api/blogs/create')).toHaveLength(0)
 
-  await userEvent.selectOptions(sheet.getByLabelText('Category'), 'Crops')
-  const topics = sheet.getByLabelText('Topics')
+  await userEvent.selectOptions(sheet.getByLabelText('Topic'), 'Crops')
+  const topics = sheet.getByLabelText('Tags')
   await userEvent.type(topics, 'Ri')
   await userEvent.click(await sheet.findByRole('button', { name: 'rice blast' }))
   await userEvent.type(topics, 'Cold Stress{Enter}')
@@ -84,11 +84,11 @@ test('topics stop at five', async () => {
 
   await userEvent.click(await screen.findByRole('button', { name: 'Publish' }))
   const sheet = within(await screen.findByRole('dialog'))
-  const topics = sheet.getByLabelText('Topics')
+  const topics = sheet.getByLabelText('Tags')
   await userEvent.type(topics, 'a{Enter}b{Enter}c{Enter}d{Enter}e{Enter}')
   expect(topics).toBeDisabled()
-  expect(sheet.getByText("That's the most a story can have (5).")).toBeInTheDocument()
-  await userEvent.click(sheet.getByRole('button', { name: 'Remove topic c' }))
+  expect(sheet.getByText("That's the most you can add (5).")).toBeInTheDocument()
+  await userEvent.click(sheet.getByRole('button', { name: 'Remove tag c' }))
   expect(topics).toBeEnabled()
 })
 
@@ -100,7 +100,7 @@ test('saving as a draft keeps it private and opens it for editing', async () => 
 
   await userEvent.click(await screen.findByRole('button', { name: 'Publish' }))
   const sheet = within(await screen.findByRole('dialog'))
-  await userEvent.selectOptions(sheet.getByLabelText('Category'), 'Fisheries')
+  await userEvent.selectOptions(sheet.getByLabelText('Topic'), 'Fisheries')
   await userEvent.click(sheet.getByRole('button', { name: 'Save as draft' }))
 
   await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/write/71'))
@@ -123,7 +123,7 @@ test('publishing a server draft saves its details first', async () => {
 
   await userEvent.click(await screen.findByRole('button', { name: 'Publish' }))
   const sheet = within(await screen.findByRole('dialog'))
-  expect(sheet.getByLabelText('Category')).toHaveValue('2')
+  expect(sheet.getByLabelText('Topic')).toHaveValue('2')
   expect(sheet.getByText('jute', { selector: 'span' })).toBeInTheDocument()
   await userEvent.click(sheet.getByRole('button', { name: 'Publish' }))
 

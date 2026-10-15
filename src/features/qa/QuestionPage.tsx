@@ -13,6 +13,7 @@ import { useSession } from '../auth/session'
 import { NotFoundPage } from '../errors/NotFoundPage'
 import { useMyVotes } from '../../api/votes'
 import { Answers } from './Answers'
+import { ReportButton } from '../reports/ReportButton'
 import { AiAnswerCard } from './AiAnswerCard'
 import { AuthorLine } from './AuthorLine'
 import { VoteControl } from './VoteControl'
@@ -71,7 +72,7 @@ function QuestionView({ question }: { question: Question }) {
             meta={t('Asked {date}', { date: storyDate(question.createdAt) })}
           />
         </div>
-        {own && <OwnerActions questionId={id} />}
+        {own ? <OwnerActions questionId={id} /> : <ReportButton targetType="QUESTION" targetId={id} what={t('this question')} />}
       </div>
       <div className="mt-8 flex gap-2 sm:gap-4">
         <div className="-ml-2 sm:-ml-14">

@@ -12,6 +12,7 @@ import { Spinner } from '../../ui/Spinner'
 import { useSession } from '../auth/session'
 import { useRequireSignIn } from '../auth/useRequireSignIn'
 import { Composer } from '../threads/Composer'
+import { ReportButton } from '../reports/ReportButton'
 import { AuthorLine } from './AuthorLine'
 import { VoteControl } from './VoteControl'
 
@@ -235,6 +236,7 @@ function Post({ questionId, item, compact = false }: { questionId: number; item:
       ) : (
         <SafeHtml html={item.content} className={compact ? 'mt-1.5 text-base whitespace-pre-line' : 'mt-3 font-serif text-[1.0625rem] leading-relaxed whitespace-pre-line [&>p+p]:mt-3'} />
       )}
+      {!own && mode === 'view' && <ReportButton targetType="ANSWER" targetId={id} what={compact ? t('this reply') : t('this answer')} className="mt-1 -ml-3" />}
       {own && mode === 'view' && (
         <div className="mt-1 -ml-3 flex gap-1">
           <Button variant="quiet" size="sm" onClick={() => setMode('edit')}>

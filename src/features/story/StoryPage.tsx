@@ -11,6 +11,7 @@ import { Chip } from '../../ui/Chip'
 import { SafeHtml } from '../../ui/SafeHtml'
 import { Spinner } from '../../ui/Spinner'
 import { useSession } from '../auth/session'
+import { ReportButton } from '../reports/ReportButton'
 import { BookmarkButton } from '../reactions/BookmarkButton'
 import { ClapButton } from '../reactions/ClapButton'
 import { WrittenBy } from '../authors/AuthorPage'
@@ -105,10 +106,16 @@ function Story({ story }: { story: BlogResponse }) {
 }
 
 function StoryActions({ story }: { story: BlogResponse }) {
+  const t = useT()
+  const { user } = useSession()
+  const own = user?.authorId != null && user.authorId === story.author?.authorId
   return (
     <div className="mt-6 flex items-center justify-between border-y border-rule py-1">
       <ClapButton story={story} />
-      <BookmarkButton story={story} />
+      <div className="flex items-center gap-1">
+        <ReportButton targetType="BLOG" targetId={story.id ?? 0} own={own} what={t('this story')} />
+        <BookmarkButton story={story} />
+      </div>
     </div>
   )
 }

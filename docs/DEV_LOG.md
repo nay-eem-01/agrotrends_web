@@ -13,12 +13,12 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   F7–F14 in `docs/ROADMAP.md` follow it. Checked against the backend code on 2026-10-15: every endpoint, shape and
   enum in the plan matches (backend `fix/phase8-review-3b`).
 - Phase F7 on `feat/backend-catchup-base`: F7.0 design system (`feat/design-system`) F7.0b no season strip
-  (`feat/no-season-strip`) F7.1a API types (`feat/api-types`) F7.1b one account (`feat/one-account`) and F7.2
-  e-mail confirmation (`feat/email-confirm`) done.
+  (`feat/no-season-strip`) F7.1a API types (`feat/api-types`) F7.1b one account (`feat/one-account`) F7.2
+  e-mail confirmation (`feat/email-confirm`) and F7.3 excerpts (`feat/excerpts`) done. Phase F7 is complete.
 
 ## Next up
 
-1. F7.3 excerpts on story cards.
+1. Phase F8 questions first: F8.1 ask form (tags, photos), F8.2 questions list and home, F8.3 question page.
 2. F12–F14 need the backend's Phase 8 branch until it is merged.
 
 ## Open items
@@ -34,6 +34,22 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-15 (F7.3 excerpts)
+
+**Done**
+- Story lists (feeds, search, tag, author, drafts, bookmarks) are typed as `StorySummary` (the backend's
+  `BlogSummaryResponse`), and story cards show its plain-text `excerpt` instead of cutting the body down.
+- The editor already loads a story by id (`GET /api/blogs/id/{id}`), never from a list item; a test now covers
+  opening a draft from My stories and getting its full body.
+- Staff views of other people's drafts never existed here, so nothing to remove.
+- Live: feed items carry `excerpt` and the cards show it.
+
+**Decisions**
+- List types are changed in the components too: `BlogSummaryResponse` is structurally compatible with
+  `BlogResponse` (every field optional), so without the explicit type a card would silently read an absent `content`.
 
 ---
 

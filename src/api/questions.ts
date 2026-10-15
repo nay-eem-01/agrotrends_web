@@ -8,7 +8,6 @@ import type { Page, Schemas } from './types'
 export type Question = Schemas['QuestionResponse']
 export type CreateQuestionRequest = Schemas['CreateQuestionRequest']
 export type UpdateQuestionRequest = Schemas['UpdateQuestionRequest']
-export type AiDraftAnswer = Schemas['AiDraftAnswerResponse']
 
 /** Questions, newest first, optionally filtered by crop, season, region and soil. Public. */
 export function useQuestions(filters: AgriFilters) {
@@ -50,9 +49,4 @@ export function useQuestionWrite() {
           : api<null>(`/api/questions/id/${write.questionId}/delete`, { method: 'DELETE' }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['questions'] }),
   })
-}
-
-/** An AI draft answer for an unanswered question: labelled, never posted. 503 while the AI is down. */
-export function useAiDraftAnswer(questionId: number) {
-  return useMutation({ mutationFn: () => api<AiDraftAnswer>(`/api/questions/id/${questionId}/ai-draft`, { method: 'POST' }) })
 }

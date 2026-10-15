@@ -12,12 +12,12 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   experts reviewing AI answers, notifications, moderation). `docs/BACKEND_CATCHUP_PLAN.md` is the plan; phases
   F7–F14 in `docs/ROADMAP.md` follow it. Checked against the backend code on 2026-10-15: every endpoint, shape and
   enum in the plan matches (backend `fix/phase8-review-3b`).
-- Phase F7 on `feat/backend-catchup-base`: F7.0 design system (`feat/design-system`) and F7.0b no season strip
-  (`feat/no-season-strip`) done.
+- Phase F7 on `feat/backend-catchup-base`: F7.0 design system (`feat/design-system`) F7.0b no season strip
+  (`feat/no-season-strip`) and F7.1a API types (`feat/api-types`) done.
 
 ## Next up
 
-1. F7.1 one account type, F7.2 e-mail confirmation, F7.3 excerpts on story cards.
+1. F7.1b one account type, F7.2 e-mail confirmation, F7.3 excerpts on story cards.
 2. F12–F14 need the backend's Phase 8 branch until it is merged.
 
 ## Open items
@@ -33,6 +33,21 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-15 (F7.1a API types)
+
+**Done**
+- `src/api/schema.d.ts` regenerated from the backend's `fix/phase8-review-3b` (Phases 5–8). F7.1 split in two to stay
+  under 20 files; this half fixes what the new types break.
+- Sign-up: no reader/author choice and no professional details; the request is name, e-mail, mobile and password.
+- Ask and edit question: a required **Topic** (the backend's `categoryId`), prefilled when editing.
+- The AI draft answer under unanswered questions is gone with its endpoint; F10.1 brings the AI answer card.
+- Tests: sign-up sends one kind of account; the ask form needs a topic and sends `categoryId`.
+
+**Decisions**
+- Sign-up still signs in straight away: an unconfirmed account can sign in and read; F7.2 adds the confirm banner.
 
 ---
 

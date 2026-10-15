@@ -2,6 +2,7 @@ import { useT } from '../../lib/i18n'
 import { useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ApiError, errorMessage } from '../../api/errors'
+import { useCategories } from '../../api/categories'
 import { useQuestion, useQuestionWrite, type Question } from '../../api/questions'
 import { htmlToText } from '../../lib/html'
 import { Button } from '../../ui/Button'
@@ -10,7 +11,7 @@ import { TextArea } from '../../ui/TextArea'
 import { TextField } from '../../ui/TextField'
 import { useSession } from '../auth/session'
 import { NotFoundPage } from '../errors/NotFoundPage'
-import { FarmingFields, toAgri, type Farming } from '../farming/FarmingFields'
+import { FarmingFields, Select, toAgri, type Farming } from '../farming/FarmingFields'
 
 /** `/questions/ask`, and `/questions/:questionId/edit` for the asker. */
 export function AskPage() {
@@ -45,6 +46,8 @@ function QuestionForm({ question }: { question?: Question }) {
   const t = useT()
   const navigate = useNavigate()
   const write = useQuestionWrite()
+  const categories = useCategories()
+  const [categoryId, setCategoryId] = useState<number | undefined>(question?.category?.id)
   const [title, setTitle] = useState(question?.title ?? '')
   // Older questions were saved as HTML; they are edited as plain text.
   const [details, setDetails] = useState(() => htmlToText(question?.content))
@@ -54,17 +57,18 @@ function QuestionForm({ question }: { question?: Question }) {
     region: question?.agri?.region ?? '',
     soil: question?.agri?.soil,
   })
-  const [errors, setErrors] = useState<{ title?: string; details?: string }>({})
+  const [errors, setErrors] = useState<{ title?: string; details?: string; topic?: string }>({})
 
   function submit(event: FormEvent) {
     event.preventDefault()
     const found = {
       title: title.trim() ? undefined : t('Write your question in a line.'),
       details: details.trim() ? undefined : t('Add what you have seen and tried.'),
+      topic: categoryId == null ? t('Choose a topic.') : undefined,
     }
     setErrors(found)
-    if (found.title || found.details) return
-    const fields = { title: title.trim(), content: details.trim(), agri: toAgri(farming) }
+    if (found.title || found.details || categoryId == null) return
+    const fields = { title: title.trim(), content: details.trim(), categoryId, agri: toAgri(farming) }
     write.mutate(question ? { kind: 'update', request: { questionId: question.questionId ?? 0, ...fields } } : { kind: 'create', request: fields }, {
       onSuccess: (saved) => navigate(`/questions/${saved?.questionId ?? question?.questionId}`, { replace: true }),
     })
@@ -91,6 +95,14 @@ function QuestionForm({ question }: { question?: Question }) {
           value={details}
           onChange={(e) => setDetails(e.target.value)}
           error={errors.details}
+        />
+        <Select
+          label={t('Topic')}
+          value={categoryId == null ? '' : String(categoryId)}
+          error={errors.topic}
+          onChange={(value) => setCategoryId(value ? Number(value) : undefined)}
+          options={(categories.data ?? []).map((c) => ({ value: String(c.id), label: c.categoryName ?? '' }))}
+          placeholder={categories.isPending ? t('Loading…') : t('Choose a topic')}
         />
         <FarmingFields value={farming} onChange={(changes) => setFarming((f) => ({ ...f, ...changes }))} />
         {write.isError && (

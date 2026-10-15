@@ -56,6 +56,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/questions/id/{questionId}/vote": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Vote on a question (UP or DOWN; replaces your earlier vote; not your own) */
+        put: operations["voteOnQuestion"];
+        post?: never;
+        /** Withdraw your vote on a question */
+        delete: operations["unvoteQuestion"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/comments/update": {
         parameters: {
             query?: never;
@@ -150,9 +168,9 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Your own author profile, for the profile editor (authors only; 403 for readers) */
+        /** Your own profile, for the profile editor (created on first use) */
         get: operations["getMine"];
-        /** Edit your own author profile (authors only) */
+        /** Edit your own profile */
         put: operations["updateMine"];
         post?: never;
         delete?: never;
@@ -178,6 +196,42 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/answers/id/{answerId}/vote": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Vote on an answer (UP or DOWN; replaces your earlier vote; not your own) */
+        put: operations["voteOnAnswer"];
+        post?: never;
+        /** Withdraw your vote on an answer */
+        delete: operations["unvoteAnswer"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/answers/id/{answerId}/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** The asker accepts this answer (replaces an earlier accept) */
+        put: operations["accept"];
+        post?: never;
+        /** The asker takes back accepting this answer */
+        delete: operations["unaccept"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/user/change-password": {
         parameters: {
             query?: never;
@@ -194,7 +248,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/questions/id/{questionId}/ai-draft": {
+    "/api/reports": {
         parameters: {
             query?: never;
             header?: never;
@@ -203,8 +257,59 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** AI draft answer for a question that has no answers yet; labelled as AI-generated and not posted */
-        post: operations["aiDraft"];
+        /** Report a blog, question, answer, AI answer (by question id), comment or user; once per target */
+        post: operations["report"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/questions/id/{questionId}/ai-answer/flag": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Flag a question's AI answer as wrong or unsafe; it is hidden (Verified Expert or Top Contributor in its topic) */
+        post: operations["flag"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/questions/id/{questionId}/ai-answer/correct": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Correct a question's AI answer: your answer is posted on the question and the AI answer is marked CORRECTED (Verified Expert in its topic) */
+        post: operations["correct"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/questions/id/{questionId}/ai-answer/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm a question's AI answer as correct (Verified Expert in its topic) */
+        post: operations["confirm"];
         delete?: never;
         options?: never;
         head?: never;
@@ -228,6 +333,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/notifications/{notificationId}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mark one of your notifications read */
+        post: operations["markRead"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/notifications/read-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mark all your notifications read: {updated} */
+        post: operations["markAllRead"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/images": {
         parameters: {
             query?: never;
@@ -237,8 +376,25 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Upload a cover or inline image (authors; JPEG, PNG or WebP up to 5 MB); returns its URL */
+        /** Upload an image (JPEG, PNG or WebP up to 5 MB); returns its URL */
         post: operations["upload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/experts/applications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Apply to be a Verified Expert: topics, your field, proof images or links (one pending at a time) */
+        post: operations["apply"];
         delete?: never;
         options?: never;
         head?: never;
@@ -366,6 +522,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/auth/verify-email": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm your e-mail address with the token from the confirmation e-mail */
+        post: operations["verifyEmail"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/sign-up": {
         parameters: {
             query?: never;
@@ -417,6 +590,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/auth/resend-verification": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send a new confirmation e-mail. Always answers 200 so accounts cannot be enumerated. */
+        post: operations["resendVerification"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/refresh-token": {
         parameters: {
             query?: never;
@@ -428,6 +618,26 @@ export interface paths {
         put?: never;
         /** Exchange a refresh token for a new access token (the refresh token is single-use and rotated) */
         post: operations["refreshToken"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/google": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Sign in (or up) with Google
+         * @description Send the ID token (credential) Google Identity Services gives the page. Finds the account linked to that Google account, else links the account with the same e-mail, else creates one (no password). Linking an account whose e-mail was never verified drops its password and sessions. Admin accounts must use the admin sign-in.
+         */
+        post: operations["signInWithGoogle"];
         delete?: never;
         options?: never;
         head?: never;
@@ -485,6 +695,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/ai/history/{aiAnswerId}/ask-experts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ask an expert to check this: send one of your private AI questions to the experts as a public question in a topic; its AI answer goes into their review queue */
+        post: operations["askExperts"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/ai/blog-assist": {
         parameters: {
             query?: never;
@@ -494,7 +721,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Authors only: a short summary and suggested topic tags for a draft post */
+        /** A short summary and suggested topic tags for a draft post */
         post: operations["blogAssist"];
         delete?: never;
         options?: never;
@@ -519,6 +746,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/users/{userId}/ban": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Admin: ban a user: sign-in and token refresh are refused and every session ends; closes the open reports about them */
+        post: operations["ban"];
+        /** Admin: lift a ban */
+        delete: operations["unban"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/sign-in": {
         parameters: {
             query?: never;
@@ -530,6 +775,108 @@ export interface paths {
         put?: never;
         /** Sign in */
         post: operations["signIn_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/reports/{reportId}/remove-content": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Admin: remove the reported post for good (an AI answer is hidden instead); closes every open report on it and tells the author */
+        post: operations["removeContent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/reports/{reportId}/dismiss": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Admin: close a report without action */
+        post: operations["dismiss"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/questions/{questionId}/ai-answer/reopen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Admin: reopen a reviewed AI answer (back to UNCHECKED) */
+        post: operations["reopen"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/expert-applications/{applicationId}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Admin: reject a pending application with a reason the applicant sees */
+        post: operations["reject"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/expert-applications/{applicationId}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Admin: approve a pending application; grants a Verified Expert badge in each topic (all requested, or the subset in categoryIds) */
+        post: operations["approve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/users/{userId}/reputation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A user's reputation: total and per topic, highest first (public) */
+        get: operations["reputation"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -604,6 +951,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/review-queue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Unchecked AI answers in your expert topics, oldest first (Verified Experts only) */
+        get: operations["queue"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/questions/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Search questions by words in the title or text (supports "quoted phrases" and -exclusions), best match first */
+        get: operations["search"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/questions/id/{questionId}": {
         parameters: {
             query?: never;
@@ -621,6 +1002,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/questions/id/{questionId}/my-votes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Your votes on a question and its answers */
+        get: operations["myVotes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/questions/id/{questionId}/ai-answer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The AI's answer to a question (public): generated a few seconds after the question is posted, 404 until then; show the disclaimer and the review status with it */
+        get: operations["aiAnswer"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/questions/all": {
         parameters: {
             query?: never;
@@ -628,7 +1043,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** All questions - paginated; optional filters crop, season, region, soil */
+        /** All questions - paginated; optional filters categoryId (topic), tag, unanswered, crop, season, region, soil */
         get: operations["getAll"];
         put?: never;
         post?: never;
@@ -647,6 +1062,40 @@ export interface paths {
         };
         /** Get all questions by user - paginated */
         get: operations["getAllByUser"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Your notifications, newest first (unreadOnly=true for unread ones) */
+        get: operations["mine"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/notifications/unread-count": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** How many of your notifications are unread: {count} */
+        get: operations["unreadCount"];
         put?: never;
         post?: never;
         delete?: never;
@@ -740,6 +1189,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/experts/applications/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Your own expert applications and their decisions, newest first */
+        get: operations["mine_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/comments/replies/{parentCommentId}": {
         parameters: {
             query?: never;
@@ -817,7 +1283,7 @@ export interface paths {
             cookie?: never;
         };
         /** Your saved blogs, most recently saved first */
-        get: operations["mine"];
+        get: operations["mine_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -851,7 +1317,7 @@ export interface paths {
             cookie?: never;
         };
         /** Search published blogs by words in the title or text (supports "quoted phrases" and -exclusions), best match first */
-        get: operations["search"];
+        get: operations["search_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -867,7 +1333,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Your own drafts - paginated (authors only) */
+        /** Your own drafts - paginated */
         get: operations["getMyDrafts"];
         put?: never;
         post?: never;
@@ -1037,7 +1503,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get all answers by question id */
+        /** Direct answers to a question: the accepted one first, then by score (replies via /replies) */
         get: operations["getAllByQuestionId"];
         put?: never;
         post?: never;
@@ -1073,6 +1539,40 @@ export interface paths {
         };
         /** Your own AI questions and answers, newest first */
         get: operations["history"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin: reports in one status (default OPEN), oldest first */
+        get: operations["reports"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/expert-applications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin: expert applications in one status (default PENDING), oldest first */
+        get: operations["applications"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1166,6 +1666,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/users/{userId}/expert-badges/{categoryId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Admin: revoke a user's Verified Expert badge in one topic */
+        delete: operations["revoke"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1213,7 +1730,16 @@ export interface components {
             questionId: number;
             title: string;
             content: string;
+            /** Format: int64 */
+            categoryId: number;
+            tags?: string[];
+            imageUrls?: string[];
             agri?: components["schemas"]["AgriInfo"];
+        };
+        CategoryResponse: {
+            /** Format: int64 */
+            id?: number;
+            categoryName?: string;
         };
         QuestionResponse: {
             /** Format: int64 */
@@ -1223,11 +1749,29 @@ export interface components {
             title?: string;
             content?: string;
             authorName?: string;
+            /** Format: int64 */
+            authorReputation?: number;
+            authorBadges?: ("TOP_CONTRIBUTOR" | "VERIFIED_EXPERT")[];
             /** Format: date-time */
             createdAt?: string;
             /** Format: date-time */
             updatedAt?: string;
             agri?: components["schemas"]["AgriInfo"];
+            category?: components["schemas"]["CategoryResponse"];
+            tags?: string[];
+            imageUrls?: string[];
+            /** Format: int64 */
+            answerCount?: number;
+            /** Format: int64 */
+            score?: number;
+            /** Format: int64 */
+            acceptedAnswerId?: number;
+        };
+        VoteResponse: {
+            /** Format: int64 */
+            score?: number;
+            /** @enum {string} */
+            myVote?: "UP" | "DOWN";
         };
         UpdateCommentRequest: {
             /** Format: int64 */
@@ -1247,15 +1791,11 @@ export interface components {
             lastModifiedDate?: string;
             commentContent?: string;
             parentComment?: components["schemas"]["Comment"];
-            /** Format: int64 */
-            creationDateTimeStamp?: number;
+            hidden?: boolean;
             /** Format: int64 */
             lastModifiedDateTimeStamp?: number;
-        };
-        CategoryResponse: {
             /** Format: int64 */
-            id?: number;
-            categoryName?: string;
+            creationDateTimeStamp?: number;
         };
         UpdateBlogRequest: {
             /** Format: int64 */
@@ -1289,7 +1829,7 @@ export interface components {
             category?: components["schemas"]["CategoryResponse"];
             author?: components["schemas"]["AuthorSummaryResponse"];
             /** @enum {string} */
-            status?: "DRAFT" | "PUBLISHED";
+            status?: "DRAFT" | "PUBLISHED" | "HIDDEN";
             /** Format: date-time */
             publishedAt?: string;
             /** Format: date-time */
@@ -1348,9 +1888,27 @@ export interface components {
             question?: components["schemas"]["Question"];
             parentAnswer?: components["schemas"]["Answer"];
             /** Format: int64 */
-            creationDateTimeStamp?: number;
+            score?: number;
+            hidden?: boolean;
             /** Format: int64 */
             lastModifiedDateTimeStamp?: number;
+            /** Format: int64 */
+            creationDateTimeStamp?: number;
+        };
+        Category: {
+            /** Format: int64 */
+            id?: number;
+            createdBy?: string;
+            lastModifiedBy?: string;
+            /** Format: date-time */
+            creationDate?: string;
+            /** Format: date-time */
+            lastModifiedDate?: string;
+            categoryName?: string;
+            /** Format: int64 */
+            lastModifiedDateTimeStamp?: number;
+            /** Format: int64 */
+            creationDateTimeStamp?: number;
         };
         Privilege: {
             /** Format: int64 */
@@ -1364,9 +1922,9 @@ export interface components {
             privilegeName?: string;
             description?: string;
             /** Format: int64 */
-            creationDateTimeStamp?: number;
-            /** Format: int64 */
             lastModifiedDateTimeStamp?: number;
+            /** Format: int64 */
+            creationDateTimeStamp?: number;
         };
         Question: {
             /** Format: int64 */
@@ -1380,11 +1938,22 @@ export interface components {
             title?: string;
             content?: string;
             user?: components["schemas"]["User"];
-            agri?: components["schemas"]["AgriMetadata"];
+            category?: components["schemas"]["Category"];
+            tags?: components["schemas"]["Tag"][];
+            imageUrls?: string[];
+            acceptedAnswer?: components["schemas"]["Answer"];
             /** Format: int64 */
-            creationDateTimeStamp?: number;
+            visibleAcceptedAnswerId?: number;
+            /** Format: int64 */
+            answerCount?: number;
+            /** Format: int64 */
+            score?: number;
+            agri?: components["schemas"]["AgriMetadata"];
+            hidden?: boolean;
             /** Format: int64 */
             lastModifiedDateTimeStamp?: number;
+            /** Format: int64 */
+            creationDateTimeStamp?: number;
         };
         Role: {
             /** Format: int64 */
@@ -1400,9 +1969,24 @@ export interface components {
             roleType?: "USER" | "ADMIN" | "SUPER_ADMIN";
             privileges?: components["schemas"]["Privilege"][];
             /** Format: int64 */
+            lastModifiedDateTimeStamp?: number;
+            /** Format: int64 */
             creationDateTimeStamp?: number;
+        };
+        Tag: {
+            /** Format: int64 */
+            id?: number;
+            createdBy?: string;
+            lastModifiedBy?: string;
+            /** Format: date-time */
+            creationDate?: string;
+            /** Format: date-time */
+            lastModifiedDate?: string;
+            name?: string;
             /** Format: int64 */
             lastModifiedDateTimeStamp?: number;
+            /** Format: int64 */
+            creationDateTimeStamp?: number;
         };
         User: {
             /** Format: int64 */
@@ -1415,34 +1999,155 @@ export interface components {
             lastModifiedDate?: string;
             name: string;
             email: string;
-            mobileNumber: string;
-            userTypes?: string[];
+            mobileNumber?: string;
+            googleSubject?: string;
+            /** Format: date-time */
+            emailVerifiedAt?: string;
             mustChangePassword?: boolean;
             roles?: components["schemas"]["Role"][];
-            /** Format: int64 */
-            creationDateTimeStamp?: number;
+            /** Format: date-time */
+            bannedAt?: string;
+            banReason?: string;
             /** Format: int64 */
             lastModifiedDateTimeStamp?: number;
+            /** Format: int64 */
+            creationDateTimeStamp?: number;
+        };
+        AnswerResponse: {
+            /** Format: int64 */
+            answerId?: number;
+            /** Format: int64 */
+            questionId?: number;
+            /** Format: int64 */
+            userId?: number;
+            content?: string;
+            authorName?: string;
+            /** Format: int64 */
+            authorReputation?: number;
+            authorBadges?: ("TOP_CONTRIBUTOR" | "VERIFIED_EXPERT")[];
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: date-time */
+            updatedAt?: string;
+            /** Format: int64 */
+            score?: number;
+            accepted?: boolean;
         };
         ChangePasswordRequest: {
             currentPassword: string;
             newPassword: string;
         };
-        AiDraftAnswerResponse: {
-            /** @description Show this next to the draft: it is AI-generated and not reviewed */
-            label?: string;
-            answer?: string;
-            sources?: components["schemas"]["AiSourceResponse"][];
+        CreateReportRequest: {
+            /** @enum {string} */
+            targetType: "BLOG" | "QUESTION" | "ANSWER" | "AI_ANSWER" | "COMMENT" | "USER";
+            /** Format: int64 */
+            targetId: number;
+            /** @enum {string} */
+            reason: "HARMFUL_ADVICE" | "SPAM" | "ABUSE" | "FALSE_CREDENTIALS" | "OTHER";
+            details?: string;
+        };
+        ReportResponse: {
+            /** Format: int64 */
+            id?: number;
+            /** Format: int64 */
+            reporterId?: number;
+            reporterName?: string;
+            /** @enum {string} */
+            targetType?: "BLOG" | "QUESTION" | "ANSWER" | "AI_ANSWER" | "COMMENT" | "USER";
+            /** Format: int64 */
+            targetId?: number;
+            /** @enum {string} */
+            reason?: "HARMFUL_ADVICE" | "SPAM" | "ABUSE" | "FALSE_CREDENTIALS" | "OTHER";
+            details?: string;
+            /** @enum {string} */
+            status?: "OPEN" | "ACTIONED" | "DISMISSED";
+            snapshot?: string;
+            /** Format: date-time */
+            createdAt?: string;
         };
         AiSourceResponse: {
+            type?: string;
             /** Format: int64 */
             blogId?: number;
+            /** Format: int64 */
+            questionId?: number;
             title?: string;
+        };
+        QuestionAiAnswerResponse: {
+            /** Format: int64 */
+            id?: number;
+            /** Format: int64 */
+            questionId?: number;
+            answer?: string;
+            sources?: components["schemas"]["AiSourceResponse"][];
+            /** @enum {string} */
+            status?: "UNCHECKED" | "CONFIRMED" | "CORRECTED" | "FLAGGED";
+            disclaimer?: string;
+            reviewerName?: string;
+            /** Format: date-time */
+            reviewedAt?: string;
+            /** Format: int64 */
+            correctionAnswerId?: number;
+            /** Format: date-time */
+            createdAt?: string;
+        };
+        CorrectAiAnswerRequest: {
+            content: string;
         };
         CreateQuestionRequest: {
             title: string;
             content: string;
+            /** Format: int64 */
+            categoryId: number;
+            tags?: string[];
+            imageUrls?: string[];
             agri?: components["schemas"]["AgriInfo"];
+        };
+        NotificationResponse: {
+            /** Format: int64 */
+            id?: number;
+            /** @enum {string} */
+            type?: "ANSWER_ON_YOUR_QUESTION" | "ANSWER_ACCEPTED" | "AI_ANSWER_REVIEWED" | "NEW_REVIEW_ITEM" | "APPLICATION_DECIDED" | "COMMENT_REPLY" | "CONTENT_REMOVED" | "CONTENT_HIDDEN" | "CONTENT_RESTORED";
+            /** @enum {string} */
+            targetType?: "QUESTION" | "BLOG" | "EXPERT_APPLICATION";
+            /** Format: int64 */
+            targetId?: number;
+            /** Format: int64 */
+            actorId?: number;
+            actorName?: string;
+            read?: boolean;
+            /** Format: date-time */
+            createdAt?: string;
+        };
+        ExpertApplicationRequest: {
+            categoryIds: number[];
+            fieldTitle: string;
+            /** @enum {string} */
+            credentialType: "DEGREE" | "STAFF_ID" | "FACULTY_PAGE" | "LICENCE" | "OTHER";
+            institution: string;
+            proofImageUrls?: string[];
+            links?: string[];
+        };
+        ExpertApplicationResponse: {
+            /** Format: int64 */
+            id?: number;
+            /** Format: int64 */
+            userId?: number;
+            applicantName?: string;
+            topics?: components["schemas"]["CategoryResponse"][];
+            fieldTitle?: string;
+            /** @enum {string} */
+            credentialType?: "DEGREE" | "STAFF_ID" | "FACULTY_PAGE" | "LICENCE" | "OTHER";
+            institution?: string;
+            proofImageUrls?: string[];
+            links?: string[];
+            /** @enum {string} */
+            status?: "PENDING" | "APPROVED" | "REJECTED";
+            reviewNote?: string;
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: date-time */
+            updatedAt?: string;
         };
         ReplyCommentRequest: {
             /** Format: int64 */
@@ -1469,23 +2174,16 @@ export interface components {
             content: string;
             imageUrl?: string;
             /** @enum {string} */
-            status?: "DRAFT" | "PUBLISHED";
+            status?: "DRAFT" | "PUBLISHED" | "HIDDEN";
             tags?: string[];
             agri?: components["schemas"]["AgriInfo"];
         };
-        ProfessionalInfoRequest: {
-            designation: string;
-            specialities: string[];
-            profileImageUrl?: string;
-            occupation?: string;
-            institution?: string;
-            professionalStatement?: string;
+        VerifyEmailRequest: {
+            token: string;
         };
         SignUpRequest: {
             name: string;
             email?: string;
-            /** @description Select user type */
-            userType?: ("AUTHOR" | "CONSUMER")[];
             /**
              * @description Country Code
              * @example +880
@@ -1497,8 +2195,6 @@ export interface components {
              */
             mobileNumber: string;
             password: string;
-            /** @description Professional information for doctor */
-            professionalInfoRequest?: components["schemas"]["ProfessionalInfoRequest"];
         };
         UserResponse: {
             /** Format: int64 */
@@ -1506,13 +2202,14 @@ export interface components {
             name?: string;
             email?: string;
             mobileNumber?: string;
-            userTypes?: string[];
             roles?: string[];
             mustChangePassword?: boolean;
             /** Format: date-time */
             createdAt?: string;
             /** Format: int64 */
             authorId?: number;
+            hasPassword?: boolean;
+            emailVerified?: boolean;
         };
         SignInRequest: {
             email: string;
@@ -1528,11 +2225,15 @@ export interface components {
             token: string;
             newPassword: string;
         };
+        EmailRequest: {
+            email: string;
+        };
         RefreshTokenRequest: {
             refreshToken: string;
         };
-        ForgotPasswordRequest: {
-            email: string;
+        GoogleSignInRequest: {
+            /** @description The credential from Google Identity Services (a Google-signed ID token) */
+            idToken: string;
         };
         ReplyToAnswerRequest: {
             /** Format: int64 */
@@ -1545,6 +2246,11 @@ export interface components {
             /** Format: int64 */
             questionId: number;
             content: string;
+        };
+        AskExpertsRequest: {
+            /** Format: int64 */
+            categoryId: number;
+            title?: string;
         };
         BlogAssistRequest: {
             /**
@@ -1574,10 +2280,72 @@ export interface components {
             /** @description Posts whose excerpts were given to the AI for this answer, most relevant first; empty when no post matched */
             sources?: components["schemas"]["AiSourceResponse"][];
         };
+        BanRequest: {
+            reason: string;
+        };
+        ExpertDecisionRequest: {
+            categoryIds?: number[];
+            note?: string;
+        };
+        ReputationResponse: {
+            /** Format: int64 */
+            total?: number;
+            topics?: components["schemas"]["TopicReputation"][];
+        };
+        TopicReputation: {
+            /** Format: int64 */
+            categoryId?: number;
+            categoryName?: string;
+            /** Format: int64 */
+            points?: number;
+            /** Format: int64 */
+            acceptedAnswers?: number;
+            badges?: ("TOP_CONTRIBUTOR" | "VERIFIED_EXPERT")[];
+            expertField?: string;
+        };
         PublicUserResponse: {
             /** Format: int64 */
             id?: number;
             name?: string;
+        };
+        ReviewItemResponse: {
+            /** Format: int64 */
+            questionId?: number;
+            questionTitle?: string;
+            questionContent?: string;
+            topic?: components["schemas"]["CategoryResponse"];
+            aiAnswer?: components["schemas"]["QuestionAiAnswerResponse"];
+        };
+        MyVotesResponse: {
+            /** @enum {string} */
+            question?: "UP" | "DOWN";
+            answers?: {
+                [key: string]: "UP" | "DOWN";
+            };
+        };
+        BlogSummaryResponse: {
+            /** Format: int64 */
+            id?: number;
+            slug?: string;
+            title?: string;
+            excerpt?: string;
+            imageUrl?: string;
+            /** Format: int32 */
+            readingTimeMinutes?: number;
+            tags?: string[];
+            /** Format: int64 */
+            clapCount?: number;
+            agri?: components["schemas"]["AgriInfo"];
+            category?: components["schemas"]["CategoryResponse"];
+            author?: components["schemas"]["AuthorSummaryResponse"];
+            /** @enum {string} */
+            status?: "DRAFT" | "PUBLISHED" | "HIDDEN";
+            /** Format: date-time */
+            publishedAt?: string;
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: date-time */
+            updatedAt?: string;
         };
         RelatedBlogResponse: {
             /** Format: int64 */
@@ -1589,6 +2357,9 @@ export interface components {
             id?: number;
             question?: string;
             answer?: string;
+            sources?: components["schemas"]["AiSourceResponse"][];
+            /** Format: int64 */
+            publishedQuestionId?: number;
             /** Format: date-time */
             askedAt?: string;
         };
@@ -1841,6 +2612,163 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["QuestionResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
+    voteOnQuestion: {
+        parameters: {
+            query: {
+                direction: "UP" | "DOWN";
+                lang?: string;
+            };
+            header?: never;
+            path: {
+                questionId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["VoteResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
+    unvoteQuestion: {
+        parameters: {
+            query?: {
+                lang?: string;
+            };
+            header?: never;
+            path: {
+                questionId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["VoteResponse"];
                 };
             };
             /** @description Bad Request */
@@ -2651,6 +3579,319 @@ export interface operations {
             };
         };
     };
+    voteOnAnswer: {
+        parameters: {
+            query: {
+                direction: "UP" | "DOWN";
+                lang?: string;
+            };
+            header?: never;
+            path: {
+                answerId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["VoteResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
+    unvoteAnswer: {
+        parameters: {
+            query?: {
+                lang?: string;
+            };
+            header?: never;
+            path: {
+                answerId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["VoteResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
+    accept: {
+        parameters: {
+            query?: {
+                lang?: string;
+            };
+            header?: never;
+            path: {
+                answerId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AnswerResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
+    unaccept: {
+        parameters: {
+            query?: {
+                lang?: string;
+            };
+            header?: never;
+            path: {
+                answerId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AnswerResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
     changePassword: {
         parameters: {
             query?: {
@@ -2722,7 +3963,87 @@ export interface operations {
             };
         };
     };
-    aiDraft: {
+    report: {
+        parameters: {
+            query?: {
+                lang?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateReportRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ReportResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
+    flag: {
         parameters: {
             query?: {
                 lang?: string;
@@ -2741,7 +4062,167 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["AiDraftAnswerResponse"];
+                    "*/*": components["schemas"]["QuestionAiAnswerResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
+    correct: {
+        parameters: {
+            query?: {
+                lang?: string;
+            };
+            header?: never;
+            path: {
+                questionId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CorrectAiAnswerRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["QuestionAiAnswerResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
+    confirm: {
+        parameters: {
+            query?: {
+                lang?: string;
+            };
+            header?: never;
+            path: {
+                questionId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["QuestionAiAnswerResponse"];
                 };
             };
             /** @description Bad Request */
@@ -2880,6 +4361,151 @@ export interface operations {
             };
         };
     };
+    markRead: {
+        parameters: {
+            query?: {
+                lang?: string;
+            };
+            header?: never;
+            path: {
+                notificationId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["NotificationResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
+    markAllRead: {
+        parameters: {
+            query?: {
+                lang?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
     upload: {
         parameters: {
             query?: {
@@ -2898,6 +4524,86 @@ export interface operations {
             };
         };
         responses: {
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
+    apply: {
+        parameters: {
+            query?: {
+                lang?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExpertApplicationRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ExpertApplicationResponse"];
+                };
+            };
             /** @description Bad Request */
             400: {
                 headers: {
@@ -3661,6 +5367,86 @@ export interface operations {
             };
         };
     };
+    verifyEmail: {
+        parameters: {
+            query?: {
+                lang?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VerifyEmailRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
     signUp: {
         parameters: {
             query?: {
@@ -3901,6 +5687,95 @@ export interface operations {
             };
         };
     };
+    resendVerification: {
+        parameters: {
+            query?: {
+                lang?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmailRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Too many requests for this e-mail or network */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
     refreshToken: {
         parameters: {
             query?: {
@@ -3981,6 +5856,95 @@ export interface operations {
             };
         };
     };
+    signInWithGoogle: {
+        parameters: {
+            query?: {
+                lang?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GoogleSignInRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["WebTokenResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Invalid Google token, unverified Google e-mail, or an admin account */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Google sign-in is not configured (no GOOGLE_CLIENT_ID) */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+        };
+    };
     forgotPassword: {
         parameters: {
             query?: {
@@ -3992,7 +5956,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ForgotPasswordRequest"];
+                "application/json": components["schemas"]["EmailRequest"];
             };
         };
         responses: {
@@ -4221,6 +6185,88 @@ export interface operations {
             };
         };
     };
+    askExperts: {
+        parameters: {
+            query?: {
+                lang?: string;
+            };
+            header?: never;
+            path: {
+                aiAnswerId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AskExpertsRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["QuestionResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
     blogAssist: {
         parameters: {
             query?: {
@@ -4381,6 +6427,148 @@ export interface operations {
             };
         };
     };
+    ban: {
+        parameters: {
+            query?: {
+                lang?: string;
+            };
+            header?: never;
+            path: {
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BanRequest"];
+            };
+        };
+        responses: {
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
+    unban: {
+        parameters: {
+            query?: {
+                lang?: string;
+            };
+            header?: never;
+            path: {
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
     signIn_1: {
         parameters: {
             query?: {
@@ -4403,6 +6591,480 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["WebTokenResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
+    removeContent: {
+        parameters: {
+            query?: {
+                lang?: string;
+            };
+            header?: never;
+            path: {
+                reportId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ReportResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
+    dismiss: {
+        parameters: {
+            query?: {
+                lang?: string;
+            };
+            header?: never;
+            path: {
+                reportId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ReportResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
+    reopen: {
+        parameters: {
+            query?: {
+                lang?: string;
+            };
+            header?: never;
+            path: {
+                questionId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["QuestionAiAnswerResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
+    reject: {
+        parameters: {
+            query?: {
+                lang?: string;
+            };
+            header?: never;
+            path: {
+                applicationId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExpertDecisionRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ExpertApplicationResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
+    approve: {
+        parameters: {
+            query?: {
+                lang?: string;
+            };
+            header?: never;
+            path: {
+                applicationId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExpertDecisionRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ExpertApplicationResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
+    reputation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ReputationResponse"];
                 };
             };
             /** @description Bad Request */
@@ -4762,6 +7424,163 @@ export interface operations {
             };
         };
     };
+    queue: {
+        parameters: {
+            query?: {
+                pageNo?: number;
+                pageSize?: number;
+                lang?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ReviewItemResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
+    search: {
+        parameters: {
+            query: {
+                q: string;
+                pageNo?: number;
+                pageSize?: number;
+                lang?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["QuestionResponse"][];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
     findById_1: {
         parameters: {
             query?: never;
@@ -4838,6 +7657,162 @@ export interface operations {
             };
         };
     };
+    myVotes: {
+        parameters: {
+            query?: {
+                lang?: string;
+            };
+            header?: never;
+            path: {
+                questionId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MyVotesResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
+    aiAnswer: {
+        parameters: {
+            query?: {
+                lang?: string;
+            };
+            header?: never;
+            path: {
+                questionId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["QuestionAiAnswerResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
     getAll: {
         parameters: {
             query?: {
@@ -4846,6 +7821,9 @@ export interface operations {
                 sortBy?: string;
                 ascOrDesc?: "asc" | "desc";
                 lang?: string;
+                categoryId?: number;
+                tag?: string;
+                unanswered?: boolean;
                 crop?: string;
                 season?: "RABI" | "KHARIF_1" | "KHARIF_2" | "YEAR_ROUND";
                 region?: string;
@@ -4948,6 +7926,152 @@ export interface operations {
                     "*/*": components["schemas"]["QuestionResponse"][];
                 };
             };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
+    mine: {
+        parameters: {
+            query?: {
+                unreadOnly?: boolean;
+                pageNo?: number;
+                pageSize?: number;
+                lang?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["NotificationResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
+    unreadCount: {
+        parameters: {
+            query?: {
+                lang?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
             /** @description Bad Request */
             400: {
                 headers: {
@@ -5169,7 +8293,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["BlogResponse"][];
+                    "*/*": components["schemas"]["BlogSummaryResponse"][];
                 };
             };
             /** @description Bad Request */
@@ -5246,7 +8370,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["BlogResponse"][];
+                    "*/*": components["schemas"]["BlogSummaryResponse"][];
                 };
             };
             /** @description Bad Request */
@@ -5324,7 +8448,85 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["BlogResponse"][];
+                    "*/*": components["schemas"]["BlogSummaryResponse"][];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
+    mine_1: {
+        parameters: {
+            query?: {
+                pageNo?: number;
+                pageSize?: number;
+                lang?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ExpertApplicationResponse"];
                 };
             };
             /** @description Bad Request */
@@ -5615,7 +8817,9 @@ export interface operations {
     };
     getAllCommentsByBlogId: {
         parameters: {
-            query?: never;
+            query?: {
+                lang?: string;
+            };
             header?: never;
             path: {
                 blogId: number;
@@ -5769,7 +8973,7 @@ export interface operations {
             };
         };
     };
-    mine: {
+    mine_2: {
         parameters: {
             query?: {
                 pageNo?: number;
@@ -5788,7 +8992,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["BlogResponse"][];
+                    "*/*": components["schemas"]["BlogSummaryResponse"][];
                 };
             };
             /** @description Bad Request */
@@ -5925,7 +9129,7 @@ export interface operations {
             };
         };
     };
-    search: {
+    search_1: {
         parameters: {
             query: {
                 q: string;
@@ -5945,7 +9149,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["BlogResponse"][];
+                    "*/*": components["schemas"]["BlogSummaryResponse"][];
                 };
             };
             /** @description Bad Request */
@@ -6025,7 +9229,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["BlogResponse"][];
+                    "*/*": components["schemas"]["BlogSummaryResponse"][];
                 };
             };
             /** @description Bad Request */
@@ -6266,7 +9470,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["BlogResponse"][];
+                    "*/*": components["schemas"]["BlogSummaryResponse"][];
                 };
             };
             /** @description Bad Request */
@@ -6348,7 +9552,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["BlogResponse"][];
+                    "*/*": components["schemas"]["BlogSummaryResponse"][];
                 };
             };
             /** @description Bad Request */
@@ -6430,7 +9634,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["BlogResponse"][];
+                    "*/*": components["schemas"]["BlogSummaryResponse"][];
                 };
             };
             /** @description Bad Request */
@@ -6512,7 +9716,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["BlogResponse"][];
+                    "*/*": components["schemas"]["BlogSummaryResponse"][];
                 };
             };
             /** @description Bad Request */
@@ -7031,6 +10235,162 @@ export interface operations {
             };
         };
     };
+    reports: {
+        parameters: {
+            query?: {
+                status?: "OPEN" | "ACTIONED" | "DISMISSED";
+                pageNo?: number;
+                pageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ReportResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
+    applications: {
+        parameters: {
+            query?: {
+                status?: "PENDING" | "APPROVED" | "REJECTED";
+                pageNo?: number;
+                pageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ExpertApplicationResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
     deleteUser: {
         parameters: {
             query?: {
@@ -7361,6 +10721,76 @@ export interface operations {
                     "*/*": components["schemas"]["HttpResponse"];
                 };
             };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
+    revoke: {
+        parameters: {
+            query?: {
+                lang?: string;
+            };
+            header?: never;
+            path: {
+                userId: number;
+                categoryId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
             /** @description Bad Request */
             400: {
                 headers: {

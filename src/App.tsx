@@ -31,8 +31,11 @@ const SearchPage = page(() => import('./features/search/SearchPage'), 'SearchPag
 const StoryById = page(() => import('./features/story/StoryById'), 'StoryById')
 const TagPage = page(() => import('./features/topics/TagPage'), 'TagPage')
 const UserPage = page(() => import('./features/users/UserPage'), 'UserPage')
+const ExpertApplyPage = page(() => import('./features/experts/ExpertApplyPage'), 'ExpertApplyPage')
+const ReviewQueuePage = page(() => import('./features/experts/ReviewQueuePage'), 'ReviewQueuePage')
 const TopicsPage = page(() => import('./features/topics/TopicsPage'), 'TopicsPage')
 const AdminCategoriesPage = page(() => import('./features/admin/AdminCategoriesPage'), 'AdminCategoriesPage')
+const AdminExpertsPage = page(() => import('./features/admin/AdminExpertsPage'), 'AdminExpertsPage')
 const EditorPage = page(() => import('./features/editor/EditorPage'), 'EditorPage')
 
 export default function App() {
@@ -48,6 +51,7 @@ export default function App() {
         <Route path="/tags/:tagName" element={<TagPage />} />
         <Route path="/advisor" element={<AdvisorPage />} />
         <Route path="/admin/categories" element={<AdminCategoriesPage />} />
+        <Route path="/admin/experts" element={<AdminExpertsPage />} />
         <Route path="/questions" element={<QuestionsPage />} />
         <Route path="/questions/:questionId" element={<QuestionPage />} />
         <Route path="/search" element={<SearchPage />} />
@@ -67,6 +71,8 @@ export default function App() {
           <Route path="/library" element={<LibraryPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/welcome" element={<WelcomePage />} />
+          <Route path="/experts/apply" element={<ExpertApplyPage />} />
+          <Route path="/review" element={<ReviewQueuePage />} />
         </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Route>

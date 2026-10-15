@@ -17,9 +17,15 @@ const user = { id: 1, name: 'Nasrin Akter', email: 'nasrin@farm.bd', mobileNumbe
 const fetchMock = vi.fn<typeof fetch>()
 
 beforeEach(() => {
-  // The profile section loads on its own; the account and password tests count the other calls.
+  // The profile, expert and reputation reads load on their own; the account and password tests count the other calls.
   vi.stubGlobal('fetch', (input: RequestInfo | URL, init?: RequestInit) =>
-    String(input).startsWith('/api/authors/me') ? Promise.resolve(envelope(200, { name: user.name, specialities: [] })) : fetchMock(input, init),
+    String(input).startsWith('/api/authors/me')
+      ? Promise.resolve(envelope(200, { name: user.name, specialities: [] }))
+      : String(input).startsWith('/api/experts/applications/me')
+        ? Promise.resolve(envelope(200, { content: [], number: 0, last: true }))
+        : String(input).startsWith('/api/users/')
+          ? Promise.resolve(envelope(200, { total: 0, topics: [] }))
+          : fetchMock(input, init),
   )
   localStorage.clear()
   clearSession()

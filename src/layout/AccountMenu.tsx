@@ -1,9 +1,10 @@
 import { useT } from '../lib/i18n'
-import { BookmarksSimple, GearSix, NotePencil, SignOut, Tag } from '@phosphor-icons/react'
+import { BookmarksSimple, GearSix, NotePencil, SealCheck, ShieldCheck, SignOut } from '@phosphor-icons/react'
 import { useEffect, useId, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { isAdmin } from '../api/auth'
 import { useSession } from '../features/auth/session'
+import { useMyBadges } from '../features/experts/useMyBadges'
 import { Avatar } from '../ui/Avatar'
 import { LanguageSwitch } from './Footer'
 
@@ -17,6 +18,8 @@ export function AccountMenu() {
   const root = useRef<HTMLDivElement>(null)
   const trigger = useRef<HTMLButtonElement>(null)
   const name = user?.name || t('Your account')
+  // The review queue is for Verified Experts; the entry stays hidden for everyone else.
+  const { expertAnywhere } = useMyBadges()
 
   useEffect(() => {
     if (!open) return
@@ -64,10 +67,16 @@ export function AccountMenu() {
             <NotePencil size={18} aria-hidden="true" />
             {t('Your stories')}
           </Link>
+          {expertAnywhere && (
+            <Link to="/review" onClick={() => setOpen(false)} className="flex h-11 items-center gap-2 px-4 text-sm text-ink-muted hover:bg-field hover:text-ink">
+              <SealCheck size={18} aria-hidden="true" />
+              {t('Review queue')}
+            </Link>
+          )}
           {isAdmin(user) && (
-            <Link to="/admin/categories" onClick={() => setOpen(false)} className="flex h-11 items-center gap-2 px-4 text-sm text-ink-muted hover:bg-field hover:text-ink">
-              <Tag size={18} aria-hidden="true" />
-              {t('Categories')}
+            <Link to="/admin/experts" onClick={() => setOpen(false)} className="flex h-11 items-center gap-2 px-4 text-sm text-ink-muted hover:bg-field hover:text-ink">
+              <ShieldCheck size={18} aria-hidden="true" />
+              {t('Admin')}
             </Link>
           )}
           <Link to="/library" onClick={() => setOpen(false)} className="flex h-11 items-center gap-2 px-4 text-sm text-ink-muted hover:bg-field hover:text-ink">

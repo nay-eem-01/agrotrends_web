@@ -7,6 +7,10 @@ import { TextField } from '../../ui/TextField'
 import { FormError } from '../auth/AuthPage'
 import { useSession } from '../auth/session'
 import { AuthorProfileForm } from './AuthorProfileForm'
+import { useMyApplications } from '../../api/experts'
+import { ApplicationStatus } from '../experts/ExpertApplyPage'
+import { ButtonLink } from '../../ui/Button'
+import { Spinner } from '../../ui/Spinner'
 
 export const EMAIL_CHANGED_NOTICE = 'E-mail changed. Sign in with your new address.'
 export const PASSWORD_CHANGED_NOTICE = 'Password changed. Sign in with your new password.'
@@ -22,10 +26,30 @@ export function SettingsPage() {
       <Section title="Profile" intro="Optional. People see it next to your stories and answers, and on your profile page.">
         <AuthorProfileForm name={user?.name ?? ''} />
       </Section>
+      <Section title="Verified expert" intro="Experts check AI answers in their topics and carry a badge on their answers.">
+        <ExpertStatus />
+      </Section>
       <Section title="Password" intro="Changing it signs you out on every device.">
         <PasswordForm />
       </Section>
     </section>
+  )
+}
+
+/** The latest expert application's status, or the way to apply. */
+function ExpertStatus() {
+  const mine = useMyApplications()
+  if (mine.isPending) return <Spinner />
+  const latest = mine.data?.content[0]
+  return (
+    <div className="flex flex-col items-start gap-4">
+      {latest && <ApplicationStatus application={latest} />}
+      {latest?.status !== 'PENDING' && (
+        <ButtonLink to="/experts/apply" variant="secondary" size="sm">
+          {latest ? 'Apply again' : 'Apply to be a verified expert'}
+        </ButtonLink>
+      )}
+    </div>
   )
 }
 

@@ -21,10 +21,12 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   (`feat/reputation`) done. Phase F9 is complete.
 - Phase F10 on `feat/ai-answers-base` (stacked on F9's tip): F10.1 AI answer card (`feat/ai-answer-card`) F10.2 sources (`feat/ai-sources`) and F10.3 ask the
   experts (`feat/ask-experts`) done. Phase F10 is complete.
+- Phase F11 on `feat/experts-base` (stacked on F10's tip): F11.1 apply (`feat/expert-apply`) F11.2 review (`feat/expert-review`) and F11.3 admin
+  (`feat/expert-admin`) done. Phase F11 is complete.
 
 ## Next up
 
-1. Phase F11 verified experts: F11.1 apply, F11.2 review, F11.3 admin.
+1. Phase F12 notifications: F12.1 bell, F12.2 notifications page (backend Phase 8 branch).
 2. F12–F14 need the backend's Phase 8 branch until it is merged.
 
 ## Open items
@@ -40,7 +42,71 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
+| The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-15 (F11.3 expert applications admin)
+
+**Done**
+- `/admin/experts` (staff; the account menu's **Admin**): Waiting / Approved / Rejected tabs over
+  `GET /api/admin/expert-applications?status=`. Each application shows the applicant (linking to their profile),
+  field, institution, proof type, requested topics, proof photos and links (both open in a new tab,
+  `rel="noopener noreferrer"`).
+- Waiting: tick the topics to approve (all ticked sends no `categoryIds`, i.e. every requested topic) with an optional
+  note; **Reject** needs a reason (up to 500). A second decision's 409 is shown as written and the lists reload.
+- Approved: **Revoke {topic}** per badge, behind an alert dialog that says the expert's confirmed AI answers in that
+  topic go back to unchecked (`DELETE /api/admin/users/{id}/expert-badges/{topicId}`).
+- `admin/AdminPage`: one frame for admin pages (sections nav and the admin sign-in), now used by categories too.
+  Staff see every section; a missing privilege shows the backend's 403.
+- Tests: `admin/admin-experts.test.tsx` (proofs open safely and approve-all sends no topics; approve some with a note;
+  reject needs a reason and shows a 409; revoke asks first; a 403 is shown).
+
+**Known limitations**
+- Admin pages stay in English, as in F6.6.
+- Not live-tested: no admin login here.
+
+---
+
+## 2026-10-15 (F11.2 expert review)
+
+**Done**
+- On the question page, an unchecked AI answer shows **Review as an expert** to people with a badge in the question's
+  topic: Verified Experts get **Confirm**, **Correct** (their corrected answer, up to 5000 characters, posted on the
+  question) and **Flag**; Top Contributors get **Flag** only. Flag asks first ("It will be hidden from everyone").
+- `/review`: the review queue (`GET /api/review-queue`, oldest first) with the question, its topic, the AI answer and
+  the same actions. A 403 explains the queue is for verified experts and links to applying.
+- The account menu shows **Review queue** only to Verified Experts.
+- Whatever happens (success or 409 "already reviewed"), the AI answer, the answers and the queue reload; the 409's
+  message is shown as written.
+- Badges come from `GET /api/users/{me}/reputation` (`experts/useMyBadges`), as the backend has no "am I an expert
+  here" read.
+- Tests: `experts/review.test.tsx` (confirm on the question page; a correction's body; a top contributor flags only
+  and sees a 409; no buttons without a badge in that topic; the queue and the menu entry; 403 on the queue).
+
+**Known limitations**
+- Not live-tested: approving an expert needs an admin account with `EXPERT_REVIEW` (the seeded admin's password
+  isn't known here).
+
+---
+
+## 2026-10-15 (F11.1 apply to be a verified expert)
+
+**Done**
+- `/experts/apply`: topics (1–3, as toggle chips), field, institution, credential type, proof photos (up to 4, through
+  `POST /api/images`, with a warning that they live at a public, unguessable address) and up to 3 `http(s)` links;
+  at least one proof. Sent to `POST /api/experts/applications`.
+- Status from `GET /api/experts/applications/me` (newest first): waiting, approved (mustard) or not approved, with the
+  admin's note; the deciding admin is never shown. A pending application replaces the form (a 409 says so); after a
+  decision, **Apply again**.
+- Settings has a **Verified expert** section with the same status card, or the way to apply.
+- `qa/PhotoPicker` takes a label, hint and limit, so proofs reuse it.
+- Fixed a lint warning from F9.1 (`VoteControl` synced props into state in an effect; it now adjusts during
+  render). Lint is now run with `--max-warnings 0`: plain `oxlint` exits 0 on warnings, which hid it.
+- Live: an application sent through the API shows as waiting.
+- Tests: `experts/apply.test.tsx` (validation, then the exact request; pending shows status; a rejection's note and
+  Apply again; the Settings card).
 
 ---
 

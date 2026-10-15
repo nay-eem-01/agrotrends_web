@@ -113,7 +113,7 @@ function QuestionView({ question }: { question: Question }) {
         )}
         </div>
       </div>
-      <AiAnswerCard questionId={id} askedAt={askedAt} />
+      <AiAnswerCard questionId={id} topicId={question.category?.id} askedAt={askedAt} />
       <Answers questionId={id} askerId={question.userId} />
     </article>
   )

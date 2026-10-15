@@ -3,7 +3,7 @@ import type { AgriFilters } from '../lib/agri'
 import { api } from './client'
 import { ApiError } from './errors'
 import { FEED_PAGE_SIZE } from './feed'
-import type { BlogResponse, Page, Schemas } from './types'
+import type { BlogResponse, Page, Schemas, StorySummary } from './types'
 
 export const blogKeys = {
   list: (filters: AgriFilters) => ['blogs', 'list', filters] as const,
@@ -14,7 +14,7 @@ export function useBlogs(filters: AgriFilters, enabled = true) {
   return useInfiniteQuery({
     queryKey: blogKeys.list(filters),
     queryFn: ({ pageParam, signal }) =>
-      api<Page<BlogResponse>>('/api/blogs/all', {
+      api<Page<StorySummary>>('/api/blogs/all', {
         params: { pageNo: pageParam, pageSize: FEED_PAGE_SIZE, sortBy: 'creationDate', ascOrDesc: 'desc', ...filters },
         signal,
       }),
@@ -40,7 +40,7 @@ export function useSearch(q: string) {
   return useInfiniteQuery({
     queryKey: ['blogs', 'search', q],
     queryFn: ({ pageParam, signal }) =>
-      api<Page<BlogResponse>>('/api/blogs/search', { params: { q, pageNo: pageParam, pageSize: FEED_PAGE_SIZE }, signal }),
+      api<Page<StorySummary>>('/api/blogs/search', { params: { q, pageNo: pageParam, pageSize: FEED_PAGE_SIZE }, signal }),
     initialPageParam: 0,
     getNextPageParam: (page) => (page.last ? undefined : page.number + 1),
     enabled: q.trim() !== '',
@@ -96,7 +96,7 @@ export function useMyDrafts() {
   return useInfiniteQuery({
     queryKey: ['blogs', 'drafts'],
     queryFn: ({ pageParam, signal }) =>
-      api<Page<BlogResponse>>('/api/blogs/me/drafts', {
+      api<Page<StorySummary>>('/api/blogs/me/drafts', {
         params: { pageNo: pageParam, pageSize: 20, sortBy: 'lastModifiedDate', ascOrDesc: 'desc' },
         signal,
       }),

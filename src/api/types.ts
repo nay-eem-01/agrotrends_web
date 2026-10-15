@@ -20,3 +20,5 @@ export interface Page<T> {
 }
 
 export type BlogResponse = Schemas['BlogResponse']
+/** A story in a list (feeds, search, drafts, bookmarks): `excerpt` instead of `content`. */
+export type StorySummary = Schemas['BlogSummaryResponse']

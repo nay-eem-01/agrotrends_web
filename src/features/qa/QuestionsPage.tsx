@@ -1,4 +1,4 @@
-import { CheckCircle, Sparkle, X } from '@phosphor-icons/react'
+import { CheckCircle, SealCheck, Sparkle, X } from '@phosphor-icons/react'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { Badge } from '@/components/ui/badge'
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyTitle } from '@/components/ui/empty'
@@ -215,7 +215,14 @@ export function QuestionCard({ question }: { question: Question }) {
         <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-muted-foreground">
           <span className="inline-flex items-center gap-1.5">
             <Avatar name={question.authorName ?? '?'} size={20} />
-            {question.authorName} · {storyDate(question.createdAt)}
+            {question.authorName}
+            {question.authorReputation != null && (
+              <span className="tabular-nums">
+                <span className="sr-only">{t('Reputation')} </span>· {formatNumber(question.authorReputation)}
+              </span>
+            )}
+            {question.authorBadges?.includes('VERIFIED_EXPERT') && <SealCheck size={14} weight="fill" className="text-mustard" aria-label={t('Verified expert')} />}
+            <span>· {storyDate(question.createdAt)}</span>
           </span>
           {(question.tags ?? []).map((tag) => (
             <Link key={tag} to={`/questions?tag=${encodeURIComponent(tag)}`} className="relative z-10 rounded-full bg-muted px-2 py-0.5 text-foreground hover:bg-accent">

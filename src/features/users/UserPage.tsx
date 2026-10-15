@@ -7,7 +7,11 @@ import { Avatar } from '../../ui/Avatar'
 import { Button } from '../../ui/Button'
 import { Spinner } from '../../ui/Spinner'
 import { NotFoundPage } from '../errors/NotFoundPage'
+import { isAdmin } from '../../api/auth'
+import { BanControls } from '../admin/BanControls'
+import { useSession } from '../auth/session'
 import { BadgeMark } from '../qa/AuthorLine'
+import { ReportButton } from '../reports/ReportButton'
 import { QuestionCard } from '../qa/QuestionsPage'
 
 /**
@@ -18,6 +22,7 @@ export function UserPage() {
   const t = useT()
   const userId = Number(useParams().userId)
   const fromLink = (useLocation().state as { name?: string } | null)?.name
+  const { user } = useSession()
   const reputation = useReputation(userId)
   const questions = useUserQuestions(userId)
   const list = questions.data?.pages.flatMap((page) => page.content) ?? []
@@ -39,7 +44,15 @@ export function UserPage() {
             </p>
           )}
         </div>
+        <ReportButton targetType="USER" targetId={userId} own={user?.id === userId} what={t('this profile')} className="ml-auto self-start" />
       </div>
+
+      {isAdmin(user) && user?.id !== userId && (
+        <section aria-label="Staff" className="mt-6 rounded-2xl border border-dashed border-input p-4">
+          <p className="mb-3 text-sm text-muted-foreground">Staff</p>
+          <BanControls userId={userId} name={name} />
+        </section>
+      )}
 
       <section aria-labelledby="by-topic" className="mt-10">
         <h2 id="by-topic" className="text-xl">

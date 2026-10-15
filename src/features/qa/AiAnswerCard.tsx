@@ -6,6 +6,7 @@ import { storyDate } from '../../lib/dates'
 import { useT } from '../../lib/i18n'
 import { Sources } from '../ai/Sources'
 import { ReviewActions } from '../experts/ReviewActions'
+import { ReportButton } from '../reports/ReportButton'
 import { useMyBadges } from '../experts/useMyBadges'
 
 /**
@@ -53,6 +54,7 @@ function Card({ answer, topicId }: { answer: AiAnswer; topicId?: number }) {
           {t('AI answer')}
         </h2>
         <StatusLabel answer={answer} />
+        {answer.questionId != null && <ReportButton targetType="AI_ANSWER" targetId={answer.questionId} what={t('this AI answer')} className="ml-auto" />}
       </header>
       <p className="mt-3 font-serif text-[1.0625rem] leading-relaxed whitespace-pre-line">{answer.answer}</p>
       {corrected && answer.correctionAnswerId != null && (

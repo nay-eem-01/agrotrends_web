@@ -12,6 +12,7 @@ import { useSession } from '../auth/session'
 
 const SECTIONS = [
   { to: '/admin/experts', label: 'Expert applications' },
+  { to: '/admin/reports', label: 'Reports' },
   { to: '/admin/categories', label: 'Categories' },
 ]
 

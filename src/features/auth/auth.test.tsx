@@ -82,7 +82,8 @@ test('signing up sends one kind of account, then signs in', async () => {
   expect(screen.queryByRole('radio')).not.toBeInTheDocument()
   await userEvent.click(screen.getByRole('button', { name: 'Create account' }))
 
-  await waitFor(() => expect(getAccessToken()).toBe('a1'))
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/welcome?next=%2F'))
+  expect(getAccessToken()).toBe('a1')
   expect(fetchMock.mock.calls[0][0]).toBe('/api/auth/sign-up')
   expect(body(0)).toEqual({
     name: 'Nasrin Akter',

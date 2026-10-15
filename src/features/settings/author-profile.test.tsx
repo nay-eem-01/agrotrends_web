@@ -56,7 +56,7 @@ function call(key: string): RequestInit | undefined {
 
 async function openProfile() {
   renderWithProviders(<App />, '/settings')
-  const heading = await screen.findByRole('heading', { name: 'Author profile' })
+  const heading = await screen.findByRole('heading', { name: 'Profile' })
   const section = heading.closest('section')!
   await within(section).findByLabelText('Designation')
   return within(section)
@@ -140,11 +140,10 @@ test('designation and specialities are required', async () => {
   expect(call('PUT /api/authors/me')).toBeUndefined()
 })
 
-test('readers have no author profile section', async () => {
-  routes['POST /api/auth/refresh-token'] = () => envelope(200, { accessToken: 'a1', refreshToken: 'r1', user: { ...author, authorId: undefined } })
+test('every account has a profile section, even before its first story', async () => {
+  routes['POST /api/auth/refresh-token'] = () => envelope(200, { accessToken: 'a1', refreshToken: 'r1', user: { ...author, authorId: null } })
   renderWithProviders(<App />, '/settings')
 
-  await screen.findByRole('heading', { name: 'Settings' })
-  expect(screen.queryByRole('heading', { name: 'Author profile' })).not.toBeInTheDocument()
-  expect(call('GET /api/authors/me')).toBeUndefined()
+  expect(await screen.findByRole('heading', { name: 'Profile' })).toBeInTheDocument()
+  expect(await screen.findByLabelText('Designation')).toHaveValue('Agronomist')
 })

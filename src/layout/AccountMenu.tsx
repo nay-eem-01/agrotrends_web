@@ -60,12 +60,10 @@ export function AccountMenu() {
             <p className="truncate font-medium">{name}</p>
             {user?.email && <p className="truncate text-sm text-ink-muted">{user.email}</p>}
           </div>
-          {user?.authorId != null && (
-            <Link to="/me/stories" onClick={() => setOpen(false)} className="mt-1 flex h-11 items-center gap-2 px-4 text-sm text-ink-muted hover:bg-field hover:text-ink">
-              <NotePencil size={18} aria-hidden="true" />
-              {t('Your stories')}
-            </Link>
-          )}
+          <Link to="/me/stories" onClick={() => setOpen(false)} className="mt-1 flex h-11 items-center gap-2 px-4 text-sm text-ink-muted hover:bg-field hover:text-ink">
+            <NotePencil size={18} aria-hidden="true" />
+            {t('Your stories')}
+          </Link>
           {isAdmin(user) && (
             <Link to="/admin/categories" onClick={() => setOpen(false)} className="flex h-11 items-center gap-2 px-4 text-sm text-ink-muted hover:bg-field hover:text-ink">
               <Tag size={18} aria-hidden="true" />

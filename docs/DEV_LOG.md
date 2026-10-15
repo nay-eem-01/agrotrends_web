@@ -15,11 +15,11 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 - Phase F7 on `feat/backend-catchup-base`: F7.0 design system (`feat/design-system`) F7.0b no season strip
   (`feat/no-season-strip`) F7.1a API types (`feat/api-types`) F7.1b one account (`feat/one-account`) F7.2
   e-mail confirmation (`feat/email-confirm`) and F7.3 excerpts (`feat/excerpts`) done. Phase F7 is complete.
-- Phase F8 on `feat/questions-first-base` (stacked on F7's tip): F8.1 ask form (`feat/ask-form`) done.
+- Phase F8 on `feat/questions-first-base` (stacked on F7's tip): F8.1 ask form (`feat/ask-form`) and F8.2 questions home (`feat/questions-home`) done.
 
 ## Next up
 
-1. F8.2 questions list and home, F8.3 question page.
+1. F8.3 question page.
 2. F12–F14 need the backend's Phase 8 branch until it is merged.
 
 ## Open items
@@ -35,6 +35,32 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-15 (F8.2 questions home)
+
+**Done**
+- `/` is the question feed, under **Questions | Stories** tabs; stories moved to `/stories` (feed tabs, filters and
+  story chips follow: `filterPath` now defaults to `/stories`). Visitors get a new welcome ("Farming questions,
+  answered by people who grow") above the tabs. `/questions` shows the same list with its own heading.
+- Question cards (white on the leaf floor): votes and answers in a left column, the answers box in mustard-soft with
+  a check when an answer is accepted, then topic badge, serif title (the link covers the card), excerpt, `#tags` and
+  farming chips. Skeleton cards while loading; shadcn `Empty` when nothing matches.
+- Filters: **Newest | Unanswered** (`unanswered=true`), a topic select (`categoryId`), a removable tag chip (`tag`),
+  and the farming filter bar; all combine, and changing one keeps the others (`filterPath(…, keep)`). A rail lists
+  topics and offers the advisor.
+- Search: question results first (`GET /api/questions/search`, quotes and `-exclusions` explained when nothing
+  matches), stories on a second tab (`?type=stories`); a new search stays on its tab. Matching tags above.
+- Top bar: Questions, Stories, Advisor, Write, and an **Ask** button when signed in. The home rail calls tags "Tags".
+- Bundle: the confirm-e-mail dialog (Base UI) mounts only when first needed and the stories tab is lazy, keeping the
+  main bundle at 105 kB gzip.
+- Tests: home lands on questions; cards show votes, answers, accepted, topic and tags; Unanswered + topic + tag +
+  crop combine and survive each other; question search by phrase; story tests moved to `/stories`.
+
+**Decisions**
+- Tabs and filters are links (URL state), so every view can be shared and the back button works.
+- Answer and vote counts sit in a fixed column so titles align down the list, the way people scan a Q&A site.
 
 ---
 

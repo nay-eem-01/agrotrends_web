@@ -1,13 +1,13 @@
 import { useT } from '../../lib/i18n'
 import { BookmarkSimple } from '@phosphor-icons/react'
 import { useBookmarkedIds, useToggleBookmark } from '../../api/reactions'
-import type { BlogResponse } from '../../api/types'
+import type { StorySummary } from '../../api/types'
 import { cx } from '../../ui/cx'
 import { useSession } from '../auth/session'
 import { useRequireSignIn } from '../auth/useRequireSignIn'
 
 /** Save to (or remove from) the reader's reading list. Visitors are sent to sign-in. */
-export function BookmarkButton({ story, className }: { story: BlogResponse; className?: string }) {
+export function BookmarkButton({ story, className }: { story: Pick<StorySummary, 'id' | 'title'>; className?: string }) {
   const t = useT()
   const blogId = story.id ?? 0
   const { status } = useSession()

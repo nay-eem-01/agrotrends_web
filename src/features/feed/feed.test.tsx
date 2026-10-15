@@ -1,18 +1,19 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
-import type { BlogResponse } from '../../api/types'
+import type { StorySummary } from '../../api/types'
 import { clearSession } from '../../api/client'
 import App from '../../App'
 import { envelope, mockApi, page } from '../../test/api'
 import { renderWithProviders } from '../../test/render'
 
-function story(id: number, overrides: Partial<BlogResponse> = {}): BlogResponse {
+// Lists carry a plain-text excerpt, never the body.
+function story(id: number, overrides: Partial<StorySummary> = {}): StorySummary {
   return {
     id,
     slug: `story-${id}`,
     title: `Story ${id}`,
-    content: `<p>Body of story ${id}.</p>`,
+    excerpt: `Body of story ${id}.`,
     readingTimeMinutes: 3,
     clapCount: 0,
     author: { authorId: 7, name: 'Nasrin Akter' },

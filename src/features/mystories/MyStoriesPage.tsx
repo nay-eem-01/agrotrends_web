@@ -4,7 +4,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { useAuthorStories, useMyAuthorProfile } from '../../api/authors'
 import { useBlogWrite, useMyDrafts } from '../../api/blogs'
 import { errorMessage } from '../../api/errors'
-import type { BlogResponse, Page } from '../../api/types'
+import type { Page, StorySummary } from '../../api/types'
 import { storyDate } from '../../lib/dates'
 import { isBlank, loadLocalDraft } from '../../lib/draft'
 import { Button, ButtonLink } from '../../ui/Button'
@@ -92,7 +92,7 @@ function PublishedList({ authorId }: { authorId: number }) {
   return <StoryRows query={useAuthorStories(authorId)} empty="Nothing published yet. Your published stories appear here." />
 }
 
-function StoryRows({ query, empty }: { query: UseInfiniteQueryResult<InfiniteData<Page<BlogResponse>>>; empty: string | null }) {
+function StoryRows({ query, empty }: { query: UseInfiniteQueryResult<InfiniteData<Page<StorySummary>>>; empty: string | null }) {
   const stories = query.data?.pages.flatMap((page) => page.content) ?? []
   if (query.isPending) return <Spinner label="Loading stories" />
   if (query.isError) {
@@ -119,7 +119,7 @@ function StoryRows({ query, empty }: { query: UseInfiniteQueryResult<InfiniteDat
   )
 }
 
-function StoryRow({ story }: { story: BlogResponse }) {
+function StoryRow({ story }: { story: StorySummary }) {
   const [confirming, setConfirming] = useState(false)
   const remove = useBlogWrite()
   const draft = story.status === 'DRAFT'

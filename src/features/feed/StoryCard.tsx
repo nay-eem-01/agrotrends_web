@@ -1,19 +1,19 @@
 import { formatNumber, useT } from '../../lib/i18n'
 import { HandsClapping } from '@phosphor-icons/react'
 import { Link } from 'react-router-dom'
-import type { BlogResponse } from '../../api/types'
+import type { StorySummary } from '../../api/types'
 import { filterPath, SEASON_LABELS } from '../../lib/agri'
 import { storyDate } from '../../lib/dates'
-import { excerpt, htmlToText } from '../../lib/html'
 import { Avatar } from '../../ui/Avatar'
 import { BookmarkButton } from '../reactions/BookmarkButton'
 
 /** One story in a feed: text on the left, cover on the right, separated by a hairline rather than a box. */
-export function StoryCard({ story }: { story: BlogResponse }) {
+export function StoryCard({ story }: { story: StorySummary }) {
   const t = useT()
   const href = `/stories/${story.slug}`
   const author = story.author
-  const preview = excerpt(htmlToText(story.content))
+  // Lists carry a plain-text excerpt (up to 200 characters) instead of the body.
+  const preview = story.excerpt
   const crop = story.agri?.crop
   const season = story.agri?.season
   const meta = [storyDate(story.publishedAt), story.readingTimeMinutes ? t('{n} min read', { n: formatNumber(story.readingTimeMinutes) }) : null].filter(Boolean)

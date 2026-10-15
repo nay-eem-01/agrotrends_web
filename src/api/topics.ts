@@ -1,7 +1,7 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './client'
 import { FEED_PAGE_SIZE, feedKeys } from './feed'
-import type { BlogResponse, Page } from './types'
+import type { Page, StorySummary } from './types'
 
 export const topicKeys = {
   search: (q: string) => ['tags', 'search', q] as const,
@@ -22,7 +22,7 @@ export function useTagStories(tag: string) {
   return useInfiniteQuery({
     queryKey: topicKeys.stories(tag),
     queryFn: ({ pageParam, signal }) =>
-      api<Page<BlogResponse>>(`/api/blogs/all/tag/${encodeURIComponent(tag)}`, {
+      api<Page<StorySummary>>(`/api/blogs/all/tag/${encodeURIComponent(tag)}`, {
         params: { pageNo: pageParam, pageSize: FEED_PAGE_SIZE, sortBy: 'creationDate', ascOrDesc: 'desc' },
         signal,
       }),

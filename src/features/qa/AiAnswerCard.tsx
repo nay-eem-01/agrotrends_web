@@ -5,12 +5,14 @@ import { AI_POLL_FOR_MS, useAiAnswer, type AiAnswer } from '../../api/aiAnswer'
 import { storyDate } from '../../lib/dates'
 import { useT } from '../../lib/i18n'
 import { Sources } from '../ai/Sources'
+import { ReviewActions } from '../experts/ReviewActions'
+import { useMyBadges } from '../experts/useMyBadges'
 
 /**
  * The AI answer, as its own card above the people's answers and never mixed with them: labelled with its review state
  * (unchecked, confirmed or corrected by a named expert), always with the disclaimer. Nothing at all while there is none.
  */
-export function AiAnswerCard({ questionId, askedAt }: { questionId: number; askedAt?: number }) {
+export function AiAnswerCard({ questionId, topicId, askedAt }: { questionId: number; topicId?: number; askedAt?: number }) {
   const t = useT()
   const ai = useAiAnswer(questionId, askedAt)
   // Just asked: say an answer is coming while the hook polls; after a minute, stop saying so.
@@ -29,11 +31,14 @@ export function AiAnswerCard({ questionId, askedAt }: { questionId: number; aske
       </p>
     ) : null
   }
-  return <Card answer={ai.data} />
+  return <Card answer={ai.data} topicId={topicId} />
 }
 
-function Card({ answer }: { answer: AiAnswer }) {
+function Card({ answer, topicId }: { answer: AiAnswer; topicId?: number }) {
   const t = useT()
+  const { inTopic } = useMyBadges(topicId)
+  const expert = inTopic.includes('VERIFIED_EXPERT')
+  const canFlag = expert || inTopic.includes('TOP_CONTRIBUTOR')
   const confirmed = answer.status === 'CONFIRMED'
   const corrected = answer.status === 'CORRECTED'
 
@@ -61,6 +66,9 @@ function Card({ answer }: { answer: AiAnswer }) {
           <Warning size={18} className="mt-0.5 shrink-0" aria-hidden="true" />
           {answer.disclaimer}
         </p>
+      )}
+      {answer.status === 'UNCHECKED' && canFlag && answer.questionId != null && (
+        <ReviewActions questionId={answer.questionId} canConfirm={expert} canFlag={canFlag} />
       )}
     </section>
   )

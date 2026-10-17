@@ -41,6 +41,7 @@ export function AdminUserPage() {
 function Member({ detail, userId }: { detail: AdminUserDetail; userId: number }) {
   const user = detail.user ?? {}
   const name = user.name ?? 'Member'
+  const staff = (user.roles ?? []).some((role) => role !== 'USER')
   const counts = [
     { label: 'Questions', value: detail.questions },
     { label: 'Answers', value: detail.answers },
@@ -79,8 +80,15 @@ function Member({ detail, userId }: { detail: AdminUserDetail; userId: number })
         <h2 id="member-ban" className="text-lg">
           Ban
         </h2>
-        <p className="mt-1 mb-3 text-sm text-muted-foreground">{user.banned ? 'They cannot sign in until the ban is lifted.' : 'A ban signs them out everywhere and closes the open reports about them.'}</p>
-        <BanControls userId={userId} name={name} banned={Boolean(user.banned)} />
+        {staff && !user.banned ? (
+          // The backend refuses to ban an account holding an admin role, so the button would only fail.
+          <p className="mt-1 text-sm text-muted-foreground">They hold an admin role. Remove it below before banning the account.</p>
+        ) : (
+          <>
+            <p className="mt-1 mb-3 text-sm text-muted-foreground">{user.banned ? 'They cannot sign in until the ban is lifted.' : 'A ban signs them out everywhere and closes the open reports about them.'}</p>
+            <BanControls userId={userId} name={name} banned={Boolean(user.banned)} />
+          </>
+        )}
       </section>
 
       <ExpertTopics userId={userId} topics={detail.expertTopics ?? []} />

@@ -141,3 +141,14 @@ test('admin roles are created with privileges, edited and deleted; fixed roles a
   await userEvent.click(await screen.findByRole('button', { name: 'Delete role' }))
   await waitFor(() => expect(api.mock.calls.some(([url, init]) => url === '/api/admin/roles/6' && init?.method === 'DELETE')).toBe(true))
 })
+
+test('an account with an admin role is not offered a ban', async () => {
+  mockApi({
+    ...signedInAdmin(),
+    'GET /api/admin/users/7': () => envelope(200, { user: { ...nasrin, roles: ['USER', 'Moderator'] }, questions: 0, answers: 0, publishedStories: 0, openReports: 0, expertTopics: [] }),
+    'GET /api/admin/roles': () => envelope(200, roles),
+  })
+  renderWithProviders(<App />, '/admin/users/7')
+  expect(await screen.findByText('They hold an admin role. Remove it below before banning the account.')).toBeInTheDocument()
+  expect(screen.queryByRole('button', { name: 'Ban the account' })).not.toBeInTheDocument()
+})

@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom'
 import { cn } from 'cn'
 import { isAdmin, useAdminSignIn } from '../../api/auth'
 import { errorMessage } from '../../api/errors'
-import { isEmail } from '../../lib/auth'
+import { isEmail, isPhone, signInIdentifier } from '../../lib/auth'
 import { Button } from '../../ui/Button'
 import { Spinner } from '../../ui/Spinner'
 import { TextField } from '../../ui/TextField'
@@ -80,12 +80,12 @@ function AdminSignIn({ signedInAsReader }: { signedInAsReader: boolean }) {
 
   function submit(event: FormEvent) {
     event.preventDefault()
-    if (!isEmail(email) || !password) {
-      setError('Enter your admin e-mail and password.')
+    if (!(isEmail(email) || isPhone(email)) || !password) {
+      setError('Enter your admin e-mail or phone number, and the password.')
       return
     }
     setError(undefined)
-    signIn.mutate({ identifier: email.trim(), password }, { onSuccess: (tokens) => session.signedIn(tokens) })
+    signIn.mutate({ identifier: signInIdentifier(email), password }, { onSuccess: (tokens) => session.signedIn(tokens) })
   }
 
   return (
@@ -93,7 +93,7 @@ function AdminSignIn({ signedInAsReader }: { signedInAsReader: boolean }) {
       <p className="text-muted-foreground">
         {signedInAsReader ? 'Your account has no admin access. Sign in with an admin account.' : 'Sign in with an admin account.'}
       </p>
-      <TextField label="Admin e-mail" type="email" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} />
+      <TextField label="Admin e-mail or phone" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} />
       <TextField label="Password" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
       <FormError message={error ?? (signIn.isError ? errorMessage(signIn.error) : null)} />
       <Button type="submit" loading={signIn.isPending} className="self-start">

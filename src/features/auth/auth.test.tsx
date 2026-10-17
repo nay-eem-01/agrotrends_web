@@ -38,7 +38,7 @@ test('signing in stores the session and goes back where the reader was', async (
   fetchMock.mockResolvedValueOnce(envelope(200, tokens))
   renderWithProviders(<App />, '/sign-in?next=%2Fstories%2Fboro-rice')
 
-  await userEvent.type(await screen.findByLabelText('E-mail'), ' nasrin@farm.bd ')
+  await userEvent.type(await screen.findByLabelText('E-mail or phone number'), ' nasrin@farm.bd ')
   await userEvent.type(screen.getByLabelText('Password'), 'Paddy2026!')
   await userEvent.click(screen.getByRole('button', { name: 'Sign in' }))
 
@@ -54,7 +54,7 @@ test('a rejected sign-in shows the server message', async () => {
   fetchMock.mockResolvedValueOnce(envelope(401, null, 'Invalid email or password.'))
   renderWithProviders(<App />, '/sign-in')
 
-  await userEvent.type(await screen.findByLabelText('E-mail'), 'nasrin@farm.bd')
+  await userEvent.type(await screen.findByLabelText('E-mail or phone number'), 'nasrin@farm.bd')
   await userEvent.type(screen.getByLabelText('Password'), 'wrong')
   await userEvent.click(screen.getByRole('button', { name: 'Sign in' }))
 
@@ -66,7 +66,7 @@ test('an empty sign-in form is checked before anything is sent', async () => {
   renderWithProviders(<App />, '/sign-in')
   await userEvent.click(await screen.findByRole('button', { name: 'Sign in' }))
 
-  expect(screen.getByLabelText('E-mail')).toHaveAccessibleDescription('Enter your e-mail address.')
+  expect(screen.getByLabelText('E-mail or phone number')).toHaveAccessibleDescription('Enter your e-mail address or phone number.')
   expect(screen.getByLabelText('Password')).toHaveAccessibleDescription('Enter your password.')
   expect(fetchMock).not.toHaveBeenCalled()
 })
@@ -188,4 +188,20 @@ test('Escape closes the account menu and returns focus to it', async () => {
   await userEvent.keyboard('{Escape}')
   await waitFor(() => expect(screen.queryByRole('menuitem', { name: 'Sign out' })).not.toBeInTheDocument())
   expect(button).toHaveFocus()
+})
+
+test('a phone number signs in too, sent without spaces or dashes', async () => {
+  fetchMock.mockResolvedValueOnce(envelope(200, tokens))
+  renderWithProviders(<App />, '/sign-in')
+
+  await userEvent.type(await screen.findByLabelText('E-mail or phone number'), 'nasrin')
+  await userEvent.type(screen.getByLabelText('Password'), 'Paddy2026!')
+  await userEvent.click(screen.getByRole('button', { name: 'Sign in' }))
+  expect(screen.getByLabelText('E-mail or phone number')).toHaveAccessibleDescription('Enter your e-mail address or phone number.')
+
+  await userEvent.clear(screen.getByLabelText('E-mail or phone number'))
+  await userEvent.type(screen.getByLabelText('E-mail or phone number'), '01712-345 678')
+  await userEvent.click(screen.getByRole('button', { name: 'Sign in' }))
+  await waitFor(() => expect(fetchMock).toHaveBeenCalled())
+  expect(body(0)).toEqual({ identifier: '01712345678', password: 'Paddy2026!' })
 })

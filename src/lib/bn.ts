@@ -518,4 +518,7 @@ export const BN: Record<string, string> = {
   'Help a farmer today': 'আজ একজন কৃষককে সাহায্য করুন',
   'All unanswered': 'উত্তর না-পাওয়া সব',
   'These questions have no answer yet. If you have grown it, your answer helps.': 'এই প্রশ্নগুলোর এখনো উত্তর আসেনি। আপনি এই ফসল ফলিয়ে থাকলে আপনার উত্তর কাজে আসবে।',
+  // F18 phone sign-in
+  'E-mail or phone number': 'ই-মেইল বা ফোন নম্বর',
+  'Enter your e-mail address or phone number.': 'আপনার ই-মেইল ঠিকানা বা ফোন নম্বর লিখুন।',
 }

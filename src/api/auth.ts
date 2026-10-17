@@ -37,7 +37,7 @@ export function useSignUp() {
     mutationFn: async (request: SignUpRequest) => {
       await signUp(request)
       try {
-        return await signIn({ email: request.email ?? '', password: request.password })
+        return await signIn({ identifier: request.email ?? request.mobileNumber ?? '', password: request.password })
       } catch (error) {
         // The account exists now; trying the form again would only say the e-mail is taken.
         const status = error instanceof ApiError ? error.status : 0

@@ -33,7 +33,7 @@ export function SignInPage() {
     setErrors(found)
     if (found.email || found.password) return
     signIn.mutate(
-      { email: email.trim(), password },
+      { identifier: email.trim(), password },
       {
         onSuccess: (tokens) => {
           session.signedIn(tokens)

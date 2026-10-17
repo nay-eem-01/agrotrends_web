@@ -44,7 +44,7 @@ test('signing in stores the session and goes back where the reader was', async (
 
   await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/stories/boro-rice'))
   expect(fetchMock.mock.calls[0][0]).toBe('/api/auth/sign-in')
-  expect(body(0)).toEqual({ email: 'nasrin@farm.bd', password: 'Paddy2026!' })
+  expect(body(0)).toEqual({ identifier: 'nasrin@farm.bd', password: 'Paddy2026!' })
   expect(getAccessToken()).toBe('a1')
   expect(localStorage.getItem('agrotrends.refreshToken')).toBe('r1')
   expect(await screen.findByRole('button', { name: 'Account' })).toBeInTheDocument()
@@ -92,7 +92,7 @@ test('signing up sends one kind of account, then signs in', async () => {
     mobileNumber: '1712345678',
     password: 'Paddy2026!',
   })
-  expect(body(1)).toEqual({ email: 'nasrin@farm.bd', password: 'Paddy2026!' })
+  expect(body(1)).toEqual({ identifier: 'nasrin@farm.bd', password: 'Paddy2026!' })
 })
 
 test('sign-up checks the password rule before sending', async () => {

@@ -67,7 +67,7 @@ function AdminSignIn({ signedInAsReader }: { signedInAsReader: boolean }) {
       return
     }
     setError(undefined)
-    signIn.mutate({ email: email.trim(), password }, { onSuccess: (tokens) => session.signedIn(tokens) })
+    signIn.mutate({ identifier: email.trim(), password }, { onSuccess: (tokens) => session.signedIn(tokens) })
   }
 
   return (

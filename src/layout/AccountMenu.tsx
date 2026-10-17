@@ -64,7 +64,7 @@ export function AccountMenu() {
             </DropdownMenuItem>
           )}
           {isAdmin(user) && (
-            <DropdownMenuItem className={item} render={<Link to="/admin/experts" />}>
+            <DropdownMenuItem className={item} render={<Link to="/admin" />}>
               <ShieldCheck size={18} aria-hidden="true" />
               {t('Admin')}
             </DropdownMenuItem>

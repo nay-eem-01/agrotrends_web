@@ -87,3 +87,31 @@ test('visitors are asked to sign in', async () => {
   await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/sign-in?next=%2Fadvisor'))
   expect(api).not.toHaveBeenCalled()
 })
+
+test('Ctrl+Enter asks once, and the answer is labelled as unchecked AI with its sources apart', async () => {
+  const api = mockApi(signedIn(() => envelope(200, { answer: 'Drain the field.', sources: [{ blogId: 41, title: 'After the flood' }] })))
+  renderWithProviders(<App />, '/advisor')
+
+  const field = await screen.findByLabelText('Your question')
+  await userEvent.type(field, 'Flooded field?')
+  await userEvent.keyboard('{Control>}{Enter}{Enter}{/Control}')
+
+  const conversation = await screen.findByRole('list', { name: 'This conversation' })
+  expect(within(conversation).getByText('AI answer')).toBeInTheDocument()
+  expect(within(conversation).getByRole('region', { name: 'Sources' })).toBeInTheDocument()
+  expect(within(conversation).getByText(/not checked by an expert/)).toBeInTheDocument()
+  expect(api.mock.calls.filter(([url]) => url === '/api/ai/ask')).toHaveLength(1)
+})
+
+test('the counter shows the length, then what is left near the limit', async () => {
+  mockApi(signedIn(() => envelope(200, { answer: 'x', sources: [] })))
+  renderWithProviders(<App />, '/advisor')
+
+  const field = await screen.findByLabelText('Your question')
+  await userEvent.type(field, 'Blast?')
+  expect(field).toHaveAccessibleDescription('6 / 1,000')
+  await userEvent.clear(field)
+  await userEvent.click(field)
+  await userEvent.paste('a'.repeat(950))
+  expect(field).toHaveAccessibleDescription('50 characters left')
+})

@@ -39,7 +39,7 @@ test('no results suggest asking instead', async () => {
   renderWithProviders(<App />, '/search?q=quinoa&type=stories')
 
   expect(await screen.findByRole('heading', { name: 'No stories match “quinoa”' })).toBeInTheDocument()
-  expect(screen.getByRole('link', { name: 'Ask a question' })).toHaveAttribute('href', '/questions/ask')
+  expect(within(screen.getByRole('main')).getByRole('link', { name: 'Ask a question' })).toHaveAttribute('href', '/questions/ask')
 })
 
 test('an empty search asks for words and offers topics, without searching', async () => {

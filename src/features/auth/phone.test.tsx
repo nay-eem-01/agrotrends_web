@@ -92,3 +92,30 @@ test('an unconfirmed phone-only account sees a banner that leads to the code', a
   expect(screen.getByRole('link', { name: 'Enter the SMS code' })).toHaveAttribute('href', '/verify-phone')
   expect(screen.queryByRole('button', { name: 'Send a new link' })).not.toBeInTheDocument()
 })
+
+test('a forgotten password is reset by SMS code, then sign-in says so', async () => {
+  const api = mockApi({
+    'POST /api/auth/forgot-password/phone': () => envelope(200, null),
+    'POST /api/auth/reset-password/phone': () => envelope(200, null),
+  })
+  renderWithProviders(<App />, '/forgot-password')
+
+  await userEvent.click(await screen.findByRole('link', { name: 'Phone' }))
+  await userEvent.type(await screen.findByLabelText('Mobile number'), '01712 345678')
+  await userEvent.click(screen.getByRole('button', { name: 'Text me a code' }))
+  expect(await screen.findByText(/we texted it a 6-digit code/)).toHaveTextContent('+8801712345678')
+  expect(bodyOf(api, '/api/auth/forgot-password/phone')).toEqual({ countryCode: '+880', mobileNumber: '01712345678' })
+
+  await userEvent.type(screen.getByLabelText('SMS code'), '654321')
+  await userEvent.type(screen.getByLabelText('New password'), 'Paddy2026!')
+  await userEvent.type(screen.getByLabelText('Repeat new password'), 'Paddy2026?')
+  await userEvent.click(screen.getByRole('button', { name: 'Set new password' }))
+  expect(screen.getByLabelText('Repeat new password')).toHaveAccessibleDescription("The passwords don't match.")
+  await userEvent.clear(screen.getByLabelText('Repeat new password'))
+  await userEvent.type(screen.getByLabelText('Repeat new password'), 'Paddy2026!')
+  await userEvent.click(screen.getByRole('button', { name: 'Set new password' }))
+
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/sign-in'))
+  expect(bodyOf(api, '/api/auth/reset-password/phone')).toEqual({ countryCode: '+880', mobileNumber: '01712345678', code: '654321', newPassword: 'Paddy2026!' })
+  expect(await screen.findByText('Password changed. Sign in with your new password.')).toBeInTheDocument()
+})

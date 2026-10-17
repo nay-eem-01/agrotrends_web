@@ -49,6 +49,7 @@ export async function pickOption(trigger: HTMLElement, option: string, user: Use
 
 /** Opens a post's "More actions" menu (the one inside `scope`, when given) and returns the open menu. */
 export async function openMoreActions(scope: HTMLElement = document.body, user: UserEvent = userEvent.setup()) {
-  await user.click(within(scope).getAllByRole('button', { name: 'More actions' })[0])
+  // The menu loads lazily, so wait for its button.
+  await user.click((await within(scope).findAllByRole('button', { name: 'More actions' }))[0])
   return within(await screen.findByRole('menu'))
 }

@@ -101,3 +101,15 @@ export function useVerifyPhone() {
 export function useResendPhoneCode() {
   return useMutation({ mutationFn: (request: PhoneRequest) => api<null>('/api/auth/resend-phone-code', { method: 'POST', body: request }) })
 }
+
+/** Always 200, so numbers can't be discovered; texts a 6-digit code when the number has an account. */
+export function useForgotPasswordByPhone() {
+  return useMutation({ mutationFn: (request: PhoneRequest) => api<null>('/api/auth/forgot-password/phone', { method: 'POST', body: request }) })
+}
+
+/** Sets a new password with the texted code (which also confirms the number); every session is signed out. */
+export function useResetPasswordByPhone() {
+  return useMutation({
+    mutationFn: (request: Schemas['ResetPasswordWithCodeRequest']) => api<null>('/api/auth/reset-password/phone', { method: 'POST', body: request }),
+  })
+}

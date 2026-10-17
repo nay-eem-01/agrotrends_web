@@ -538,4 +538,12 @@ export const BN: Record<string, string> = {
   'Confirm your phone number to ask, answer, vote and publish. We texted a code to {phone}.': 'প্রশ্ন, উত্তর, ভোট আর প্রকাশ করতে ফোন নম্বর নিশ্চিত করুন। {phone} নম্বরে কোড পাঠানো হয়েছে।',
   'Enter the SMS code': 'এসএমএস কোডটি লিখুন',
   'Enter the code we texted to {phone}. Until then you can read everything, but not post, vote or publish.': '{phone} নম্বরে পাঠানো কোডটি লিখুন। ততক্ষণ সব পড়তে পারবেন, কিন্তু পোস্ট, ভোট বা প্রকাশ করতে পারবেন না।',
+  'Reset by': 'যেভাবে রিসেট করবেন',
+  Phone: 'ফোন',
+  "Enter the phone number you signed up with and we'll text you a code.": 'যে ফোন নম্বর দিয়ে সাইন আপ করেছিলেন সেটি লিখুন, আমরা একটি কোড পাঠাব।',
+  'Text me a code': 'আমাকে কোড পাঠান',
+  'If an account uses {phone}, we texted it a 6-digit code. It works for 10 minutes.': '{phone} নম্বরে অ্যাকাউন্ট থাকলে ৬ অঙ্কের একটি কোড পাঠানো হয়েছে। এটি ১০ মিনিট কাজ করবে।',
+  'SMS code': 'এসএমএস কোড',
+  'Use another number': 'অন্য নম্বর ব্যবহার করুন',
+  'Enter the number without the country code.': 'দেশের কোড ছাড়া নম্বরটি লিখুন।',
 }

@@ -46,7 +46,7 @@ function Card({ answer, topicId }: { answer: AiAnswer; topicId?: number }) {
   return (
     <section
       aria-labelledby="ai-answer"
-      className={cn('mt-10 rounded-2xl p-5 ring-1 sm:p-6', confirmed ? 'bg-card ring-2 ring-mustard' : 'border border-dashed border-input bg-card/60 ring-0')}
+      className={cn('mt-10 rounded-xl p-5 ring-1 sm:p-6', confirmed ? 'bg-card ring-2 ring-mustard' : 'border border-dashed border-input bg-card/60 ring-0')}
     >
       <header className="flex flex-wrap items-center gap-x-3 gap-y-2">
         <h2 id="ai-answer" className="flex items-center gap-2 font-sans text-base font-semibold">
@@ -56,7 +56,7 @@ function Card({ answer, topicId }: { answer: AiAnswer; topicId?: number }) {
         <StatusLabel answer={answer} />
         {answer.questionId != null && <ReportButton targetType="AI_ANSWER" targetId={answer.questionId} what={t('this AI answer')} className="ml-auto" />}
       </header>
-      <p className="mt-3 font-serif text-[1.0625rem] leading-relaxed whitespace-pre-line">{answer.answer}</p>
+      <p className="mt-3 text-base leading-relaxed whitespace-pre-line">{answer.answer}</p>
       {corrected && answer.correctionAnswerId != null && (
         <a href={`#answer-${answer.correctionAnswerId}`} className="mt-3 inline-block text-sm font-medium text-primary underline-offset-4 hover:underline">
           {t("Read the expert's corrected answer")}

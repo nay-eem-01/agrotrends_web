@@ -4,7 +4,7 @@ import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { clearSession } from '../../api/client'
 import App from '../../App'
 import { envelope, mockApi, page } from '../../test/api'
-import { renderWithProviders } from '../../test/render'
+import { chooseOption, pickOption, renderWithProviders } from '../../test/render'
 
 function signedInAs(user: object) {
   localStorage.setItem('agrotrends.refreshToken', 'r0')
@@ -56,8 +56,8 @@ test('a question is checked, posted with its farming details and opened', async 
 
   await userEvent.type(screen.getByLabelText('Your question'), ' Why are seedlings yellow? ')
   await userEvent.type(screen.getByLabelText('Details'), 'BRRI dhan29, 30 days old.')
-  await userEvent.selectOptions(await screen.findByLabelText('Topic'), 'Crops')
-  await userEvent.selectOptions(screen.getByLabelText('Season'), 'Rabi')
+  await chooseOption(await screen.findByLabelText('Topic'), 'Crops')
+  await pickOption(screen.getByLabelText('Season'), 'Rabi')
   await userEvent.type(screen.getByLabelText('Crop'), 'boro rice')
   await userEvent.click(screen.getByRole('button', { name: 'Post question' }))
 
@@ -109,7 +109,7 @@ test('a question carries tags and photos', async () => {
 
   await userEvent.type(await screen.findByLabelText('Your question'), 'Spots on leaves')
   await userEvent.type(screen.getByLabelText('Details'), 'Brown spots after rain.')
-  await userEvent.selectOptions(await screen.findByLabelText('Topic'), 'Crops')
+  await chooseOption(await screen.findByLabelText('Topic'), 'Crops')
   await userEvent.type(screen.getByLabelText('Tags'), 'Rice Blast{Enter}')
   await userEvent.upload(screen.getByLabelText('Add a photo', { selector: 'input' }), new File(['img'], 'leaf.webp', { type: 'image/webp' }))
   expect(await screen.findByRole('img', { name: 'Photo 1' })).toHaveAttribute('src', '/uploads/leaf.webp')

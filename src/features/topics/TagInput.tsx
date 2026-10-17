@@ -37,11 +37,11 @@ export function TagInput({ tags, onChange }: { tags: string[]; onChange: (tags: 
       <label htmlFor={inputId} className="text-sm font-medium">
         {t('Tags')}
       </label>
-      <div className="flex flex-wrap items-center gap-2 rounded-lg border border-rule px-2 py-1.5 focus-within:border-paddy">
+      <div className="flex min-h-11 flex-wrap items-center gap-2 rounded-lg border border-input bg-card px-2 py-1.5 transition-[border-color,box-shadow] duration-150 focus-within:border-primary focus-within:ring-[3px] focus-within:ring-ring/60 hover:border-foreground/60">
         {tags.map((tag) => (
-          <span key={tag} className="inline-flex h-8 items-center gap-1 rounded-full bg-field pr-1 pl-3 text-sm">
+          <span key={tag} className="inline-flex h-8 items-center gap-1 rounded-full bg-secondary pr-1 pl-3 text-sm text-secondary-foreground">
             {tag}
-            <button type="button" aria-label={t('Remove tag {tag}', { tag })} onClick={() => onChange(tags.filter((t) => t !== tag))} className="flex size-7 items-center justify-center rounded-full hover:bg-rule">
+            <button type="button" aria-label={t('Remove tag {tag}', { tag })} onClick={() => onChange(tags.filter((t) => t !== tag))} className="flex size-7 items-center justify-center rounded-full hover:bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_10%)]">
               <X size={12} />
             </button>
           </span>
@@ -55,17 +55,17 @@ export function TagInput({ tags, onChange }: { tags: string[]; onChange: (tags: 
           onBlur={() => add(text)}
           aria-describedby={hintId}
           placeholder={full ? '' : tags.length ? t('Add another') : t('rice, pest control…')}
-          className="h-8 min-w-32 flex-1 bg-transparent px-1 text-base focus:outline-none"
+          className="h-8 min-w-32 flex-1 bg-transparent px-1.5 text-base placeholder:text-muted-foreground/80 focus:outline-none"
         />
       </div>
-      <p id={hintId} className="text-xs text-ink-muted">
+      <p id={hintId} className="text-sm text-muted-foreground">
         {full ? t("That's the most you can add ({n}).", { n: MAX_TAGS }) : t('Up to {n}. Press Enter after each.', { n: MAX_TAGS })}
       </p>
       {q && !full && suggestions.length > 0 && (
         <ul aria-label={t('Suggested tags')} className="flex flex-wrap gap-2">
           {suggestions.map((tag) => (
             <li key={tag}>
-              <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => add(tag)} className="h-8 rounded-full border border-rule px-3 text-sm hover:bg-field">
+              <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => add(tag)} className="h-8 rounded-full border border-border-strong px-3 text-sm transition-colors duration-150 hover:bg-secondary">
                 {tag}
               </button>
             </li>

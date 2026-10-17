@@ -4,7 +4,7 @@ import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { clearSession } from '../../api/client'
 import App from '../../App'
 import { envelope, mockApi, page } from '../../test/api'
-import { renderWithProviders } from '../../test/render'
+import { pickOption, renderWithProviders } from '../../test/render'
 
 function signedIn() {
   localStorage.setItem('agrotrends.refreshToken', 'r0')
@@ -52,7 +52,7 @@ test('an application is checked, then sent with topics, field, credential and pr
   await userEvent.click(screen.getByRole('checkbox', { name: 'Livestock' }))
   await userEvent.type(screen.getByLabelText('Your field'), 'Veterinarian')
   await userEvent.type(screen.getByLabelText('Institution or workplace'), 'DLS')
-  await userEvent.selectOptions(screen.getByLabelText('Your proof is a'), 'Professional licence')
+  await pickOption(screen.getByLabelText('Your proof is a'), 'Professional licence')
   await userEvent.upload(screen.getByLabelText('Add a photo', { selector: 'input' }), new File(['x'], 'licence.webp', { type: 'image/webp' }))
   await screen.findByRole('img', { name: 'Photo 1' })
   await userEvent.type(screen.getByLabelText('Link 1'), 'ftp://nope')

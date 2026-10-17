@@ -12,7 +12,7 @@ import { BanControls } from '../admin/BanControls'
 import { useSession } from '../auth/session'
 import { BadgeMark } from '../qa/AuthorLine'
 import { ReportButton } from '../reports/ReportButton'
-import { QuestionCard } from '../qa/QuestionsPage'
+import { QuestionCard } from '../qa/QuestionRow'
 
 /**
  * `/users/:userId`: reputation by topic, with badges, and the questions they asked. The backend has no public user
@@ -48,7 +48,7 @@ export function UserPage() {
       </div>
 
       {isAdmin(user) && user?.id !== userId && (
-        <section aria-label="Staff" className="mt-6 rounded-2xl border border-dashed border-input p-4">
+        <section aria-label="Staff" className="mt-6 rounded-xl border border-dashed border-input p-4">
           <p className="mb-3 text-sm text-muted-foreground">Staff</p>
           <BanControls userId={userId} name={name} />
         </section>
@@ -67,7 +67,7 @@ export function UserPage() {
         ) : (reputation.data.topics ?? []).length === 0 ? (
           <p className="mt-3 text-muted-foreground">{t('No reputation yet. Points come from upvotes and accepted answers.')}</p>
         ) : (
-          <ul className="mt-4 overflow-hidden rounded-2xl bg-card ring-1 ring-border">
+          <ul className="mt-4 overflow-hidden rounded-xl bg-card ring-1 ring-border">
             {reputation.data.topics!.map((topic) => (
               <li key={topic.categoryId} className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-border px-5 py-4 last:border-b-0">
                 <span className="min-w-0 flex-1 font-medium">{topic.categoryName}</span>
@@ -100,7 +100,7 @@ export function UserPage() {
           <p className="mt-3 text-muted-foreground">{t('No questions yet.')}</p>
         ) : (
           <>
-            <ul className="mt-4 flex flex-col gap-3">
+            <ul className="mt-2 border-t border-border">
               {list.map((question) => (
                 <QuestionCard key={question.questionId} question={question} />
               ))}

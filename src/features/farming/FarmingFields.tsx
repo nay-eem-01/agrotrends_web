@@ -1,9 +1,9 @@
 import { useT } from '../../lib/i18n'
 import { useId } from 'react'
-import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
-import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
+import { Select as SelectRoot, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Field, FieldLabel } from '@/components/ui/field'
 import { SEASON_LABELS, SOIL_LABELS, type Season, type Soil } from '../../lib/agri'
-import { TextField } from '../../ui/TextField'
+import { Message, TextField } from '../../ui/TextField'
 
 export interface Farming {
   crop: string
@@ -13,11 +13,12 @@ export interface Farming {
 }
 
 /** Season, crop, region and soil: the farming a story or question is about. */
-export function FarmingFields({ value, onChange }: { value: Farming; onChange: (changes: Partial<Farming>) => void }) {
+export function FarmingFields({ value, onChange, hideLegend = false }: { value: Farming; onChange: (changes: Partial<Farming>) => void; hideLegend?: boolean }) {
   const t = useT()
   return (
     <fieldset className="flex flex-col gap-4">
-      <legend className="mb-2 font-sans text-base font-semibold">{t('Farming details')}</legend>
+      {/* Hidden when a visible heading (a <summary>) already says it; it still names the group. */}
+      <legend className={hideLegend ? 'sr-only' : 'mb-2 font-sans text-base font-semibold'}>{t('Farming details')}</legend>
       <div className="grid gap-4 sm:grid-cols-2">
         <TextField
           label={t('Crop')}
@@ -60,6 +61,10 @@ export function toAgri(value: Farming) {
   }
 }
 
+/**
+ * A short, fixed list (season, soil) as the shadcn Select: a labelled button that opens a listbox, keyboard-operable,
+ * with the "any" choice first so a value can be cleared. '' means none.
+ */
 export function Select({
   label,
   value,
@@ -76,29 +81,26 @@ export function Select({
   onChange: (value: string) => void
 }) {
   const id = useId()
+  const items = Object.fromEntries(options.map((option) => [option.value, option.label]))
   return (
     <Field data-invalid={error ? true : undefined}>
       <FieldLabel htmlFor={id}>{label}</FieldLabel>
-      <NativeSelect
-        id={id}
-        value={value}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={error ? `${id}-error` : undefined}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full"
-      >
-        <NativeSelectOption value="">{placeholder}</NativeSelectOption>
-        {options.map((option) => (
-          <NativeSelectOption key={option.value} value={option.value}>
-            {option.label}
-          </NativeSelectOption>
-        ))}
-      </NativeSelect>
-      {error && (
-        <FieldDescription id={`${id}-error`} className="text-destructive">
-          {error}
-        </FieldDescription>
-      )}
+      <SelectRoot value={value || null} items={items} onValueChange={(next: string | null) => onChange(next ?? '')}>
+        <SelectTrigger id={id} aria-invalid={error ? true : undefined} aria-describedby={error ? `${id}-error` : undefined} className="w-full">
+          <SelectValue placeholder={placeholder} />
+        </SelectTrigger>
+        <SelectContent alignItemWithTrigger={false}>
+          <SelectGroup>
+            <SelectItem value={null}>{placeholder}</SelectItem>
+            {options.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        </SelectContent>
+      </SelectRoot>
+      <Message inputId={id} error={error} />
     </Field>
   )
 }

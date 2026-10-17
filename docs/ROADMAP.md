@@ -165,6 +165,17 @@ the season strip goes, shadcn/ui replaces the hand-made primitives, staff see th
 | F15.3 | Advisor (`feat/redesign-advisor`): workspace with history rail, suggestion cards, composer with near-limit counter and Ctrl+Enter, AI-labelled turns with sources apart | ✅ |
 | F15.4 | Stories (`feat/redesign-stories`): featured story + grid with drawn covers, story page wide cover and contents list, editor styling | ✅ |
 | F15.5 | Questions, Discover and forms (`feat/redesign-discover`): Discover home, question rows with photos and topic chips, question page vote bar, ask form two columns, shadcn Select everywhere, publish Dialog | ✅ |
+## Phase F15 — Admin dashboard (`feat/admin-dashboard-base`)
+
+Backend Phase 9 (`feat/admin-dashboard-base` on the backend) adds users with ban state, overview counts and admin roles.
+Endpoints and rules: `docs/BACKEND_CATCHUP_PLAN.md` § Admin dashboard.
+
+| # | Step | Status |
+|---|---|---|
+| F15.1 | Admin home: overview cards from `/api/admin/stats` linking to their pages; nav gains Overview, Users, Roles | ⬜ |
+| F15.2 | Users page: search, All / Banned / Active tabs, table, paging | ⬜ |
+| F15.3 | User page: counts, expert topics with revoke, Ban or Unban from the known state, grant and remove admin roles | ⬜ |
+| F15.4 | Roles page: create, edit and delete admin roles with privilege checkboxes; Bengali strings; smoke grants a moderator | ⬜ |
 
 ## Needs from the backend
 

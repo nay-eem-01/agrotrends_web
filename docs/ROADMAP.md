@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend · ➡ moved to a later step
 
-**Progress:** 66 of 66 steps done
+**Progress:** 71 of 71 steps done
 
 ---
 
@@ -182,6 +182,16 @@ Endpoints and rules: `docs/BACKEND_CATCHUP_PLAN.md` § Admin dashboard.
 | # | Step | Status |
 |---|---|---|
 | F16.1 | One search (top-bar dialog, Ctrl/⌘+K; page and hero search fields removed), one topic area (Discover's topic cards replaced by "Help a farmer today" and a filter row); softer radius scale and field borders; More menu for post actions; caret vote control; +N tag overflow; photo tile grid; Enter/Shift+Enter in the advisor with an IME guard (`feat/refine-ui`) | ✅ |
+
+## Phase F17 — Admin dashboard (`feat/admin-dashboard-base`, backend Phase 9)
+
+| # | Step | Status |
+|---|---|---|
+| F17.0 | Regenerate API types for backend Phases 9 and 10; sign-in sends `identifier` (`feat/api-types-p10`) | ✅ |
+| F17.1 | Overview: waiting work (open reports, expert applications, unchecked AI answers) linking to queues, community counts; admin rail gains Overview, Users, Roles (`feat/admin-overview`) | ✅ |
+| F17.2 | Users: search name or e-mail, All / Active / Banned, rows with contact, roles and ban badge, paging (`feat/admin-users`) | ✅ |
+| F17.3 | Member page: contact and confirmation, ban state and reason, counts, expert topics with Revoke, give and remove admin roles (`feat/admin-user`) | ✅ |
+| F17.4 | Roles: create, edit (privilege checkboxes) and delete admin roles; member and super-admin roles fixed (`feat/admin-roles`) | ✅ |
 
 ## Needs from the backend
 

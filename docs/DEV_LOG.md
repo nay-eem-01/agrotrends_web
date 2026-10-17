@@ -34,6 +34,9 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   questions, Discover and forms (`feat/redesign-discover`) done. Phase F15 is complete; F7–F15 are merged into
   `development`, and `staging` was cut from it on 2026-10-17.
 - Phase F16 on `feat/refine-base` (from `development`): F16.1 refinement (`feat/refine-ui`) done.
+- Phase F17 on `feat/admin-dashboard-base` (stacked on F16's tip): F17.0 API types (`feat/api-types-p10`) F17.1
+  overview (`feat/admin-overview`) F17.2 users (`feat/admin-users`) F17.3 member page (`feat/admin-user`) and F17.4
+  roles (`feat/admin-roles`) done. Phase F17 is complete.
 
 ## Next up
 
@@ -56,6 +59,30 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-17 (F17 admin dashboard, backend Phase 9)
+
+**Done**
+- API types regenerated from the backend's `development` (Phases 9 and 10); sign-in sends `identifier`.
+- `/admin` overview: open reports, expert applications and unchecked AI answers first (each to its queue, amber when
+  something waits), then members, banned, questions, answers and stories with this week's new members and questions.
+- `/admin/users`: search (Enter, in the URL), All / Active / Banned, contact, join date, staff roles, ban badge, paging.
+- `/admin/users/:id`: contact with confirmation state, ban and reason, counts, expert topics with Revoke, give or
+  remove ADMIN roles (USER and SUPER ADMIN shown, not changeable). Ban controls offer only the action that applies.
+- `/admin/roles`: roles with their privileges; create and edit ADMIN roles with privilege checkboxes (shadcn
+  Checkbox), delete with a confirmation.
+- Admin sections in a rail on wide screens (tabs on phones): Overview, Users, Reports, Expert applications, Roles,
+  Categories. Tests: overview, users filters, member actions, roles create / edit / delete.
+
+**Decisions**
+- Admin copy stays English, like the existing admin screens.
+- Every admin mutation refreshes all admin queries (`['admin']`): a ban changes reports, users and the counts.
+- The backend's 403 is shown as written when a staff member lacks a privilege; every section stays visible.
+
+**Known limitations**
+- An account with an admin role can't be banned (backend rule); the page says so next to the roles.
 
 ---
 

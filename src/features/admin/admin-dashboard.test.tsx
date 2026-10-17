@@ -100,3 +100,44 @@ test('a member page shows their counts and lets staff revoke, give and remove ro
   // Fixed roles are shown, not offered.
   expect(within(screen.getByRole('list', { name: 'Roles held' })).getByText('USER')).toBeInTheDocument()
 })
+
+test('admin roles are created with privileges, edited and deleted; fixed roles are not', async () => {
+  const privileges = [
+    { id: 11, name: 'CONTENT_MODERATE', description: 'Handle reports' },
+    { id: 12, name: 'EXPERT_REVIEW', description: 'Decide expert applications' },
+    { id: 13, name: 'USER_READ', description: 'Read members' },
+  ]
+  const api = mockApi({
+    ...signedInAdmin(),
+    'GET /api/admin/roles': () => envelope(200, roles),
+    'GET /api/admin/privileges': () => envelope(200, privileges),
+    'POST /api/admin/roles': () => envelope(200, { id: 7, name: 'Support', type: 'ADMIN', privileges: [] }),
+    'PUT /api/admin/roles': () => envelope(200, roles[2]),
+    'DELETE /api/admin/roles/6': () => envelope(200, null),
+  })
+  renderWithProviders(<App />, '/admin/roles')
+
+  const list = within(await screen.findByRole('list', { name: 'Roles' }))
+  expect(list.queryByRole('button', { name: 'Edit SUPER ADMIN' })).not.toBeInTheDocument()
+
+  await userEvent.click(screen.getByRole('button', { name: 'New role' }))
+  const dialog = within(await screen.findByRole('dialog', { name: 'New admin role' }))
+  await userEvent.click(dialog.getByRole('button', { name: 'Create role' }))
+  expect(dialog.getByLabelText('Name')).toHaveAccessibleDescription('Give the role a name.')
+  await userEvent.type(dialog.getByLabelText('Name'), 'Support')
+  await userEvent.click(await dialog.findByRole('checkbox', { name: /USER_READ/ }))
+  await userEvent.click(dialog.getByRole('button', { name: 'Create role' }))
+  await waitFor(() => expect(api.mock.calls.some(([url, init]) => url === '/api/admin/roles' && init?.method === 'POST')).toBe(true))
+  const created = api.mock.calls.find(([url, init]) => url === '/api/admin/roles' && init?.method === 'POST')!
+  expect(JSON.parse(created[1]!.body as string)).toEqual({ roleName: 'Support', roleType: 'ADMIN', privilegeIds: [13] })
+
+  await userEvent.click(list.getByRole('button', { name: 'Edit Moderator' }))
+  const edit = within(await screen.findByRole('dialog', { name: 'Edit Moderator' }))
+  expect(await edit.findByRole('checkbox', { name: /CONTENT_MODERATE/ })).toBeChecked()
+  await userEvent.click(edit.getByRole('button', { name: 'Save role' }))
+  await waitFor(() => expect(api.mock.calls.some(([url, init]) => url === '/api/admin/roles' && init?.method === 'PUT')).toBe(true))
+
+  await userEvent.click(list.getByRole('button', { name: 'Delete Expert reviewer' }))
+  await userEvent.click(await screen.findByRole('button', { name: 'Delete role' }))
+  await waitFor(() => expect(api.mock.calls.some(([url, init]) => url === '/api/admin/roles/6' && init?.method === 'DELETE')).toBe(true))
+})

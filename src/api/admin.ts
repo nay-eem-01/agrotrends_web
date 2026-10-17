@@ -50,3 +50,25 @@ export function useUserRole() {
     onSettled: () => queryClient.invalidateQueries({ queryKey: ['admin'] }),
   })
 }
+
+/** Privileges an admin role may hold (the ROLE_* ones are never grantable). */
+export function usePrivileges() {
+  return useQuery({ queryKey: adminKeys.privileges, queryFn: ({ signal }) => api<Privilege[]>('/api/admin/privileges', { signal }) })
+}
+
+export type RoleWrite =
+  | { kind: 'create'; request: Schemas['CreateRoleRequest'] }
+  | { kind: 'update'; request: Schemas['UpdateRoleRequest'] }
+  | { kind: 'delete'; roleId: number }
+
+/** Create, edit or delete an ADMIN role (super-admin only). */
+export function useRoleWrite() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (write: RoleWrite) =>
+      write.kind === 'delete'
+        ? api<null>(`/api/admin/roles/${write.roleId}`, { method: 'DELETE' })
+        : api<Role>('/api/admin/roles', { method: write.kind === 'create' ? 'POST' : 'PUT', body: write.request }),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['admin'] }),
+  })
+}

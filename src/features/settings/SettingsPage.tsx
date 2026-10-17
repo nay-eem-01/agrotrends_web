@@ -1,10 +1,13 @@
 import { useState, type FormEvent, type ReactNode } from 'react'
 import { useChangePassword, useUpdateAccount } from '../../api/account'
 import { errorMessage } from '../../api/errors'
-import { isEmail, passwordProblem, splitMobile } from '../../lib/auth'
+import { CheckCircle, Circle } from '@phosphor-icons/react'
+import { fetchMe } from '../../api/auth'
+import { compactPhone, isEmail, joinPhone, passwordProblem, splitMobile } from '../../lib/auth'
 import { Button } from '../../ui/Button'
 import { TextField } from '../../ui/TextField'
 import { FormError } from '../auth/AuthPage'
+import { ResendLink } from '../auth/confirmEmail'
 import { useSession } from '../auth/session'
 import { AuthorProfileForm } from './AuthorProfileForm'
 import { useMyApplications } from '../../api/experts'
@@ -12,7 +15,6 @@ import { ApplicationStatus } from '../experts/ExpertApplyPage'
 import { ButtonLink } from '../../ui/Button'
 import { Spinner } from '../../ui/Spinner'
 
-export const EMAIL_CHANGED_NOTICE = 'E-mail changed. Sign in with your new address.'
 export const PASSWORD_CHANGED_NOTICE = 'Password changed. Sign in with your new password.'
 
 export function SettingsPage() {
@@ -74,12 +76,16 @@ function useSignInAgain() {
 
 type AccountErrors = Partial<Record<'name' | 'email' | 'countryCode' | 'mobileNumber', string>>
 
+/**
+ * Name, e-mail and phone. Either contact may be added, changed or removed while one remains; a new one starts
+ * unconfirmed (a new e-mail gets a link, a new phone a code). Changing them keeps the reader signed in.
+ */
 function AccountForm() {
   const { user, updateUser } = useSession()
   const update = useUpdateAccount()
-  const signInAgain = useSignInAgain()
-  const [form, setForm] = useState(() => ({ name: user?.name ?? '', email: user?.email ?? '', ...splitMobile(user?.mobileNumber) }))
+  const [form, setForm] = useState(() => ({ name: user?.name ?? '', email: user?.email ?? '', ...splitMobile(user?.mobileNumber), ...(user?.mobileNumber ? {} : { countryCode: '+880' }) }))
   const [errors, setErrors] = useState<AccountErrors>({})
+  const [sent, setSent] = useState<{ email?: string; phone?: string }>({})
 
   function set(key: keyof typeof form, value: string) {
     setForm((current) => ({ ...current, [key]: value }))
@@ -88,28 +94,31 @@ function AccountForm() {
 
   function submit(event: FormEvent) {
     event.preventDefault()
+    const email = form.email.trim()
+    const mobile = compactPhone(form.mobileNumber)
     const found: AccountErrors = {}
     if (!form.name.trim()) found.name = 'Enter your name.'
-    if (!isEmail(form.email)) found.email = 'Enter a valid e-mail address.'
-    if (!/^\+\d{1,4}$/.test(form.countryCode.trim())) found.countryCode = 'Like +880.'
-    if (!/^\d{6,14}$/.test(form.mobileNumber.trim())) found.mobileNumber = 'Enter the number without the country code.'
+    if (!email && !mobile) found.email = 'Keep an e-mail address, a phone number or both.'
+    if (email && !isEmail(email)) found.email = 'Enter a valid e-mail address.'
+    if (mobile && !/^\+\d{1,4}$/.test(form.countryCode.trim())) found.countryCode = 'Like +880.'
+    if (mobile && !/^0?\d{6,14}$/.test(mobile)) found.mobileNumber = 'Enter the number without the country code.'
     setErrors(found)
     if (Object.keys(found).length > 0) return
 
     const request = {
       name: form.name.trim(),
-      email: form.email.trim(),
-      countryCode: form.countryCode.trim(),
-      mobileNumber: form.mobileNumber.trim(),
+      email: email || undefined,
+      countryCode: mobile ? form.countryCode.trim() : undefined,
+      mobileNumber: mobile || undefined,
     }
-    const emailChanged = request.email.toLowerCase() !== (user?.email ?? '').toLowerCase()
+    const phone = mobile ? joinPhone(form.countryCode, mobile) : undefined
+    const newEmail = email && email.toLowerCase() !== (user?.email ?? '').toLowerCase() ? email : undefined
+    const newPhone = phone && phone !== user?.mobileNumber ? phone : undefined
     update.mutate(request, {
       onSuccess: () => {
-        if (emailChanged) {
-          signInAgain(EMAIL_CHANGED_NOTICE)
-          return
-        }
-        updateUser({ name: request.name, email: request.email, mobileNumber: request.countryCode + request.mobileNumber })
+        setSent({ email: newEmail, phone: newPhone })
+        // Reload the account for its confirmation state; fall back to what was sent.
+        void fetchMe().then(updateUser, () => updateUser({ name: request.name, email: request.email, mobileNumber: phone }))
       },
     })
   }
@@ -117,35 +126,72 @@ function AccountForm() {
   return (
     <form onSubmit={submit} noValidate className="flex flex-col gap-5">
       <TextField label="Full name" autoComplete="name" value={form.name} onChange={(e) => set('name', e.target.value)} error={errors.name} />
-      <TextField
-        label="E-mail"
-        type="email"
-        autoComplete="email"
-        hint="You sign in with this. Changing it signs you out."
-        value={form.email}
-        onChange={(e) => set('email', e.target.value)}
-        error={errors.email}
-      />
-      <div className="grid grid-cols-[6rem_1fr] gap-3">
-        <TextField label="Code" autoComplete="tel-country-code" value={form.countryCode} onChange={(e) => set('countryCode', e.target.value)} error={errors.countryCode} />
+      <div className="flex flex-col gap-2">
         <TextField
-          label="Mobile number"
-          type="tel"
-          inputMode="numeric"
-          autoComplete="tel-national"
-          value={form.mobileNumber}
-          onChange={(e) => set('mobileNumber', e.target.value)}
-          error={errors.mobileNumber}
+          label="E-mail"
+          type="email"
+          autoComplete="email"
+          hint="You can sign in with it. Leave it empty to remove it, if you keep a phone number."
+          value={form.email}
+          onChange={(e) => set('email', e.target.value)}
+          error={errors.email}
         />
+        {user?.email && user.email === form.email.trim() && <ContactStatus confirmed={user.emailVerified} action={user.emailVerified ? null : <ResendLink email={user.email} variant="quiet" />} />}
+      </div>
+      <div className="flex flex-col gap-2">
+        <div className="grid grid-cols-[6rem_1fr] gap-3">
+          <TextField label="Code" autoComplete="tel-country-code" value={form.countryCode} onChange={(e) => set('countryCode', e.target.value)} error={errors.countryCode} />
+          <TextField
+            label="Mobile number"
+            type="tel"
+            inputMode="numeric"
+            autoComplete="tel-national"
+            placeholder="1712345678"
+            value={form.mobileNumber}
+            onChange={(e) => set('mobileNumber', e.target.value)}
+            error={errors.mobileNumber}
+          />
+        </div>
+        {user?.mobileNumber && compactPhone(form.mobileNumber) && joinPhone(form.countryCode, form.mobileNumber) === user.mobileNumber && (
+          <ContactStatus
+            confirmed={user.phoneVerified}
+            action={
+              user.phoneVerified ? null : (
+                <ButtonLink to="/verify-phone?next=%2Fsettings" variant="quiet" size="sm">
+                  Enter the SMS code
+                </ButtonLink>
+              )
+            }
+          />
+        )}
       </div>
       <FormError message={update.isError ? errorMessage(update.error) : null} />
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-4">
         <Button type="submit" loading={update.isPending}>
           Save changes
         </Button>
-        {update.isSuccess && <output className="text-sm text-paddy">Changes saved</output>}
+        {update.isSuccess && (
+          <output className="text-sm text-success">
+            Changes saved.
+            {sent.email && ` We sent a confirmation link to ${sent.email}.`}
+            {sent.phone && ` We texted a code to ${sent.phone}.`}
+          </output>
+        )}
       </div>
     </form>
+  )
+}
+
+/** Whether a saved contact is confirmed, with what to do while it isn't. */
+function ContactStatus({ confirmed, action }: { confirmed?: boolean; action: ReactNode }) {
+  return (
+    <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+      <span className={confirmed ? 'inline-flex items-center gap-1.5 font-medium text-success' : 'inline-flex items-center gap-1.5 text-muted-foreground'}>
+        {confirmed ? <CheckCircle size={16} weight="fill" aria-hidden="true" /> : <Circle size={16} aria-hidden="true" />}
+        {confirmed ? 'Confirmed' : 'Not confirmed yet'}
+      </span>
+      {action}
+    </p>
   )
 }
 

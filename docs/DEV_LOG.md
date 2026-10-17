@@ -37,12 +37,16 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 - Phase F17 on `feat/admin-dashboard-base` (stacked on F16's tip): F17.0 API types (`feat/api-types-p10`) F17.1
   overview (`feat/admin-overview`) F17.2 users (`feat/admin-users`) F17.3 member page (`feat/admin-user`) and F17.4
   roles (`feat/admin-roles`) done. Phase F17 is complete.
+- Phase F18 on `feat/phone-auth-base` (stacked on F17's tip): F18.1 sign-in (`feat/phone-sign-in`) F18.2 sign-up and
+  confirmation (`feat/phone-sign-up`) F18.3 reset (`feat/phone-reset`) and F18.4 settings (`feat/phone-settings`)
+  done. Phase F18 is complete.
 
 ## Next up
 
-1. **Nayeem:** PR F16.1 into `feat/refine-base`, then the base into `development`.
-2. Run the admin smoke step (`E2E_ADMIN_EMAIL` / `E2E_ADMIN_PASSWORD`) and the admin screens live once an admin login is at hand.
-3. Merge the backend's Phase 8 so F12–F14 run against its `development`.
+1. **Nayeem:** PR the F16, F17 and F18 steps in order into their bases, then each base into `development`.
+2. Pick an SMS provider (backend 10.5): until then codes only appear in the backend log as `[DEV SMS]`.
+3. Run the admin smoke step (`E2E_ADMIN_EMAIL` / `E2E_ADMIN_PASSWORD`) and the admin screens live once an admin login is at hand.
+4. Merge the backend's Phase 8 so F12–F14 run against its `development`.
 
 ## Open items
 
@@ -59,6 +63,34 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-17 (F18 phone sign-up, backend Phase 10)
+
+**Done**
+- Sign-in and admin sign-in take an e-mail or a phone number (`identifier`); phones go out without spaces or dashes,
+  and a Bangladeshi number may drop +880 (`lib/auth`: `isPhone`, `signInIdentifier`, `joinPhone`).
+- Sign-up: an e-mail, a phone number or both (blank ones stay out), then sign-in with whichever was given. A
+  phone-only account goes to `/verify-phone`: 6-digit code (one field, `one-time-code`), resend after 60 s.
+- The confirm banner and the write-refused dialog follow the account (`needsConfirmation`): the e-mail link, the SMS
+  code or both. The 403 is still told apart by "Confirm your e-mail", which the new message keeps.
+- Forgot password: E-mail | Phone; by phone, a code, then the code and a new password (every session signed out),
+  then sign-in with the usual notice.
+- Settings: e-mail and phone optional while one remains, each with Confirmed / Not confirmed yet and its action (new
+  link, enter the code); changing the e-mail no longer signs out. The account menu shows the phone when there's no
+  e-mail.
+- `openMoreActions` (tests) now waits for the lazily loaded menu: a timing flake since F16.
+- Tests: phone sign-in, phone-only sign-up to `/verify-phone`, code and resend, wrong code, phone banner, reset by
+  SMS, settings contacts. 291 tests.
+
+**Decisions**
+- After a phone-only sign-up the code comes before the optional profile step; with an e-mail too, the banner offers
+  both ways.
+- Resend waits 60 s on the page; the backend allows three codes an hour per number.
+
+**Known limitations**
+- No SMS provider yet (backend 10.5): codes are written to the backend log as `[DEV SMS]`.
 
 ---
 

@@ -29,7 +29,7 @@ export function ReviewQueuePage() {
           <Spinner label={t('Loading')} />
         </div>
       ) : notExpert ? (
-        <div className="mt-8 rounded-2xl bg-card p-6 ring-1 ring-border">
+        <div className="mt-8 rounded-xl bg-card p-6 ring-1 ring-border">
           <p>{t('The review queue is for verified experts.')}</p>
           <ButtonLink to="/experts/apply" variant="secondary" size="sm" className="mt-4">
             {t('Become a verified expert')}
@@ -46,7 +46,7 @@ export function ReviewQueuePage() {
           <ul className="mt-8 flex flex-col gap-4">
             {items.map((item) => (
               <li key={item.questionId}>
-                <article aria-labelledby={`review-${item.questionId}`} className="rounded-2xl bg-card p-5 ring-1 ring-border">
+                <article aria-labelledby={`review-${item.questionId}`} className="rounded-xl bg-card p-5 ring-1 ring-border">
                   {item.topic?.categoryName && <Badge variant="secondary">{item.topic.categoryName}</Badge>}
                   <h2 id={`review-${item.questionId}`} className="mt-2 font-serif text-lg font-bold">
                     <Link to={`/questions/${item.questionId}`} className="hover:underline">

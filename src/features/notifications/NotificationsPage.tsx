@@ -56,7 +56,7 @@ export function NotificationsPage() {
         <p className="py-12 text-center text-muted-foreground">{unreadOnly ? t('You have read everything.') : t('Nothing new. Answers to your questions and replies show up here.')}</p>
       ) : (
         <>
-          <ul className="mt-4 overflow-hidden rounded-2xl bg-card ring-1 ring-border">
+          <ul className="mt-4 overflow-hidden rounded-xl bg-card ring-1 ring-border">
             {items.map((item) => (
               <li key={item.id} className="border-b border-border last:border-b-0">
                 <NotificationRow item={item} />

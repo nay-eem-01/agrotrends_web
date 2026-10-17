@@ -1,3 +1,4 @@
+import { WarningCircle } from '@phosphor-icons/react'
 import { useId, type InputHTMLAttributes } from 'react'
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
@@ -27,7 +28,9 @@ export function TextField({ label, hint, error, id, className, ...rest }: TextFi
 export function Message({ inputId, hint, error }: { inputId: string; hint?: string; error?: string }) {
   if (error)
     return (
-      <FieldDescription id={`${inputId}-error`} className="text-destructive">
+      // The icon marks the error without relying on colour alone.
+      <FieldDescription id={`${inputId}-error`} className="flex items-start gap-1.5 text-destructive">
+        <WarningCircle size={16} weight="bold" aria-hidden="true" className="mt-0.5 shrink-0" />
         {error}
       </FieldDescription>
     )

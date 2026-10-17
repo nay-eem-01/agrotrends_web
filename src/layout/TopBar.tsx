@@ -1,16 +1,26 @@
 import { useT } from '../lib/i18n'
 import { MagnifyingGlass, NotePencil } from '@phosphor-icons/react'
-import { useState, type FormEvent } from 'react'
+import { lazy, Suspense, useState, type FormEvent } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { cn } from 'cn'
 import { useSession } from '../features/auth/session'
 import { ButtonLink } from '../ui/Button'
-import { AccountMenu } from './AccountMenu'
 import { NotificationBell } from './NotificationBell'
 import { Logo } from './Logo'
 
+// The menus (dialog and menu code) load just after the page; a same-size space holds their place meanwhile.
+const AccountMenu = lazy(() => import('./AccountMenu').then((m) => ({ default: m.AccountMenu })))
+const MobileMenu = lazy(() => import('./MobileMenu').then((m) => ({ default: m.MobileMenu })))
+const placeholder = (className: string) => <span aria-hidden="true" className={cn('size-11 shrink-0', className)} />
+
+// The current page is green and underlined at the bar's bottom edge, so it doesn't rely on colour alone.
 const navClass = ({ isActive }: { isActive: boolean }) =>
-  cn('hidden h-11 items-center px-2 text-sm transition-colors duration-150 md:flex', isActive ? 'font-medium text-foreground' : 'text-muted-foreground hover:text-foreground')
+  cn(
+    'relative hidden h-11 items-center gap-1.5 px-2.5 text-sm whitespace-nowrap transition-colors duration-150 lg:flex',
+    isActive
+      ? 'font-semibold text-primary after:absolute after:inset-x-2.5 after:-bottom-[10px] after:h-0.5 after:rounded-full after:bg-primary'
+      : 'text-muted-foreground hover:text-foreground',
+  )
 
 export function TopBar() {
   const t = useT()
@@ -25,12 +35,12 @@ export function TopBar() {
   }
 
   return (
-    <header className="sticky top-0 z-20 border-b border-rule bg-paper/95 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-(--container-page) items-center gap-3 px-4 sm:gap-4 sm:px-6">
+    <header className="sticky top-0 z-20 border-b border-border bg-background">
+      <div className="mx-auto flex h-16 max-w-(--container-page) items-center gap-2 px-4 sm:gap-4 sm:px-6">
         <Logo />
-        <search className="hidden min-w-0 flex-1 sm:block sm:max-w-60">
+        <search className="hidden min-w-0 flex-1 xl:block xl:max-w-72">
           <form onSubmit={search}>
-            <label className="flex h-10 items-center gap-2 rounded-full bg-field px-3 text-ink-muted focus-within:ring-2 focus-within:ring-paddy">
+            <label className="flex h-10 items-center gap-2 rounded-lg border border-border bg-surface px-3 text-muted-foreground transition-[border-color,box-shadow,background-color] duration-150 focus-within:border-primary focus-within:bg-background focus-within:ring-[3px] focus-within:ring-ring/60 hover:border-border-strong">
               <MagnifyingGlass size={18} aria-hidden="true" />
               <span className="sr-only">{t('Search questions and stories')}</span>
               <input
@@ -38,50 +48,57 @@ export function TopBar() {
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder={t('Search')}
-                className="min-w-0 flex-1 bg-transparent text-sm text-ink placeholder:text-ink-muted focus:outline-none"
+                enterKeyHint="search"
+                className="min-w-0 flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
               />
             </label>
           </form>
         </search>
-        <nav aria-label={t('Main')} className="ml-auto flex items-center gap-0 sm:gap-3">
-          <Link to="/search" className="flex h-11 w-11 items-center justify-center rounded-full text-ink-muted hover:text-ink sm:hidden" aria-label={t('Search')}>
+        <nav aria-label={t('Main')} className="ml-auto flex items-center gap-0 md:gap-1">
+          {/* Below 1280px the search page's own field is used. Below 380px the menu carries search, to keep the bar on one line. */}
+          <Link to="/search" className="flex size-11 items-center justify-center rounded-full text-muted-foreground hover:text-foreground max-[379px]:hidden xl:hidden" aria-label={t('Search')}>
             <MagnifyingGlass size={22} />
           </Link>
           <NavLink to="/" end className={navClass}>
+            {t('Discover')}
+          </NavLink>
+          <NavLink to="/questions" className={navClass}>
             {t('Questions')}
           </NavLink>
           <NavLink to="/stories" className={navClass}>
             {t('Stories')}
           </NavLink>
           <NavLink to="/advisor" className={navClass}>
-            {t('Advisor')}
+            {t('AI advisor')}
           </NavLink>
-          <Link to="/write" className="hidden h-11 items-center gap-1.5 px-2 text-sm text-ink-muted hover:text-ink md:flex">
-            <NotePencil size={20} aria-hidden="true" />
+          <NavLink to="/write" className={navClass}>
+            <NotePencil size={18} aria-hidden="true" />
             {t('Write')}
-          </Link>
+          </NavLink>
           {status === 'signed-in' && (
             <>
-              <Link to="/write" className="flex h-11 w-11 items-center justify-center rounded-full text-ink-muted hover:text-ink md:hidden" aria-label={t('Write')}>
-                <NotePencil size={22} />
-              </Link>
-              <ButtonLink to="/questions/ask" size="sm" className="ml-1 hidden sm:inline-flex">
+              <ButtonLink to="/questions/ask" size="sm" className="mx-1 hidden lg:inline-flex">
                 {t('Ask')}
               </ButtonLink>
               <NotificationBell />
-              <AccountMenu />
+              <Suspense fallback={placeholder('')}>
+                <AccountMenu />
+              </Suspense>
             </>
           )}
           {status === 'anonymous' && (
             <>
-              <Link to="/sign-in" className="hidden h-11 items-center px-2 text-sm whitespace-nowrap text-ink-muted hover:text-ink sm:flex">
+              <Link to="/sign-in" className="hidden h-11 items-center px-2.5 text-sm whitespace-nowrap text-muted-foreground hover:text-foreground lg:flex">
                 {t('Sign in')}
               </Link>
-              <ButtonLink to="/sign-up" size="sm">
+              <ButtonLink to="/sign-up" size="sm" className="ml-1 hidden sm:inline-flex">
                 {t('Get started')}
               </ButtonLink>
             </>
           )}
+          <Suspense fallback={placeholder('lg:hidden')}>
+            <MobileMenu signedIn={status === 'signed-in'} anonymous={status === 'anonymous'} />
+          </Suspense>
         </nav>
       </div>
     </header>

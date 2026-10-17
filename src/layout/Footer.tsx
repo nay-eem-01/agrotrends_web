@@ -11,8 +11,9 @@ export function Footer() {
     <footer className="mt-24 border-t border-rule">
       <div className="mx-auto flex max-w-(--container-page) flex-wrap items-center gap-x-6 gap-y-2 px-4 py-8 text-sm text-ink-muted sm:px-6">
         <span>© {YEAR} AgroTrends</span>
-        <nav aria-label="Footer" className="flex gap-5 sm:ml-auto">
+        <nav aria-label="Footer" className="flex flex-wrap gap-x-5 gap-y-2 sm:ml-auto">
           <Link to="/questions" className="hover:text-ink">{t('Questions')}</Link>
+          <Link to="/stories" className="hover:text-ink">{t('Stories')}</Link>
           <Link to="/advisor" className="hover:text-ink">{t('AI advisor')}</Link>
           <Link to="/write" className="hover:text-ink">{t('Write')}</Link>
           <LanguageSwitch />

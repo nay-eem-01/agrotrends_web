@@ -65,7 +65,7 @@ test('saving a new name keeps the reader signed in and updates the menu', async 
   expect(fetchMock.mock.calls[1][0]).toBe('/api/user/update')
   expect(body(1)).toEqual({ name: 'Nasrin Sultana', email: 'nasrin@farm.bd', countryCode: '+880', mobileNumber: '1712345678' })
   await userEvent.click(screen.getByRole('button', { name: 'Account' }))
-  expect(screen.getByText('Nasrin Sultana')).toBeInTheDocument()
+  expect(await screen.findByText('Nasrin Sultana')).toBeInTheDocument()
   expect(getAccessToken()).toBe('a1')
 })
 

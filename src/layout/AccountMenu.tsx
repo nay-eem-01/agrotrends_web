@@ -1,101 +1,102 @@
-import { useT } from '../lib/i18n'
-import { BookmarksSimple, GearSix, NotePencil, SealCheck, ShieldCheck, SignOut } from '@phosphor-icons/react'
-import { useEffect, useId, useRef, useState } from 'react'
+import { setLang, useLang, useT } from '../lib/i18n'
+import { BookmarksSimple, GearSix, NotePencil, SealCheck, ShieldCheck, SignOut, Translate } from '@phosphor-icons/react'
+import { useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate } from 'react-router-dom'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { isAdmin } from '../api/auth'
 import { useSession } from '../features/auth/session'
 import { useMyBadges } from '../features/experts/useMyBadges'
 import { Avatar } from '../ui/Avatar'
-import { LanguageSwitch } from './Footer'
 
-/** The signed-in reader's avatar in the top bar; opens a small panel with who is signed in and Sign out. */
+const item = 'min-h-11 text-muted-foreground'
+
+/**
+ * The signed-in reader's avatar in the top bar; opens a menu with who is signed in, their pages and Sign out.
+ * A real menu (shadcn DropdownMenu): arrow keys move between items, Escape closes it and returns focus.
+ */
 export function AccountMenu() {
   const t = useT()
   const { user, signOut } = useSession()
   const navigate = useNavigate()
-  const [open, setOpen] = useState(false)
-  const panelId = useId()
-  const root = useRef<HTMLDivElement>(null)
-  const trigger = useRef<HTMLButtonElement>(null)
+  const lang = useLang()
+  const queryClient = useQueryClient()
   const name = user?.name || t('Your account')
   // The review queue is for Verified Experts; the entry stays hidden for everyone else.
   const { expertAnywhere } = useMyBadges()
-
-  useEffect(() => {
-    if (!open) return
-    function close(event: MouseEvent | KeyboardEvent) {
-      if (event instanceof KeyboardEvent ? event.key === 'Escape' : !root.current?.contains(event.target as Node)) {
-        setOpen(false)
-        // Escape returns focus to the button that opened the menu.
-        if (event instanceof KeyboardEvent) trigger.current?.focus()
-      }
-    }
-    document.addEventListener('mousedown', close)
-    document.addEventListener('keydown', close)
-    return () => {
-      document.removeEventListener('mousedown', close)
-      document.removeEventListener('keydown', close)
-    }
-  }, [open])
+  const nextLang = lang === 'bn' ? 'en' : 'bn'
 
   async function leave() {
-    setOpen(false)
     await signOut()
     navigate('/')
   }
 
   return (
-    <div ref={root} className="relative">
-      <button
-        ref={trigger}
-        type="button"
-        aria-expanded={open}
-        aria-controls={panelId}
-        onClick={() => setOpen((value) => !value)}
-        className="flex h-11 w-11 items-center justify-center rounded-full"
-      >
+    <DropdownMenu>
+      <DropdownMenuTrigger className="flex size-11 items-center justify-center rounded-full transition-transform duration-150 ease-(--ease-out) active:scale-[0.94]">
         <span className="sr-only">{t('Account')}</span>
         <Avatar name={name} size={32} />
-      </button>
-      {open && (
-        <div id={panelId} className="absolute right-0 mt-1 w-64 rounded-lg border border-rule bg-paper py-2 shadow-lg">
-          <div className="border-b border-rule px-4 pt-1 pb-3">
-            <p className="truncate font-medium">{name}</p>
-            {user?.email && <p className="truncate text-sm text-ink-muted">{user.email}</p>}
-          </div>
-          <Link to="/me/stories" onClick={() => setOpen(false)} className="mt-1 flex h-11 items-center gap-2 px-4 text-sm text-ink-muted hover:bg-field hover:text-ink">
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-64">
+        <DropdownMenuGroup>
+          <DropdownMenuLabel className="flex flex-col gap-0.5 pb-3 text-sm text-foreground">
+            <span className="truncate font-medium">{name}</span>
+            {user?.email && <span className="truncate text-muted-foreground">{user.email}</span>}
+          </DropdownMenuLabel>
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuGroup>
+          <DropdownMenuItem className={item} render={<Link to="/me/stories" />}>
             <NotePencil size={18} aria-hidden="true" />
             {t('Your stories')}
-          </Link>
+          </DropdownMenuItem>
           {expertAnywhere && (
-            <Link to="/review" onClick={() => setOpen(false)} className="flex h-11 items-center gap-2 px-4 text-sm text-ink-muted hover:bg-field hover:text-ink">
+            <DropdownMenuItem className={item} render={<Link to="/review" />}>
               <SealCheck size={18} aria-hidden="true" />
               {t('Review queue')}
-            </Link>
+            </DropdownMenuItem>
           )}
           {isAdmin(user) && (
-            <Link to="/admin/experts" onClick={() => setOpen(false)} className="flex h-11 items-center gap-2 px-4 text-sm text-ink-muted hover:bg-field hover:text-ink">
+            <DropdownMenuItem className={item} render={<Link to="/admin/experts" />}>
               <ShieldCheck size={18} aria-hidden="true" />
               {t('Admin')}
-            </Link>
+            </DropdownMenuItem>
           )}
-          <Link to="/library" onClick={() => setOpen(false)} className="flex h-11 items-center gap-2 px-4 text-sm text-ink-muted hover:bg-field hover:text-ink">
+          <DropdownMenuItem className={item} render={<Link to="/library" />}>
             <BookmarksSimple size={18} aria-hidden="true" />
             {t('Library')}
-          </Link>
-          <Link to="/settings" onClick={() => setOpen(false)} className="flex h-11 items-center gap-2 px-4 text-sm text-ink-muted hover:bg-field hover:text-ink">
+          </DropdownMenuItem>
+          <DropdownMenuItem className={item} render={<Link to="/settings" />}>
             <GearSix size={18} aria-hidden="true" />
             {t('Settings')}
-          </Link>
-          <button type="button" onClick={leave} className="flex h-11 w-full items-center gap-2 px-4 text-left text-sm text-ink-muted hover:bg-field hover:text-ink">
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuGroup>
+          <DropdownMenuItem
+            className={item}
+            lang={nextLang}
+            onClick={() => {
+              setLang(nextLang)
+              void queryClient.invalidateQueries()
+            }}
+          >
+            <Translate size={18} aria-hidden="true" />
+            {nextLang === 'bn' ? 'বাংলা' : 'English'}
+          </DropdownMenuItem>
+          <DropdownMenuItem className={item} onClick={() => void leave()}>
             <SignOut size={18} aria-hidden="true" />
             {t('Sign out')}
-          </button>
-          <div className="border-t border-rule px-4 pt-1">
-            <LanguageSwitch className="flex h-11 items-center text-sm text-ink-muted hover:text-ink" />
-          </div>
-        </div>
-      )}
-    </div>
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }

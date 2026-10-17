@@ -7,7 +7,7 @@ import { ApiError, errorMessage } from '../../api/errors'
 import { useT } from '../../lib/i18n'
 import { Button } from '../../ui/Button'
 import { TextField } from '../../ui/TextField'
-import { Select } from '../farming/FarmingFields'
+import { SearchSelect } from '../../ui/SearchSelect'
 
 /**
  * Under an earlier private ask: publish it as a question for the experts in a topic, with that AI answer for them to
@@ -60,9 +60,10 @@ function AskExpertsForm({ item, onCancel, ask }: { item: AiHistoryItem; onCancel
   }
 
   return (
-    <form onSubmit={submit} noValidate className="mt-4 flex flex-col gap-4 rounded-2xl bg-muted/60 p-4">
-      <Select
+    <form onSubmit={submit} noValidate className="mt-4 flex flex-col gap-4 rounded-xl bg-surface p-4">
+      <SearchSelect
         label={t('Topic')}
+        disabled={categories.isPending}
         value={categoryId == null ? '' : String(categoryId)}
         error={missing && categoryId == null ? t('Choose a topic.') : undefined}
         onChange={(value) => setCategoryId(value ? Number(value) : undefined)}

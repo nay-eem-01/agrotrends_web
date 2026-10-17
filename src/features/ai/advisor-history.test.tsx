@@ -4,7 +4,7 @@ import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { clearSession } from '../../api/client'
 import App from '../../App'
 import { envelope, mockApi, page } from '../../test/api'
-import { renderWithProviders } from '../../test/render'
+import { chooseOption, renderWithProviders } from '../../test/render'
 
 function signedIn(routes: object) {
   localStorage.setItem('agrotrends.refreshToken', 'r0')
@@ -103,7 +103,7 @@ test('a private ask is posted for the experts with a topic and title, then links
   await userEvent.click(screen.getByRole('button', { name: 'Post for the experts' }))
   expect(screen.getByLabelText('Topic')).toHaveAccessibleDescription('Choose a topic.')
 
-  await userEvent.selectOptions(await screen.findByLabelText('Topic'), 'Livestock')
+  await chooseOption(await screen.findByLabelText('Topic'), 'Livestock')
   await userEvent.type(screen.getByLabelText('Title (optional)'), 'Calf cough')
   await userEvent.click(screen.getByRole('button', { name: 'Post for the experts' }))
 
@@ -128,7 +128,7 @@ test('already published: a 409 says so and the refetched history links to the qu
 
   await userEvent.click(await screen.findByText(/Calf has a cough/))
   await userEvent.click(screen.getByRole('button', { name: 'Ask the experts' }))
-  await userEvent.selectOptions(await screen.findByLabelText('Topic'), 'Livestock')
+  await chooseOption(await screen.findByLabelText('Topic'), 'Livestock')
   await userEvent.click(screen.getByRole('button', { name: 'Post for the experts' }))
 
   expect(await screen.findByRole('link', { name: 'Open the question' })).toHaveAttribute('href', '/questions/91')

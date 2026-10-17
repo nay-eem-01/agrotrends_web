@@ -47,7 +47,7 @@ test('signing in stores the session and goes back where the reader was', async (
   expect(body(0)).toEqual({ email: 'nasrin@farm.bd', password: 'Paddy2026!' })
   expect(getAccessToken()).toBe('a1')
   expect(localStorage.getItem('agrotrends.refreshToken')).toBe('r1')
-  expect(screen.getByRole('button', { name: 'Account' })).toBeInTheDocument()
+  expect(await screen.findByRole('button', { name: 'Account' })).toBeInTheDocument()
 })
 
 test('a rejected sign-in shows the server message', async () => {
@@ -143,8 +143,8 @@ test('signing out ends the session on the server and here', async () => {
   renderWithProviders(<App />, '/')
 
   await userEvent.click(await screen.findByRole('button', { name: 'Account' }))
-  expect(screen.getByText('nasrin@farm.bd')).toBeInTheDocument()
-  await userEvent.click(screen.getByRole('button', { name: 'Sign out' }))
+  expect(await screen.findByText('nasrin@farm.bd')).toBeInTheDocument()
+  await userEvent.click(await screen.findByRole('menuitem', { name: 'Sign out' }))
 
   expect(await screen.findByRole('link', { name: 'Get started' })).toBeInTheDocument()
   expect(api.mock.calls.some(([url]) => url === '/api/auth/sign-out')).toBe(true)
@@ -184,8 +184,8 @@ test('Escape closes the account menu and returns focus to it', async () => {
 
   const button = await screen.findByRole('button', { name: 'Account' })
   await userEvent.click(button)
-  expect(screen.getByRole('button', { name: 'Sign out' })).toBeInTheDocument()
+  expect(await screen.findByRole('menuitem', { name: 'Sign out' })).toBeInTheDocument()
   await userEvent.keyboard('{Escape}')
-  expect(screen.queryByRole('button', { name: 'Sign out' })).not.toBeInTheDocument()
+  await waitFor(() => expect(screen.queryByRole('menuitem', { name: 'Sign out' })).not.toBeInTheDocument())
   expect(button).toHaveFocus()
 })

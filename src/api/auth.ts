@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query'
 import { api } from './client'
 import { ApiError } from './errors'
+import { joinPhone } from '../lib/auth'
 import type { Schemas, UserResponse, WebTokenResponse } from './types'
 
 export type SignInRequest = Schemas['SignInRequest']
@@ -31,13 +32,13 @@ export function useGoogleSignIn() {
   return useMutation({ mutationFn: (idToken: string) => api<WebTokenResponse>('/api/auth/google', { method: 'POST', body: { idToken } }) })
 }
 
-/** Sign up, then sign in with the same e-mail and password. */
+/** Sign up (an e-mail, a phone number or both), then sign in with whichever was given and the same password. */
 export function useSignUp() {
   return useMutation({
     mutationFn: async (request: SignUpRequest) => {
       await signUp(request)
       try {
-        return await signIn({ identifier: request.email ?? request.mobileNumber ?? '', password: request.password })
+        return await signIn({ identifier: request.email || joinPhone(request.countryCode ?? '', request.mobileNumber ?? ''), password: request.password })
       } catch (error) {
         // The account exists now; trying the form again would only say the e-mail is taken.
         const status = error instanceof ApiError ? error.status : 0
@@ -87,4 +88,16 @@ export function useAdminSignIn() {
 /** Any role besides USER is staff; the backend checks the exact permission on each call. */
 export function isAdmin(user: { roles?: string[] } | null | undefined): boolean {
   return (user?.roles ?? []).some((role) => role !== 'USER')
+}
+
+export type PhoneRequest = Schemas['PhoneRequest']
+
+/** Confirms the phone number with the 6-digit SMS code; 400 when the code is wrong, used or expired. */
+export function useVerifyPhone() {
+  return useMutation({ mutationFn: (request: Schemas['VerifyPhoneRequest']) => api<null>('/api/auth/verify-phone', { method: 'POST', body: request }) })
+}
+
+/** Always 200, so numbers can't be discovered; at most three codes an hour per number. */
+export function useResendPhoneCode() {
+  return useMutation({ mutationFn: (request: PhoneRequest) => api<null>('/api/auth/resend-phone-code', { method: 'POST', body: request }) })
 }

@@ -20,6 +20,7 @@ const ResetPasswordPage = page(() => import('./features/auth/ResetPasswordPage')
 const SignInPage = page(() => import('./features/auth/SignInPage'), 'SignInPage')
 const SignUpPage = page(() => import('./features/auth/SignUpPage'), 'SignUpPage')
 const WelcomePage = page(() => import('./features/auth/WelcomePage'), 'WelcomePage')
+const VerifyPhonePage = page(() => import('./features/auth/VerifyPhonePage'), 'VerifyPhonePage')
 const VerifyEmailPage = page(() => import('./features/auth/VerifyEmailPage'), 'VerifyEmailPage')
 const LibraryPage = page(() => import('./features/library/LibraryPage'), 'LibraryPage')
 const MyStoriesPage = page(() => import('./features/mystories/MyStoriesPage'), 'MyStoriesPage')
@@ -82,6 +83,7 @@ export default function App() {
           <Route path="/library" element={<LibraryPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/welcome" element={<WelcomePage />} />
+          <Route path="/verify-phone" element={<VerifyPhonePage />} />
           <Route path="/experts/apply" element={<ExpertApplyPage />} />
           <Route path="/review" element={<ReviewQueuePage />} />
           <Route path="/notifications" element={<NotificationsPage />} />

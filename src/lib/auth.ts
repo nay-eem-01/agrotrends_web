@@ -69,3 +69,13 @@ export function splitMobile(mobile: string | undefined): { countryCode: string; 
   if (value.startsWith('+880')) return { countryCode: '+880', mobileNumber: value.slice(4) }
   return { countryCode: '', mobileNumber: value }
 }
+
+/**
+ * Writes need a confirmed e-mail or phone. True while the account has a contact and none of them is confirmed
+ * (false while the session has no confirmation state, so nothing nags before it loads).
+ */
+export function needsConfirmation(user: { email?: string; mobileNumber?: string; emailVerified?: boolean; phoneVerified?: boolean } | null): boolean {
+  if (!user || (!user.email && !user.mobileNumber)) return false
+  if (user.emailVerified === true || user.phoneVerified === true) return false
+  return (user.email ? user.emailVerified === false : true) && (user.mobileNumber ? user.phoneVerified === false : true)
+}

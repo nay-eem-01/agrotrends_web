@@ -35,6 +35,8 @@ export function Composer({ label, submitLabel, doneLabel, placeholder, initial =
 
   function submit(event: FormEvent) {
     event.preventDefault()
+    // A second Ctrl+Enter while the first is still sending would post twice.
+    if (pending) return
     const content = text.trim()
     if (!content) {
       setProblem(t('Write something first.'))
@@ -61,6 +63,13 @@ export function Composer({ label, submitLabel, doneLabel, placeholder, initial =
           setDone(false)
         }}
         error={problem}
+        onKeyDown={(event) => {
+          // Ctrl+Enter (⌘+Enter on a Mac) sends; Enter alone is a new line.
+          if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+            event.preventDefault()
+            event.currentTarget.form?.requestSubmit()
+          }
+        }}
       />
       {error != null && (
         <p role="alert" className="text-sm text-destructive">

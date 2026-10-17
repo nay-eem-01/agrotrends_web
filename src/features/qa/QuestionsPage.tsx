@@ -1,23 +1,27 @@
-import { CheckCircle, SealCheck, Sparkle, X } from '@phosphor-icons/react'
+import { MagnifyingGlass, Plus, Sparkle } from '@phosphor-icons/react'
+import { lazy, Suspense, useState, type FormEvent } from 'react'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
-import { Badge } from '@/components/ui/badge'
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyTitle } from '@/components/ui/empty'
-import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from 'cn'
-import { useCategories } from '../../api/categories'
+import { useCategories, type Category } from '../../api/categories'
 import { errorMessage } from '../../api/errors'
-import { useQuestions, type Question } from '../../api/questions'
-import { filterPath, readQuestionFilters, SEASON_LABELS, SOIL_LABELS, type QuestionFilters } from '../../lib/agri'
-import { storyDate } from '../../lib/dates'
-import { excerpt, htmlToText } from '../../lib/html'
-import { formatNumber, useT } from '../../lib/i18n'
-import { Avatar } from '../../ui/Avatar'
+import { useQuestions } from '../../api/questions'
+import { readQuestionFilters, type QuestionFilters } from '../../lib/agri'
+import { useT } from '../../lib/i18n'
 import { Button, ButtonLink } from '../../ui/Button'
-import { AgriFilterBar } from '../feed/AgriFilterBar'
+import { Sprig } from '../../ui/Botanical'
+import { ActiveFilters, FilterButton, FilterChip } from '../feed/AgriFilterBar'
+import { QuestionCard } from './QuestionRow'
+
+// The searchable picker (and its positioning code) loads a moment after the page.
+const SearchSelect = lazy(() => import('../../ui/SearchSelect').then((m) => ({ default: m.SearchSelect })))
+
+/** How many topics show as chips; the rest are found with the "More topics" picker. */
+const TOPIC_CHIPS = 6
 
 /** The URL of this list with `changes` applied to its query; `undefined` removes a parameter. */
-function useListPath() {
+export function useListPath() {
   const { pathname } = useLocation()
   const [params] = useSearchParams()
   return (changes: Record<string, string | undefined>) => {
@@ -32,10 +36,10 @@ function useListPath() {
 }
 
 /**
- * The question feed: Newest or Unanswered, filtered by topic, tag and farming context. It is the home page (`/`)
- * and `/questions`; on home it sits under the Questions | Stories tabs.
+ * `/questions`: the question feed. Search sits first (most people come looking for an answer), then the topics as
+ * chips, Newest | Unanswered and the farming filters; a quiet sidebar points to the advisor and to asking well.
  */
-export function QuestionsPage({ heading = true }: { heading?: boolean }) {
+export function QuestionsPage() {
   const t = useT()
   const [params] = useSearchParams()
   const filters = readQuestionFilters(params)
@@ -44,24 +48,22 @@ export function QuestionsPage({ heading = true }: { heading?: boolean }) {
   const filtered = Object.keys(filters).some((key) => key !== 'unanswered')
 
   return (
-    <div className="mx-auto max-w-(--container-page) px-4 pb-16 sm:px-6">
+    <div className="mx-auto max-w-(--container-page) px-4 pb-16 sm:px-8">
       <title>{t('Questions – AgroTrends')}</title>
-      {heading && (
-        <div className="flex items-end justify-between gap-4 pt-10">
-          <div>
-            <h1 className="text-2xl sm:text-3xl">{t('Questions')}</h1>
-            <p className="mt-1 text-muted-foreground">{t('Ask the community about your crop, your soil, your season.')}</p>
-          </div>
-          <ButtonLink to="/questions/ask" size="sm" className="shrink-0">
-            {t('Ask a question')}
-          </ButtonLink>
+      <header className="flex flex-wrap items-end justify-between gap-x-6 gap-y-4 pt-8 sm:pt-10">
+        <div className="max-w-xl">
+          <h1 className="text-2xl sm:text-[2rem]">{t('Questions')}</h1>
+          <p className="mt-1.5 text-muted-foreground">{t('Ask the community about your crop, your soil, your season.')}</p>
         </div>
-      )}
-      <div className="lg:flex lg:gap-12">
-        <div className="max-w-(--container-feed) min-w-0 flex-1">
+        <ButtonLink to="/questions/ask" className="shrink-0">
+          <Plus size={18} weight="bold" aria-hidden="true" />
+          {t('Ask a question')}
+        </ButtonLink>
+      </header>
+      <QuestionSearch className="mt-6" />
+      <div className="mt-2 lg:grid lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-12">
+        <div className="min-w-0">
           <Toolbar filters={filters} />
-          <TagChip tag={filters.tag} />
-          <AgriFilterBar filters={filters} />
           {questions.isPending ? (
             <ListSkeleton />
           ) : questions.isError ? (
@@ -72,7 +74,7 @@ export function QuestionsPage({ heading = true }: { heading?: boolean }) {
             <EmptyList filtered={filtered} unanswered={filters.unanswered} />
           ) : (
             <>
-              <ul className="mt-4 flex flex-col gap-3">
+              <ul className="border-t border-border">
                 {list.map((question) => (
                   <QuestionCard key={question.questionId} question={question} />
                 ))}
@@ -87,169 +89,155 @@ export function QuestionsPage({ heading = true }: { heading?: boolean }) {
             </>
           )}
         </div>
-        <aside className="hidden w-80 shrink-0 pt-6 lg:block">
-          <TopicRail active={filters.categoryId} />
-          <AdvisorCard />
+        <aside className="hidden pt-5 lg:block">
+          <div className="sticky top-24 flex flex-col gap-6">
+            <AdvisorCard />
+            <AskingWell />
+          </div>
         </aside>
       </div>
     </div>
   )
 }
 
-/** Newest | Unanswered, and the topic picker. */
+/** Searches questions (and stories, on the next tab) through `/search`. */
+export function QuestionSearch({ className, size = 'md' }: { className?: string; size?: 'md' | 'lg' }) {
+  const t = useT()
+  const navigate = useNavigate()
+  const [query, setQuery] = useState('')
+
+  function submit(event: FormEvent) {
+    event.preventDefault()
+    const q = query.trim()
+    if (q) navigate(`/search?q=${encodeURIComponent(q)}`)
+  }
+
+  return (
+    <search className={className}>
+      <form onSubmit={submit}>
+        <label
+          className={cn(
+            'flex items-center gap-3 rounded-xl border border-input bg-card pr-1.5 pl-4 text-muted-foreground transition-[border-color,box-shadow] duration-150 focus-within:border-primary focus-within:ring-[3px] focus-within:ring-ring/60 hover:border-foreground/60',
+            size === 'lg' ? 'h-14' : 'h-12',
+          )}
+        >
+          <MagnifyingGlass size={20} aria-hidden="true" />
+          <span className="sr-only">{t('Search questions and stories')}</span>
+          <input
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder={t('Search questions, crops, pests')}
+            enterKeyHint="search"
+            className="min-w-0 flex-1 bg-transparent text-base text-foreground placeholder:text-muted-foreground focus:outline-none"
+          />
+          <Button type="submit" size="sm" className={size === 'lg' ? 'h-11' : undefined}>
+            {t('Search')}
+          </Button>
+        </label>
+      </form>
+    </search>
+  )
+}
+
+/** Topics as chips (the first few; the rest through a searchable picker), Newest | Unanswered, and the farming filters. */
 function Toolbar({ filters }: { filters: QuestionFilters }) {
   const t = useT()
   const path = useListPath()
   const navigate = useNavigate()
-  const categories = useCategories()
+  const categories = useCategories().data ?? []
+  const shown = chipTopics(categories, filters.categoryId)
   const tabs = [
     { label: t('Newest'), to: path({ unanswered: undefined }), current: !filters.unanswered },
     { label: t('Unanswered'), to: path({ unanswered: 'true' }), current: Boolean(filters.unanswered) },
   ]
+  const chip = (current: boolean) =>
+    cn(
+      'inline-flex h-9 shrink-0 items-center rounded-full border px-3.5 text-sm whitespace-nowrap transition-colors duration-150',
+      current ? 'border-primary bg-secondary font-semibold text-primary' : 'border-border-strong text-foreground hover:border-primary/50 hover:bg-surface',
+    )
 
   return (
-    <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-      <nav aria-label={t('Sort questions')} className="flex gap-1 rounded-full bg-muted p-1">
-        {tabs.map((tab) => (
-          <Link
-            key={tab.label}
-            to={tab.to}
-            aria-current={tab.current ? 'page' : undefined}
-            className={cn(
-              'flex h-9 items-center rounded-full px-4 text-sm transition-colors duration-150',
-              tab.current ? 'bg-card font-medium text-foreground shadow-xs ring-1 ring-border' : 'text-muted-foreground hover:text-foreground',
-            )}
-          >
-            {tab.label}
-          </Link>
-        ))}
-      </nav>
-      <label className="flex items-center gap-2 text-sm text-muted-foreground">
-        <span className="sr-only sm:not-sr-only">{t('Topic')}</span>
-        <NativeSelect
-          size="sm"
-          value={filters.categoryId == null ? '' : String(filters.categoryId)}
-          onChange={(event) => navigate(path({ categoryId: event.target.value || undefined }))}
-          className="min-w-40"
-        >
-          <NativeSelectOption value="">{t('All topics')}</NativeSelectOption>
-          {(categories.data ?? []).map((category) => (
-            <NativeSelectOption key={category.id} value={String(category.id)}>
-              {category.categoryName}
-            </NativeSelectOption>
+    <div className="flex flex-col gap-3 py-4">
+      {categories.length > 0 && (
+        <nav aria-label={t('Topics')} className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+          <ul className="flex gap-2 pb-1 sm:flex-wrap">
+            <li>
+              <Link to={path({ categoryId: undefined })} aria-current={filters.categoryId == null ? 'true' : undefined} className={chip(filters.categoryId == null)}>
+                {t('All topics')}
+              </Link>
+            </li>
+            {shown.map((category) => (
+              <li key={category.id}>
+                <Link to={path({ categoryId: String(category.id) })} aria-current={category.id === filters.categoryId ? 'true' : undefined} className={chip(category.id === filters.categoryId)}>
+                  {category.categoryName}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
+      <div className="flex flex-wrap items-center gap-3">
+        <nav aria-label={t('Sort questions')} className="flex gap-1 rounded-lg bg-muted p-1">
+          {tabs.map((tab) => (
+            <Link
+              key={tab.label}
+              to={tab.to}
+              aria-current={tab.current ? 'page' : undefined}
+              className={cn(
+                'flex h-9 items-center rounded-md px-3.5 text-sm transition-colors duration-150',
+                tab.current ? 'bg-card font-semibold text-primary shadow-xs ring-1 ring-border' : 'text-muted-foreground hover:text-foreground',
+              )}
+            >
+              {tab.label}
+            </Link>
           ))}
-        </NativeSelect>
-      </label>
-    </div>
-  )
-}
-
-function TagChip({ tag }: { tag?: string }) {
-  const t = useT()
-  const path = useListPath()
-  if (!tag) return null
-  return (
-    <div className="mt-3 flex items-center gap-2 text-sm">
-      <span className="text-muted-foreground">{t('Tagged')}</span>
-      <span className="inline-flex h-8 items-center gap-1 rounded-full bg-foreground pr-1 pl-3 text-background">
-        {tag}
-        <Link to={path({ tag: undefined })} aria-label={t('Remove tag {tag}', { tag })} className="flex size-7 items-center justify-center rounded-full hover:bg-background/20">
-          <X size={14} aria-hidden="true" />
-        </Link>
-      </span>
-    </div>
-  )
-}
-
-/**
- * One question as a card: votes and answers on the left (the accepted state in mustard, the trust colour), then the
- * title, a short excerpt, topic, tags and farming chips. The title link covers the card; chips sit above it.
- */
-export function QuestionCard({ question }: { question: Question }) {
-  const t = useT()
-  const agri = question.agri ?? {}
-  const answers = question.answerCount ?? 0
-  const accepted = question.acceptedAnswerId != null
-  const score = question.score ?? 0
-  const preview = excerpt(htmlToText(question.content), 160)
-  const chips = [
-    agri.crop && { label: agri.crop, to: filterPath({ crop: agri.crop }, '/questions') },
-    agri.season && { label: t(SEASON_LABELS[agri.season]), to: filterPath({ season: agri.season }, '/questions') },
-    agri.region && { label: agri.region, to: filterPath({ region: agri.region }, '/questions') },
-    agri.soil && { label: t(SOIL_LABELS[agri.soil]), to: filterPath({ soil: agri.soil }, '/questions') },
-  ].filter((chip): chip is { label: string; to: string } => Boolean(chip))
-
-  return (
-    <li className="group relative flex gap-4 rounded-2xl bg-card p-4 ring-1 ring-border transition-shadow duration-200 hover:ring-primary/40 sm:gap-5 sm:p-5">
-      <div className="flex w-14 shrink-0 flex-col items-center gap-2 pt-0.5 text-center sm:w-16">
-        <p className="flex flex-col leading-tight">
-          <span className="text-lg font-semibold tabular-nums">{formatNumber(score)}</span>
-          <span className="text-xs text-muted-foreground">{score === 1 || score === -1 ? t('vote') : t('votes')}</span>
-        </p>
-        <p
-          className={cn(
-            'flex w-full flex-col rounded-lg px-1 py-1 leading-tight',
-            accepted ? 'bg-mustard-soft text-foreground' : answers > 0 ? 'ring-1 ring-primary/40 text-primary' : 'text-muted-foreground',
+        </nav>
+        <div className="flex min-w-0 flex-1 items-center justify-end gap-3">
+          {categories.length > TOPIC_CHIPS && (
+            <Suspense fallback={<span aria-hidden="true" className="h-11 min-w-0 flex-1 rounded-lg border border-input sm:max-w-56" />}>
+              <SearchSelect
+                label={t('Topic')}
+                hideLabel
+                placeholder={t('More topics')}
+                value={filters.categoryId == null ? '' : String(filters.categoryId)}
+                options={categories.map((category) => ({ value: String(category.id), label: category.categoryName ?? '' }))}
+                onChange={(value) => navigate(path({ categoryId: value || undefined }))}
+                className="min-w-0 flex-1 sm:max-w-56"
+              />
+            </Suspense>
           )}
-        >
-          <span className="inline-flex items-center justify-center gap-1 text-base font-semibold tabular-nums">
-            {accepted && <CheckCircle size={14} weight="fill" className="text-mustard" aria-hidden="true" />}
-            {formatNumber(answers)}
-          </span>
-          <span className="text-xs">{answers === 1 ? t('answer') : t('answers')}</span>
-          {accepted && <span className="sr-only">{t('An answer was accepted')}</span>}
-        </p>
-      </div>
-      <div className="min-w-0 flex-1">
-        {question.category?.categoryName && (
-          <Badge variant="secondary" className="relative z-10 mb-2" render={<Link to={`/questions?categoryId=${question.category.id}`} />}>
-            {question.category.categoryName}
-          </Badge>
-        )}
-        <h2 className="font-serif text-lg leading-snug font-bold sm:text-xl">
-          <Link to={`/questions/${question.questionId}`} className="after:absolute after:inset-0 after:rounded-2xl group-hover:underline">
-            {question.title}
-          </Link>
-        </h2>
-        {preview && <p className="mt-1 line-clamp-2 text-muted-foreground">{preview}</p>}
-        <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-muted-foreground">
-          <span className="inline-flex items-center gap-1.5">
-            <Avatar name={question.authorName ?? '?'} size={20} />
-            {question.authorName}
-            {question.authorReputation != null && (
-              <span className="tabular-nums">
-                <span className="sr-only">{t('Reputation')} </span>· {formatNumber(question.authorReputation)}
-              </span>
-            )}
-            {question.authorBadges?.includes('VERIFIED_EXPERT') && <SealCheck size={14} weight="fill" className="text-mustard" aria-label={t('Verified expert')} />}
-            <span>· {storyDate(question.createdAt)}</span>
-          </span>
-          {(question.tags ?? []).map((tag) => (
-            <Link key={tag} to={`/questions?tag=${encodeURIComponent(tag)}`} className="relative z-10 rounded-full bg-muted px-2 py-0.5 text-foreground hover:bg-accent">
-              #{tag}
-            </Link>
-          ))}
-          {chips.map((chip) => (
-            <Link key={chip.to} to={chip.to} className="relative z-10 rounded-full px-2 py-0.5 text-foreground ring-1 ring-border hover:bg-muted">
-              {chip.label}
-            </Link>
-          ))}
+          <FilterButton filters={filters} className="h-11 shrink-0" />
         </div>
       </div>
-    </li>
+      <ActiveFilters filters={filters}>
+        {filters.tag && (
+          <FilterChip to={path({ tag: undefined })} removeLabel={t('Remove tag {tag}', { tag: filters.tag })}>
+            <span className="sr-only">{t('Tagged')} </span>#{filters.tag}
+          </FilterChip>
+        )}
+      </ActiveFilters>
+    </div>
   )
+}
+
+/** The first few topics as chips, always including the chosen one so the current filter stays visible. */
+export function chipTopics(categories: Category[], active?: number): Category[] {
+  const first = categories.slice(0, TOPIC_CHIPS)
+  const chosen = categories.find((category) => category.id === active)
+  return chosen && !first.includes(chosen) ? [...first.slice(0, TOPIC_CHIPS - 1), chosen] : first
 }
 
 function ListSkeleton() {
   const t = useT()
   return (
-    <ul className="mt-4 flex flex-col gap-3" aria-busy="true">
+    <ul className="border-t border-border" aria-busy="true">
       <li className="sr-only">
         <output>{t('Loading questions')}</output>
       </li>
       {[0, 1, 2].map((key) => (
-        <li key={key} className="flex gap-5 rounded-2xl bg-card p-5 ring-1 ring-border">
-          <Skeleton className="h-20 w-16 rounded-lg" />
+        <li key={key} className="flex gap-5 border-b border-border py-5">
+          <Skeleton className="h-20 w-16" />
           <div className="flex flex-1 flex-col gap-2">
             <Skeleton className="h-5 w-24 rounded-full" />
             <Skeleton className="h-6 w-4/5" />
@@ -265,10 +253,11 @@ function EmptyList({ filtered, unanswered }: { filtered: boolean; unanswered?: b
   const t = useT()
   const title = filtered ? t('No questions match these filters') : unanswered ? t('Every question has an answer') : t('No questions yet')
   return (
-    <Empty className="mt-4 rounded-2xl bg-card ring-1 ring-border">
+    <Empty className="relative overflow-hidden rounded-xl border border-dashed border-border-strong">
+      <Sprig className="pointer-events-none absolute -right-4 -bottom-6 h-36 opacity-40" />
       <EmptyHeader>
         <EmptyTitle>
-          <h2 className="font-serif text-xl font-bold">{title}</h2>
+          <h2 className="font-serif text-xl font-semibold">{title}</h2>
         </EmptyTitle>
         <EmptyDescription>{t('Ask the first one. Farmers and agronomists answer here.')}</EmptyDescription>
       </EmptyHeader>
@@ -281,49 +270,38 @@ function EmptyList({ filtered, unanswered }: { filtered: boolean; unanswered?: b
   )
 }
 
-/** Topics (the backend's categories) to browse by. */
-function TopicRail({ active }: { active?: number }) {
+function AdvisorCard() {
   const t = useT()
-  const path = useListPath()
-  const categories = useCategories()
-  if (!categories.data?.length) return null
   return (
-    <section aria-labelledby="topic-rail" className="rounded-2xl bg-card p-5 ring-1 ring-border">
-      <h2 id="topic-rail" className="font-sans text-base font-semibold">
-        {t('Browse by topic')}
+    <section className="relative overflow-hidden rounded-xl bg-surface p-5">
+      <Sprig className="pointer-events-none absolute -top-3 -right-3 h-24 opacity-30" />
+      <h2 className="relative flex items-center gap-2 text-sm font-semibold">
+        <Sparkle size={18} weight="fill" aria-hidden="true" className="text-primary" />
+        {t('Ask the advisor')}
       </h2>
-      <ul className="mt-3 flex flex-col">
-        {categories.data.map((category) => (
-          <li key={category.id}>
-            <Link
-              to={path({ categoryId: category.id === active ? undefined : String(category.id) })}
-              aria-current={category.id === active ? 'true' : undefined}
-              className={cn(
-                '-mx-2 flex h-10 items-center rounded-lg px-2 text-sm transition-colors duration-150',
-                category.id === active ? 'bg-accent font-medium text-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground',
-              )}
-            >
-              {category.categoryName}
-            </Link>
-          </li>
-        ))}
-      </ul>
+      <p className="relative mt-1.5 text-sm text-muted-foreground">{t('A private answer in seconds, written from what farmers here have shared, with sources.')}</p>
+      <ButtonLink to="/advisor" variant="secondary" size="sm" className="relative mt-4">
+        {t('Open the advisor')}
+      </ButtonLink>
     </section>
   )
 }
 
-function AdvisorCard() {
+/** Plain guidance on asking, so a question gets useful answers (no data behind it, just advice). */
+export function AskingWell({ className = 'border-t border-border pt-5' }: { className?: string }) {
   const t = useT()
+  const tips = [t('Say what you grow and where.'), t('Describe what you see, and since when.'), t('Add what you have already tried.'), t('A clear photo of the leaves, roots or pests helps.')]
   return (
-    <section className="mt-4 rounded-2xl bg-card p-5 ring-1 ring-border">
-      <h2 className="flex items-center gap-2 font-sans text-base font-semibold">
-        <Sparkle size={18} aria-hidden="true" className="text-primary" />
-        {t('Ask the advisor')}
-      </h2>
-      <p className="mt-1 text-sm text-muted-foreground">{t('A private answer in seconds, written from what farmers here have shared, with sources.')}</p>
-      <ButtonLink to="/advisor" variant="secondary" size="sm" className="mt-4">
-        {t('Open the advisor')}
-      </ButtonLink>
+    <section className={className}>
+      <h2 className="text-sm font-semibold">{t('Getting a good answer')}</h2>
+      <ul className="mt-3 flex flex-col gap-2.5 text-sm text-muted-foreground">
+        {tips.map((tip) => (
+          <li key={tip} className="flex gap-2.5">
+            <span aria-hidden="true" className="mt-2 size-1.5 shrink-0 rounded-full bg-mustard" />
+            {tip}
+          </li>
+        ))}
+      </ul>
     </section>
   )
 }

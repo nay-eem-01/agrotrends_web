@@ -1,11 +1,13 @@
 import { useT } from '../../lib/i18n'
 import { useState } from 'react'
-import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { ArrowLeft, ChatCircleText } from '@phosphor-icons/react'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
+import { Badge } from '@/components/ui/badge'
 import { ApiError, errorMessage } from '../../api/errors'
 import { useQuestion, useQuestionWrite, type Question } from '../../api/questions'
 import { filterPath, SEASON_LABELS, SOIL_LABELS } from '../../lib/agri'
 import { storyDate } from '../../lib/dates'
-import { Button, ButtonLink } from '../../ui/Button'
+import { Button, ButtonLink, buttonClass } from '../../ui/Button'
 import { Chip } from '../../ui/Chip'
 import { SafeHtml } from '../../ui/SafeHtml'
 import { Spinner } from '../../ui/Spinner'
@@ -25,7 +27,7 @@ export function QuestionPage() {
 
   if (question.isPending) {
     return (
-      <div className="flex justify-center py-24 text-ink-muted">
+      <div className="flex justify-center py-24 text-muted-foreground">
         <Spinner label={t('Loading question')} />
       </div>
     )
@@ -33,7 +35,7 @@ export function QuestionPage() {
   if (question.isError) {
     if (question.error instanceof ApiError && question.error.isNotFound) return <NotFoundPage />
     return (
-      <p role="alert" className="mx-auto max-w-(--container-feed) px-4 py-24 text-ink-muted sm:px-6">
+      <p role="alert" className="mx-auto max-w-(--container-feed) px-4 py-24 text-muted-foreground sm:px-6">
         {errorMessage(question.error)}
       </p>
     )
@@ -58,11 +60,24 @@ function QuestionView({ question }: { question: Question }) {
   ].filter((chip): chip is { name: string; label: string; to: string } => Boolean(chip))
 
   return (
-    <article className="mx-auto max-w-(--container-feed) px-4 pt-10 pb-20 sm:px-6 sm:pt-14">
+    <article className="mx-auto max-w-(--container-feed) px-4 pt-6 pb-20 sm:px-6 sm:pt-8">
       <title>{`${question.title} – AgroTrends`}</title>
-      <p className="text-sm text-ink-muted">{question.category?.categoryName ?? t('Question')}</p>
-      <h1 className="mt-1 text-2xl sm:text-3xl">{question.title}</h1>
-      <div className="mt-5 flex items-center gap-3 text-sm">
+      <Link to="/questions" className="inline-flex h-11 items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground">
+        <ArrowLeft size={16} aria-hidden="true" />
+        {t('Back to questions')}
+      </Link>
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        {question.category?.categoryName ? (
+          <Badge variant="secondary" render={<Link to={`/questions?categoryId=${question.category.id}`} />}>
+            {question.category.categoryName}
+          </Badge>
+        ) : (
+          <p className="text-sm text-muted-foreground">{t('Question')}</p>
+        )}
+        {(question.answerCount ?? 0) === 0 && <span className="text-xs font-medium text-muted-foreground">{t('Unanswered')}</span>}
+      </div>
+      <h1 className="mt-3 text-2xl leading-tight text-balance sm:text-[2rem]">{question.title}</h1>
+      <div className="mt-5 flex flex-wrap items-center gap-3 border-b border-border pb-5 text-sm">
         <div className="min-w-0 flex-1">
           <AuthorLine
             userId={question.userId}
@@ -74,12 +89,10 @@ function QuestionView({ question }: { question: Question }) {
         </div>
         {own ? <OwnerActions questionId={id} /> : <ReportButton targetType="QUESTION" targetId={id} what={t('this question')} />}
       </div>
-      <div className="mt-8 flex gap-2 sm:gap-4">
-        <div className="-ml-2 sm:-ml-14">
-          <VoteControl target="questions" id={id} score={question.score ?? 0} myVote={myVotes.data?.question} own={own} />
-        </div>
-        <div className="min-w-0 flex-1">
-        <SafeHtml html={question.content} className="story-body whitespace-pre-line" />
+      <div className="mt-6">
+        <div className="min-w-0">
+        {/* A question is a request for help: interface type, not the story's reading serif. */}
+        <SafeHtml html={question.content} className="text-base leading-relaxed whitespace-pre-line sm:text-lg [&>*+*]:mt-4" />
         {(question.imageUrls?.length ?? 0) > 0 && (
           <ul aria-label={t('Photos')} className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
             {question.imageUrls!.map((url, index) => (
@@ -92,7 +105,7 @@ function QuestionView({ question }: { question: Question }) {
           </ul>
         )}
         {(question.tags?.length ?? 0) > 0 && (
-          <ul aria-label={t('Tags')} className="mt-6 flex flex-wrap gap-2">
+          <ul aria-label={t('Tags')} className="mt-8 flex flex-wrap gap-2">
             {question.tags!.map((tag) => (
               <li key={tag}>
                 <Chip to={`/questions?tag=${encodeURIComponent(tag)}`}>{tag}</Chip>
@@ -101,11 +114,11 @@ function QuestionView({ question }: { question: Question }) {
           </ul>
         )}
         {chips.length > 0 && (
-          <ul aria-label={t('Farming context')} className="mt-8 flex flex-wrap gap-2">
+          <ul aria-label={t('Farming context')} className="mt-3 flex flex-wrap gap-2">
             {chips.map((chip) => (
               <li key={chip.name}>
                 <Chip to={chip.to}>
-                  <span className="mr-1 text-ink-muted">{t(chip.name)}</span>
+                  <span className="mr-1 text-muted-foreground">{t(chip.name)}</span>
                   {chip.label}
                 </Chip>
               </li>
@@ -113,6 +126,13 @@ function QuestionView({ question }: { question: Question }) {
           </ul>
         )}
         </div>
+      </div>
+      <div className="mt-8 flex flex-wrap items-center gap-3 border-y border-border py-3">
+        <VoteControl target="questions" id={id} score={question.score ?? 0} myVote={myVotes.data?.question} own={own} orientation="horizontal" />
+        <a href="#your-answer" className={buttonClass('secondary', 'md')}>
+          <ChatCircleText size={18} aria-hidden="true" />
+          {t('Answer')}
+        </a>
       </div>
       <AiAnswerCard questionId={id} topicId={question.category?.id} askedAt={askedAt} />
       <Answers questionId={id} askerId={question.userId} />
@@ -142,7 +162,7 @@ function OwnerActions({ questionId }: { questionId: number }) {
           {t('Keep it')}
         </Button>
         {remove.isError && (
-          <span role="alert" className="text-danger">
+          <span role="alert" className="text-destructive">
             {errorMessage(remove.error)}
           </span>
         )}

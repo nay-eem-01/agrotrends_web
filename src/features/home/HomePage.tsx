@@ -1,73 +1,93 @@
-import { ChatCircleText, Newspaper } from '@phosphor-icons/react'
-import { NavLink } from 'react-router-dom'
-import { cn } from 'cn'
+import { ArrowRight, Sparkle } from '@phosphor-icons/react'
+import { lazy, Suspense } from 'react'
+import { Link } from 'react-router-dom'
+import { Skeleton } from '@/components/ui/skeleton'
+import { useCategories } from '../../api/categories'
 import { useT } from '../../lib/i18n'
 import { ButtonLink } from '../../ui/Button'
+import { FieldScene } from '../../ui/Botanical'
 import { useSession } from '../auth/session'
-import { QuestionsPage } from '../qa/QuestionsPage'
+import { QuestionSearch } from '../qa/QuestionsPage'
 
-/** `/`: questions first (the product is Q&A-first); visitors get a short welcome above. */
+// Below the hero: topics, questions, the advisor and stories load just after it (their icons and lists are not
+// needed for the first paint), keeping the main bundle in budget.
+const DiscoverSections = lazy(() => import('./DiscoverSections').then((m) => ({ default: m.DiscoverSections })))
+
+/**
+ * `/`: Discover. What AgroTrends is and how to start (search, ask), the topics, what people are asking now, the
+ * advisor, and stories from the field. Every list is real data; a section with nothing to show says so or steps aside.
+ */
 export function HomePage() {
+  const t = useT()
   return (
-    <>
-      <Welcome />
-      <HomeTabs />
-      <QuestionsPage heading={false} />
-    </>
+    <div className="pb-16">
+      <title>{t('AgroTrends – farming questions, stories and advice')}</title>
+      <Hero />
+      <div className="mx-auto flex max-w-(--container-page) flex-col gap-14 px-4 sm:gap-16 sm:px-8">
+        <Suspense fallback={<Skeleton className="h-64 w-full rounded-2xl" />}>
+          <DiscoverSections />
+        </Suspense>
+      </div>
+    </div>
   )
 }
 
-export function Welcome() {
+/** The headline, search and a few topics on the left; the drawn field with a pointer to the advisor on the right. */
+function Hero() {
   const t = useT()
   const { status } = useSession()
-  if (status !== 'anonymous') return null
+  const topics = (useCategories().data ?? []).slice(0, 5)
+
   return (
-    <section className="border-b border-border bg-card">
-      <div className="mx-auto max-w-(--container-page) px-4 pt-12 pb-10 sm:px-6 sm:pt-16">
-        <h1 className="max-w-3xl text-3xl sm:text-[3.25rem] sm:leading-[1.05]">{t('Farming questions, answered by people who grow.')}</h1>
-        <p className="mt-5 max-w-xl font-serif text-lg text-muted-foreground">
-          {t('Ask about your crop, your soil, your season. Farmers, agronomists and verified experts answer; an AI answer arrives first, and experts check it.')}
-        </p>
-        <div className="mt-7 flex flex-wrap gap-3">
-          <ButtonLink to="/questions/ask">{t('Ask a question')}</ButtonLink>
-          <ButtonLink to="/sign-up" variant="secondary">
-            {t('Join AgroTrends')}
-          </ButtonLink>
+    <section aria-labelledby="discover-title" className="mx-auto max-w-(--container-page) px-4 pt-8 pb-12 sm:px-8 sm:pt-12 sm:pb-16">
+      <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)] lg:gap-14">
+        <div>
+          <h1 id="discover-title" className="font-serif text-[2.375rem] leading-[1.06] font-medium tracking-[-0.02em] text-balance sm:text-4xl">
+            {t('Farming questions, answered by people who grow.')}
+          </h1>
+          <p className="mt-4 max-w-xl text-lg leading-relaxed text-muted-foreground">
+            {t('Ask about your crop, your soil, your season. Farmers, agronomists and verified experts answer; an AI answer arrives first, and experts check it.')}
+          </p>
+          <QuestionSearch size="lg" className="mt-7 max-w-xl" />
+          {topics.length > 0 && (
+            <ul aria-label={t('Topics')} className="mt-4 flex flex-wrap gap-2">
+              {topics.map((topic) => (
+                <li key={topic.id}>
+                  <Link
+                    to={`/questions?categoryId=${topic.id}`}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-full border border-border-strong px-3.5 text-sm transition-colors duration-150 hover:border-primary/50 hover:bg-surface"
+                  >
+                    <span aria-hidden="true" className="size-1.5 rounded-full bg-primary" />
+                    {topic.categoryName}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+          <div className="mt-7 flex flex-wrap gap-3">
+            <ButtonLink to="/questions/ask">{t('Ask a question')}</ButtonLink>
+            {status === 'anonymous' && (
+              <ButtonLink to="/sign-up" variant="secondary">
+                {t('Join AgroTrends')}
+              </ButtonLink>
+            )}
+          </div>
         </div>
+        <figure className="relative hidden overflow-hidden rounded-2xl md:block">
+          <FieldScene className="aspect-[4/3] w-full" />
+          <figcaption className="absolute bottom-4 left-4 max-w-72 rounded-xl bg-background/95 p-4 shadow-sm ring-1 ring-border">
+            <p className="flex items-center gap-2 text-sm font-semibold">
+              <Sparkle size={16} weight="fill" aria-hidden="true" className="text-primary" />
+              {t('Ask the advisor')}
+            </p>
+            <p className="mt-1 text-sm text-muted-foreground">{t('A private answer in seconds, written from what farmers here have shared, with sources.')}</p>
+            <Link to="/advisor" className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-primary underline-offset-4 hover:underline">
+              {t('Open the advisor')}
+              <ArrowRight size={14} weight="bold" aria-hidden="true" />
+            </Link>
+          </figcaption>
+        </figure>
       </div>
     </section>
-  )
-}
-
-/** Questions | Stories, as links so each has its own URL. */
-export function HomeTabs() {
-  const t = useT()
-  const { status } = useSession()
-  const tabs = [
-    { to: '/', label: t('Questions'), icon: ChatCircleText },
-    { to: '/stories', label: t('Stories'), icon: Newspaper },
-  ]
-  return (
-    <div className="mx-auto max-w-(--container-page) px-4 pt-6 sm:px-6">
-      {status !== 'anonymous' && <h1 className="sr-only">{t('Home')}</h1>}
-      <nav aria-label={t('Home sections')} className="flex gap-6 border-b border-border">
-        {tabs.map(({ to, label, icon: Icon }) => (
-          <NavLink
-            key={to}
-            to={to}
-            end
-            className={({ isActive }) =>
-              cn(
-                '-mb-px flex h-12 items-center gap-2 border-b-2 text-base transition-colors duration-150',
-                isActive ? 'border-primary font-semibold text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground',
-              )
-            }
-          >
-            <Icon size={20} aria-hidden="true" />
-            {label}
-          </NavLink>
-        ))}
-      </nav>
-    </div>
   )
 }

@@ -6,7 +6,7 @@ import type { BlogResponse } from '../../api/types'
 import App from '../../App'
 import { loadLocalDraft, saveLocalDraft } from '../../lib/draft'
 import { envelope, mockApi, page } from '../../test/api'
-import { renderWithProviders } from '../../test/render'
+import { chooseOption, pickOption, renderWithProviders } from '../../test/render'
 
 function signedInAuthor() {
   localStorage.setItem('agrotrends.refreshToken', 'r0')
@@ -53,14 +53,14 @@ test('publishing a new story sends its details and opens it', async () => {
   expect(sheet.getByLabelText('Topic')).toHaveAccessibleDescription('Choose a topic.')
   expect(bodies(api, 'POST', '/api/blogs/create')).toHaveLength(0)
 
-  await userEvent.selectOptions(sheet.getByLabelText('Topic'), 'Crops')
+  await chooseOption(sheet.getByLabelText('Topic'), 'Crops')
   const topics = sheet.getByLabelText('Tags')
   await userEvent.type(topics, 'Ri')
   await userEvent.click(await sheet.findByRole('button', { name: 'rice blast' }))
   await userEvent.type(topics, 'Cold Stress{Enter}')
-  await userEvent.selectOptions(sheet.getByLabelText('Season'), 'Rabi')
+  await pickOption(sheet.getByLabelText('Season'), 'Rabi')
   await userEvent.type(sheet.getByLabelText('Crop'), ' boro rice ')
-  await userEvent.selectOptions(sheet.getByLabelText('Soil'), 'Clay loam')
+  await pickOption(sheet.getByLabelText('Soil'), 'Clay loam')
   await userEvent.click(sheet.getByRole('button', { name: 'Publish now' }))
 
   await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/stories/boro-cold'))
@@ -100,7 +100,7 @@ test('saving as a draft keeps it private and opens it for editing', async () => 
 
   await userEvent.click(await screen.findByRole('button', { name: 'Publish' }))
   const sheet = within(await screen.findByRole('dialog'))
-  await userEvent.selectOptions(sheet.getByLabelText('Topic'), 'Fisheries')
+  await chooseOption(sheet.getByLabelText('Topic'), 'Fisheries')
   await userEvent.click(sheet.getByRole('button', { name: 'Save as draft' }))
 
   await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/write/71'))
@@ -123,7 +123,7 @@ test('publishing a server draft saves its details first', async () => {
 
   await userEvent.click(await screen.findByRole('button', { name: 'Publish' }))
   const sheet = within(await screen.findByRole('dialog'))
-  expect(sheet.getByLabelText('Topic')).toHaveValue('2')
+  await waitFor(() => expect(sheet.getByLabelText('Topic')).toHaveValue('Fisheries'))
   expect(sheet.getByText('jute', { selector: 'span' })).toBeInTheDocument()
   await userEvent.click(sheet.getByRole('button', { name: 'Publish' }))
 

@@ -1,5 +1,10 @@
 import { useT, formatNumber } from '../../lib/i18n'
+import { ArrowLeft } from '@phosphor-icons/react'
+import { useEffect, useMemo, useRef } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
+import { Badge } from '@/components/ui/badge'
+import { cn } from 'cn'
+import { looksLikeHtml, sanitizeHtml } from '../../lib/sanitize'
 import { useStory } from '../../api/blogs'
 import { ApiError, errorMessage } from '../../api/errors'
 import type { BlogResponse } from '../../api/types'
@@ -28,7 +33,7 @@ export function StoryPage() {
 
   if (status === 'restoring' || story.isPending) {
     return (
-      <div className="flex justify-center py-24 text-ink-muted">
+      <div className="flex justify-center py-24 text-muted-foreground">
         <Spinner label={t('Loading story')} />
       </div>
     )
@@ -36,7 +41,7 @@ export function StoryPage() {
   if (story.isError) {
     if (story.error instanceof ApiError && story.error.isNotFound) return <NotFoundPage />
     return (
-      <p role="alert" className="mx-auto max-w-(--container-feed) px-4 py-24 text-ink-muted sm:px-6">
+      <p role="alert" className="mx-auto max-w-(--container-feed) px-4 py-24 text-muted-foreground sm:px-6">
         {errorMessage(story.error)}
       </p>
     )
@@ -55,27 +60,36 @@ function Story({ story }: { story: BlogResponse }) {
   return (
     <article className="pb-20">
       <title>{`${story.title} – AgroTrends`}</title>
-      <header className="mx-auto max-w-(--container-feed) px-4 pt-10 sm:px-6 sm:pt-14">
-        {notice && <output className="mb-4 block w-fit rounded-full bg-paddy px-3 py-1 text-sm text-paper">{notice}</output>}
-        {story.status === 'DRAFT' && (
-          <p className="mb-4 inline-block rounded-full bg-field px-3 py-1 text-sm text-ink">{t('Draft — only you can see this')}</p>
+      <div className="mx-auto max-w-(--container-page) px-4 pt-6 sm:px-8 sm:pt-8">
+        <Link to="/stories" className="inline-flex h-11 items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground">
+          <ArrowLeft size={16} aria-hidden="true" />
+          {t('Back to stories')}
+        </Link>
+        {story.imageUrl && (
+          <figure className="mt-3 overflow-hidden rounded-2xl bg-muted">
+            {/* A wide, deliberate crop from the centre; the photo is never stretched. */}
+            <img src={story.imageUrl} alt="" fetchPriority="high" decoding="async" className="aspect-[16/9] w-full object-cover sm:aspect-[21/9]" />
+          </figure>
         )}
-        <h1 className="text-2xl sm:text-3xl">{story.title}</h1>
+      </div>
+      <header className="mx-auto max-w-(--container-read) px-4 pt-8 sm:px-6 sm:pt-10">
+        {notice && <output className="mb-4 block w-fit rounded-full bg-primary px-3 py-1 text-sm text-primary-foreground">{notice}</output>}
+        {story.status === 'DRAFT' && (
+          <p className="mb-4 inline-block rounded-full bg-secondary px-3 py-1 text-sm text-secondary-foreground">{t('Draft — only you can see this')}</p>
+        )}
+        <p className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+          {story.category?.categoryName && <Badge variant="secondary">{story.category.categoryName}</Badge>}
+          {meta.join(' · ')}
+        </p>
+        <h1 className="mt-4 font-serif text-[2.25rem] leading-[1.1] font-medium tracking-[-0.015em] text-balance sm:text-[3rem]">{story.title}</h1>
         {author?.name && (
-          <div className="mt-8 flex items-center gap-3">
+          <div className="mt-7 flex items-center gap-3">
             <Avatar name={author.name} size={44} />
             <div className="min-w-0 text-sm">
-              <Link to={`/authors/${author.authorId}`} className="font-medium text-ink hover:underline">
+              <Link to={`/authors/${author.authorId}`} className="font-medium text-foreground hover:underline">
                 {author.name}
               </Link>
-              <p className="text-ink-muted">
-                {meta.join(' · ')}
-                {story.category?.categoryName && (
-                  <>
-                    {' · '}in {story.category.categoryName}
-                  </>
-                )}
-              </p>
+              <p className="text-muted-foreground">{storyDate(story.publishedAt)}</p>
             </div>
             {own && (
               <ButtonLink to={`/write/${story.id}`} variant="secondary" size="sm" className="ml-auto">
@@ -87,14 +101,8 @@ function Story({ story }: { story: BlogResponse }) {
         <StoryActions story={story} />
       </header>
 
-      {story.imageUrl && (
-        <figure className="mx-auto mt-10 max-w-[1000px] sm:px-6">
-          <img src={story.imageUrl} alt="" fetchPriority="high" decoding="async" className="w-full sm:rounded" />
-        </figure>
-      )}
-
-      <div className="mx-auto mt-10 max-w-(--container-feed) px-4 sm:px-6">
-        <SafeHtml html={story.content} className="story-body" />
+      <Body story={story} />
+      <div className="mx-auto max-w-(--container-read) px-4 sm:px-6">
         <StoryFooter story={story} />
         <StoryActions story={story} />
         {author?.authorId != null && <WrittenBy authorId={author.authorId} fallbackName={author.name ?? ''} />}
@@ -105,12 +113,62 @@ function Story({ story }: { story: BlogResponse }) {
   )
 }
 
+/** The story's own section headings (its h2s), for the contents list; none for plain-text stories. */
+function storyHeadings(html: string | undefined): string[] {
+  if (!html || !looksLikeHtml(html)) return []
+  const doc = new DOMParser().parseFromString(sanitizeHtml(html), 'text/html')
+  return Array.from(doc.querySelectorAll('h2')).map((heading) => heading.textContent?.trim() ?? '').filter(Boolean)
+}
+
+/**
+ * The reading column; on wide screens, when the story has two or more sections, an "In this article" list beside it
+ * that links to them. The headings get ids after render (the stored HTML is never changed).
+ */
+function Body({ story }: { story: BlogResponse }) {
+  const t = useT()
+  const column = useRef<HTMLDivElement>(null)
+  const headings = useMemo(() => storyHeadings(story.content), [story.content])
+  const contents = headings.length >= 2
+
+  useEffect(() => {
+    column.current?.querySelectorAll('h2').forEach((heading, index) => {
+      heading.id = `section-${index + 1}`
+    })
+  }, [story.content])
+
+  return (
+    <div className={cn('mx-auto mt-10 px-4 sm:px-6', contents ? 'max-w-(--container-page) lg:grid lg:grid-cols-[13rem_minmax(0,var(--container-read))_13rem] lg:justify-center lg:gap-12' : 'max-w-(--container-read)')}>
+      {contents && (
+        <nav aria-labelledby="story-contents" className="hidden lg:block">
+          <div className="sticky top-24">
+            <h2 id="story-contents" className="text-xs font-semibold text-muted-foreground">
+              {t('In this article')}
+            </h2>
+            <ol className="mt-3 flex flex-col gap-1 border-l border-border">
+              {headings.map((heading, index) => (
+                <li key={index}>
+                  <a href={`#section-${index + 1}`} className="-ml-px block border-l-2 border-transparent py-1.5 pl-3 text-sm text-muted-foreground transition-colors duration-150 hover:border-primary hover:text-foreground">
+                    {heading}
+                  </a>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </nav>
+      )}
+      <div ref={column} className="min-w-0">
+        <SafeHtml html={story.content} className="story-body" />
+      </div>
+    </div>
+  )
+}
+
 function StoryActions({ story }: { story: BlogResponse }) {
   const t = useT()
   const { user } = useSession()
   const own = user?.authorId != null && user.authorId === story.author?.authorId
   return (
-    <div className="mt-6 flex items-center justify-between border-y border-rule py-1">
+    <div className="mt-8 flex items-center justify-between border-y border-border py-1">
       <ClapButton story={story} />
       <div className="flex items-center gap-1">
         <ReportButton targetType="BLOG" targetId={story.id ?? 0} own={own} what={t('this story')} />
@@ -140,7 +198,7 @@ function StoryFooter({ story }: { story: BlogResponse }) {
             {farming.map((item) => (
               <li key={item.name}>
                 <Chip to={item.to}>
-                  <span className="mr-1 text-ink-muted">{t(item.name)}</span>
+                  <span className="mr-1 text-muted-foreground">{t(item.name)}</span>
                   {item.label}
                 </Chip>
               </li>

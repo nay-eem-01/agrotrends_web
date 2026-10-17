@@ -1,5 +1,5 @@
 import { CheckCircle } from '@phosphor-icons/react'
-import { useId, useState } from 'react'
+import { useId, useState, type ReactNode } from 'react'
 import { cn } from 'cn'
 import { useAcceptAnswer, useAnswerReplies, useAnswers, useAnswerWrite, type Answer } from '../../api/answers'
 import { ApiError, errorMessage } from '../../api/errors'
@@ -45,7 +45,7 @@ export function Answers({ questionId, askerId }: { questionId: number; askerId?:
       ) : list.length === 0 ? (
         <p className="py-6 text-muted-foreground">{t('No answers yet. If you have grown this, your answer helps.')}</p>
       ) : (
-        <ol className="mt-5 flex flex-col gap-4">
+        <ol className="mt-4 border-b border-border">
           {list.map((answer) => (
             <li key={answer.answerId}>
               <AnswerCard questionId={questionId} answer={answer} asker={user?.id != null && user.id === askerId} />
@@ -53,8 +53,8 @@ export function Answers({ questionId, askerId }: { questionId: number; askerId?:
           ))}
         </ol>
       )}
-      <div className="mt-10">
-        <div>
+      <div id="your-answer" className="mt-10 scroll-mt-24">
+        <div className="rounded-xl bg-surface p-4 sm:p-5">
           {status === 'signed-in' ? (
             <Composer
               label={t('Your answer')}
@@ -93,7 +93,7 @@ function AnswerCard({ questionId, answer, asker }: { questionId: number; answer:
     <article
       id={`answer-${id}`}
       aria-label={t('Answer by {name}', { name: answer.authorName ?? '' })}
-      className={cn('flex scroll-mt-24 gap-2 rounded-2xl bg-card p-4 ring-1 sm:gap-4 sm:p-5', answer.accepted ? 'ring-2 ring-mustard' : 'ring-border')}
+      className={cn('flex scroll-mt-24 gap-2 border-t border-border py-6 sm:gap-4', answer.accepted && 'border-l-[3px] border-l-mustard pl-2 sm:pl-3')}
     >
       <VoteControl target="answers" id={id} score={answer.score ?? 0} myVote={myVotes.data?.answers?.[String(id)]} own={user?.id != null && user.id === answer.userId} />
       <div className="min-w-0 flex-1">
@@ -103,33 +103,38 @@ function AnswerCard({ questionId, answer, asker }: { questionId: number; answer:
             {t('Accepted by the asker')}
           </p>
         )}
-        <Post questionId={questionId} item={answer} />
-        <div className="mt-2 -ml-3 flex flex-wrap gap-1">
-          <Button
-            variant="quiet"
-            size="sm"
-            aria-expanded={open}
-            aria-controls={repliesId}
-            onClick={() => setOpen((value) => !value)}
-          >
-            {open ? t('Hide replies') : t('Show replies')}
-          </Button>
-          {asker && <AcceptButton questionId={questionId} answerId={id} accepted={Boolean(answer.accepted)} />}
-          {!replying && (
-            <Button
-              variant="quiet"
-              size="sm"
-              onClick={() =>
-                requireSignIn(() => {
-                  setOpen(true)
-                  setReplying(true)
-                })
-              }
-            >
-              {t('Reply')}
-            </Button>
-          )}
-        </div>
+        <Post
+          questionId={questionId}
+          item={answer}
+          actions={
+            <>
+              <Button
+                variant="quiet"
+                size="sm"
+                aria-expanded={open}
+                aria-controls={repliesId}
+                onClick={() => setOpen((value) => !value)}
+              >
+                {open ? t('Hide replies') : t('Show replies')}
+              </Button>
+              {asker && <AcceptButton questionId={questionId} answerId={id} accepted={Boolean(answer.accepted)} />}
+              {!replying && (
+                <Button
+                  variant="quiet"
+                  size="sm"
+                  onClick={() =>
+                    requireSignIn(() => {
+                      setOpen(true)
+                      setReplying(true)
+                    })
+                  }
+                >
+                  {t('Reply')}
+                </Button>
+              )}
+            </>
+          }
+        />
         {open && (
           <div id={repliesId} className="mt-3 ml-2 border-l-2 border-border pl-5">
             {replies.isPending ? (
@@ -200,7 +205,7 @@ function AcceptButton({ questionId, answerId, accepted }: { questionId: number; 
 }
 
 /** The author line, the text, and the owner's edit and delete; shared by answers and replies. */
-function Post({ questionId, item, compact = false }: { questionId: number; item: Answer; compact?: boolean }) {
+function Post({ questionId, item, compact = false, actions }: { questionId: number; item: Answer; compact?: boolean; actions?: ReactNode }) {
   const t = useT()
   const { user } = useSession()
   const id = item.answerId ?? 0
@@ -237,17 +242,24 @@ function Post({ questionId, item, compact = false }: { questionId: number; item:
           />
         </div>
       ) : (
-        <SafeHtml html={item.content} className={compact ? 'mt-1.5 text-base whitespace-pre-line' : 'mt-3 font-serif text-[1.0625rem] leading-relaxed whitespace-pre-line [&>p+p]:mt-3'} />
+        <SafeHtml html={item.content} className={compact ? 'mt-1.5 text-base whitespace-pre-line' : 'mt-3 text-base leading-relaxed whitespace-pre-line [&>p+p]:mt-3'} />
       )}
-      {!own && mode === 'view' && <ReportButton targetType="ANSWER" targetId={id} what={compact ? t('this reply') : t('this answer')} className="mt-1 -ml-3" />}
-      {own && mode === 'view' && (
-        <div className="mt-1 -ml-3 flex gap-1">
-          <Button variant="quiet" size="sm" onClick={() => setMode('edit')}>
-            {t('Edit')}
-          </Button>
-          <Button variant="quiet" size="sm" onClick={() => setMode('confirm-delete')}>
-            {t('Delete')}
-          </Button>
+      {mode === 'view' && (
+        // One row: the answer's own actions first, then report or the owner's edit and delete, kept quiet.
+        <div className="mt-2 -ml-3 flex flex-wrap items-center gap-1">
+          {actions}
+          {own ? (
+            <>
+              <Button variant="quiet" size="sm" onClick={() => setMode('edit')}>
+                {t('Edit')}
+              </Button>
+              <Button variant="quiet" size="sm" onClick={() => setMode('confirm-delete')}>
+                {t('Delete')}
+              </Button>
+            </>
+          ) : (
+            <ReportButton targetType="ANSWER" targetId={id} what={compact ? t('this reply') : t('this answer')} />
+          )}
         </div>
       )}
       {mode === 'confirm-delete' && (

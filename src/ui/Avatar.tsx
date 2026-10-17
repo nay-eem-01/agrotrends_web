@@ -26,7 +26,7 @@ export function Avatar({ name, src, size = 32, className }: AvatarProps) {
     <span
       aria-hidden="true"
       style={style}
-      className={cx('inline-flex items-center justify-center rounded-full bg-field font-sans font-semibold text-paddy', className)}
+      className={cx('inline-flex items-center justify-center rounded-full bg-secondary font-sans font-semibold text-primary', className)}
     >
       {initials(name)}
     </span>

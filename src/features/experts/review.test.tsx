@@ -105,7 +105,7 @@ test('the review queue lists unchecked answers; the menu shows it to experts onl
   expect(within(item).getByText('Give it honey.')).toBeInTheDocument()
   expect(within(item).getByRole('button', { name: 'Confirm' })).toBeInTheDocument()
   await userEvent.click(screen.getByRole('button', { name: /Account/ }))
-  expect(await screen.findByRole('link', { name: 'Review queue' })).toHaveAttribute('href', '/review')
+  expect(await screen.findByRole('menuitem', { name: 'Review queue' })).toHaveAttribute('href', '/review')
 })
 
 test('the queue explains itself to non-experts (403)', async () => {

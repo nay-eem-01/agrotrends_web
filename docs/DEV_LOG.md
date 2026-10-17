@@ -29,13 +29,17 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   F13.3 ban and hidden states (`feat/ban-hidden`) done. Phase F13 is complete.
 - Phase F14 on `feat/launch-polish-base` (stacked on F13's tip): F14.1 Bengali and accessibility (`feat/bengali-a11y`) and F14.2 community smoke tests
   (`feat/smoke-community`) done. Phase F14 is complete: every step of F7–F14 is built.
+- Phase F15 on `feat/redesign-base` (stacked on F14's tip): F15.1 foundation (`feat/redesign-foundation`) F15.2 shell
+  (`feat/redesign-shell`) F15.3 advisor (`feat/redesign-advisor`) F15.4 stories (`feat/redesign-stories`) and F15.5
+  questions, Discover and forms (`feat/redesign-discover`) done. Phase F15 is complete.
 
 ## Next up
 
-1. **Nayeem:** open and merge the F7–F14 step PRs in order (each phase base into `development` after its steps).
-2. Run the admin smoke step (`E2E_ADMIN_EMAIL` / `E2E_ADMIN_PASSWORD`) and the admin screens live once an admin login is at hand.
-3. Merge the backend's Phase 8 so F12–F14 run against its `development`. (Done 2026-10-15, backend PR #110.)
-4. **F15 admin dashboard** (2026-10-15): backend Phase 9 added `/api/admin/stats`, `/api/admin/users`, `/api/admin/users/{id}` and admin roles. Read `docs/BACKEND_CATCHUP_PLAN.md` § Admin dashboard and build F15.1–F15.4 (`docs/ROADMAP.md`) against the backend's `feat/admin-dashboard-base` until it is merged.
+1. **Nayeem:** open and merge the F15 step PRs in order into `feat/redesign-base`, then the base into `development`
+   (after F7–F14).
+2. **Nayeem:** open and merge the F7–F14 step PRs in order (each phase base into `development` after its steps).
+3. Run the admin smoke step (`E2E_ADMIN_EMAIL` / `E2E_ADMIN_PASSWORD`) and the admin screens live once an admin login is at hand.
+4. Merge the backend's Phase 8 so F12–F14 run against its `development`.
 
 ## Open items
 
@@ -52,6 +56,83 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-17 (F15 "Living Field" direction, steps F15.1–F15.5)
+
+**Done**
+- Palette exactly as specified (white `#FFFFFF`, text `#1C2B21` / `#59665D`, green `#245C3A` / `#19482D`, sage
+  `#EAF3E8`, pale `#F5F8F3`, borders `#E2E8E1` / `#C9D5C9`, warm `#D9A441` / `#FBF3E1`, error `#B42318` /
+  `#FEF3F2`, success `#216E45`, ring `#79A98A`); dark theme rebuilt to match. New tokens `subtle`,
+  `destructive-soft`, `success`.
+- Fonts: Newsreader (editorial) and Inter (interface), self-hosted via fontsource; Literata removed. Base headings
+  are now Inter; serif is opted into per element. Type scale rebalanced for Inter.
+- Navigation: Discover / Questions / Stories / AI advisor / Write; bottom tab bar on phones (`layout/BottomNav`).
+- Discover (`features/home/HomePage`, `DiscoverSections`); Questions page rebuilt with `QuestionRow` (photo
+  thumbnails, unanswered state); question page vote bar (`VoteControl orientation="horizontal"`); Stories featured +
+  grid (`feed/StoryTiles`), story page wide cover and contents list; advisor workspace with history rail and `?q=`;
+  ask form two columns; auth brand panel; `ui/Botanical` drawings.
+- Forms: season, soil and proof selects moved from native selects to the shadcn Select; the publish sheet from a
+  native `<dialog>` to the shadcn Dialog (menus inside it now open above it). Tests drive them with `pickOption`.
+- 274 tests, lint, type-check and build pass; no overflow at 320–1440 on 12 pages; light and dark screenshots.
+
+**Decisions**
+- `/` is now Discover; the question feed lives at `/questions` (both routes existed already). No route was added
+  or removed.
+- `#78847B` (3.9:1) is used for field borders and icons, not text; `#79A98A` (2.7:1) is a halo next to a green
+  outline or border, which carries the WCAG focus contrast; `#D9A441` is decorative, with dark text on its surface.
+- No photographs were added or hotlinked: drawn field art and covers stand in until licensed photos exist.
+- The advisor's common questions are interface examples (English, like the seasonal ones), not advice.
+- Discover below the hero is lazy (its topic icons alone pushed the main bundle to 141 kB); now 117 kB.
+
+**Known limitations**
+- Question views, "helpful" votes on AI answers and follow-up suggestions are in the reference but have no backend,
+  so they are not shown.
+- Seasonal and common advisor examples, and editor / publish-dialog copy, are English only (as before).
+
+---
+
+## 2026-10-17 (F15 first pass: white editorial canvas, superseded by the entry above)
+
+**Done**
+- Tokens: white canvas; forest green `#246B45` / `#194D33`, sage `#E8F0E6`, pale green `#F1F6EF`, quiet panel
+  `#F7F9F6`; new `surface`, `border-strong`, `warning` / `warning-soft`; field borders `#879284` (3.2:1). Dark theme
+  retuned to match. `--radius` 0.5rem; every shadcn primitive moved from pills to 8px (12px for menus and dialogs),
+  hairline rings instead of heavy shadows.
+- New: shadcn `combobox`, `sheet`, `input-group`; `src/ui/SearchSelect` (labelled, filterable, clearable, error
+  wiring, can open inside a native `<dialog>`); `Alert` warning variant; error messages carry an icon; selected chips a
+  tick.
+- Questions: rows with hairlines; toolbar = Newest | Unanswered, searchable topic, "Filter" popover with a count;
+  active filters (tag included) as sage chips with Clear all; light sidebar. Question page: vote column inside the
+  column, answers as rows with one action row each, accepted answer's mustard edge, answer box on a quiet panel. Ask
+  form: searchable topic, farming details folded (open when editing one that has them). Ctrl/⌘+Enter sends in the
+  shared composer, with a guard against double posts.
+- Stories: green-underlined feed tabs, featured first story, broken covers hidden, story page title and cover,
+  editor toolbar and title, publish sheet with a searchable topic. The welcome hero shows on home only.
+- Advisor: one composer surface (label, text, counter, "Ctrl+Enter to send", Ask); the counter turns amber and is
+  announced in the last 100 characters; answers labelled "AI answer", sources in their own panel, "Written by AI, not
+  checked by an expert" note; the daily limit (429) is an amber Alert, other failures red. History: caret, AI label.
+- Shell: white top bar, active page green and underlined, search field from 1024px; phone menu sheet with every
+  destination (the advisor had no way in on phones); account menu is a shadcn DropdownMenu (arrow keys, Escape
+  returns focus); footer links Stories.
+- Tests: SearchSelect, chip tick, Ctrl+Enter answer, advisor counter and AI labelling, phone menu; topic pickers in
+  tests use `chooseOption` (src/test/render.tsx). 273 tests, lint, build pass. No horizontal overflow at 320, 375,
+  390, 430, 768, 1024, 1440 on ten pages; checked light and dark.
+
+**Decisions**
+- Fonts stay Literata + Hind Siliguri: the brief's Inter / Lora have no Bengali.
+- Mustard stays for trust only; cautions use a separate amber.
+- The advisor's caution is a fixed sentence: its response has no disclaimer or review state to show.
+- Menus, the filter popover and home's topic picker are lazy with same-size placeholders: eager they pushed the main
+  bundle to 148 kB gzip; now 112 kB (budget 120).
+- Testing Library's async timeout is 3 s (src/test/setup.ts): lazy chunks sometimes took over 1 s to import with the
+  whole suite running.
+- Editor and publish-sheet strings stay English as before (they never went through `t()`); not in this phase's scope.
+
+**Known limitations**
+- Admin, expert, settings, library and notification screens only picked up the tokens and radii; no layout changes.
+- Crop and region stay free text: the backend has no list to search.
 
 ---
 

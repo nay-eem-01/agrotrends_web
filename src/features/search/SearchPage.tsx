@@ -11,7 +11,7 @@ import { Button, ButtonLink } from '../../ui/Button'
 import { Spinner } from '../../ui/Spinner'
 import { Chip } from '../../ui/Chip'
 import { StoryList } from '../feed/Feed'
-import { QuestionCard } from '../qa/QuestionsPage'
+import { QuestionCard } from '../qa/QuestionRow'
 
 /** `/search?q=`: matching tags, then matching questions or stories. The field is here too, since phones hide the top bar's. */
 export function SearchPage() {
@@ -44,7 +44,7 @@ function SearchField({ initial }: { initial: string }) {
   return (
     <search>
       <form onSubmit={submit}>
-        <label className="flex h-12 items-center gap-3 rounded-full bg-field px-4 text-ink-muted focus-within:ring-2 focus-within:ring-paddy">
+        <label className="flex h-12 items-center gap-3 rounded-lg border border-input bg-card px-4 text-muted-foreground transition-[border-color,box-shadow] duration-150 focus-within:border-primary focus-within:ring-[3px] focus-within:ring-ring/60 hover:border-foreground/60">
           <MagnifyingGlass size={20} aria-hidden="true" />
           <span className="sr-only">{t('Search questions and stories')}</span>
           <input
@@ -53,7 +53,7 @@ function SearchField({ initial }: { initial: string }) {
             onChange={(event) => setValue(event.target.value)}
             placeholder={t('Search questions, crops, pests')}
             enterKeyHint="search"
-            className="min-w-0 flex-1 bg-transparent text-base text-ink placeholder:text-ink-muted focus:outline-none"
+            className="min-w-0 flex-1 bg-transparent text-base text-foreground placeholder:text-muted-foreground/80 focus:outline-none"
           />
         </label>
       </form>
@@ -97,7 +97,7 @@ function Results({ q }: { q: string }) {
             key={value}
             to={to}
             aria-current={type === value ? 'page' : undefined}
-            className={cn('-mb-px flex h-12 items-center border-b-2 text-sm', type === value ? 'border-primary font-medium text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground')}
+            className={cn('-mb-px flex h-12 items-center border-b-2 text-sm transition-colors duration-150', type === value ? 'border-primary font-semibold text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground')}
           >
             {label}
           </Link>
@@ -139,7 +139,7 @@ function QuestionResults({ q }: { q: string }) {
   }
   return (
     <>
-      <ul className="mt-4 flex flex-col gap-3">
+      <ul className="mt-2 border-t border-border">
         {list.map((question) => (
           <QuestionCard key={question.questionId} question={question} />
         ))}
@@ -181,7 +181,7 @@ function Prompt() {
   return (
     <div className="mt-10">
       <h1 className="text-2xl">{t('Search AgroTrends')}</h1>
-      <p className="mt-2 text-ink-muted">{t('Look for a crop, a pest, a practice or a place.')}</p>
+      <p className="mt-2 text-muted-foreground">{t('Look for a crop, a pest, a practice or a place.')}</p>
       {topics.data && topics.data.length > 0 && (
         <section aria-label={t('Topics')} className="mt-8">
           <h2 className="font-sans text-base font-semibold">{t('Or browse a topic')}</h2>

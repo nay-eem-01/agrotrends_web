@@ -129,7 +129,7 @@ export function ClapButton({ story }: { story: BlogResponse }) {
         </span>
       </button>
       {pending > 0 && (
-        <span aria-hidden="true" className="absolute -top-7 left-0 animate-bounce rounded-full bg-ink px-2 py-0.5 text-xs text-paper">
+        <span aria-hidden="true" className="absolute -top-7 left-0 animate-bounce rounded-full bg-foreground px-2 py-0.5 text-xs text-background">
           +{mine}
         </span>
       )}

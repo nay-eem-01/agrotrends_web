@@ -5,7 +5,7 @@ import { clearSession } from '../../api/client'
 import type { BlogResponse } from '../../api/types'
 import App from '../../App'
 import { envelope, mockApi, page } from '../../test/api'
-import { renderWithProviders } from '../../test/render'
+import { pickOption, renderWithProviders } from '../../test/render'
 
 function story(id: number, overrides: Partial<BlogResponse> = {}): BlogResponse {
   return { id, slug: `story-${id}`, title: `Story ${id}`, content: '<p>Body.</p>', author: { authorId: 7, name: 'Nasrin' }, agri: {}, ...overrides }
@@ -38,8 +38,8 @@ test('choosing a season filters the stories, and removing it clears it', async (
   renderWithProviders(<App />, '/stories')
   await screen.findByRole('link', { name: 'Story 1' })
 
-  await userEvent.click(screen.getByRole('button', { name: 'Filter by crop, season, region or soil' }))
-  await userEvent.selectOptions(screen.getByLabelText('Season'), 'Kharif-2')
+  await userEvent.click(await screen.findByRole('button', { name: 'Filter by crop, season, region or soil' }))
+  await pickOption(screen.getByLabelText('Season'), 'Kharif-2')
   await userEvent.click(screen.getByRole('button', { name: 'Apply filters' }))
 
   expect(await screen.findByRole('link', { name: 'Aman transplanting' })).toBeInTheDocument()
@@ -59,10 +59,10 @@ test('crop, region and soil filters combine with the season', async () => {
   renderWithProviders(<App />, '/stories?season=RABI')
   await screen.findByRole('link', { name: 'Boro on clay loam' })
 
-  await userEvent.click(screen.getByRole('button', { name: 'Filter by crop, season, region or soil' }))
+  await userEvent.click(await screen.findByRole('button', { name: 'Filter by crop, season, region or soil' }))
   await userEvent.type(screen.getByLabelText('Crop'), ' boro rice ')
   await userEvent.type(screen.getByLabelText('Region'), 'Rangpur')
-  await userEvent.selectOptions(screen.getByLabelText('Soil'), 'Clay loam')
+  await pickOption(screen.getByLabelText('Soil'), 'Clay loam')
   await userEvent.click(screen.getByRole('button', { name: 'Apply filters' }))
 
   await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/stories?crop=boro+rice&season=RABI&region=Rangpur&soil=CLAY_LOAM'))

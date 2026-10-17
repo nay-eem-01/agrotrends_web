@@ -78,7 +78,7 @@ export function AdminReportsPage() {
           ))}
         </ul>
       ) : (
-        <ul className="mt-6 overflow-hidden rounded-2xl bg-card ring-1 ring-border">
+        <ul className="mt-6 overflow-hidden rounded-xl bg-card ring-1 ring-border">
           {list.map((report) => (
             <li key={report.id} className="flex flex-wrap gap-x-3 gap-y-1 border-b border-border px-5 py-3 text-sm last:border-b-0">
               <span className="font-medium">
@@ -110,7 +110,7 @@ function OpenGroup({ group }: { group: ReportGroup }) {
   const isAi = group.targetType === 'AI_ANSWER'
 
   return (
-    <article aria-label={`${TARGET_LABELS[group.targetType]} ${group.targetId}`} className="rounded-2xl bg-card p-5 ring-1 ring-border">
+    <article aria-label={`${TARGET_LABELS[group.targetType]} ${group.targetId}`} className="rounded-xl bg-card p-5 ring-1 ring-border">
       <header className="flex flex-wrap items-center gap-2">
         <h2 className="font-sans text-base font-semibold">
           {TARGET_LABELS[group.targetType]} #{group.targetId}

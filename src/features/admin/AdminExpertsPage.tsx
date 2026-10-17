@@ -79,7 +79,7 @@ export function AdminExpertsPage() {
 
 function ApplicationCard({ application }: { application: ExpertApplication }) {
   return (
-    <article aria-label={`Application from ${application.applicantName}`} className="rounded-2xl bg-card p-5 ring-1 ring-border">
+    <article aria-label={`Application from ${application.applicantName}`} className="rounded-xl bg-card p-5 ring-1 ring-border">
       <header className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="font-sans text-base font-semibold">
           {application.userId != null ? (

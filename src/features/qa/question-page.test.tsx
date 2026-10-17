@@ -153,3 +153,20 @@ test('the question shows its topic, photos and tags', async () => {
   expect(screen.getByRole('img', { name: 'Photo 1 of the question' })).toHaveAttribute('src', '/uploads/leaf.webp')
   expect(screen.getByRole('link', { name: 'rice blast' })).toHaveAttribute('href', '/questions?tag=rice%20blast')
 })
+
+test('Ctrl+Enter posts an answer once, Enter alone adds a line', async () => {
+  const api = mockApi({
+    ...signedInAs({ id: 9, name: 'Nasrin' }),
+    'GET /api/questions/id/5': () => envelope(200, question),
+    'GET /api/answers/question/5': () => envelope(200, []),
+    'POST /api/answers/create': () => envelope(200, answer(4, { userId: 9, content: 'Drain it.' })),
+  })
+  renderWithProviders(<App />, '/questions/5')
+
+  const field = await screen.findByLabelText('Your answer')
+  await userEvent.type(field, 'Drain{Enter}it.')
+  expect(field).toHaveValue('Drain\nit.')
+  expect(api.mock.calls.some(([url]) => url === '/api/answers/create')).toBe(false)
+  await userEvent.keyboard('{Control>}{Enter}{Enter}{/Control}')
+  await waitFor(() => expect(api.mock.calls.filter(([url]) => url === '/api/answers/create')).toHaveLength(1))
+})

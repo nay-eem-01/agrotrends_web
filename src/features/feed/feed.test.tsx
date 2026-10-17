@@ -40,7 +40,6 @@ test('visitors see the latest stories without a For you tab', async () => {
   renderWithProviders(<App />, '/stories')
 
   const card = (await screen.findByRole('link', { name: 'Boro rice in Rangpur' })).closest('article')!
-  expect(card).toHaveAttribute('class', expect.stringContaining('border-b'))
   expect(within(card).getByRole('link', { name: 'Boro rice in Rangpur' })).toHaveAttribute('href', '/stories/story-1')
   expect(within(card).getByRole('link', { name: 'Nasrin Akter' })).toHaveAttribute('href', '/authors/7')
   expect(within(card).getByText('Body of story 1.')).toBeInTheDocument()

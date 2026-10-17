@@ -19,42 +19,50 @@
 
 /* Tokens from docs/DESIGN.md: shadcn's semantic roles, AgroTrends' colours. Components never use raw hex. */
 :root {
-  --background: #f6f7f3;
-  --foreground: #1d211b;
+  /* "The Living Field" (F15): a white page, forest green for action, sage for selection, a warm field accent. */
+  --background: #ffffff;
+  --foreground: #1c2b21;
+  --surface: #f5f8f3;
   --card: #ffffff;
-  --card-foreground: #1d211b;
+  --card-foreground: #1c2b21;
   --popover: #ffffff;
-  --popover-foreground: #1d211b;
-  --primary: #1f6b3a;
+  --popover-foreground: #1c2b21;
+  --primary: #245c3a;
   --primary-foreground: #ffffff;
-  --primary-active: #154d29;
-  --secondary: #eaf0e5;
-  --secondary-foreground: #1d211b;
-  --muted: #eef1ea;
-  --muted-foreground: #5c6356;
-  --accent: #eaf0e5;
-  --accent-foreground: #1d211b;
-  --destructive: #b3261e;
-  --border: #e1e5dc;
-  --input: #d5dacf;
-  --ring: #1f6b3a;
-  --mustard: #e2b007;
-  --mustard-soft: #fbf3d6;
-  --shade: #1d211b;
-  --radius: 0.625rem;
-  --chart-1: #1f6b3a;
-  --chart-2: #e2b007;
-  --chart-3: #5c6356;
-  --chart-4: #74c48a;
-  --chart-5: #154d29;
+  --primary-active: #19482d;
+  --secondary: #eaf3e8;
+  --secondary-foreground: #1c2b21;
+  --muted: #f5f8f3;
+  --muted-foreground: #59665d;
+  --subtle: #78847b;
+  --accent: #eaf3e8;
+  --accent-foreground: #1c2b21;
+  --destructive: #b42318;
+  --destructive-soft: #fef3f2;
+  --success: #216e45;
+  --warning: #d9a441;
+  --warning-soft: #fbf3e1;
+  --border: #e2e8e1;
+  --border-strong: #c9d5c9;
+  --input: #78847b;
+  --ring: #79a98a;
+  --mustard: #d9a441;
+  --mustard-soft: #fbf3e1;
+  --shade: #1c2b21;
+  --radius: 0.5rem;
+  --chart-1: #245c3a;
+  --chart-2: #d9a441;
+  --chart-3: #59665d;
+  --chart-4: #79a98a;
+  --chart-5: #19482d;
   --sidebar: #ffffff;
-  --sidebar-foreground: #1d211b;
-  --sidebar-primary: #1f6b3a;
+  --sidebar-foreground: #1c2b21;
+  --sidebar-primary: #245c3a;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #eaf0e5;
-  --sidebar-accent-foreground: #1d211b;
-  --sidebar-border: #e1e5dc;
-  --sidebar-ring: #1f6b3a;
+  --sidebar-accent: #eaf3e8;
+  --sidebar-accent-foreground: #1c2b21;
+  --sidebar-border: #e2e8e1;
+  --sidebar-ring: #79a98a;
 
   /* Motion (Emil Kowalski's curves): enter and exit with ease-out, move on screen with ease-in-out. */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
@@ -62,78 +70,95 @@
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-/* Dark, "the field at night": deep loam, warm off-white ink, paddy lifted for contrast. */
+/* Dark, "the field at night": deep loam, warm off-white ink, forest green lifted for contrast. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --background: #141512;
-    --foreground: #ecede6;
-    --card: #1c1e1a;
-    --card-foreground: #ecede6;
-    --popover: #1f221d;
-    --popover-foreground: #ecede6;
-    --primary: #74c48a;
-    --primary-foreground: #0d1a10;
-    --primary-active: #95d6a7;
-    --secondary: #262b23;
-    --secondary-foreground: #ecede6;
-    --muted: #23261f;
-    --muted-foreground: #a3a898;
-    --accent: #262b23;
-    --accent-foreground: #ecede6;
+    --background: #121713;
+    --foreground: #e9eee8;
+    --surface: #182019;
+    --card: #161d17;
+    --card-foreground: #e9eee8;
+    --popover: #1b231c;
+    --popover-foreground: #e9eee8;
+    --primary: #7cc794;
+    --primary-foreground: #0c1a10;
+    --primary-active: #9ad8ad;
+    --secondary: #1f2b21;
+    --secondary-foreground: #e9eee8;
+    --muted: #182019;
+    --muted-foreground: #a7b3a9;
+    --subtle: #7f8c81;
+    --accent: #1f2b21;
+    --accent-foreground: #e9eee8;
     --destructive: #f2766d;
-    --border: #2e322b;
-    --input: #3a3f36;
-    --ring: #74c48a;
-    --mustard-soft: #3a3214;
+    --destructive-soft: #2c1714;
+    --success: #7cc794;
+    --warning: #e0b04a;
+    --warning-soft: #2b2412;
+    --border: #263027;
+    --border-strong: #354236;
+    --input: #6d7a6f;
+    --ring: #5f9a72;
+    --mustard: #e0b04a;
+    --mustard-soft: #2b2412;
     --shade: #000000;
-    --sidebar: #1c1e1a;
-    --sidebar-foreground: #ecede6;
-    --sidebar-primary: #74c48a;
-    --sidebar-primary-foreground: #0d1a10;
-    --sidebar-accent: #262b23;
-    --sidebar-accent-foreground: #ecede6;
-    --sidebar-border: #2e322b;
-    --sidebar-ring: #74c48a;
+    --sidebar: #161d17;
+    --sidebar-foreground: #e9eee8;
+    --sidebar-primary: #7cc794;
+    --sidebar-primary-foreground: #0c1a10;
+    --sidebar-accent: #1f2b21;
+    --sidebar-accent-foreground: #e9eee8;
+    --sidebar-border: #263027;
+    --sidebar-ring: #5f9a72;
     color-scheme: dark;
   }
 }
 
 :root[data-theme='dark'] {
-  --background: #141512;
-  --foreground: #ecede6;
-  --card: #1c1e1a;
-  --card-foreground: #ecede6;
-  --popover: #1f221d;
-  --popover-foreground: #ecede6;
-  --primary: #74c48a;
-  --primary-foreground: #0d1a10;
-  --primary-active: #95d6a7;
-  --secondary: #262b23;
-  --secondary-foreground: #ecede6;
-  --muted: #23261f;
-  --muted-foreground: #a3a898;
-  --accent: #262b23;
-  --accent-foreground: #ecede6;
+  --background: #121713;
+  --foreground: #e9eee8;
+  --surface: #182019;
+  --card: #161d17;
+  --card-foreground: #e9eee8;
+  --popover: #1b231c;
+  --popover-foreground: #e9eee8;
+  --primary: #7cc794;
+  --primary-foreground: #0c1a10;
+  --primary-active: #9ad8ad;
+  --secondary: #1f2b21;
+  --secondary-foreground: #e9eee8;
+  --muted: #182019;
+  --muted-foreground: #a7b3a9;
+  --subtle: #7f8c81;
+  --accent: #1f2b21;
+  --accent-foreground: #e9eee8;
   --destructive: #f2766d;
-  --border: #2e322b;
-  --input: #3a3f36;
-  --ring: #74c48a;
-  --mustard-soft: #3a3214;
+  --destructive-soft: #2c1714;
+  --success: #7cc794;
+  --warning: #e0b04a;
+  --warning-soft: #2b2412;
+  --border: #263027;
+  --border-strong: #354236;
+  --input: #6d7a6f;
+  --ring: #5f9a72;
+  --mustard: #e0b04a;
+  --mustard-soft: #2b2412;
   --shade: #000000;
-  --sidebar: #1c1e1a;
-  --sidebar-foreground: #ecede6;
-  --sidebar-primary: #74c48a;
-  --sidebar-primary-foreground: #0d1a10;
-  --sidebar-accent: #262b23;
-  --sidebar-accent-foreground: #ecede6;
-  --sidebar-border: #2e322b;
-  --sidebar-ring: #74c48a;
+  --sidebar: #161d17;
+  --sidebar-foreground: #e9eee8;
+  --sidebar-primary: #7cc794;
+  --sidebar-primary-foreground: #0c1a10;
+  --sidebar-accent: #1f2b21;
+  --sidebar-accent-foreground: #e9eee8;
+  --sidebar-border: #263027;
+  --sidebar-ring: #5f9a72;
   color-scheme: dark;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
@@ -148,7 +173,13 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
+  --color-destructive-soft: var(--destructive-soft);
+  --color-success: var(--success);
+  --color-subtle: var(--subtle);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
   --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-mustard: var(--mustard);
@@ -186,30 +217,34 @@
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
 
-  --font-serif: 'Literata Variable', 'Noto Serif Bengali Variable', Georgia, serif;
-  --font-sans: 'Hind Siliguri', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* Newsreader and Inter have no Bengali letters: the browser takes those glyphs from the next font in the stack. */
+  --font-serif: 'Newsreader Variable', 'Noto Serif Bengali Variable', Georgia, serif;
+  --font-sans: 'Inter Variable', 'Hind Siliguri', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-heading: var(--font-sans);
 }
 
 @theme {
-  /* Type scale: 13 · 15 · 17 · 20 · 24 · 32 · 42 */
+  /* Type scale: 13 · 14 · 16 · 18 · 22 · 28 · 40 · 52 (Inter for the interface, Newsreader for headlines) */
   --text-xs: 0.8125rem;
   --text-xs--line-height: 1.4;
-  --text-sm: 0.9375rem;
+  --text-sm: 0.875rem;
   --text-sm--line-height: 1.45;
-  --text-base: 1.0625rem;
-  --text-base--line-height: 1.5;
-  --text-lg: 1.25rem;
-  --text-lg--line-height: 1.4;
-  --text-xl: 1.5rem;
+  --text-base: 1rem;
+  --text-base--line-height: 1.55;
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.45;
+  --text-xl: 1.375rem;
   --text-xl--line-height: 1.3;
-  --text-2xl: 2rem;
+  --text-2xl: 1.75rem;
   --text-2xl--line-height: 1.2;
-  --text-3xl: 2.625rem;
-  --text-3xl--line-height: 1.12;
+  --text-3xl: 2.5rem;
+  --text-3xl--line-height: 1.1;
+  --text-4xl: 3.25rem;
+  --text-4xl--line-height: 1.04;
 
-  --container-feed: 680px;
-  --container-page: 1192px;
+  --container-feed: 720px;
+  --container-read: 680px;
+  --container-page: 1240px;
 }
 
 @layer base {
@@ -226,20 +261,21 @@
     @apply border-border outline-ring/50;
   }
 
+  /* Headings are interface type (Inter); editorial headlines opt into Newsreader with `font-serif`. */
   h1,
   h2,
   h3 {
-    @apply font-serif font-bold tracking-[-0.01em] text-ink;
+    @apply font-sans font-semibold tracking-[-0.015em] text-foreground;
   }
 
+  /* The forest-green outline is the focus indicator (7.9:1); components add the #79A98A ring as a soft halo. */
   :focus-visible {
-    outline: 2px solid var(--color-paddy);
+    outline: 2px solid var(--color-primary);
     outline-offset: 2px;
-    border-radius: 4px;
   }
 
   ::selection {
-    background: color-mix(in srgb, var(--color-mustard) 35%, transparent);
+    background: var(--color-secondary);
   }
 }
 
@@ -264,12 +300,13 @@
   }
 
   .story-body h2 {
-    @apply text-xl sm:text-2xl;
+    @apply font-serif text-xl font-semibold sm:text-2xl;
     margin-top: 1.8em;
+    scroll-margin-top: 6rem;
   }
 
   .story-body h3 {
-    @apply text-lg sm:text-xl;
+    @apply font-serif text-lg font-semibold sm:text-xl;
     margin-top: 1.6em;
   }
 
@@ -295,7 +332,7 @@
   }
 
   .story-body blockquote {
-    @apply border-l-2 border-ink pl-5 italic;
+    @apply border-l-2 border-primary/60 pl-5 italic;
   }
 
   .story-body img {

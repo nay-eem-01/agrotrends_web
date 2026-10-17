@@ -16,6 +16,8 @@ interface VoteControlProps {
   myVote?: Direction
   /** Your own post: the score shows, the arrows don't (the backend refuses self-votes). */
   own: boolean
+  /** `horizontal`: one pill-free bar of up, score, down (the question page); vertical beside answers. */
+  orientation?: 'vertical' | 'horizontal'
 }
 
 /**
@@ -23,7 +25,7 @@ interface VoteControlProps {
  * sent the arrows are disabled (a double tap can race on the backend). A refusal (e.g. the 50-point rule for
  * downvotes) shows the backend's message beside the arrows for a few seconds.
  */
-export function VoteControl({ target, id, score, myVote, own }: VoteControlProps) {
+export function VoteControl({ target, id, score, myVote, own, orientation = 'vertical' }: VoteControlProps) {
   const t = useT()
   const { status } = useSession()
   const requireSignIn = useRequireSignIn()
@@ -65,17 +67,30 @@ export function VoteControl({ target, id, score, myVote, own }: VoteControlProps
     </span>
   )
 
+  const horizontal = orientation === 'horizontal'
   if (own && status === 'signed-in') {
-    return <div className="flex w-11 flex-col items-center pt-1">{scoreText}</div>
+    return horizontal ? (
+      <div className="flex h-11 items-center gap-1.5 rounded-lg border border-border px-3 text-sm text-muted-foreground">
+        {scoreText} {t('votes')}
+      </div>
+    ) : (
+      <div className="flex w-11 flex-col items-center pt-1">{scoreText}</div>
+    )
   }
 
   return (
-    <div className="relative flex w-11 flex-col items-center">
+    <div className={cn('relative flex items-center', horizontal ? 'gap-0.5 rounded-lg border border-border-strong pr-0.5' : 'w-11 flex-col')}>
       <Arrow direction="UP" pressed={state.myVote === 'UP'} disabled={vote.isPending} label={target === 'questions' ? t('Upvote this question') : t('Upvote this answer')} onClick={() => cast('UP')} />
       {scoreText}
       <Arrow direction="DOWN" pressed={state.myVote === 'DOWN'} disabled={vote.isPending} label={target === 'questions' ? t('Downvote this question') : t('Downvote this answer')} onClick={() => cast('DOWN')} />
       {refusal && (
-        <p role="alert" className="absolute top-1/2 left-full z-20 ml-2 w-56 -translate-y-1/2 rounded-2xl bg-foreground px-3 py-2 text-xs text-background shadow-md transition-opacity duration-150 starting:opacity-0">
+        <p
+          role="alert"
+          className={cn(
+            'absolute z-20 w-56 rounded-xl bg-foreground px-3 py-2 text-xs text-background shadow-md transition-opacity duration-150 starting:opacity-0',
+            horizontal ? 'top-full left-0 mt-2' : 'top-1/2 left-full ml-2 -translate-y-1/2',
+          )}
+        >
           {refusal}
         </p>
       )}

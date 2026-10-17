@@ -1,11 +1,13 @@
 import { Sparkle, X } from '@phosphor-icons/react'
-import { useEffect, useId, useRef, useState, type FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { useBlogAssist } from '../../api/ai'
 import { useCategories } from '../../api/categories'
 import { errorMessage } from '../../api/errors'
 import type { Season, Soil } from '../../lib/agri'
 import { Button } from '../../ui/Button'
-import { FarmingFields, Select } from '../farming/FarmingFields'
+import { SearchSelect } from '../../ui/SearchSelect'
+import { FarmingFields } from '../farming/FarmingFields'
 import { MAX_TAGS, TagInput } from '../topics/TagInput'
 
 
@@ -34,29 +36,17 @@ interface PublishSheetProps {
 }
 
 export function PublishSheet({ open, mode, initial, draft, busy, error, onSubmit, onClose }: PublishSheetProps) {
-  const dialog = useRef<HTMLDialogElement>(null)
-  const titleId = useId()
-
-  useEffect(() => {
-    const node = dialog.current
-    if (!node) return
-    if (open && !node.open) node.showModal()
-    if (!open && node.open) node.close()
-  }, [open])
-
+  // A shadcn Dialog (Base UI), so the topic and season menus inside it open above it and stay usable.
   return (
-    <dialog
-      ref={dialog}
-      aria-labelledby={titleId}
-      onClose={onClose}
-      className="m-0 mt-auto max-h-[92dvh] w-full max-w-none overflow-y-auto rounded-t-2xl bg-paper p-0 text-ink backdrop:bg-shade/50 sm:m-auto sm:max-w-xl sm:rounded-2xl"
-    >
-      {open && <DetailsForm titleId={titleId} mode={mode} initial={initial} draft={draft} busy={busy} error={error} onSubmit={onSubmit} onClose={onClose} />}
-    </dialog>
+    <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
+      <DialogContent showCloseButton={false} className="block max-h-[92dvh] gap-0 overflow-y-auto p-0 sm:max-w-xl">
+        {open && <DetailsForm mode={mode} initial={initial} draft={draft} busy={busy} error={error} onSubmit={onSubmit} onClose={onClose} />}
+      </DialogContent>
+    </Dialog>
   )
 }
 
-function DetailsForm({ titleId, mode, initial, draft, busy, error, onSubmit, onClose }: Omit<PublishSheetProps, 'open'> & { titleId: string }) {
+function DetailsForm({ mode, initial, draft, busy, error, onSubmit, onClose }: Omit<PublishSheetProps, 'open'>) {
   const categories = useCategories()
   const [details, setDetails] = useState(initial)
   const [missingCategory, setMissingCategory] = useState(false)
@@ -83,18 +73,19 @@ function DetailsForm({ titleId, mode, initial, draft, busy, error, onSubmit, onC
     <form onSubmit={submit} noValidate className="flex flex-col gap-6 p-6 sm:p-8">
       <header className="flex items-start justify-between gap-4">
         <div>
-          <h2 id={titleId} className="text-xl">
+          <DialogTitle className="font-serif text-2xl leading-tight font-medium">
             {mode === 'published' ? 'Story details' : 'Ready to publish?'}
-          </h2>
-          <p className="mt-1 text-sm text-ink-muted">Readers find stories by topic and by the farming they describe.</p>
+          </DialogTitle>
+          <p className="mt-1 text-sm text-muted-foreground">Readers find stories by topic and by the farming they describe.</p>
         </div>
-        <button type="button" onClick={onClose} aria-label="Close" className="-mt-1 -mr-2 flex size-11 items-center justify-center rounded-full text-ink-muted hover:bg-field">
+        <button type="button" onClick={onClose} aria-label="Close" className="-mt-1 -mr-2 flex size-11 items-center justify-center rounded-md text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground">
           <X size={20} />
         </button>
       </header>
 
-      <Select
+      <SearchSelect
         label="Topic"
+        disabled={categories.isPending}
         value={details.categoryId == null ? '' : String(details.categoryId)}
         error={missingCategory && details.categoryId == null ? 'Choose a topic.' : undefined}
         onChange={(value) => set({ categoryId: value ? Number(value) : undefined })}
@@ -108,7 +99,7 @@ function DetailsForm({ titleId, mode, initial, draft, busy, error, onSubmit, onC
       <FarmingFields value={details} onChange={set} />
 
       {error && (
-        <p role="alert" className="text-sm text-danger">
+        <p role="alert" className="text-sm text-destructive">
           {error}
         </p>
       )}
@@ -137,7 +128,7 @@ function AiHelp({ draft, tags, onAddTag }: { draft: { title: string; content: st
   const ideas = assist.data?.suggestedTags?.filter((tag) => !tags.includes(tag)) ?? []
 
   return (
-    <section aria-label="AI suggestions" className="rounded-lg border border-dashed border-rule p-4">
+    <section aria-label="AI suggestions" className="rounded-lg border border-dashed border-border-strong p-4">
       {!assist.data ? (
         <div className="flex flex-wrap items-center gap-3">
           <Button variant="secondary" size="sm" loading={assist.isPending} onClick={() => assist.mutate(draft)}>
@@ -145,16 +136,16 @@ function AiHelp({ draft, tags, onAddTag }: { draft: { title: string; content: st
             Suggest topics and a summary
           </Button>
           {assist.isError ? (
-            <span role="alert" className="text-sm text-ink-muted">
+            <span role="alert" className="text-sm text-muted-foreground">
               {errorMessage(assist.error)}
             </span>
           ) : (
-            <span className="text-xs text-ink-muted">AI reads your draft; nothing is changed until you choose.</span>
+            <span className="text-xs text-muted-foreground">AI reads your draft; nothing is changed until you choose.</span>
           )}
         </div>
       ) : (
         <div className="flex flex-col gap-3">
-          <p className="flex items-center gap-1.5 text-xs text-ink-muted">
+          <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Sparkle size={14} aria-hidden="true" />
             Suggested by AI. Check before you use it.
           </p>
@@ -175,7 +166,7 @@ function AiHelp({ draft, tags, onAddTag }: { draft: { title: string; content: st
             <ul aria-label="Suggested by AI" className="flex flex-wrap gap-2">
               {ideas.map((tag) => (
                 <li key={tag}>
-                  <button type="button" disabled={tags.length >= MAX_TAGS} onClick={() => onAddTag(tag)} className="h-8 rounded-full border border-paddy/40 px-3 text-sm text-paddy hover:bg-field disabled:opacity-50">
+                  <button type="button" disabled={tags.length >= MAX_TAGS} onClick={() => onAddTag(tag)} className="h-8 rounded-full border border-primary/40 px-3 text-sm text-primary transition-colors duration-150 hover:bg-secondary disabled:opacity-50">
                     + {tag}
                   </button>
                 </li>

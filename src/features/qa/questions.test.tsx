@@ -5,7 +5,7 @@ import { clearSession } from '../../api/client'
 import type { Question } from '../../api/questions'
 import App from '../../App'
 import { envelope, mockApi, page } from '../../test/api'
-import { renderWithProviders } from '../../test/render'
+import { pickOption, renderWithProviders } from '../../test/render'
 
 const question: Question = {
   questionId: 5,
@@ -43,8 +43,8 @@ test('season and farming filters stay on the questions page', async () => {
   renderWithProviders(<App />, '/questions?crop=jute')
 
   expect(await screen.findByRole('heading', { name: 'No questions match these filters' })).toBeInTheDocument()
-  await userEvent.click(screen.getByRole('button', { name: 'Filter by crop, season, region or soil' }))
-  await userEvent.selectOptions(screen.getByLabelText('Season'), 'Kharif-1')
+  await userEvent.click(await screen.findByRole('button', { name: 'Filter by crop, season, region or soil' }))
+  await pickOption(screen.getByLabelText('Season'), 'Kharif-1')
   await userEvent.click(screen.getByRole('button', { name: 'Apply filters' }))
   await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/questions?crop=jute&season=KHARIF_1'))
   const last = new URL(String(api.mock.calls.at(-1)![0]), 'http://x')
@@ -75,14 +75,21 @@ function lastQuery(api: ReturnType<typeof mockApi>) {
     .at(-1)!.searchParams
 }
 
-test('home lands on questions, with stories as the second tab', async () => {
-  mockApi({ 'GET /api/questions/all': () => envelope(200, page([question])), 'GET /api/categories/all': () => envelope(200, page([])) })
+test('Discover shows recent questions and topics, and leads to the full feeds', async () => {
+  mockApi({
+    'GET /api/questions/all': () => envelope(200, page([question])),
+    'GET /api/categories/all': () => envelope(200, page([{ id: 2, categoryName: 'Crops' }])),
+    'GET /api/feed/latest': () => envelope(200, page([])),
+  })
   renderWithProviders(<App />, '/')
 
-  expect(await screen.findByRole('link', { name: 'Why are my boro seedlings yellow?' })).toBeInTheDocument()
-  const tabs = screen.getByRole('navigation', { name: 'Home sections' })
-  expect(within(tabs).getByRole('link', { name: 'Questions' })).toHaveAttribute('aria-current', 'page')
-  expect(within(tabs).getByRole('link', { name: 'Stories' })).toHaveAttribute('href', '/stories')
+  const recent = (await screen.findByRole('heading', { name: 'What farmers are asking' })).closest('section')!
+  expect(await within(recent).findByRole('link', { name: 'Why are my boro seedlings yellow?' })).toHaveAttribute('href', '/questions/5')
+  expect(within(recent).getByRole('link', { name: 'Answer an unanswered question' })).toHaveAttribute('href', '/questions?unanswered=true')
+  const topics = (await screen.findByRole('heading', { name: 'Browse by topic' })).closest('section')!
+  expect(within(topics).getByRole('link', { name: 'Crops' })).toHaveAttribute('href', '/questions?categoryId=2')
+  // No stories yet: the stories section steps aside instead of showing an empty frame.
+  expect(screen.queryByRole('heading', { name: 'From the field' })).not.toBeInTheDocument()
 })
 
 test('cards show votes, answers and an accepted answer', async () => {
@@ -111,7 +118,7 @@ test('Unanswered, topic and tag combine with the farming filters', async () => {
 
   await userEvent.click(screen.getByRole('link', { name: 'Unanswered' }))
   await waitFor(() => expect(lastQuery(api).get('unanswered')).toBe('true'))
-  await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Topic' }), 'Crops')
+  await userEvent.click(within(screen.getByRole('navigation', { name: 'Topics' })).getByRole('link', { name: 'Crops' }))
   await waitFor(() => expect(lastQuery(api).get('categoryId')).toBe('2'))
   expect(Object.fromEntries(['crop', 'tag', 'unanswered'].map((key) => [key, lastQuery(api).get(key)]))).toEqual({ crop: 'jute', tag: 'cold', unanswered: 'true' })
 

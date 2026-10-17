@@ -4,7 +4,7 @@ import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { clearSession, hasStoredSession } from '../../api/client'
 import App from '../../App'
 import { envelope, mockApi, page } from '../../test/api'
-import { renderWithProviders } from '../../test/render'
+import { chooseOption, renderWithProviders } from '../../test/render'
 
 const unconfirmed = { id: 9, name: 'Karim', email: 'karim@farm.bd', emailVerified: false }
 
@@ -54,7 +54,7 @@ test('a write refused for an unconfirmed e-mail opens the confirm dialog', async
 
   await userEvent.type(await screen.findByLabelText('Your question'), 'Yellow leaves?')
   await userEvent.type(screen.getByLabelText('Details'), 'Boro, 30 days.')
-  await userEvent.selectOptions(await screen.findByLabelText('Topic'), 'Crops')
+  await chooseOption(await screen.findByLabelText('Topic'), 'Crops')
   await userEvent.click(screen.getByRole('button', { name: 'Post question' }))
 
   const dialog = await screen.findByRole('dialog', { name: 'Confirm your e-mail first' })

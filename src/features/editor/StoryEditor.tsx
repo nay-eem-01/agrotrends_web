@@ -54,7 +54,7 @@ export function StoryEditor({ title, html, cover, onTitleChange, onHtmlChange, o
             editor?.commands.focus('start')
           }
         }}
-        className="mt-6 w-full resize-none bg-transparent font-serif text-2xl font-bold tracking-[-0.01em] text-ink [field-sizing:content] placeholder:text-ink-muted/50 focus:outline-none sm:text-3xl"
+        className="mt-8 w-full resize-none bg-transparent font-serif text-[2rem] leading-[1.15] font-bold tracking-[-0.01em] text-foreground [field-sizing:content] placeholder:text-muted-foreground/60 focus:outline-none sm:text-3xl"
       />
       <EditorContent editor={editor} className="mt-6" />
     </div>
@@ -88,7 +88,7 @@ function Toolbar({ editor }: { editor: Editor }) {
   }
 
   return (
-    <div role="toolbar" aria-label="Formatting" className="sticky top-16 z-10 -mx-2 flex flex-wrap gap-0.5 border-b border-rule bg-paper/95 px-1 py-1 backdrop-blur">
+    <div role="toolbar" aria-label="Formatting" className="sticky top-16 z-10 -mx-2 flex flex-wrap gap-0.5 border-b border-border bg-background px-1 py-1">
       <Tool label="Heading" pressed={state.h2} onClick={() => chain().toggleHeading({ level: 2 }).run()}>
         <TextHTwo size={20} />
       </Tool>
@@ -109,7 +109,7 @@ function Toolbar({ editor }: { editor: Editor }) {
       </Tool>
       {picker.input}
       {picker.error && (
-        <p role="alert" className="flex items-center px-2 text-sm text-danger">
+        <p role="alert" className="flex items-center px-2 text-sm text-destructive">
           {picker.error}
         </p>
       )}
@@ -135,7 +135,10 @@ function Tool({ label, pressed, onClick, children }: { label: string; pressed: b
       title={label}
       onMouseDown={(event) => event.preventDefault()}
       onClick={onClick}
-      className={cx('flex size-11 items-center justify-center rounded-lg', pressed ? 'bg-ink text-paper' : 'text-ink-muted hover:bg-field hover:text-ink')}
+      className={cx(
+        'flex size-11 items-center justify-center rounded-md transition-colors duration-150',
+        pressed ? 'bg-secondary text-primary' : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+      )}
     >
       {children}
     </button>
@@ -170,7 +173,7 @@ function Cover({ cover, onChange }: { cover: string; onChange: (cover: string) =
   const picker = useImagePicker(onChange)
   return (
     <div className="mt-6">
-      {cover && <img src={cover} alt="" className="mb-3 max-h-80 w-full rounded object-cover" />}
+      {cover && <img src={cover} alt="" className="mb-3 max-h-80 w-full rounded-lg bg-muted object-cover" />}
       <div className="flex flex-wrap items-center gap-2">
         <Button variant="secondary" size="sm" loading={picker.uploading} onClick={picker.open}>
           {cover ? 'Change cover' : 'Add a cover image'}
@@ -182,11 +185,11 @@ function Cover({ cover, onChange }: { cover: string; onChange: (cover: string) =
         )}
         {picker.input}
         {picker.error ? (
-          <span role="alert" className="text-sm text-danger">
+          <span role="alert" className="text-sm text-destructive">
             {picker.error}
           </span>
         ) : (
-          !cover && <span className="text-xs text-ink-muted">JPEG, PNG or WebP, up to 5 MB</span>
+          !cover && <span className="text-xs text-muted-foreground">JPEG, PNG or WebP, up to 5 MB</span>
         )}
       </div>
     </div>

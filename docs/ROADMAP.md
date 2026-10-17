@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend · ➡ moved to a later step
 
-**Progress:** 60 of 64 steps done
+**Progress:** 65 of 65 steps done
 
 ---
 
@@ -156,6 +156,15 @@ the season strip goes, shadcn/ui replaces the hand-made primitives, staff see th
 | F14.1 | Bengali strings for every new screen; keyboard and screen-reader pass on them | ✅ |
 | F14.2 | Playwright smoke: sign up, confirm, ask, answer, vote, accept, three reports hide, admin dismisses, notifications arrive | ✅ |
 
+## Phase F15 — Redesign: "The Living Field" (`feat/redesign-base`)
+
+| # | Step | Status |
+|---|---|---|
+| F15.1 | Foundation (`feat/redesign-foundation`): white canvas, exact palette (light and dark), Newsreader + Inter with Bengali fallbacks, 8px corners, green focus outline; shadcn Combobox, Sheet; `SearchSelect`; drawn Botanical art | ✅ |
+| F15.2 | Shell (`feat/redesign-shell`): Discover / Questions / Stories / AI advisor / Write, phone tab bar and menu sheet, account DropdownMenu, auth brand panel | ✅ |
+| F15.3 | Advisor (`feat/redesign-advisor`): workspace with history rail, suggestion cards, composer with near-limit counter and Ctrl+Enter, AI-labelled turns with sources apart | ✅ |
+| F15.4 | Stories (`feat/redesign-stories`): featured story + grid with drawn covers, story page wide cover and contents list, editor styling | ✅ |
+| F15.5 | Questions, Discover and forms (`feat/redesign-discover`): Discover home, question rows with photos and topic chips, question page vote bar, ask form two columns, shadcn Select everywhere, publish Dialog | ✅ |
 ## Phase F15 — Admin dashboard (`feat/admin-dashboard-base`)
 
 Backend Phase 9 (`feat/admin-dashboard-base` on the backend) adds users with ban state, overview counts and admin roles.

@@ -36,6 +36,7 @@ const ReviewQueuePage = page(() => import('./features/experts/ReviewQueuePage'),
 const NotificationsPage = page(() => import('./features/notifications/NotificationsPage'), 'NotificationsPage')
 const TopicsPage = page(() => import('./features/topics/TopicsPage'), 'TopicsPage')
 const AdminOverviewPage = page(() => import('./features/admin/AdminOverviewPage'), 'AdminOverviewPage')
+const AdminUsersPage = page(() => import('./features/admin/AdminUsersPage'), 'AdminUsersPage')
 const AdminCategoriesPage = page(() => import('./features/admin/AdminCategoriesPage'), 'AdminCategoriesPage')
 const AdminExpertsPage = page(() => import('./features/admin/AdminExpertsPage'), 'AdminExpertsPage')
 const AdminReportsPage = page(() => import('./features/admin/AdminReportsPage'), 'AdminReportsPage')
@@ -54,6 +55,7 @@ export default function App() {
         <Route path="/tags/:tagName" element={<TagPage />} />
         <Route path="/advisor" element={<AdvisorPage />} />
         <Route path="/admin" element={<AdminOverviewPage />} />
+        <Route path="/admin/users" element={<AdminUsersPage />} />
         <Route path="/admin/categories" element={<AdminCategoriesPage />} />
         <Route path="/admin/experts" element={<AdminExpertsPage />} />
         <Route path="/admin/reports" element={<AdminReportsPage />} />

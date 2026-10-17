@@ -1,8 +1,9 @@
-import { screen, within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { clearSession } from '../../api/client'
 import App from '../../App'
-import { envelope, mockApi } from '../../test/api'
+import { envelope, mockApi, page } from '../../test/api'
 import { renderWithProviders } from '../../test/render'
 
 const admin = { id: 1, name: 'Admin', email: 'admin@agrotrends.local', roles: ['SUPER ADMIN'] }
@@ -39,4 +40,25 @@ test('a missing privilege shows the backend message', async () => {
   mockApi({ ...signedInAdmin(), 'GET /api/admin/stats': () => envelope(403, null, 'You do not have permission to do this.') })
   renderWithProviders(<App />, '/admin')
   expect(await screen.findByRole('alert')).toHaveTextContent('You do not have permission to do this.')
+})
+
+const nasrin = { id: 7, name: 'Nasrin Akter', email: 'nasrin@farm.bd', roles: ['USER'], banned: false, createdAt: '2026-10-01T00:00:00Z' }
+const karim = { id: 8, name: 'Karim', mobileNumber: '+8801712345678', roles: ['USER', 'Moderator'], banned: true, banReason: 'Spam', createdAt: '2026-10-02T00:00:00Z' }
+
+test('users are searched by name or e-mail and filtered by ban state', async () => {
+  const api = mockApi({ ...signedInAdmin(), 'GET /api/admin/users': () => envelope(200, page([nasrin, karim])) })
+  renderWithProviders(<App />, '/admin/users')
+
+  const members = within(await screen.findByRole('list', { name: 'Members' }))
+  expect(members.getByRole('link', { name: 'Nasrin Akter' })).toHaveAttribute('href', '/admin/users/7')
+  expect(members.getByText(/\+8801712345678/)).toBeInTheDocument()
+  expect(members.getByText('Banned')).toBeInTheDocument()
+  expect(members.getByText('Moderator')).toBeInTheDocument()
+
+  await userEvent.type(screen.getByRole('searchbox', { name: 'Search members by name or e-mail' }), 'nasrin{Enter}')
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/admin/users?q=nasrin'))
+  await userEvent.click(screen.getByRole('link', { name: 'Banned' }))
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/admin/users?q=nasrin&banned=true'))
+  const last = new URL(String(api.mock.calls.filter(([url]) => String(url).startsWith('/api/admin/users')).at(-1)![0]), 'http://x')
+  expect([last.searchParams.get('q'), last.searchParams.get('banned')]).toEqual(['nasrin', 'true'])
 })

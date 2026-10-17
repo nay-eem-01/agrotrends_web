@@ -1,6 +1,6 @@
-import { useQuery } from '@tanstack/react-query'
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { api } from './client'
-import type { Schemas } from './types'
+import type { Page, Schemas } from './types'
 
 export type AdminStats = Schemas['AdminStatsResponse']
 export type AdminUser = Schemas['AdminUserResponse']
@@ -19,4 +19,14 @@ export const adminKeys = {
 /** The overview counts (users, posts, open queues). Any staff privilege may read them. */
 export function useAdminStats() {
   return useQuery({ queryKey: adminKeys.stats, queryFn: ({ signal }) => api<AdminStats>('/api/admin/stats', { signal }) })
+}
+
+/** Members, newest first: `q` inside the name or e-mail, `banned` true or false (left out for everyone). */
+export function useAdminUsers(q: string, banned?: boolean) {
+  return useInfiniteQuery({
+    queryKey: adminKeys.users(q, banned),
+    queryFn: ({ pageParam, signal }) => api<Page<AdminUser>>('/api/admin/users', { params: { q: q || undefined, banned, pageNo: pageParam, pageSize: 20 }, signal }),
+    initialPageParam: 0,
+    getNextPageParam: (last) => (last.last ? undefined : last.number + 1),
+  })
 }

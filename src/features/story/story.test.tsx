@@ -40,7 +40,7 @@ test('a story shows its title, author, details and cleaned body', async () => {
 
   expect(await screen.findByRole('heading', { level: 1, name: 'Rice blast and nitrogen' })).toBeInTheDocument()
   expect(screen.getByRole('link', { name: 'Nasrin Akter' })).toHaveAttribute('href', '/authors/1')
-  expect(screen.getByText(/4 min read/)).toHaveTextContent('4 min read · Oct 6 · in Crop diseases')
+  expect(screen.getByText(/4 min read/)).toHaveTextContent('Crop diseases4 min read · Oct 6')
   expect(screen.getByRole('heading', { level: 2, name: 'Why it matters' })).toBeInTheDocument()
   expect(screen.getByText('nitrogen', { selector: 'strong' })).toBeInTheDocument()
 

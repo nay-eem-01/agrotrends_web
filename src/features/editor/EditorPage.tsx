@@ -46,7 +46,7 @@ function StatusBar({ status, children, heading }: { status: ReactNode; children?
   return (
     <div className="flex min-h-14 items-center justify-between gap-4 pt-4">
       <h1 className="sr-only">{heading}</h1>
-      <output aria-live="polite" className="text-sm text-ink-muted">
+      <output aria-live="polite" className="text-sm text-muted-foreground">
         {status}
       </output>
       <div className="flex items-center gap-2">{children}</div>
@@ -131,7 +131,7 @@ function EditStory({ blogId }: { blogId: number }) {
 
   if (story.isPending) {
     return (
-      <div className="flex justify-center py-24 text-ink-muted">
+      <div className="flex justify-center py-24 text-muted-foreground">
         <Spinner label="Loading story" />
       </div>
     )
@@ -140,7 +140,7 @@ function EditStory({ blogId }: { blogId: number }) {
     if (story.error instanceof ApiError && story.error.isNotFound) return <NotFoundPage />
     return (
       <Page>
-        <p role="alert" className="py-24 text-ink-muted">
+        <p role="alert" className="py-24 text-muted-foreground">
           {errorMessage(story.error)}
         </p>
       </Page>

@@ -5,7 +5,7 @@ import { clearSession } from '../../api/client'
 import type { BlogResponse } from '../../api/types'
 import App from '../../App'
 import { envelope, mockApi, page } from '../../test/api'
-import { renderWithProviders } from '../../test/render'
+import { openMoreActions, renderWithProviders } from '../../test/render'
 
 const story: BlogResponse = { id: 402, slug: 'rice-blast', title: 'Rice blast', content: '<p>Body.</p>', author: { authorId: 1, name: 'Nasrin' }, status: 'PUBLISHED', agri: {} }
 
@@ -179,8 +179,8 @@ test('owners edit and delete their own responses', async () => {
   const mine = await section.findByRole('article', { name: 'Response by Karim' })
   expect(within(section.getByRole('article', { name: 'Response by Rahim Uddin' })).queryByRole('button', { name: 'Edit' })).not.toBeInTheDocument()
 
-  await userEvent.click(within(mine).getByRole('button', { name: 'Edit' }))
-  const field = within(mine).getByLabelText('Edit your response')
+  await userEvent.click((await openMoreActions(mine)).getByRole('menuitem', { name: 'Edit' }))
+  const field = await within(mine).findByLabelText('Edit your response')
   expect(field).toHaveValue('Old text')
   await userEvent.clear(field)
   await userEvent.type(field, 'New text')
@@ -188,8 +188,8 @@ test('owners edit and delete their own responses', async () => {
   expect(await within(mine).findByText('New text')).toBeInTheDocument()
   expect(bodyOf(api, 'PUT', '/api/comments/update')).toEqual({ commentId: 1, blogId: 402, content: 'New text' })
 
-  await userEvent.click(within(mine).getByRole('button', { name: 'Delete' }))
-  expect(within(mine).getByText('Delete this response?')).toBeInTheDocument()
+  await userEvent.click((await openMoreActions(mine)).getByRole('menuitem', { name: 'Delete' }))
+  expect(await within(mine).findByText('Delete this response?')).toBeInTheDocument()
   await userEvent.click(within(mine).getByRole('button', { name: 'Delete' }))
   await waitFor(() => expect(section.queryByRole('article', { name: 'Response by Karim' })).not.toBeInTheDocument())
 })

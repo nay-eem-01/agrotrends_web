@@ -8,6 +8,7 @@ import { storyDate } from '../../lib/dates'
 import { excerpt, htmlToText } from '../../lib/html'
 import { formatNumber, useT } from '../../lib/i18n'
 import { Avatar } from '../../ui/Avatar'
+import { TagList, type TagItem } from '../../ui/TagList'
 
 /**
  * One question in a list. A question is a request for help, so it reads like one: the votes and the answer state
@@ -23,12 +24,18 @@ export function QuestionCard({ question, compact = false }: { question: Question
   const score = question.score ?? 0
   const preview = excerpt(htmlToText(question.content), 160)
   const photo = question.imageUrls?.[0]
-  const chips = [
-    agri.crop && { label: agri.crop, to: filterPath({ crop: agri.crop }, '/questions') },
-    agri.season && { label: t(SEASON_LABELS[agri.season]), to: filterPath({ season: agri.season }, '/questions') },
-    agri.region && { label: agri.region, to: filterPath({ region: agri.region }, '/questions') },
-    agri.soil && { label: t(SOIL_LABELS[agri.soil]), to: filterPath({ soil: agri.soil }, '/questions') },
-  ].filter((chip): chip is { label: string; to: string } => Boolean(chip))
+  // Tags first, then the farming context, shown three at a time with the rest behind "+N".
+  const tags: TagItem[] = [
+    ...(question.tags ?? []).map((tag) => ({ label: `#${tag}`, to: `/questions?tag=${encodeURIComponent(tag)}` })),
+    ...[
+      agri.crop && { label: agri.crop, to: filterPath({ crop: agri.crop }, '/questions'), name: t('Crop') },
+      agri.season && { label: t(SEASON_LABELS[agri.season]), to: filterPath({ season: agri.season }, '/questions'), name: t('Season') },
+      agri.region && { label: agri.region, to: filterPath({ region: agri.region }, '/questions'), name: t('Region') },
+      agri.soil && { label: t(SOIL_LABELS[agri.soil]), to: filterPath({ soil: agri.soil }, '/questions'), name: t('Soil') },
+    ]
+      .filter((chip): chip is { label: string; to: string; name: string } => Boolean(chip))
+      .map((chip) => ({ ...chip, kind: 'context' as const })),
+  ]
 
   return (
     <li className={cn('group relative flex gap-4 border-b border-border sm:gap-5', compact ? 'py-4' : 'py-5')}>
@@ -85,19 +92,8 @@ export function QuestionCard({ question, compact = false }: { question: Question
             </span>
           )}
           {compact && question.category?.categoryName && <span>· {question.category.categoryName}</span>}
-          {!compact &&
-            (question.tags ?? []).map((tag) => (
-              <Link key={tag} to={`/questions?tag=${encodeURIComponent(tag)}`} className="relative z-10 rounded-full bg-secondary px-2 py-0.5 text-secondary-foreground hover:bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_6%)]">
-                #{tag}
-              </Link>
-            ))}
-          {!compact &&
-            chips.map((chip) => (
-              <Link key={chip.to} to={chip.to} className="relative z-10 rounded-full px-2 py-0.5 text-foreground ring-1 ring-border-strong ring-inset hover:bg-muted">
-                {chip.label}
-              </Link>
-            ))}
         </div>
+        {!compact && <TagList items={tags} label={t('Tags')} className="mt-2.5" />}
       </div>
       {photo && (
         <img

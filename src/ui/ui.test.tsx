@@ -1,4 +1,5 @@
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import userEvent from '@testing-library/user-event'
 import { useState } from 'react'
 import { vi } from 'vitest'
@@ -6,6 +7,7 @@ import { Avatar, initials } from './Avatar'
 import { Button } from './Button'
 import { Chip } from './Chip'
 import { SearchSelect } from './SearchSelect'
+import { TagList } from './TagList'
 import { TextField } from './TextField'
 
 test('initials take the first and last name, Bengali included', () => {
@@ -93,4 +95,39 @@ test('search select links its error', () => {
   const input = screen.getByRole('combobox', { name: 'Topic' })
   expect(input).toHaveAttribute('aria-invalid', 'true')
   expect(input).toHaveAccessibleDescription('Choose a topic.')
+})
+
+const tagItems = (n: number) => Array.from({ length: n }, (_, i) => ({ label: `tag${i + 1}`, to: `/questions?tag=tag${i + 1}` }))
+
+function renderTags(n: number) {
+  return render(
+    <MemoryRouter>
+      <TagList items={tagItems(n)} label="Tags" />
+    </MemoryRouter>,
+  )
+}
+
+test('the tag list shows up to three tags, then +N', async () => {
+  expect(renderTags(0).container).toBeEmptyDOMElement()
+  for (const n of [1, 3]) {
+    const { unmount } = renderTags(n)
+    expect(screen.getAllByRole('link')).toHaveLength(n)
+    expect(screen.queryByRole('button')).not.toBeInTheDocument()
+    unmount()
+  }
+  const { unmount } = renderTags(4)
+  expect(screen.getAllByRole('link')).toHaveLength(3)
+  expect(await screen.findByRole('button', { name: 'Show 1 more tags' })).toHaveTextContent('+1')
+  unmount()
+})
+
+test('+N opens every tag in a popover, and Escape closes it', async () => {
+  renderTags(7)
+  expect(screen.getAllByRole('link')).toHaveLength(3)
+  await userEvent.click(await screen.findByRole('button', { name: 'Show 4 more tags' }))
+  const popover = await screen.findByRole('dialog')
+  expect(within(popover).getAllByRole('link')).toHaveLength(7)
+  expect(within(popover).getByRole('link', { name: 'tag7' })).toHaveAttribute('href', '/questions?tag=tag7')
+  await userEvent.keyboard('{Escape}')
+  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
 })

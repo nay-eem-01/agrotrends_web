@@ -42,32 +42,44 @@ different border, the active nav an underline, errors an icon, unanswered questi
   Serif Bengali** (after Newsreader); the browser takes Bengali glyphs from those.
 - Scale (px): 13 · 14 · 16 · 18 · 22 · 28 · 40 · 52. Story body 18px on phones, 20px from 640px, measure ~68ch.
 
-## Shape and controls
+## Shape and controls (F16, 2026-10-17)
 
-- Moderate corners (`--radius: 0.5rem`): buttons, inputs, selects and textareas `rounded-lg` (8px); menus, dialogs,
-  panels and the advisor composer `rounded-xl`; chips and badges stay fully round. No pills for fields or buttons.
-- Heights: buttons 40px (`default`) and 44px (`lg`, the app's `md`); inputs, selects, native selects and the
-  searchable select 44px; so every tap target is ≥ 44px on a phone.
-- Fields: white, `input` border, darker on hover, green border and 3px ring on focus. Labels always visible (or
-  `sr-only` in a toolbar, never placeholder-only). Errors sit under the field with a warning icon, wired through
-  `aria-describedby`.
-- Buttons: primary filled green; secondary white with `border-strong`; quiet is a ghost; danger is a red wash.
-- Lists: short fixed ones (season, soil) are native selects; topics use `SearchSelect` (`src/ui`, shadcn Combobox) so
-  a long list can be typed into. Farming filters open in a Popover from a "Filter" button with a count.
-- No drop shadows on the page; menus, popovers and dialogs keep a soft `shadow-lg`.
+- Radius from one token (`--radius: 0.75rem`): inputs, selects, buttons and compact controls `rounded-lg` (12px);
+  cards, menus and popovers `rounded-xl` (~17px); dialogs and large surfaces `rounded-xl`/`rounded-2xl` (17–22px);
+  chips and badges fully round. No one-off radii on pages.
+- Fields: white, 44px high, 12px corners, `input` border `#C9D5C9`, darker (`subtle`) on hover, green border plus the
+  `#79A98A` halo on focus, red border and an icon with the message on error. Labels always visible; placeholders are
+  examples, never the label.
+- Buttons: primary filled green; secondary white with `border-strong`; quiet is a ghost; danger a red wash.
+- Selects: every list is the shadcn Select (short fixed lists) or `SearchSelect` (topics). No native selects.
+- Secondary post actions (Edit, Delete, Report) sit behind a "More actions" menu (`threads/PostMenu`) at the top right
+  of each question, answer, reply and response; Reply, Show replies and Accept stay visible. Delete is red and still
+  asks first.
+- Votes (`qa/VoteControl`): bold carets at the score's weight in 36px squares (44px touch area); pressed is a tint,
+  sage with green for up, soft red for down. Horizontal on the question page, a narrow column beside answers.
+- Tags (`ui/TagList`): three chips, then "+N" opening the full list in a popover; used on question rows, the
+  question page and the story page.
+- Photos (`qa/PhotoPicker`): square thumbnails and a dashed "Add a photo" tile in one grid; upload progress in the
+  tile.
+- Composers: the advisor sends on Enter (Shift+Enter for a new line); answers and responses send on Ctrl/⌘+Enter.
+  Neither sends while an input method (Bangla) is composing.
+- Search: one entry point, the top bar (a field-styled button from 1280px, an icon below; Ctrl/⌘+K), opening a
+  search dialog that goes to `/search`. Pages don't repeat it.
+- Shadows only on overlays (menus, popovers, dialogs).
 
 ## Layout (F15 "Living Field")
 
 Page width 1240px, gutters 16px (phones) / 32px; reading column 680px; feed column 720px.
 
 - **Navigation:** white bar with a hairline: Discover · Questions · Stories · AI advisor · Write, Ask (signed in),
-  bell, account menu; the current page green and underlined. Search field from 1280px. Below 1024px a menu sheet;
+  bell, account menu; the current page green and underlined. Search opens a dialog (field-styled trigger from 1280px). Below 1024px a menu sheet;
   below 768px a bottom tab bar (Discover, Questions, Ask +, Stories, AI advisor).
-- **Discover (`/`):** hero (Newsreader headline, search, five topics, Ask) beside the drawn field (`FieldScene`) with
-  an advisor caption; topic tiles; "What farmers are asking" (compact question rows) beside the advisor panel with
+- **Discover (`/`):** hero (Newsreader headline, intro, Ask a question / Join) beside the drawn field (`FieldScene`) with
+  an advisor caption; "Help a farmer today" (up to three unanswered questions, each with Answer); "What farmers are
+  asking" (one row of topic filters, then compact question rows) beside the advisor panel with
   seasonal questions that open `/advisor?q=`; "From the field": a featured story and three compact ones. Sections
   below the hero load lazily.
-- **Questions (`/questions`):** header + Ask, a search field, topics as chips (first six; "More topics" picker past
+- **Questions (`/questions`):** header + Ask, topics as chips (first six; "More topics" picker past
   that), Newest | Unanswered, Filter popover, active-filter chips; rows with votes, answer state and the first
   photo; sidebar: advisor card and "Getting a good answer". Question page: back link, Inter title, body, a horizontal
   vote bar with "Answer", the AI answer card, answers as rows.
@@ -110,7 +122,7 @@ Checked with Lighthouse (mobile, simulated slow 4G) on a production build; re-ch
 
 | Measure | Budget | 2026-10-09 |
 |---|---|---|
-| Main JS (gzip) | <= 120 kB | 117 kB on 2026-10-17 (F15: menus, pickers and Discover below the hero lazy) |
+| Main JS (gzip) | <= 120 kB | 110 kB on 2026-10-17 (F16: post menus, tag popover and search dialog lazy too) |
 | Lighthouse performance (home, questions) | >= 80 | 85, 89 |
 | Accessibility / best practices / SEO | 100 | 100 / 100 / 100 |
 | CLS | < 0.1 | 0.07 (fonts swapping in) |

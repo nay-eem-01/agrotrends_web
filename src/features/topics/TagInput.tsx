@@ -37,7 +37,7 @@ export function TagInput({ tags, onChange }: { tags: string[]; onChange: (tags: 
       <label htmlFor={inputId} className="text-sm font-medium">
         {t('Tags')}
       </label>
-      <div className="flex min-h-11 flex-wrap items-center gap-2 rounded-lg border border-input bg-card px-2 py-1.5 transition-[border-color,box-shadow] duration-150 focus-within:border-primary focus-within:ring-[3px] focus-within:ring-ring/60 hover:border-foreground/60">
+      <div className="flex min-h-11 flex-wrap items-center gap-2 rounded-lg border border-input bg-card px-2 py-1.5 transition-[border-color,box-shadow] duration-150 focus-within:border-primary focus-within:ring-[3px] focus-within:ring-ring/60 hover:border-subtle">
         {tags.map((tag) => (
           <span key={tag} className="inline-flex h-8 items-center gap-1 rounded-full bg-secondary pr-1 pl-3 text-sm text-secondary-foreground">
             {tag}

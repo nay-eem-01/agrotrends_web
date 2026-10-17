@@ -1,22 +1,4 @@
-import {
-  ArrowRight,
-  Bug,
-  Carrot,
-  CloudSun,
-  Cow,
-  Drop,
-  Egg,
-  Fish,
-  Flask,
-  Grains,
-  Leaf,
-  Plant,
-  Sparkle,
-  Storefront,
-  Tractor,
-  Tree,
-  type Icon,
-} from '@phosphor-icons/react'
+import { ArrowRight, ChatCircleText, Plant, Sparkle } from '@phosphor-icons/react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -25,6 +7,7 @@ import { errorMessage } from '../../api/errors'
 import { useFeed } from '../../api/feed'
 import { useQuestions } from '../../api/questions'
 import { seasonCalendar, SEASON_LABELS, type Season } from '../../lib/agri'
+import { storyDate } from '../../lib/dates'
 import { useT } from '../../lib/i18n'
 import { ButtonLink } from '../../ui/Button'
 import { Sprig } from '../../ui/Botanical'
@@ -32,11 +15,11 @@ import { ADVISOR_EXAMPLES } from '../ai/examples'
 import { StoryCompact, StoryFeature } from '../feed/StoryTiles'
 import { QuestionCard } from '../qa/QuestionRow'
 
-/** Discover below the hero: topics, what people are asking beside the advisor, and stories from the field. */
+/** Discover below the hero: questions that need an answer, what people are asking beside the advisor, and stories. */
 export function DiscoverSections() {
   return (
     <>
-      <Topics />
+      <NeedsAnswer />
       <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-12">
         <RecentQuestions />
         <AdvisorPanel />
@@ -62,52 +45,64 @@ function SectionHeading({ id, title, link }: { id: string; title: string; link?:
   )
 }
 
-/** An icon for a topic from words in its name (English or Bengali names fall back to a leaf). */
-const TOPIC_ICONS: [RegExp, Icon][] = [
-  [/fish|aqua/i, Fish],
-  [/livestock|cattle|cow|dairy|goat/i, Cow],
-  [/poultry|egg|chicken|duck/i, Egg],
-  [/pest|disease|insect|bug/i, Bug],
-  [/soil|fertili[sz]er|compost|nutrient/i, Flask],
-  [/water|irrigat/i, Drop],
-  [/weather|climate|season/i, CloudSun],
-  [/rice|paddy|grain|wheat|maize|cereal/i, Grains],
-  [/vegetable|potato|tomato|onion/i, Carrot],
-  [/fruit|tree|orchard|mango/i, Tree],
-  [/machine|tool|tech|tractor/i, Tractor],
-  [/market|price|policy|business/i, Storefront],
-  [/seed|crop|plant/i, Plant],
-]
-
-export function TopicIcon({ name, size = 20 }: { name?: string; size?: number }) {
-  const Match = TOPIC_ICONS.find(([pattern]) => pattern.test(name ?? ''))?.[1] ?? Leaf
-  return <Match size={size} aria-hidden="true" className="shrink-0 text-primary" />
-}
-
-/** Every topic as a tile leading to its questions. Hidden until topics exist. */
-function Topics() {
+/**
+ * Questions nobody has answered yet, as a short row of cards with a direct way to answer: the most useful thing a
+ * visitor who knows farming can do here. Steps aside when every question has an answer.
+ */
+function NeedsAnswer() {
   const t = useT()
-  const categories = useCategories().data ?? []
-  if (categories.length === 0) return null
+  const open = useQuestions({ unanswered: true })
+  const list = (open.data?.pages[0]?.content ?? []).slice(0, 3)
+  if (open.isPending || list.length === 0) return null
   return (
-    <section aria-labelledby="discover-topics">
-      <SectionHeading id="discover-topics" title={t('Browse by topic')} link={{ to: '/questions', label: t('All questions') }} />
-      <ul className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        {categories.slice(0, 12).map((topic) => (
-          <li key={topic.id}>
-            <Link
-              to={`/questions?categoryId=${topic.id}`}
-              className="flex h-full min-h-20 flex-col justify-between gap-3 rounded-xl border border-border p-4 transition-[border-color,background-color] duration-150 hover:border-primary/40 hover:bg-surface"
-            >
-              <span className="flex size-9 items-center justify-center rounded-full bg-secondary">
-                <TopicIcon name={topic.categoryName} />
-              </span>
-              <span className="text-sm leading-snug font-medium">{topic.categoryName}</span>
-            </Link>
+    <section aria-labelledby="discover-unanswered">
+      <SectionHeading id="discover-unanswered" title={t('Help a farmer today')} link={{ to: '/questions?unanswered=true', label: t('All unanswered') }} />
+      <p className="mt-1.5 text-muted-foreground">{t('These questions have no answer yet. If you have grown it, your answer helps.')}</p>
+      <ul className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {list.map((question) => (
+          <li key={question.questionId} className="flex flex-col rounded-xl border border-border p-5 transition-colors duration-150 hover:border-border-strong">
+            {question.category?.categoryName && <p className="text-xs font-semibold text-primary">{question.category.categoryName}</p>}
+            <h3 className="mt-1.5 line-clamp-3 text-base leading-snug font-semibold">
+              <Link to={`/questions/${question.questionId}`} className="decoration-primary/60 decoration-2 underline-offset-4 hover:text-primary hover:underline">
+                {question.title}
+              </Link>
+            </h3>
+            <p className="mt-2 text-xs text-muted-foreground">
+              {question.authorName} · {storyDate(question.createdAt)}
+            </p>
+            <div className="mt-auto pt-4">
+              <ButtonLink to={`/questions/${question.questionId}#your-answer`} variant="secondary" size="sm">
+                <ChatCircleText size={16} aria-hidden="true" />
+                {t('Answer')}
+              </ButtonLink>
+            </div>
           </li>
         ))}
       </ul>
     </section>
+  )
+}
+
+/** The topics as one compact row of quick filters into the question feed (the first eight, then all questions). */
+function TopicFilters() {
+  const t = useT()
+  const categories = useCategories().data ?? []
+  if (categories.length === 0) return null
+  return (
+    <nav aria-label={t('Topics')} className="mt-4 -mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+      <ul className="flex gap-2 pb-1 sm:flex-wrap">
+        {categories.slice(0, 8).map((topic) => (
+          <li key={topic.id}>
+            <Link
+              to={`/questions?categoryId=${topic.id}`}
+              className="inline-flex h-8 shrink-0 items-center rounded-full border border-border-strong px-3 text-sm whitespace-nowrap transition-colors duration-150 hover:border-primary/50 hover:bg-surface"
+            >
+              {topic.categoryName}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </nav>
   )
 }
 
@@ -120,6 +115,7 @@ function RecentQuestions() {
   return (
     <section aria-labelledby="discover-questions" className="min-w-0">
       <SectionHeading id="discover-questions" title={t('What farmers are asking')} link={{ to: '/questions', label: t('All questions') }} />
+      <TopicFilters />
       {questions.isPending ? (
         <div className="mt-4 flex flex-col gap-4" aria-busy="true">
           <output className="sr-only">{t('Loading questions')}</output>
@@ -143,9 +139,6 @@ function RecentQuestions() {
               <QuestionCard key={question.questionId} question={question} compact />
             ))}
           </ul>
-          <Link to="/questions?unanswered=true" className="mt-4 inline-flex text-sm font-medium text-primary underline-offset-4 hover:underline">
-            {t('Answer an unanswered question')}
-          </Link>
         </>
       )}
     </section>

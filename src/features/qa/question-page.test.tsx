@@ -5,7 +5,7 @@ import { clearSession } from '../../api/client'
 import type { Question } from '../../api/questions'
 import App from '../../App'
 import { envelope, mockApi } from '../../test/api'
-import { renderWithProviders } from '../../test/render'
+import { openMoreActions, renderWithProviders } from '../../test/render'
 
 const question: Question = {
   questionId: 5,
@@ -97,7 +97,8 @@ test('answering posts to the question', async () => {
   expect(await screen.findByText('Drain the cold water.')).toBeInTheDocument()
   const sent = api.mock.calls.find(([url]) => url === '/api/answers/create')!
   expect(JSON.parse(sent[1]!.body as string)).toEqual({ questionId: 5, content: 'Drain the cold water.' })
-  expect(screen.getByRole('button', { name: 'Edit' })).toBeInTheDocument()
+  const posted = screen.getByText('Drain the cold water.').closest('article')!
+  expect((await openMoreActions(posted)).getByRole('menuitem', { name: 'Edit' })).toBeInTheDocument()
 })
 
 test('editing an answer uses the answer endpoint', async () => {
@@ -110,8 +111,8 @@ test('editing an answer uses the answer endpoint', async () => {
   renderWithProviders(<App />, '/questions/5')
 
   const mine = await screen.findByRole('article', { name: 'Answer by Nasrin' })
-  await userEvent.click(within(mine).getByRole('button', { name: 'Edit' }))
-  await userEvent.clear(within(mine).getByLabelText('Edit your answer'))
+  await userEvent.click((await openMoreActions(mine)).getByRole('menuitem', { name: 'Edit' }))
+  await userEvent.clear(await within(mine).findByLabelText('Edit your answer'))
   await userEvent.type(within(mine).getByLabelText('Edit your answer'), 'Better')
   await userEvent.click(within(mine).getByRole('button', { name: 'Save' }))
   await waitFor(() => expect(api.mock.calls.some(([url]) => url === '/api/answers/update/')).toBe(true))
@@ -129,9 +130,12 @@ test('the asker can delete the question', async () => {
   })
   renderWithProviders(<App />, '/questions/5')
 
-  expect(await screen.findByRole('link', { name: 'Edit' })).toHaveAttribute('href', '/questions/5/edit')
-  await userEvent.click(screen.getByRole('button', { name: 'Delete' }))
-  await userEvent.click(screen.getByRole('button', { name: 'Delete' }))
+  await screen.findByRole('heading', { level: 1 })
+  const menu = await openMoreActions()
+  expect(menu.getByRole('menuitem', { name: 'Edit' })).toHaveAttribute('href', '/questions/5/edit')
+  await userEvent.click(menu.getByRole('menuitem', { name: 'Delete' }))
+  // Delete still asks first.
+  await userEvent.click(await screen.findByRole('button', { name: 'Delete' }))
   await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent(/^\/questions$/))
 })
 

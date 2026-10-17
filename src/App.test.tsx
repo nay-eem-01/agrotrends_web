@@ -30,12 +30,16 @@ test('unknown paths show not found', async () => {
 
 test('searching from the top bar goes to the search page', async () => {
   renderAt('/')
-  await userEvent.type(screen.getByPlaceholderText('Search'), 'boro rice{Enter}')
+  await userEvent.click(screen.getAllByRole('button', { name: 'Search' })[0])
+  await userEvent.type(await screen.findByRole('searchbox', { name: 'Search questions and stories' }), 'boro rice{Enter}')
   await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/search?q=boro%20rice'))
 })
 
 test('blank search stays put', async () => {
   renderAt('/')
-  await userEvent.type(screen.getByPlaceholderText('Search'), '   {Enter}')
+  await userEvent.keyboard('{Control>}k{/Control}')
+  const field = await screen.findByRole('searchbox', { name: 'Search questions and stories' })
+  await userEvent.type(field, '   {Enter}')
+  expect(field).toBeInTheDocument()
   await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent(/^\/$/))
 })

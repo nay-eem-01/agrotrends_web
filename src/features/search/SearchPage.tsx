@@ -44,7 +44,7 @@ function SearchField({ initial }: { initial: string }) {
   return (
     <search>
       <form onSubmit={submit}>
-        <label className="flex h-12 items-center gap-3 rounded-lg border border-input bg-card px-4 text-muted-foreground transition-[border-color,box-shadow] duration-150 focus-within:border-primary focus-within:ring-[3px] focus-within:ring-ring/60 hover:border-foreground/60">
+        <label className="flex h-12 items-center gap-3 rounded-lg border border-input bg-card px-4 text-muted-foreground transition-[border-color,box-shadow] duration-150 focus-within:border-primary focus-within:ring-[3px] focus-within:ring-ring/60 hover:border-subtle">
           <MagnifyingGlass size={20} aria-hidden="true" />
           <span className="sr-only">{t('Search questions and stories')}</span>
           <input

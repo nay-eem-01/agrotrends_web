@@ -1,4 +1,4 @@
-import { screen, within, waitFor } from '@testing-library/react'
+import { fireEvent, screen, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { clearSession } from '../../api/client'
@@ -114,4 +114,17 @@ test('the counter shows the length, then what is left near the limit', async () 
   await userEvent.click(field)
   await userEvent.paste('a'.repeat(950))
   expect(field).toHaveAccessibleDescription('50 characters left')
+})
+
+test('Enter asks, Shift+Enter adds a line, and nothing is sent while an input method is composing', async () => {
+  const api = mockApi(signedIn(() => envelope(200, { answer: 'Drain the field.', sources: [] })))
+  renderWithProviders(<App />, '/advisor')
+
+  const field = await screen.findByLabelText('Your question')
+  await userEvent.type(field, 'Flooded{Shift>}{Enter}{/Shift}field?')
+  expect(field).toHaveValue('Flooded\nfield?')
+  fireEvent.keyDown(field, { key: 'Enter', isComposing: true })
+  expect(api.mock.calls.some(([url]) => url === '/api/ai/ask')).toBe(false)
+  await userEvent.keyboard('{Enter}')
+  await waitFor(() => expect(api.mock.calls.filter(([url]) => url === '/api/ai/ask')).toHaveLength(1))
 })

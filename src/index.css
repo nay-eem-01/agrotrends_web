@@ -44,12 +44,12 @@
   --warning-soft: #fbf3e1;
   --border: #e2e8e1;
   --border-strong: #c9d5c9;
-  --input: #78847b;
+  --input: #c9d5c9;
   --ring: #79a98a;
   --mustard: #d9a441;
   --mustard-soft: #fbf3e1;
   --shade: #1c2b21;
-  --radius: 0.5rem;
+  --radius: 0.75rem;
   --chart-1: #245c3a;
   --chart-2: #d9a441;
   --chart-3: #59665d;
@@ -97,7 +97,7 @@
     --warning-soft: #2b2412;
     --border: #263027;
     --border-strong: #354236;
-    --input: #6d7a6f;
+    --input: #435245;
     --ring: #5f9a72;
     --mustard: #e0b04a;
     --mustard-soft: #2b2412;
@@ -139,7 +139,7 @@
   --warning-soft: #2b2412;
   --border: #263027;
   --border-strong: #354236;
-  --input: #6d7a6f;
+  --input: #435245;
   --ring: #5f9a72;
   --mustard: #e0b04a;
   --mustard-soft: #2b2412;

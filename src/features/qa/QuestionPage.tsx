@@ -7,15 +7,16 @@ import { ApiError, errorMessage } from '../../api/errors'
 import { useQuestion, useQuestionWrite, type Question } from '../../api/questions'
 import { filterPath, SEASON_LABELS, SOIL_LABELS } from '../../lib/agri'
 import { storyDate } from '../../lib/dates'
-import { Button, ButtonLink, buttonClass } from '../../ui/Button'
+import { Button, buttonClass } from '../../ui/Button'
 import { Chip } from '../../ui/Chip'
+import { TagList } from '../../ui/TagList'
 import { SafeHtml } from '../../ui/SafeHtml'
 import { Spinner } from '../../ui/Spinner'
 import { useSession } from '../auth/session'
 import { NotFoundPage } from '../errors/NotFoundPage'
 import { useMyVotes } from '../../api/votes'
 import { Answers } from './Answers'
-import { ReportButton } from '../reports/ReportButton'
+import { PostMenu } from '../threads/PostMenu'
 import { AiAnswerCard } from './AiAnswerCard'
 import { AuthorLine } from './AuthorLine'
 import { VoteControl } from './VoteControl'
@@ -51,6 +52,7 @@ function QuestionView({ question }: { question: Question }) {
   const id = question.questionId ?? 0
   const myVotes = useMyVotes(id, status === 'signed-in')
   const askedAt = (useLocation().state as { askedAt?: number } | null)?.askedAt
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
   const agri = question.agri ?? {}
   const chips = [
     agri.crop && { name: t('Crop'), label: agri.crop, to: filterPath({ crop: agri.crop }, '/questions') },
@@ -87,8 +89,15 @@ function QuestionView({ question }: { question: Question }) {
             meta={t('Asked {date}', { date: storyDate(question.createdAt) })}
           />
         </div>
-        {own ? <OwnerActions questionId={id} /> : <ReportButton targetType="QUESTION" targetId={id} what={t('this question')} />}
+        <PostMenu
+          own={own}
+          what={t('this question')}
+          report={{ targetType: 'QUESTION', targetId: id }}
+          editHref={`/questions/${id}/edit`}
+          onDelete={() => setConfirmingDelete(true)}
+        />
       </div>
+      {own && confirmingDelete && <DeleteQuestion questionId={id} onCancel={() => setConfirmingDelete(false)} />}
       <div className="mt-6">
         <div className="min-w-0">
         {/* A question is a request for help: interface type, not the story's reading serif. */}
@@ -105,13 +114,12 @@ function QuestionView({ question }: { question: Question }) {
           </ul>
         )}
         {(question.tags?.length ?? 0) > 0 && (
-          <ul aria-label={t('Tags')} className="mt-8 flex flex-wrap gap-2">
-            {question.tags!.map((tag) => (
-              <li key={tag}>
-                <Chip to={`/questions?tag=${encodeURIComponent(tag)}`}>{tag}</Chip>
-              </li>
-            ))}
-          </ul>
+          <TagList
+            size="md"
+            label={t('Tags')}
+            className="mt-8"
+            items={question.tags!.map((tag) => ({ label: tag, to: `/questions?tag=${encodeURIComponent(tag)}` }))}
+          />
         )}
         {chips.length > 0 && (
           <ul aria-label={t('Farming context')} className="mt-3 flex flex-wrap gap-2">
@@ -140,43 +148,30 @@ function QuestionView({ question }: { question: Question }) {
   )
 }
 
-function OwnerActions({ questionId }: { questionId: number }) {
+/** Deleting the question asks first; the answers go with it. */
+function DeleteQuestion({ questionId, onCancel }: { questionId: number; onCancel: () => void }) {
   const t = useT()
-  const [confirming, setConfirming] = useState(false)
   const remove = useQuestionWrite()
   const navigate = useNavigate()
-
-  if (confirming) {
-    return (
-      <div className="flex flex-wrap items-center justify-end gap-2">
-        <span>{t('Delete this question and its answers?')}</span>
-        <Button
-          variant="danger"
-          size="sm"
-          loading={remove.isPending}
-          onClick={() => remove.mutate({ kind: 'delete', questionId }, { onSuccess: () => navigate('/questions', { replace: true }) })}
-        >
-          {t('Delete')}
-        </Button>
-        <Button variant="quiet" size="sm" onClick={() => setConfirming(false)}>
-          {t('Keep it')}
-        </Button>
-        {remove.isError && (
-          <span role="alert" className="text-destructive">
-            {errorMessage(remove.error)}
-          </span>
-        )}
-      </div>
-    )
-  }
   return (
-    <div className="flex gap-1">
-      <ButtonLink to={`/questions/${questionId}/edit`} variant="quiet" size="sm">
-        {t('Edit')}
-      </ButtonLink>
-      <Button variant="quiet" size="sm" onClick={() => setConfirming(true)}>
+    <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-destructive/25 bg-destructive-soft px-4 py-3 text-sm">
+      <span className="mr-auto">{t('Delete this question and its answers?')}</span>
+      <Button
+        variant="danger"
+        size="sm"
+        loading={remove.isPending}
+        onClick={() => remove.mutate({ kind: 'delete', questionId }, { onSuccess: () => navigate('/questions', { replace: true }) })}
+      >
         {t('Delete')}
       </Button>
+      <Button variant="quiet" size="sm" onClick={onCancel}>
+        {t('Keep it')}
+      </Button>
+      {remove.isError && (
+        <span role="alert" className="w-full text-destructive">
+          {errorMessage(remove.error)}
+        </span>
+      )}
     </div>
   )
 }

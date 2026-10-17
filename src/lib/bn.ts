@@ -482,7 +482,6 @@ export const BN: Record<string, string> = {
   '(optional)': '(ঐচ্ছিক)',
   'Write your question first.': 'আগে আপনার প্রশ্নটি লিখুন।',
   '{n} characters left': 'আর {n}টি অক্ষর লেখা যাবে',
-  'Ctrl+Enter to send': 'পাঠাতে Ctrl+Enter চাপুন',
   'Written by AI, not checked by an expert. Check the sources before you act on it.': 'এআই-এর লেখা, কোনো বিশেষজ্ঞ যাচাই করেননি। কাজে লাগানোর আগে সূত্রগুলো দেখে নিন।',
   Menu: 'মেনু',
   Discover: 'অন্বেষণ',
@@ -510,4 +509,13 @@ export const BN: Record<string, string> = {
   'Every field is needed unless it says optional.': '“ঐচ্ছিক” লেখা ঘর ছাড়া সব ঘর পূরণ করতে হবে।',
   'Grow better with AgroTrends.': 'AgroTrends-এর সঙ্গে আরও ভালো ফলান।',
   'Questions answered by people who grow, stories from the field, and an advisor that shows its sources.': 'চাষিদের দেওয়া উত্তর, মাঠের গল্প, আর সূত্রসহ পরামর্শ দেয় এমন এক পরামর্শক।',
+  // F15 refinement
+  'More actions': 'আরও কাজ',
+  'Show {n} more tags': 'আরও {n}টি ট্যাগ দেখুন',
+  'Questions, stories and topics. Press Enter to search.': 'প্রশ্ন, লেখা আর বিষয়। খুঁজতে Enter চাপুন।',
+  'Enter to send, Shift+Enter for a new line': 'পাঠাতে Enter, নতুন লাইনে Shift+Enter',
+  'Uploading image': 'ছবি আপলোড হচ্ছে',
+  'Help a farmer today': 'আজ একজন কৃষককে সাহায্য করুন',
+  'All unanswered': 'উত্তর না-পাওয়া সব',
+  'These questions have no answer yet. If you have grown it, your answer helps.': 'এই প্রশ্নগুলোর এখনো উত্তর আসেনি। আপনি এই ফসল ফলিয়ে থাকলে আপনার উত্তর কাজে আসবে।',
 }

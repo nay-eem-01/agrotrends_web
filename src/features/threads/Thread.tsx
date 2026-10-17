@@ -9,7 +9,7 @@ import { SafeHtml } from '../../ui/SafeHtml'
 import { Spinner } from '../../ui/Spinner'
 import { useSession } from '../auth/session'
 import { useRequireSignIn } from '../auth/useRequireSignIn'
-import { ReportButton } from '../reports/ReportButton'
+import { PostMenu } from './PostMenu'
 import { Composer } from './Composer'
 
 const COPY = {
@@ -145,10 +145,19 @@ function Item({ kind, parentId, copy, item, onReply }: ItemProps & { item: Threa
       <header className="flex items-center gap-2 text-sm">
         <Avatar name={item.authorName} size={28} />
         <span className="font-medium">{item.authorName}</span>
-        <span className="text-ink-muted">
+        <span className="min-w-0 flex-1 text-muted-foreground">
           · {storyDate(item.createdAt)}
           {edited && ' · edited'}
         </span>
+        {mode === 'view' && (
+          <PostMenu
+            own={own}
+            what={t('this response')}
+            report={{ targetType: 'COMMENT', targetId: item.id }}
+            onEdit={() => setMode('edit')}
+            onDelete={() => setMode('confirm-delete')}
+          />
+        )}
       </header>
 
       {mode === 'edit' ? (
@@ -167,7 +176,7 @@ function Item({ kind, parentId, copy, item, onReply }: ItemProps & { item: Threa
           />
         </div>
       ) : (
-        <SafeHtml html={item.content} className="mt-2 font-serif text-base whitespace-pre-line [&>p+p]:mt-3" />
+        <SafeHtml html={item.content} className="mt-2 text-base leading-relaxed whitespace-pre-line [&>p+p]:mt-3" />
       )}
 
       {mode === 'confirm-delete' ? (
@@ -185,30 +194,18 @@ function Item({ kind, parentId, copy, item, onReply }: ItemProps & { item: Threa
             {t('Cancel')}
           </Button>
           {remove.isError && (
-            <span role="alert" className="text-danger">
+            <span role="alert" className="text-destructive">
               {errorMessage(remove.error)}
             </span>
           )}
         </div>
       ) : (
-        mode === 'view' && (
+        mode === 'view' &&
+        onReply && (
           <div className="mt-1 -ml-3 flex gap-1">
-            {onReply && (
-              <Button variant="quiet" size="sm" onClick={onReply}>
-                {t('Reply')}
-              </Button>
-            )}
-            {!own && <ReportButton targetType="COMMENT" targetId={item.id} what={t('this response')} />}
-            {own && (
-              <>
-                <Button variant="quiet" size="sm" onClick={() => setMode('edit')}>
-                  {t('Edit')}
-                </Button>
-                <Button variant="quiet" size="sm" onClick={() => setMode('confirm-delete')}>
-                  {t('Delete')}
-                </Button>
-              </>
-            )}
+            <Button variant="quiet" size="sm" onClick={onReply}>
+              {t('Reply')}
+            </Button>
           </div>
         )
       )}

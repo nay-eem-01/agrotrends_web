@@ -31,15 +31,15 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   (`feat/smoke-community`) done. Phase F14 is complete: every step of F7–F14 is built.
 - Phase F15 on `feat/redesign-base` (stacked on F14's tip): F15.1 foundation (`feat/redesign-foundation`) F15.2 shell
   (`feat/redesign-shell`) F15.3 advisor (`feat/redesign-advisor`) F15.4 stories (`feat/redesign-stories`) and F15.5
-  questions, Discover and forms (`feat/redesign-discover`) done. Phase F15 is complete.
+  questions, Discover and forms (`feat/redesign-discover`) done. Phase F15 is complete; F7–F15 are merged into
+  `development`, and `staging` was cut from it on 2026-10-17.
+- Phase F16 on `feat/refine-base` (from `development`): F16.1 refinement (`feat/refine-ui`) done.
 
 ## Next up
 
-1. **Nayeem:** open and merge the F15 step PRs in order into `feat/redesign-base`, then the base into `development`
-   (after F7–F14).
-2. **Nayeem:** open and merge the F7–F14 step PRs in order (each phase base into `development` after its steps).
-3. Run the admin smoke step (`E2E_ADMIN_EMAIL` / `E2E_ADMIN_PASSWORD`) and the admin screens live once an admin login is at hand.
-4. Merge the backend's Phase 8 so F12–F14 run against its `development`.
+1. **Nayeem:** PR F16.1 into `feat/refine-base`, then the base into `development`.
+2. Run the admin smoke step (`E2E_ADMIN_EMAIL` / `E2E_ADMIN_PASSWORD`) and the admin screens live once an admin login is at hand.
+3. Merge the backend's Phase 8 so F12–F14 run against its `development`.
 
 ## Open items
 
@@ -56,6 +56,41 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-17 (F16 refinement: less clutter, better inputs)
+
+**Done**
+- Discover: the topic card grid is gone; "Help a farmer today" shows up to three unanswered questions with an Answer
+  link (`#your-answer`), and the topics are one row of filters above "What farmers are asking".
+- Search: one entry point. The top bar opens a search dialog (`layout/SearchDialog`, Ctrl/⌘+K, Enter goes to
+  `/search`); the Questions page's search field and the Discover hero's search and topic chips are gone (topics stay in
+  "Browse by topic" and as the Questions filter). No separate Search buttons.
+- Radius token 8px → 12px (inputs and buttons 12px, cards and menus ~17px, dialogs 17–22px); field border
+  `#C9D5C9`, hover `subtle`, focus green border + halo.
+- `threads/PostMenu`: Edit / Delete (red, still confirmed) for the author, Report for others, behind "More actions",
+  on questions, answers, replies and story responses. Report reuses the dialog through `useReportFlow`.
+- Votes: Phosphor carets in tinted 36px squares (44px touch area), sage/green up, soft red down.
+- `ui/TagList`: three chips then "+N" with a popover of all tags (rows, question page, story page); farming chips get
+  a hidden "Crop:" / "Season:" prefix.
+- Photo picker: thumbnails and a dashed "Add a photo" tile in one grid; spinner in the tile while uploading.
+- Advisor: Enter sends, Shift+Enter is a new line; answers keep Ctrl/⌘+Enter. Both ignore Enter during IME
+  composition (Bangla).
+- Tests: tag list (0, 1, 3, 4, 7 tags; popover; no navigation from a row), advisor keys and IME, menus in the
+  report, comment and question tests (`openMoreActions` helper), search dialog. 278 tests, lint, build pass; main JS
+  110 kB. Screens checked at 320–1440 with fixture data (the local backend was down).
+
+**Decisions**
+- Phosphor, not Lucide: Lucide isn't installed and the brief said not to add dependencies.
+- Field borders follow the softer brief (`#C9D5C9`, 1.5:1); every field keeps a visible label, so the border isn't
+  the only way to find it.
+- Post menus, the tag popover and the search dialog load lazily (same-size placeholders) to keep the main bundle in
+  budget.
+
+**Known limitations**
+- Answers and responses have no attachments (the backend takes images on questions only), so the composer has no
+  attach button.
 
 ---
 

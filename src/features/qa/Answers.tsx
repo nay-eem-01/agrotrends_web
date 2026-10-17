@@ -12,7 +12,7 @@ import { Spinner } from '../../ui/Spinner'
 import { useSession } from '../auth/session'
 import { useRequireSignIn } from '../auth/useRequireSignIn'
 import { Composer } from '../threads/Composer'
-import { ReportButton } from '../reports/ReportButton'
+import { PostMenu } from '../threads/PostMenu'
 import { AuthorLine } from './AuthorLine'
 import { VoteControl } from './VoteControl'
 
@@ -216,15 +216,26 @@ function Post({ questionId, item, compact = false, actions }: { questionId: numb
 
   return (
     <>
-      <header>
-        <AuthorLine
-          userId={item.userId}
-          name={item.authorName}
-          reputation={compact ? undefined : item.authorReputation}
-          badges={item.authorBadges}
-          meta={`${storyDate(item.createdAt)}${edited ? ` · ${t('edited')}` : ''}`}
-          size={compact ? 'sm' : 'md'}
-        />
+      <header className="flex items-start gap-2">
+        <div className="min-w-0 flex-1">
+          <AuthorLine
+            userId={item.userId}
+            name={item.authorName}
+            reputation={compact ? undefined : item.authorReputation}
+            badges={item.authorBadges}
+            meta={`${storyDate(item.createdAt)}${edited ? ` · ${t('edited')}` : ''}`}
+            size={compact ? 'sm' : 'md'}
+          />
+        </div>
+        {mode === 'view' && (
+          <PostMenu
+            own={own}
+            what={compact ? t('this reply') : t('this answer')}
+            report={{ targetType: 'ANSWER', targetId: id }}
+            onEdit={() => setMode('edit')}
+            onDelete={() => setMode('confirm-delete')}
+          />
+        )}
       </header>
       {mode === 'edit' ? (
         <div className="mt-3">
@@ -244,24 +255,8 @@ function Post({ questionId, item, compact = false, actions }: { questionId: numb
       ) : (
         <SafeHtml html={item.content} className={compact ? 'mt-1.5 text-base whitespace-pre-line' : 'mt-3 text-base leading-relaxed whitespace-pre-line [&>p+p]:mt-3'} />
       )}
-      {mode === 'view' && (
-        // One row: the answer's own actions first, then report or the owner's edit and delete, kept quiet.
-        <div className="mt-2 -ml-3 flex flex-wrap items-center gap-1">
-          {actions}
-          {own ? (
-            <>
-              <Button variant="quiet" size="sm" onClick={() => setMode('edit')}>
-                {t('Edit')}
-              </Button>
-              <Button variant="quiet" size="sm" onClick={() => setMode('confirm-delete')}>
-                {t('Delete')}
-              </Button>
-            </>
-          ) : (
-            <ReportButton targetType="ANSWER" targetId={id} what={compact ? t('this reply') : t('this answer')} />
-          )}
-        </div>
-      )}
+      {/* The conversation's own actions stay in view; edit, delete and report wait in the menu above. */}
+      {mode === 'view' && actions && <div className="mt-2 -ml-3 flex flex-wrap items-center gap-1">{actions}</div>}
       {mode === 'confirm-delete' && (
         <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
           <span>{t('Delete this answer?')}</span>

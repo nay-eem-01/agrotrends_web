@@ -65,7 +65,7 @@ export function Composer({ label, submitLabel, doneLabel, placeholder, initial =
         error={problem}
         onKeyDown={(event) => {
           // Ctrl+Enter (⌘+Enter on a Mac) sends; Enter alone is a new line.
-          if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+          if (event.key === 'Enter' && (event.ctrlKey || event.metaKey) && !event.nativeEvent.isComposing) {
             event.preventDefault()
             event.currentTarget.form?.requestSubmit()
           }

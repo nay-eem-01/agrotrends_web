@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend · ➡ moved to a later step
 
-**Progress:** 65 of 65 steps done
+**Progress:** 66 of 66 steps done
 
 ---
 
@@ -176,6 +176,12 @@ Endpoints and rules: `docs/BACKEND_CATCHUP_PLAN.md` § Admin dashboard.
 | F15.2 | Users page: search, All / Banned / Active tabs, table, paging | ⬜ |
 | F15.3 | User page: counts, expert topics with revoke, Ban or Unban from the known state, grant and remove admin roles | ⬜ |
 | F15.4 | Roles page: create, edit and delete admin roles with privilege checkboxes; Bengali strings; smoke grants a moderator | ⬜ |
+
+## Phase F16 — Refinement: less clutter, better inputs (`feat/refine-base`)
+
+| # | Step | Status |
+|---|---|---|
+| F16.1 | One search (top-bar dialog, Ctrl/⌘+K; page and hero search fields removed), one topic area (Discover's topic cards replaced by "Help a farmer today" and a filter row); softer radius scale and field borders; More menu for post actions; caret vote control; +N tag overflow; photo tile grid; Enter/Shift+Enter in the advisor with an IME guard (`feat/refine-ui`) | ✅ |
 
 ## Needs from the backend
 

@@ -4,7 +4,7 @@ import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { clearSession } from '../../api/client'
 import App from '../../App'
 import { envelope, mockApi, page } from '../../test/api'
-import { renderWithProviders } from '../../test/render'
+import { pickOption, renderWithProviders } from '../../test/render'
 
 const admin = { id: 1, name: 'Admin', email: 'admin@agrotrends.local', roles: ['SUPER ADMIN'] }
 
@@ -61,4 +61,42 @@ test('users are searched by name or e-mail and filtered by ban state', async () 
   await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/admin/users?q=nasrin&banned=true'))
   const last = new URL(String(api.mock.calls.filter(([url]) => String(url).startsWith('/api/admin/users')).at(-1)![0]), 'http://x')
   expect([last.searchParams.get('q'), last.searchParams.get('banned')]).toEqual(['nasrin', 'true'])
+})
+
+const roles = [
+  { id: 1, name: 'USER', type: 'USER', privileges: [] },
+  { id: 2, name: 'SUPER ADMIN', type: 'SUPER_ADMIN', privileges: [] },
+  { id: 5, name: 'Moderator', type: 'ADMIN', privileges: [{ id: 11, name: 'CONTENT_MODERATE' }] },
+  { id: 6, name: 'Expert reviewer', type: 'ADMIN', privileges: [{ id: 12, name: 'EXPERT_REVIEW' }] },
+]
+
+test('a member page shows their counts and lets staff revoke, give and remove roles', async () => {
+  const detail = { user: { ...karim, roles: ['USER', 'Moderator'], bannedAt: '2026-10-10T00:00:00Z' }, questions: 4, answers: 9, publishedStories: 1, openReports: 2, expertTopics: [{ id: 3, name: 'Rice' }] }
+  const api = mockApi({
+    ...signedInAdmin(),
+    'GET /api/admin/users/8': () => envelope(200, detail),
+    'GET /api/admin/roles': () => envelope(200, roles),
+    'DELETE /api/admin/users/8/expert-badges/3': () => envelope(200, null),
+    'POST /api/admin/users/8/roles/6': () => envelope(200, null),
+    'DELETE /api/admin/users/8/roles/5': () => envelope(200, null),
+  })
+  renderWithProviders(<App />, '/admin/users/8')
+
+  expect(await screen.findByRole('heading', { level: 1, name: 'Karim' })).toBeInTheDocument()
+  expect(screen.getByText('Open reports about them').nextElementSibling).toHaveTextContent('2')
+  expect(screen.getByText(/Banned Oct 10\./)).toBeInTheDocument()
+  // The ban state is known, so only lifting it is offered.
+  expect(screen.getByRole('button', { name: 'Lift a ban' })).toBeInTheDocument()
+  expect(screen.queryByRole('button', { name: 'Ban the account' })).not.toBeInTheDocument()
+
+  await userEvent.click(screen.getByRole('button', { name: 'Revoke' }))
+  await waitFor(() => expect(api.mock.calls.some(([url, init]) => url === '/api/admin/users/8/expert-badges/3' && init?.method === 'DELETE')).toBe(true))
+
+  await pickOption(await screen.findByLabelText('Give a role'), 'Expert reviewer')
+  await userEvent.click(screen.getByRole('button', { name: 'Give role' }))
+  await waitFor(() => expect(api.mock.calls.some(([url, init]) => url === '/api/admin/users/8/roles/6' && init?.method === 'POST')).toBe(true))
+  await userEvent.click(screen.getByRole('button', { name: 'Remove role Moderator' }))
+  await waitFor(() => expect(api.mock.calls.some(([url, init]) => url === '/api/admin/users/8/roles/5' && init?.method === 'DELETE')).toBe(true))
+  // Fixed roles are shown, not offered.
+  expect(within(screen.getByRole('list', { name: 'Roles held' })).getByText('USER')).toBeInTheDocument()
 })

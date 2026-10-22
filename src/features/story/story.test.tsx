@@ -63,7 +63,7 @@ test('farming context and tags link to filtered lists', async () => {
   expect(within(farming).getByRole('link', { name: /Crop\s*boro rice/ })).toHaveAttribute('href', '/stories?crop=boro+rice')
   expect(within(farming).getByRole('link', { name: /Season\s*Rabi/ })).toHaveAttribute('href', '/stories?season=RABI')
   expect(within(farming).getByRole('link', { name: /Soil\s*Clay loam/ })).toHaveAttribute('href', '/stories?soil=CLAY_LOAM')
-  const tags = screen.getByRole('region', { name: 'Tags' })
+  const tags = screen.getByRole('list', { name: 'Tags' })
   expect(within(tags).getByRole('link', { name: 'rice blast' })).toHaveAttribute('href', '/tags/rice%20blast')
 })
 

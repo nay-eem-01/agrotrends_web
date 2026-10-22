@@ -20,6 +20,7 @@ const ResetPasswordPage = page(() => import('./features/auth/ResetPasswordPage')
 const SignInPage = page(() => import('./features/auth/SignInPage'), 'SignInPage')
 const SignUpPage = page(() => import('./features/auth/SignUpPage'), 'SignUpPage')
 const WelcomePage = page(() => import('./features/auth/WelcomePage'), 'WelcomePage')
+const VerifyPhonePage = page(() => import('./features/auth/VerifyPhonePage'), 'VerifyPhonePage')
 const VerifyEmailPage = page(() => import('./features/auth/VerifyEmailPage'), 'VerifyEmailPage')
 const LibraryPage = page(() => import('./features/library/LibraryPage'), 'LibraryPage')
 const MyStoriesPage = page(() => import('./features/mystories/MyStoriesPage'), 'MyStoriesPage')
@@ -35,6 +36,10 @@ const ExpertApplyPage = page(() => import('./features/experts/ExpertApplyPage'),
 const ReviewQueuePage = page(() => import('./features/experts/ReviewQueuePage'), 'ReviewQueuePage')
 const NotificationsPage = page(() => import('./features/notifications/NotificationsPage'), 'NotificationsPage')
 const TopicsPage = page(() => import('./features/topics/TopicsPage'), 'TopicsPage')
+const AdminOverviewPage = page(() => import('./features/admin/AdminOverviewPage'), 'AdminOverviewPage')
+const AdminUsersPage = page(() => import('./features/admin/AdminUsersPage'), 'AdminUsersPage')
+const AdminUserPage = page(() => import('./features/admin/AdminUserPage'), 'AdminUserPage')
+const AdminRolesPage = page(() => import('./features/admin/AdminRolesPage'), 'AdminRolesPage')
 const AdminCategoriesPage = page(() => import('./features/admin/AdminCategoriesPage'), 'AdminCategoriesPage')
 const AdminExpertsPage = page(() => import('./features/admin/AdminExpertsPage'), 'AdminExpertsPage')
 const AdminReportsPage = page(() => import('./features/admin/AdminReportsPage'), 'AdminReportsPage')
@@ -52,6 +57,10 @@ export default function App() {
         <Route path="/users/:userId" element={<UserPage />} />
         <Route path="/tags/:tagName" element={<TagPage />} />
         <Route path="/advisor" element={<AdvisorPage />} />
+        <Route path="/admin" element={<AdminOverviewPage />} />
+        <Route path="/admin/users" element={<AdminUsersPage />} />
+        <Route path="/admin/users/:userId" element={<AdminUserPage />} />
+        <Route path="/admin/roles" element={<AdminRolesPage />} />
         <Route path="/admin/categories" element={<AdminCategoriesPage />} />
         <Route path="/admin/experts" element={<AdminExpertsPage />} />
         <Route path="/admin/reports" element={<AdminReportsPage />} />
@@ -74,6 +83,7 @@ export default function App() {
           <Route path="/library" element={<LibraryPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/welcome" element={<WelcomePage />} />
+          <Route path="/verify-phone" element={<VerifyPhonePage />} />
           <Route path="/experts/apply" element={<ExpertApplyPage />} />
           <Route path="/review" element={<ReviewQueuePage />} />
           <Route path="/notifications" element={<NotificationsPage />} />

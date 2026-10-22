@@ -31,13 +31,20 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   (`feat/smoke-community`) done. Phase F14 is complete: every step of F7–F14 is built.
 - Phase F15 on `feat/redesign-base` (stacked on F14's tip): F15.1 foundation (`feat/redesign-foundation`) F15.2 shell
   (`feat/redesign-shell`) F15.3 advisor (`feat/redesign-advisor`) F15.4 stories (`feat/redesign-stories`) and F15.5
-  questions, Discover and forms (`feat/redesign-discover`) done. Phase F15 is complete.
+  questions, Discover and forms (`feat/redesign-discover`) done. Phase F15 is complete; F7–F15 are merged into
+  `development`, and `staging` was cut from it on 2026-10-17.
+- Phase F16 on `feat/refine-base` (from `development`): F16.1 refinement (`feat/refine-ui`) done.
+- Phase F17 on `feat/admin-dashboard-base` (stacked on F16's tip): F17.0 API types (`feat/api-types-p10`) F17.1
+  overview (`feat/admin-overview`) F17.2 users (`feat/admin-users`) F17.3 member page (`feat/admin-user`) and F17.4
+  roles (`feat/admin-roles`) done. Phase F17 is complete.
+- Phase F18 on `feat/phone-auth-base` (stacked on F17's tip): F18.1 sign-in (`feat/phone-sign-in`) F18.2 sign-up and
+  confirmation (`feat/phone-sign-up`) F18.3 reset (`feat/phone-reset`) and F18.4 settings (`feat/phone-settings`)
+  done. Phase F18 is complete.
 
 ## Next up
 
-1. **Nayeem:** open and merge the F15 step PRs in order into `feat/redesign-base`, then the base into `development`
-   (after F7–F14).
-2. **Nayeem:** open and merge the F7–F14 step PRs in order (each phase base into `development` after its steps).
+1. **Nayeem:** PR the F16, F17 and F18 steps in order into their bases, then each base into `development`.
+2. Pick an SMS provider (backend 10.5): until then codes only appear in the backend log as `[DEV SMS]`.
 3. Run the admin smoke step (`E2E_ADMIN_EMAIL` / `E2E_ADMIN_PASSWORD`) and the admin screens live once an admin login is at hand.
 4. Merge the backend's Phase 8 so F12–F14 run against its `development`.
 
@@ -56,6 +63,93 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-17 (F18 phone sign-up, backend Phase 10)
+
+**Done**
+- Sign-in and admin sign-in take an e-mail or a phone number (`identifier`); phones go out without spaces or dashes,
+  and a Bangladeshi number may drop +880 (`lib/auth`: `isPhone`, `signInIdentifier`, `joinPhone`).
+- Sign-up: an e-mail, a phone number or both (blank ones stay out), then sign-in with whichever was given. A
+  phone-only account goes to `/verify-phone`: 6-digit code (one field, `one-time-code`), resend after 60 s.
+- The confirm banner and the write-refused dialog follow the account (`needsConfirmation`): the e-mail link, the SMS
+  code or both. The 403 is still told apart by "Confirm your e-mail", which the new message keeps.
+- Forgot password: E-mail | Phone; by phone, a code, then the code and a new password (every session signed out),
+  then sign-in with the usual notice.
+- Settings: e-mail and phone optional while one remains, each with Confirmed / Not confirmed yet and its action (new
+  link, enter the code); changing the e-mail no longer signs out. The account menu shows the phone when there's no
+  e-mail.
+- `openMoreActions` (tests) now waits for the lazily loaded menu: a timing flake since F16.
+- Tests: phone sign-in, phone-only sign-up to `/verify-phone`, code and resend, wrong code, phone banner, reset by
+  SMS, settings contacts. 291 tests.
+
+**Decisions**
+- After a phone-only sign-up the code comes before the optional profile step; with an e-mail too, the banner offers
+  both ways.
+- Resend waits 60 s on the page; the backend allows three codes an hour per number.
+
+**Known limitations**
+- No SMS provider yet (backend 10.5): codes are written to the backend log as `[DEV SMS]`.
+
+---
+
+## 2026-10-17 (F17 admin dashboard, backend Phase 9)
+
+**Done**
+- API types regenerated from the backend's `development` (Phases 9 and 10); sign-in sends `identifier`.
+- `/admin` overview: open reports, expert applications and unchecked AI answers first (each to its queue, amber when
+  something waits), then members, banned, questions, answers and stories with this week's new members and questions.
+- `/admin/users`: search (Enter, in the URL), All / Active / Banned, contact, join date, staff roles, ban badge, paging.
+- `/admin/users/:id`: contact with confirmation state, ban and reason, counts, expert topics with Revoke, give or
+  remove ADMIN roles (USER and SUPER ADMIN shown, not changeable). Ban controls offer only the action that applies.
+- `/admin/roles`: roles with their privileges; create and edit ADMIN roles with privilege checkboxes (shadcn
+  Checkbox), delete with a confirmation.
+- Admin sections in a rail on wide screens (tabs on phones): Overview, Users, Reports, Expert applications, Roles,
+  Categories. Tests: overview, users filters, member actions, roles create / edit / delete.
+
+**Decisions**
+- Admin copy stays English, like the existing admin screens.
+- Every admin mutation refreshes all admin queries (`['admin']`): a ban changes reports, users and the counts.
+- The backend's 403 is shown as written when a staff member lacks a privilege; every section stays visible.
+
+**Known limitations**
+- An account with an admin role can't be banned (backend rule); the page says so next to the roles.
+
+---
+
+## 2026-10-17 (F16 refinement: less clutter, better inputs)
+
+**Done**
+- Discover: the topic card grid is gone; "Help a farmer today" shows up to three unanswered questions with an Answer
+  link (`#your-answer`), and the topics are one row of filters above "What farmers are asking".
+- Search: one entry point. The top bar opens a search dialog (`layout/SearchDialog`, Ctrl/⌘+K, Enter goes to
+  `/search`); the Questions page's search field and the Discover hero's search and topic chips are gone (topics stay in
+  "Browse by topic" and as the Questions filter). No separate Search buttons.
+- Radius token 8px → 12px (inputs and buttons 12px, cards and menus ~17px, dialogs 17–22px); field border
+  `#C9D5C9`, hover `subtle`, focus green border + halo.
+- `threads/PostMenu`: Edit / Delete (red, still confirmed) for the author, Report for others, behind "More actions",
+  on questions, answers, replies and story responses. Report reuses the dialog through `useReportFlow`.
+- Votes: Phosphor carets in tinted 36px squares (44px touch area), sage/green up, soft red down.
+- `ui/TagList`: three chips then "+N" with a popover of all tags (rows, question page, story page); farming chips get
+  a hidden "Crop:" / "Season:" prefix.
+- Photo picker: thumbnails and a dashed "Add a photo" tile in one grid; spinner in the tile while uploading.
+- Advisor: Enter sends, Shift+Enter is a new line; answers keep Ctrl/⌘+Enter. Both ignore Enter during IME
+  composition (Bangla).
+- Tests: tag list (0, 1, 3, 4, 7 tags; popover; no navigation from a row), advisor keys and IME, menus in the
+  report, comment and question tests (`openMoreActions` helper), search dialog. 278 tests, lint, build pass; main JS
+  110 kB. Screens checked at 320–1440 with fixture data (the local backend was down).
+
+**Decisions**
+- Phosphor, not Lucide: Lucide isn't installed and the brief said not to add dependencies.
+- Field borders follow the softer brief (`#C9D5C9`, 1.5:1); every field keeps a visible label, so the border isn't
+  the only way to find it.
+- Post menus, the tag popover and the search dialog load lazily (same-size placeholders) to keep the main bundle in
+  budget.
+
+**Known limitations**
+- Answers and responses have no attachments (the backend takes images on questions only), so the composer has no
+  attach button.
 
 ---
 

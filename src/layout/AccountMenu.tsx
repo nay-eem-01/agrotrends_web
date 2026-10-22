@@ -48,7 +48,7 @@ export function AccountMenu() {
         <DropdownMenuGroup>
           <DropdownMenuLabel className="flex flex-col gap-0.5 pb-3 text-sm text-foreground">
             <span className="truncate font-medium">{name}</span>
-            {user?.email && <span className="truncate text-muted-foreground">{user.email}</span>}
+            {(user?.email || user?.mobileNumber) && <span className="truncate text-muted-foreground">{user.email || user.mobileNumber}</span>}
           </DropdownMenuLabel>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
@@ -64,7 +64,7 @@ export function AccountMenu() {
             </DropdownMenuItem>
           )}
           {isAdmin(user) && (
-            <DropdownMenuItem className={item} render={<Link to="/admin/experts" />}>
+            <DropdownMenuItem className={item} render={<Link to="/admin" />}>
               <ShieldCheck size={18} aria-hidden="true" />
               {t('Admin')}
             </DropdownMenuItem>

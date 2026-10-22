@@ -75,7 +75,7 @@ export function useExpertDecision() {
             body: decision.action === 'approve' ? { categoryIds: decision.categoryIds, note: decision.note || undefined } : { note: decision.note },
           }),
     onSettled: () => {
-      void queryClient.invalidateQueries({ queryKey: ['admin', 'expert-applications'] })
+      void queryClient.invalidateQueries({ queryKey: ['admin'] })
       void queryClient.invalidateQueries({ queryKey: ['reputation'] })
     },
   })

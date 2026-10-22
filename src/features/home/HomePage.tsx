@@ -2,12 +2,10 @@ import { ArrowRight, Sparkle } from '@phosphor-icons/react'
 import { lazy, Suspense } from 'react'
 import { Link } from 'react-router-dom'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useCategories } from '../../api/categories'
 import { useT } from '../../lib/i18n'
 import { ButtonLink } from '../../ui/Button'
 import { FieldScene } from '../../ui/Botanical'
 import { useSession } from '../auth/session'
-import { QuestionSearch } from '../qa/QuestionsPage'
 
 // Below the hero: topics, questions, the advisor and stories load just after it (their icons and lists are not
 // needed for the first paint), keeping the main bundle in budget.
@@ -32,11 +30,10 @@ export function HomePage() {
   )
 }
 
-/** The headline, search and a few topics on the left; the drawn field with a pointer to the advisor on the right. */
+/** The headline and how to start on the left; the drawn field with a pointer to the advisor on the right. */
 function Hero() {
   const t = useT()
   const { status } = useSession()
-  const topics = (useCategories().data ?? []).slice(0, 5)
 
   return (
     <section aria-labelledby="discover-title" className="mx-auto max-w-(--container-page) px-4 pt-8 pb-12 sm:px-8 sm:pt-12 sm:pb-16">
@@ -48,22 +45,6 @@ function Hero() {
           <p className="mt-4 max-w-xl text-lg leading-relaxed text-muted-foreground">
             {t('Ask about your crop, your soil, your season. Farmers, agronomists and verified experts answer; an AI answer arrives first, and experts check it.')}
           </p>
-          <QuestionSearch size="lg" className="mt-7 max-w-xl" />
-          {topics.length > 0 && (
-            <ul aria-label={t('Topics')} className="mt-4 flex flex-wrap gap-2">
-              {topics.map((topic) => (
-                <li key={topic.id}>
-                  <Link
-                    to={`/questions?categoryId=${topic.id}`}
-                    className="inline-flex h-9 items-center gap-1.5 rounded-full border border-border-strong px-3.5 text-sm transition-colors duration-150 hover:border-primary/50 hover:bg-surface"
-                  >
-                    <span aria-hidden="true" className="size-1.5 rounded-full bg-primary" />
-                    {topic.categoryName}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
           <div className="mt-7 flex flex-wrap gap-3">
             <ButtonLink to="/questions/ask">{t('Ask a question')}</ButtonLink>
             {status === 'anonymous' && (

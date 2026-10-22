@@ -1,7 +1,7 @@
 import { useT } from '../lib/i18n'
 import { MagnifyingGlass, NotePencil } from '@phosphor-icons/react'
-import { lazy, Suspense, useState, type FormEvent } from 'react'
-import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { lazy, Suspense, useEffect, useState } from 'react'
+import { Link, NavLink } from 'react-router-dom'
 import { cn } from 'cn'
 import { useSession } from '../features/auth/session'
 import { ButtonLink } from '../ui/Button'
@@ -11,6 +11,7 @@ import { Logo } from './Logo'
 // The menus (dialog and menu code) load just after the page; a same-size space holds their place meanwhile.
 const AccountMenu = lazy(() => import('./AccountMenu').then((m) => ({ default: m.AccountMenu })))
 const MobileMenu = lazy(() => import('./MobileMenu').then((m) => ({ default: m.MobileMenu })))
+const SearchDialog = lazy(() => import('./SearchDialog').then((m) => ({ default: m.SearchDialog })))
 const placeholder = (className: string) => <span aria-hidden="true" className={cn('size-11 shrink-0', className)} />
 
 // The current page is green and underlined at the bar's bottom edge, so it doesn't rely on colour alone.
@@ -24,41 +25,48 @@ const navClass = ({ isActive }: { isActive: boolean }) =>
 
 export function TopBar() {
   const t = useT()
-  const navigate = useNavigate()
   const { status } = useSession()
-  const [query, setQuery] = useState('')
+  const [searching, setSearching] = useState(false)
 
-  function search(event: FormEvent) {
-    event.preventDefault()
-    const q = query.trim()
-    if (q) navigate(`/search?q=${encodeURIComponent(q)}`)
-  }
+  // Ctrl/⌘+K opens the search from anywhere.
+  useEffect(() => {
+    function shortcut(event: KeyboardEvent) {
+      if (event.key.toLowerCase() === 'k' && (event.ctrlKey || event.metaKey)) {
+        event.preventDefault()
+        setSearching(true)
+      }
+    }
+    document.addEventListener('keydown', shortcut)
+    return () => document.removeEventListener('keydown', shortcut)
+  }, [])
 
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-background">
       <div className="mx-auto flex h-16 max-w-(--container-page) items-center gap-2 px-4 sm:gap-4 sm:px-6">
         <Logo />
-        <search className="hidden min-w-0 flex-1 xl:block xl:max-w-72">
-          <form onSubmit={search}>
-            <label className="flex h-10 items-center gap-2 rounded-lg border border-border bg-surface px-3 text-muted-foreground transition-[border-color,box-shadow,background-color] duration-150 focus-within:border-primary focus-within:bg-background focus-within:ring-[3px] focus-within:ring-ring/60 hover:border-border-strong">
-              <MagnifyingGlass size={18} aria-hidden="true" />
-              <span className="sr-only">{t('Search questions and stories')}</span>
-              <input
-                type="search"
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder={t('Search')}
-                enterKeyHint="search"
-                className="min-w-0 flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
-              />
-            </label>
-          </form>
-        </search>
+        {/* Wide screens: the search looks like a field and opens the search dialog; Ctrl/⌘+K does the same. */}
+        <button
+          type="button"
+          onClick={() => setSearching(true)}
+          aria-keyshortcuts="Control+K Meta+K"
+          className="hidden h-10 w-64 items-center gap-2 rounded-xl border border-border bg-surface px-3 text-sm text-muted-foreground transition-[border-color,background-color] duration-150 hover:border-border-strong hover:bg-background xl:flex"
+        >
+          <MagnifyingGlass size={18} aria-hidden="true" />
+          <span className="flex-1 text-left">{t('Search')}</span>
+          <kbd aria-hidden="true" className="rounded-md border border-border bg-background px-1.5 py-0.5 font-sans text-xs">
+            Ctrl K
+          </kbd>
+        </button>
         <nav aria-label={t('Main')} className="ml-auto flex items-center gap-0 md:gap-1">
-          {/* Below 1280px the search page's own field is used. Below 380px the menu carries search, to keep the bar on one line. */}
-          <Link to="/search" className="flex size-11 items-center justify-center rounded-full text-muted-foreground hover:text-foreground max-[379px]:hidden xl:hidden" aria-label={t('Search')}>
-            <MagnifyingGlass size={22} />
-          </Link>
+          <button
+            type="button"
+            onClick={() => setSearching(true)}
+            aria-label={t('Search')}
+            aria-keyshortcuts="Control+K Meta+K"
+            className="flex size-11 items-center justify-center rounded-full text-muted-foreground hover:text-foreground max-[379px]:hidden xl:hidden"
+          >
+            <MagnifyingGlass size={22} aria-hidden="true" />
+          </button>
           <NavLink to="/" end className={navClass}>
             {t('Discover')}
           </NavLink>
@@ -101,6 +109,11 @@ export function TopBar() {
           </Suspense>
         </nav>
       </div>
+      {searching && (
+        <Suspense fallback={null}>
+          <SearchDialog open={searching} onOpenChange={setSearching} />
+        </Suspense>
+      )}
     </header>
   )
 }

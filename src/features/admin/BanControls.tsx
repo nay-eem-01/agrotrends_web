@@ -18,10 +18,10 @@ const MAX_BAN_REASON = 500
 
 /**
  * Ban (with a reason) or lift a ban, for staff. A ban signs the account out everywhere and closes the open reports
- * about it; it doesn't remove their posts. Admin accounts can't be banned (the backend says so). The backend has no
- * "is banned" read, so both actions are offered.
+ * about it; it doesn't remove their posts. Admin accounts can't be banned (the backend says so). With `banned` known
+ * (the users pages) only the action that applies is offered; without it (a report), both.
  */
-export function BanControls({ userId, name }: { userId: number; name: string }) {
+export function BanControls({ userId, name, banned }: { userId: number; name: string; banned?: boolean }) {
   const moderate = useModerate()
   const [banning, setBanning] = useState(false)
   const [reason, setReason] = useState('')
@@ -43,12 +43,21 @@ export function BanControls({ userId, name }: { userId: number; name: string }) 
 
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <Button variant="danger" size="sm" onClick={() => setBanning(true)}>
-        Ban the account
-      </Button>
-      <Button variant="quiet" size="sm" loading={moderate.isPending && moderate.variables?.action === 'unban'} onClick={() => moderate.mutate({ action: 'unban', userId }, { onSuccess: () => setDone(`${name} can sign in again.`) })}>
-        Lift a ban
-      </Button>
+      {banned !== true && (
+        <Button variant="danger" size="sm" onClick={() => setBanning(true)}>
+          Ban the account
+        </Button>
+      )}
+      {banned !== false && (
+        <Button
+          variant={banned ? 'secondary' : 'quiet'}
+          size="sm"
+          loading={moderate.isPending && moderate.variables?.action === 'unban'}
+          onClick={() => moderate.mutate({ action: 'unban', userId }, { onSuccess: () => setDone(`${name} can sign in again.`) })}
+        >
+          Lift a ban
+        </Button>
+      )}
       {done && <output className="text-sm text-primary">{done}</output>}
       {moderate.isError && !banning && (
         <p role="alert" className="w-full text-sm text-destructive">

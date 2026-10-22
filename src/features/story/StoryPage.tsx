@@ -13,6 +13,7 @@ import { storyDate } from '../../lib/dates'
 import { Avatar } from '../../ui/Avatar'
 import { ButtonLink } from '../../ui/Button'
 import { Chip } from '../../ui/Chip'
+import { TagList } from '../../ui/TagList'
 import { SafeHtml } from '../../ui/SafeHtml'
 import { Spinner } from '../../ui/Spinner'
 import { useSession } from '../auth/session'
@@ -207,15 +208,7 @@ function StoryFooter({ story }: { story: BlogResponse }) {
         </section>
       )}
       {tags.length > 0 && (
-        <section aria-label={t('Tags')}>
-          <ul className="flex flex-wrap gap-2">
-            {tags.map((tag) => (
-              <li key={tag}>
-                <Chip to={`/tags/${encodeURIComponent(tag)}`}>{tag}</Chip>
-              </li>
-            ))}
-          </ul>
-        </section>
+        <TagList size="md" label={t('Tags')} items={tags.map((tag) => ({ label: tag, to: `/tags/${encodeURIComponent(tag)}` }))} />
       )}
     </footer>
   )

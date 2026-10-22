@@ -244,7 +244,7 @@ function Suggestions({ season, onPick }: { season: Exclude<Season, 'YEAR_ROUND'>
 
 /**
  * The question box: one bordered surface holding the label, the text and a footer with the counter and the button.
- * Ctrl+Enter (⌘+Enter) sends; Enter is a new line. Near the limit the counter says what is left and is announced.
+ * Enter sends, Shift+Enter is a new line. Near the limit the counter says what is left and is announced.
  */
 function Composer({
   ref,
@@ -273,7 +273,7 @@ function Composer({
       <div
         className={cn(
           'rounded-2xl border bg-card shadow-xs transition-[border-color,box-shadow] duration-150 focus-within:border-primary focus-within:ring-[3px] focus-within:ring-ring/60',
-          error ? 'border-destructive' : 'border-input hover:border-foreground/60',
+          error ? 'border-destructive' : 'border-input hover:border-subtle',
         )}
       >
         <Label htmlFor={id} className="px-4 pt-3.5 text-sm font-semibold">
@@ -290,7 +290,8 @@ function Composer({
           aria-describedby={error ? `${id}-error` : `${id}-count`}
           onChange={(event) => onChange(event.target.value)}
           onKeyDown={(event) => {
-            if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+            // A chat: Enter sends, Shift+Enter is a new line. Never while an input method (Bangla) is composing.
+            if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
               event.preventDefault()
               event.currentTarget.form?.requestSubmit()
             }
@@ -307,7 +308,7 @@ function Composer({
             {near ? t('{n} characters left', { n: formatNumber(left) }) : ''}
           </p>
           <div className="flex items-center gap-3">
-            <span className="hidden text-xs text-muted-foreground sm:inline">{t('Ctrl+Enter to send')}</span>
+            <span className="hidden text-xs text-muted-foreground sm:inline">{t('Enter to send, Shift+Enter for a new line')}</span>
             <Button type="submit" size="sm" loading={pending}>
               {!pending && <Sparkle size={18} aria-hidden="true" />}
               {signedIn ? t('Ask') : t('Sign in to ask')}

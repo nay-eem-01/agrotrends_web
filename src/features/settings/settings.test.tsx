@@ -4,7 +4,7 @@ import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { clearSession, getAccessToken, hasStoredSession } from '../../api/client'
 import App from '../../App'
 import { renderWithProviders } from '../../test/render'
-import { EMAIL_CHANGED_NOTICE, PASSWORD_CHANGED_NOTICE } from './SettingsPage'
+import { PASSWORD_CHANGED_NOTICE } from './SettingsPage'
 
 function envelope(status: number, payload: unknown, message = 'OK') {
   return new Response(JSON.stringify({ status: String(status), message, payload, success: status < 400 }), {
@@ -61,7 +61,7 @@ test('saving a new name keeps the reader signed in and updates the menu', async 
   await userEvent.type(screen.getByLabelText('Full name'), 'Nasrin Sultana')
   await userEvent.click(screen.getByRole('button', { name: 'Save changes' }))
 
-  expect(await screen.findByText('Changes saved')).toBeInTheDocument()
+  expect(await screen.findByText(/Changes saved/)).toBeInTheDocument()
   expect(fetchMock.mock.calls[1][0]).toBe('/api/user/update')
   expect(body(1)).toEqual({ name: 'Nasrin Sultana', email: 'nasrin@farm.bd', countryCode: '+880', mobileNumber: '1712345678' })
   await userEvent.click(screen.getByRole('button', { name: 'Account' }))
@@ -69,19 +69,45 @@ test('saving a new name keeps the reader signed in and updates the menu', async 
   expect(getAccessToken()).toBe('a1')
 })
 
-test('changing the e-mail sends the reader to sign in again', async () => {
-  fetchMock.mockResolvedValueOnce(envelope(200, null))
+test('a new e-mail keeps the reader signed in and says a link was sent', async () => {
+  fetchMock
+    .mockResolvedValueOnce(envelope(200, null))
+    .mockResolvedValueOnce(envelope(200, { ...user, email: 'nasrin@agro.bd', emailVerified: false, phoneVerified: true }))
   await openSettings()
 
   await userEvent.clear(screen.getByLabelText('E-mail'))
   await userEvent.type(screen.getByLabelText('E-mail'), 'nasrin@agro.bd')
   await userEvent.click(screen.getByRole('button', { name: 'Save changes' }))
 
-  expect(await screen.findByText(EMAIL_CHANGED_NOTICE)).toBeInTheDocument()
-  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/sign-in?next=%2Fsettings'))
-  expect(hasStoredSession()).toBe(false)
-  // Restore, update; no sign-out call for a session the backend already revoked.
-  expect(fetchMock).toHaveBeenCalledTimes(2)
+  expect(await screen.findByText(/We sent a confirmation link to nasrin@agro\.bd\./)).toBeInTheDocument()
+  expect(screen.getByTestId('path')).toHaveTextContent('/settings')
+  expect(hasStoredSession()).toBe(true)
+  // The reloaded account shows the new address as not confirmed, with a way to get a new link.
+  expect(await screen.findByText('Not confirmed yet')).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Send a new link' })).toBeInTheDocument()
+})
+
+test('the e-mail can be removed while a phone remains, but not both', async () => {
+  fetchMock.mockResolvedValueOnce(envelope(200, null))
+  await openSettings()
+
+  await userEvent.clear(screen.getByLabelText('E-mail'))
+  await userEvent.clear(screen.getByLabelText('Mobile number'))
+  await userEvent.click(screen.getByRole('button', { name: 'Save changes' }))
+  expect(screen.getByLabelText('E-mail')).toHaveAccessibleDescription('Keep an e-mail address, a phone number or both.')
+
+  await userEvent.type(screen.getByLabelText('Mobile number'), '1712345678')
+  await userEvent.click(screen.getByRole('button', { name: 'Save changes' }))
+  await waitFor(() => expect(fetchMock.mock.calls[1]?.[0]).toBe('/api/user/update'))
+  expect(body(1)).toEqual({ name: 'Nasrin Akter', countryCode: '+880', mobileNumber: '1712345678' })
+})
+
+test('an unconfirmed phone links to the SMS code', async () => {
+  fetchMock.mockReset()
+  fetchMock.mockResolvedValueOnce(envelope(200, { accessToken: 'a1', refreshToken: 'r1', user: { ...user, emailVerified: true, phoneVerified: false } }))
+  await openSettings()
+  expect(screen.getByText('Confirmed')).toBeInTheDocument()
+  expect(screen.getByRole('link', { name: 'Enter the SMS code' })).toHaveAttribute('href', '/verify-phone?next=%2Fsettings')
 })
 
 test('a taken e-mail shows the server message', async () => {

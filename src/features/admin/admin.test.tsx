@@ -27,7 +27,7 @@ test('admins sign in on the admin endpoint', async () => {
   })
   renderWithProviders(<App />, '/admin/categories')
 
-  await userEvent.type(await screen.findByLabelText('Admin e-mail'), 'admin@agrotrends.local')
+  await userEvent.type(await screen.findByLabelText('Admin e-mail or phone'), 'admin@agrotrends.local')
   await userEvent.type(screen.getByLabelText('Password'), 'secret')
   await userEvent.click(screen.getByRole('button', { name: 'Sign in as admin' }))
 

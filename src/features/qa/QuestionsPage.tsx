@@ -1,5 +1,5 @@
-import { MagnifyingGlass, Plus, Sparkle } from '@phosphor-icons/react'
-import { lazy, Suspense, useState, type FormEvent } from 'react'
+import { Plus, Sparkle } from '@phosphor-icons/react'
+import { lazy, Suspense } from 'react'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyTitle } from '@/components/ui/empty'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -36,8 +36,8 @@ export function useListPath() {
 }
 
 /**
- * `/questions`: the question feed. Search sits first (most people come looking for an answer), then the topics as
- * chips, Newest | Unanswered and the farming filters; a quiet sidebar points to the advisor and to asking well.
+ * `/questions`: the question feed: topics as chips, Newest | Unanswered and the farming filters (site-wide search is
+ * the top bar's); a quiet sidebar points to the advisor and to asking well.
  */
 export function QuestionsPage() {
   const t = useT()
@@ -60,8 +60,7 @@ export function QuestionsPage() {
           {t('Ask a question')}
         </ButtonLink>
       </header>
-      <QuestionSearch className="mt-6" />
-      <div className="mt-2 lg:grid lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-12">
+      <div className="mt-4 lg:grid lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-12">
         <div className="min-w-0">
           <Toolbar filters={filters} />
           {questions.isPending ? (
@@ -97,46 +96,6 @@ export function QuestionsPage() {
         </aside>
       </div>
     </div>
-  )
-}
-
-/** Searches questions (and stories, on the next tab) through `/search`. */
-export function QuestionSearch({ className, size = 'md' }: { className?: string; size?: 'md' | 'lg' }) {
-  const t = useT()
-  const navigate = useNavigate()
-  const [query, setQuery] = useState('')
-
-  function submit(event: FormEvent) {
-    event.preventDefault()
-    const q = query.trim()
-    if (q) navigate(`/search?q=${encodeURIComponent(q)}`)
-  }
-
-  return (
-    <search className={className}>
-      <form onSubmit={submit}>
-        <label
-          className={cn(
-            'flex items-center gap-3 rounded-xl border border-input bg-card pr-1.5 pl-4 text-muted-foreground transition-[border-color,box-shadow] duration-150 focus-within:border-primary focus-within:ring-[3px] focus-within:ring-ring/60 hover:border-foreground/60',
-            size === 'lg' ? 'h-14' : 'h-12',
-          )}
-        >
-          <MagnifyingGlass size={20} aria-hidden="true" />
-          <span className="sr-only">{t('Search questions and stories')}</span>
-          <input
-            type="search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder={t('Search questions, crops, pests')}
-            enterKeyHint="search"
-            className="min-w-0 flex-1 bg-transparent text-base text-foreground placeholder:text-muted-foreground focus:outline-none"
-          />
-          <Button type="submit" size="sm" className={size === 'lg' ? 'h-11' : undefined}>
-            {t('Search')}
-          </Button>
-        </label>
-      </form>
-    </search>
   )
 }
 
@@ -193,7 +152,8 @@ function Toolbar({ filters }: { filters: QuestionFilters }) {
             </Link>
           ))}
         </nav>
-        <div className="flex min-w-0 flex-1 items-center justify-end gap-3">
+        {/* Its own row on phones, so the topic picker keeps a usable width. */}
+        <div className="flex w-full min-w-0 items-center justify-end gap-3 sm:w-auto sm:flex-1">
           {categories.length > TOPIC_CHIPS && (
             <Suspense fallback={<span aria-hidden="true" className="h-11 min-w-0 flex-1 rounded-lg border border-input sm:max-w-56" />}>
               <SearchSelect

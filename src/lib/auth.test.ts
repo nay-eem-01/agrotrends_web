@@ -1,4 +1,4 @@
-import { isEmail, passwordProblem, safeNext, signInPath, splitList, splitMobile } from './auth'
+import { isEmail, isPhone, joinPhone, passwordProblem, safeNext, signInIdentifier, signInPath, splitList, splitMobile } from './auth'
 
 test('password rules match the backend', () => {
   expect(passwordProblem('')).toBe('Enter a password.')
@@ -41,4 +41,16 @@ test('stored mobile numbers split back into code and number', () => {
   expect(splitMobile('+8801712345678')).toEqual({ countryCode: '+880', mobileNumber: '1712345678' })
   expect(splitMobile('+447700900123')).toEqual({ countryCode: '', mobileNumber: '+447700900123' })
   expect(splitMobile(undefined)).toEqual({ countryCode: '', mobileNumber: '' })
+})
+
+test('phone numbers: with a code, or Bangladeshi without one; spaces and dashes allowed', () => {
+  expect(isPhone('+8801712345678')).toBe(true)
+  expect(isPhone('01712-345 678')).toBe(true)
+  expect(isPhone('+44 7700 900123')).toBe(true)
+  expect(isPhone('1712345678')).toBe(false)
+  expect(isPhone('nasrin@farm.bd')).toBe(false)
+  expect(signInIdentifier(' nasrin@farm.bd ')).toBe('nasrin@farm.bd')
+  expect(signInIdentifier('+880 1712-345678')).toBe('+8801712345678')
+  expect(joinPhone('+880', '01712345678')).toBe('+8801712345678')
+  expect(joinPhone('+880', '1712 345678')).toBe('+8801712345678')
 })

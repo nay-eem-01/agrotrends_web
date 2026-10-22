@@ -32,8 +32,8 @@ test('questions are listed newest first with their farming context', async () =>
   expect(link).toHaveAttribute('href', '/questions/5')
   const row = link.closest('li')!
   expect(within(row).getByText('Leaves turned yellow after the cold week.')).toBeInTheDocument()
-  expect(within(row).getByRole('link', { name: 'boro rice' })).toHaveAttribute('href', '/questions?crop=boro+rice')
-  expect(within(row).getByRole('link', { name: 'Rabi' })).toHaveAttribute('href', '/questions?season=RABI')
+  expect(within(row).getByRole('link', { name: 'Crop: boro rice' })).toHaveAttribute('href', '/questions?crop=boro+rice')
+  expect(within(row).getByRole('link', { name: 'Season: Rabi' })).toHaveAttribute('href', '/questions?season=RABI')
   const sent = api.mock.calls.map(([url]) => new URL(String(url), 'http://x')).find((url) => url.pathname === '/api/questions/all')!
   expect(sent.searchParams.get('ascOrDesc')).toBe('desc')
 })
@@ -75,7 +75,7 @@ function lastQuery(api: ReturnType<typeof mockApi>) {
     .at(-1)!.searchParams
 }
 
-test('Discover shows recent questions and topics, and leads to the full feeds', async () => {
+test('Discover shows questions to answer, recent questions with topic filters, and leads to the full feeds', async () => {
   mockApi({
     'GET /api/questions/all': () => envelope(200, page([question])),
     'GET /api/categories/all': () => envelope(200, page([{ id: 2, categoryName: 'Crops' }])),
@@ -85,9 +85,13 @@ test('Discover shows recent questions and topics, and leads to the full feeds', 
 
   const recent = (await screen.findByRole('heading', { name: 'What farmers are asking' })).closest('section')!
   expect(await within(recent).findByRole('link', { name: 'Why are my boro seedlings yellow?' })).toHaveAttribute('href', '/questions/5')
-  expect(within(recent).getByRole('link', { name: 'Answer an unanswered question' })).toHaveAttribute('href', '/questions?unanswered=true')
-  const topics = (await screen.findByRole('heading', { name: 'Browse by topic' })).closest('section')!
-  expect(within(topics).getByRole('link', { name: 'Crops' })).toHaveAttribute('href', '/questions?categoryId=2')
+  // Topics are one row of quick filters on the questions, not a grid of cards.
+  expect(within(within(recent).getByRole('navigation', { name: 'Topics' })).getByRole('link', { name: 'Crops' })).toHaveAttribute('href', '/questions?categoryId=2')
+  expect(screen.queryByRole('heading', { name: 'Browse by topic' })).not.toBeInTheDocument()
+  // Unanswered questions come with a direct way to answer.
+  const help = (await screen.findByRole('heading', { name: 'Help a farmer today' })).closest('section')!
+  expect(within(help).getByRole('link', { name: 'Answer' })).toHaveAttribute('href', '/questions/5#your-answer')
+  expect(within(help).getByRole('link', { name: /All unanswered/ })).toHaveAttribute('href', '/questions?unanswered=true')
   // No stories yet: the stories section steps aside instead of showing an empty frame.
   expect(screen.queryByRole('heading', { name: 'From the field' })).not.toBeInTheDocument()
 })
@@ -125,4 +129,15 @@ test('Unanswered, topic and tag combine with the farming filters', async () => {
   await userEvent.click(screen.getByRole('link', { name: 'Remove tag cold' }))
   await waitFor(() => expect(lastQuery(api).get('tag')).toBeNull())
   expect(lastQuery(api).get('categoryId')).toBe('2')
+})
+
+test('expanding a question’s extra tags does not open the question', async () => {
+  mockApi({ 'GET /api/questions/all': () => envelope(200, page([{ ...question, tags: ['cold', 'urea', 'seedbed', 'boro'] }])) })
+  renderWithProviders(<App />, '/questions')
+
+  const row = (await screen.findByRole('link', { name: 'Why are my boro seedlings yellow?' })).closest('li')!
+  await userEvent.click(await within(row).findByRole('button', { name: /^Show \d more tags$/ }))
+  const popover = await screen.findByRole('dialog')
+  expect(within(popover).getByRole('link', { name: 'Season: Rabi' })).toHaveAttribute('href', '/questions?season=RABI')
+  expect(screen.getByTestId('path')).toHaveTextContent(/^\/questions$/)
 })

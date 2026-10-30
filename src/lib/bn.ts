@@ -149,6 +149,8 @@ export const BN: Record<string, string> = {
   'Accept answer': 'উত্তর গ্রহণ করুন',
   Score: 'স্কোর',
   'Upvote this question': 'এই প্রশ্নে ভালো ভোট দিন',
+  'Rate this question': 'এই প্রশ্নটি মূল্যায়ন করুন',
+  'Useful question?': 'প্রশ্নটি কাজের?',
   'Upvote this answer': 'এই উত্তরে ভালো ভোট দিন',
   'Downvote this question': 'এই প্রশ্নে খারাপ ভোট দিন',
   'Downvote this answer': 'এই উত্তরে খারাপ ভোট দিন',

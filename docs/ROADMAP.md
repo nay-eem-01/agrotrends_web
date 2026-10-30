@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend · ➡ moved to a later step
 
-**Progress:** 75 of 75 steps done
+**Progress:** 76 of 77 steps done
 
 ---
 
@@ -201,6 +201,13 @@ Endpoints and rules: `docs/BACKEND_CATCHUP_PLAN.md` § Admin dashboard.
 | F18.2 | Sign up with an e-mail, a phone or both; `/verify-phone` with the 6-digit code and a timed resend; banner and dialog follow the account's contacts (`feat/phone-sign-up`) | ✅ |
 | F18.3 | Forgot password: E-mail or Phone; by phone, a code then the code and a new password (`feat/phone-reset`) | ✅ |
 | F18.4 | Settings: e-mail and phone optional while one remains, confirmation state for each, no sign-out on an e-mail change (`feat/phone-settings`) | ✅ |
+
+## Phase F19 — Simpler asking (`feat/simple-ask-base`)
+
+| # | Step | Status |
+|---|---|---|
+| F19.1 | Question page: the question's own vote moves beside the author line as "Useful question?", apart from the answers' votes; vote arrows get a hover title (`feat/question-vote-label`) | ✅ |
+| F19.2 | Ask form in one place: title, rich-text details (bold, italic, lists, quote, link) with a photo button, topic and tags in one composer; no crop-specific farming fields (`feat/ask-editor`) | ⬜ |
 
 ## Needs from the backend
 

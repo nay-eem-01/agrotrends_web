@@ -44,8 +44,8 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   F19.2 one-place ask form (`feat/ask-editor`) and F19.3 composer restyle (`feat/ask-composer`) done. Phase F19 is
   complete.
 - Phase F20 on `feat/harvest-base` (stacked on F19's tip): F20.1 Harvest tokens (`feat/harvest-tokens`) and F20.2
-  question page (`feat/harvest-question`) and F20.3 white page (`fix/harvest-white-page`) done; F20.4 ask form
-  redesign next.
+  question page (`feat/harvest-question`) and F20.3 white page (`fix/harvest-white-page`) and F20.4 ask form
+  redesign (`feat/ask-redesign`) done. Phase F20 is complete.
 
 ## Next up
 
@@ -70,6 +70,28 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-31 (F20.4 ask form redesign)
+
+**Done**
+- Designed with the impeccable and taste skills (installed for the user, `~/.agents/skills`). impeccable's context
+  check found no PRODUCT.md and treated this as a refinement of the existing look; the screen is "Operate" (a task),
+  so restraint, labels above fields and one primary action. Taste's app-screen rules: show the choices instead of
+  hiding them, one click to the main job, say what is missing.
+- Topic: `qa/TopicPicker`, native radios styled as chips (arrow keys move, a tick marks the choice), the first eight
+  topics then "More topics" as a search; a topic chosen there joins the chips. Legend and hint above.
+- Tags: `TagInput popular` offers the most used tags as dashed "+ tag" chips before anything is typed, so a tag is one
+  tap; typed text still filters them. The F19.3 `compact` pill is gone; the label says "(optional)".
+- Post bar: "Still needed: a title, details, a topic" until the form is complete, then "Ready to post" with the
+  Ctrl + Enter hint; Cancel and Post question (with a send icon) on the right. Ctrl/⌘+Enter posts from anywhere in the
+  form, never while a Bangla input method composes.
+- Tests: `qa/ask.test.tsx` (topic radios, popular tag one tap, Ctrl+Enter); the publish, AI answer and confirm-e-mail
+  tests follow the new controls. Checked at 1280px light and dark and 390px, with ten mocked topics.
+
+**Known limitations**
+- On phones the "Still needed" line is hidden for room; the field errors still say it on Post.
 
 ---
 

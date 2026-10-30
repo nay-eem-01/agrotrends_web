@@ -56,7 +56,9 @@ an icon, unanswered questions the word "Unanswered".
   `#86C99B` halo on focus, red border and an icon with the message on error. Labels always visible; placeholders are
   examples, never the label.
 - Buttons: primary filled green; secondary white with `border-strong`; quiet is a ghost; danger a red wash.
-- Selects: every list is the shadcn Select (short fixed lists) or `SearchSelect` (topics). No native selects.
+- Selects: every list is the shadcn Select (short fixed lists) or `SearchSelect` (topics). No native selects. The ask
+  form shows topics as one-tap chips instead (`qa/TopicPicker`: radios styled as chips, a tick on the chosen one, the
+  first eight then "More topics" as a search).
 - Secondary post actions (Edit, Delete, Report) sit behind a "More actions" menu (`threads/PostMenu`) at the top right
   of each question, answer, reply and response; Reply, Show replies and Accept stay visible. Delete is red and still
   asks first.

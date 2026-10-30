@@ -254,6 +254,8 @@ export const BN: Record<string, string> = {
   'Delete this question and its answers?': 'এই প্রশ্ন ও এর উত্তরগুলো মুছবেন?',
   'Loading question': 'প্রশ্ন লোড হচ্ছে',
   'Your question': 'আপনার প্রশ্ন',
+  'Add tags: tilapia, rice blast…': 'ট্যাগ যোগ করুন: তেলাপিয়া, ব্লাস্ট রোগ…',
+  'An AI answer comes right after you post.': 'পোস্ট করার পরপরই একটি AI উত্তর আসে।',
   'Say what you are working with, where, and what you have already tried. Specific questions get useful answers.':
     'কী নিয়ে কাজ করছেন, কোথায়, আর এরই মধ্যে কী চেষ্টা করেছেন — লিখুন। নির্দিষ্ট প্রশ্নে কাজের উত্তর মেলে।',
   'What have you seen, since when, and what have you tried?': 'কী দেখছেন, কবে থেকে, আর কী চেষ্টা করেছেন?',

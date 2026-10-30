@@ -41,11 +41,12 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   confirmation (`feat/phone-sign-up`) F18.3 reset (`feat/phone-reset`) and F18.4 settings (`feat/phone-settings`)
   done. Phase F18 is complete.
 - Phase F19 on `feat/simple-ask-base` (from `development`): F19.1 question vote label (`feat/question-vote-label`)
-  and F19.2 one-place ask form (`feat/ask-editor`) done. Phase F19 is complete.
+  F19.2 one-place ask form (`feat/ask-editor`) and F19.3 composer restyle (`feat/ask-composer`) done. Phase F19 is
+  complete.
 
 ## Next up
 
-1. **Nayeem:** PR F19.1 then F19.2 into `feat/simple-ask-base`, then the base into `development`.
+1. **Nayeem:** PR F19.1, F19.2 then F19.3 into `feat/simple-ask-base`, then the base into `development`.
 2. Pick an SMS provider (backend 10.5): until then codes only appear in the backend log as `[DEV SMS]`.
 3. Run the admin smoke step (`E2E_ADMIN_EMAIL` / `E2E_ADMIN_PASSWORD`) and the admin screens live once an admin login is at hand.
 4. Merge the backend's Phase 8 so F12–F14 run against its `development`.
@@ -65,6 +66,26 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-31 (F19.3 ask composer restyle)
+
+**Done**
+- Checked against the ui-ux-pro-max guidance (content-first minimal style; one primary action, kept in reach; Command-
+  style search for long lists). The boxed border is gone: the question line and details sit on the page as in the
+  story editor. The toolbar is a soft pill that sticks under the top bar and scrolls sideways on phones; the photo
+  label and an empty count hide on phones.
+- Topic and tags share one row under the details, both typed: the topic filters as you type and Enter picks it;
+  tags are `#` chips in a soft pill (`TagInput compact`, label read out but not shown).
+- Cancel and Post question sit in a sticky bar (with "An AI answer comes right after you post." on a new question).
+  On phones it rides above the bottom navigation (`bottom: 3.5rem + safe area`, measured 57px).
+- The page heading is smaller, so the question line is the largest text.
+- Checked in Chromium at 1280px light and dark and at 390px with the API mocked; tests unchanged (the labels and roles
+  stayed).
+
+**Decisions**
+- Topic and tags stay in the page, not in the sticky bar: tag suggestions and the topic list need room to open.
 
 ---
 

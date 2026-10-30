@@ -23,7 +23,10 @@ interface QuestionEditorProps {
   onPhotosChange: (photos: string[]) => void
 }
 
-/** The question in one box: a one-line title, then the details as rich text, with photos added from the toolbar. */
+/**
+ * The question as a page, not a box: a one-line title, a soft toolbar that stays in reach while writing, and the
+ * details as rich text; photos added from the toolbar sit under the text.
+ */
 export function QuestionEditor({ title, html, photos, titleError, detailsError, onTitleChange, onHtmlChange, onPhotosChange }: QuestionEditorProps) {
   const t = useT()
   const titleId = useId()
@@ -48,7 +51,7 @@ export function QuestionEditor({ title, html, photos, titleError, detailsError, 
   function attributes(): Record<string, string> {
     return {
       id: detailsId,
-      class: 'post-body min-h-40 px-4 py-3 focus:outline-none sm:px-5',
+      class: 'post-body min-h-32 py-4 focus:outline-none',
       'aria-label': t('Details'),
       role: 'textbox',
       'aria-multiline': 'true',
@@ -57,7 +60,7 @@ export function QuestionEditor({ title, html, photos, titleError, detailsError, 
   }
 
   return (
-    <div className="rounded-2xl border border-input bg-card transition-[border-color,box-shadow] duration-150 focus-within:border-primary focus-within:ring-[3px] focus-within:ring-ring/60">
+    <div>
       <textarea
         id={titleId}
         aria-label={t('Your question')}
@@ -75,25 +78,25 @@ export function QuestionEditor({ title, html, photos, titleError, detailsError, 
             editor?.commands.focus('start')
           }
         }}
-        className="block w-full resize-none bg-transparent px-4 pt-4 pb-2 text-xl leading-snug font-semibold text-foreground [field-sizing:content] placeholder:font-normal placeholder:text-muted-foreground/70 focus:outline-none sm:px-5 sm:text-2xl"
+        className="block w-full resize-none bg-transparent pb-3 text-2xl leading-tight font-semibold tracking-[-0.01em] text-foreground [field-sizing:content] placeholder:text-muted-foreground/55 focus:outline-none sm:text-[1.75rem]"
       />
       {titleError && (
-        <div className="px-4 pb-2 sm:px-5">
+        <div className="pb-3">
           <Message inputId={titleId} error={titleError} />
         </div>
       )}
       {editor && <Toolbar editor={editor} photos={photos} onPhotosChange={onPhotosChange} />}
       <EditorContent editor={editor} />
       {detailsError && (
-        <div className="px-4 pb-3 sm:px-5">
+        <div className="pb-3">
           <Message inputId={detailsId} error={detailsError} />
         </div>
       )}
       {photos.length > 0 && (
-        <ul aria-label={t('Photos')} className="flex flex-wrap gap-2.5 border-t border-border px-4 py-3 sm:px-5">
+        <ul aria-label={t('Photos')} className="flex flex-wrap gap-3 pt-2 pb-4">
           {photos.map((url, index) => (
             <li key={url} className="relative">
-              <img src={url} alt={t('Photo {n}', { n: index + 1 })} className="size-20 rounded-xl bg-muted object-cover ring-1 ring-border" />
+              <img src={url} alt={t('Photo {n}', { n: index + 1 })} className="size-24 rounded-2xl bg-muted object-cover ring-1 ring-border/60" />
               <button
                 type="button"
                 aria-label={t('Remove photo {n}', { n: index + 1 })}
@@ -149,7 +152,7 @@ function Toolbar({ editor, photos, onPhotosChange }: { editor: Editor; photos: s
   }
 
   return (
-    <div role="toolbar" aria-label={t('Formatting')} className="flex flex-wrap items-center gap-0.5 border-y border-border px-2 py-1 sm:px-3">
+    <div role="toolbar" aria-label={t('Formatting')} className="sticky top-16 z-10 flex items-center gap-0.5 overflow-x-auto rounded-2xl bg-muted/80 p-1 backdrop-blur-sm [scrollbar-width:none]">
       <Tool label={t('Bold')} pressed={state.bold} onClick={() => chain().toggleBold().run()}>
         <TextB size={20} />
       </Tool>
@@ -168,18 +171,18 @@ function Toolbar({ editor, photos, onPhotosChange }: { editor: Editor; photos: s
       <Tool label={t('Link')} pressed={state.link} onClick={toggleLink}>
         <LinkSimple size={20} />
       </Tool>
-      <span aria-hidden="true" className="mx-1 h-6 w-px bg-border" />
+      <span aria-hidden="true" className="mx-1 h-6 w-px bg-border-strong/60" />
       <button
         type="button"
         disabled={full || upload.isPending}
         aria-busy={upload.isPending || undefined}
         title={full ? t("That's the most you can add ({n}).", { n: MAX_PHOTOS }) : undefined}
         onClick={() => input.current?.click()}
-        className="flex h-11 items-center gap-1.5 rounded-md px-2.5 text-sm font-medium text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
+        className="flex h-11 shrink-0 items-center gap-1.5 rounded-xl px-3 text-sm font-medium text-muted-foreground transition-[color,background-color,transform] duration-150 ease-(--ease-out) hover:bg-card hover:text-foreground active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60"
       >
         {upload.isPending ? <Spinner size={18} label={t('Uploading image')} /> : <ImageSquare size={20} aria-hidden="true" />}
-        {t('Add a photo')}
-        <span className="text-xs font-normal">{t('{n} of {max}', { n: photos.length, max: MAX_PHOTOS })}</span>
+        <span className="sr-only sm:not-sr-only">{t('Add a photo')}</span>
+        <span className={cn('text-xs font-normal', photos.length === 0 && 'hidden sm:inline')}>{t('{n} of {max}', { n: photos.length, max: MAX_PHOTOS })}</span>
       </button>
       <input ref={input} type="file" accept={IMAGE_TYPES.join(',')} onChange={choose} className="sr-only" tabIndex={-1} aria-label={t('Add a photo')} />
       {error && (
@@ -201,8 +204,8 @@ function Tool({ label, pressed, onClick, children }: { label: string; pressed: b
       onMouseDown={(event) => event.preventDefault()}
       onClick={onClick}
       className={cn(
-        'flex size-11 items-center justify-center rounded-md transition-colors duration-150',
-        pressed ? 'bg-secondary text-primary' : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+        'flex size-11 shrink-0 items-center justify-center rounded-xl transition-[color,background-color,transform] duration-150 ease-(--ease-out) active:scale-[0.97]',
+        pressed ? 'bg-card text-primary shadow-xs' : 'text-muted-foreground hover:bg-card hover:text-foreground',
       )}
     >
       {children}

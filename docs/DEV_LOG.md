@@ -44,7 +44,8 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   F19.2 one-place ask form (`feat/ask-editor`) and F19.3 composer restyle (`feat/ask-composer`) done. Phase F19 is
   complete.
 - Phase F20 on `feat/harvest-base` (stacked on F19's tip): F20.1 Harvest tokens (`feat/harvest-tokens`) and F20.2
-  question page (`feat/harvest-question`) done. Phase F20 is complete.
+  question page (`feat/harvest-question`) and F20.3 white page (`fix/harvest-white-page`) done; F20.4 ask form
+  redesign next.
 
 ## Next up
 
@@ -69,6 +70,14 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-31 (F20.3 white page)
+
+**Done**
+- Nayeem: keep the page white, consistent with the app. `--background` is `#FFFFFF` again in light mode; the green,
+  gold, Lora and radius of Harvest stay. Cards keep their hairline so they still read on white. Dark mode unchanged.
 
 ---
 

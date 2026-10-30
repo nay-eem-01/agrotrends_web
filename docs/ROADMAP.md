@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend · ➡ moved to a later step
 
-**Progress:** 79 of 80 steps done
+**Progress:** 80 of 80 steps done
 
 ---
 
@@ -215,7 +215,7 @@ Endpoints and rules: `docs/BACKEND_CATCHUP_PLAN.md` § Admin dashboard.
 | # | Step | Status |
 |---|---|---|
 | F20.1 | Harvest tokens from the ui-ux-pro-max agriculture profile: pale field-green page, white cards, earth green `#15803D`, harvest gold `#A16207`, Lora for editorial type, 16px radius; field borders to 3:1 (`feat/harvest-tokens`) | ✅ |
-| F20.2 | Question page redesign on Harvest (`feat/harvest-question`) | ⬜ |
+| F20.2 | Question page on Harvest: the question as a white card with a Lora title, a side panel (Useful question? vote, answer count, asked date, Answer) sticky from 1024px and a row under the question below it, answers as cards with a gold edge on the accepted one, list formatting in answers (`feat/harvest-question`) | ✅ |
 
 ## Needs from the backend
 

@@ -355,7 +355,43 @@
   }
 }
 
-/* Tiptap's placeholder on an empty story. */
+/* Question bodies, in the ask form and on the question page: interface type, light rich text. */
+@layer components {
+  .post-body {
+    @apply text-base leading-relaxed text-foreground sm:text-lg;
+  }
+
+  .post-body > * + * {
+    margin-top: 0.9em;
+  }
+
+  .post-body a {
+    @apply text-primary underline underline-offset-4;
+  }
+
+  .post-body ul,
+  .post-body ol {
+    padding-left: 1.4em;
+  }
+
+  .post-body ul {
+    list-style: disc;
+  }
+
+  .post-body ol {
+    list-style: decimal;
+  }
+
+  .post-body li + li {
+    margin-top: 0.35em;
+  }
+
+  .post-body blockquote {
+    @apply border-l-2 border-primary/60 pl-4 text-muted-foreground;
+  }
+}
+
+/* Tiptap's placeholder on an empty story or question. */
 .tiptap p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   float: left;

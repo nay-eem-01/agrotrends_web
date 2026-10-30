@@ -53,7 +53,7 @@ export function QuestionsPage() {
       <header className="flex flex-wrap items-end justify-between gap-x-6 gap-y-4 pt-8 sm:pt-10">
         <div className="max-w-xl">
           <h1 className="text-2xl sm:text-[2rem]">{t('Questions')}</h1>
-          <p className="mt-1.5 text-muted-foreground">{t('Ask the community about your crop, your soil, your season.')}</p>
+          <p className="mt-1.5 text-muted-foreground">{t('Crops, fish, livestock or your studies: ask farmers, experts and students.')}</p>
         </div>
         <ButtonLink to="/questions/ask" className="shrink-0">
           <Plus size={18} weight="bold" aria-hidden="true" />
@@ -250,7 +250,7 @@ function AdvisorCard() {
 /** Plain guidance on asking, so a question gets useful answers (no data behind it, just advice). */
 export function AskingWell({ className = 'border-t border-border pt-5' }: { className?: string }) {
   const t = useT()
-  const tips = [t('Say what you grow and where.'), t('Describe what you see, and since when.'), t('Add what you have already tried.'), t('A clear photo of the leaves, roots or pests helps.')]
+  const tips = [t('Say what you are working with and where.'), t('Describe what you see, and since when.'), t('Add what you have already tried.'), t('A clear photo of the problem helps.')]
   return (
     <section className={className}>
       <h2 className="text-sm font-semibold">{t('Getting a good answer')}</h2>

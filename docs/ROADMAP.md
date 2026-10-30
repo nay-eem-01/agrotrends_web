@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend · ➡ moved to a later step
 
-**Progress:** 76 of 77 steps done
+**Progress:** 77 of 77 steps done
 
 ---
 
@@ -207,7 +207,7 @@ Endpoints and rules: `docs/BACKEND_CATCHUP_PLAN.md` § Admin dashboard.
 | # | Step | Status |
 |---|---|---|
 | F19.1 | Question page: the question's own vote moves beside the author line as "Useful question?", apart from the answers' votes; vote arrows get a hover title (`feat/question-vote-label`) | ✅ |
-| F19.2 | Ask form in one place: title, rich-text details (bold, italic, lists, quote, link) with a photo button, topic and tags in one composer; no crop-specific farming fields (`feat/ask-editor`) | ⬜ |
+| F19.2 | Ask form in one place: title, rich-text details (bold, italic, lists, quote, link) with a photo button, topic and tags in one composer; no crop-specific farming fields (`feat/ask-editor`) | ✅ |
 
 ## Needs from the backend
 

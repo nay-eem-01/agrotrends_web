@@ -41,11 +41,11 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   confirmation (`feat/phone-sign-up`) F18.3 reset (`feat/phone-reset`) and F18.4 settings (`feat/phone-settings`)
   done. Phase F18 is complete.
 - Phase F19 on `feat/simple-ask-base` (from `development`): F19.1 question vote label (`feat/question-vote-label`)
-  done; F19.2 one-place ask form next.
+  and F19.2 one-place ask form (`feat/ask-editor`) done. Phase F19 is complete.
 
 ## Next up
 
-1. **Nayeem:** PR the F16, F17 and F18 steps in order into their bases, then each base into `development`.
+1. **Nayeem:** PR F19.1 then F19.2 into `feat/simple-ask-base`, then the base into `development`.
 2. Pick an SMS provider (backend 10.5): until then codes only appear in the backend log as `[DEV SMS]`.
 3. Run the admin smoke step (`E2E_ADMIN_EMAIL` / `E2E_ADMIN_PASSWORD`) and the admin screens live once an admin login is at hand.
 4. Merge the backend's Phase 8 so F12–F14 run against its `development`.
@@ -65,6 +65,36 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-30 (F19.2 one-place ask form)
+
+**Done**
+- Asking was five separate boxes (question, details, topic, tags, photos) plus a folded farming section. Now one
+  composer holds the question line, a toolbar and the details as rich text (bold, italic, bulleted and numbered
+  lists, quote, link); "Add a photo" in the toolbar uploads up to 4, shown as a strip under the text and sent as
+  `imageUrls` as before. Topic and tags sit side by side under it. Enter in the question line moves to the details.
+- `QuestionEditor` (Tiptap, no headings or code blocks); `.post-body` styles the details the same in the editor and on
+  the question page. Older plain-text questions open as paragraphs (`lib/html` `textToHtml`).
+- Copy is no longer about crops only: "Say what you are working with, where…"; the tips and the questions page
+  subtitle say the same.
+- Tests: `qa/ask.test.tsx` (rich text posted as HTML, no farming fields, an old text question edited as paragraphs
+  with `agri` left out), `lib/html.test.ts`. `test/setup.ts` stubs the layout calls ProseMirror makes while typing.
+
+**Decisions**
+- The crop / season / region / soil fields are gone from the ask form: they fit crops, not fisheries, livestock or a
+  student's question. Topic says the field and tags the specifics. The backend still takes `agri`; an edit leaves it
+  out, so an older question keeps its farming details and its chips still show.
+- Details are rich text again (reverses F4.1's plain text). The backend already cleans question HTML (jsoup) and
+  gives the AI and moderation its plain text, so no backend change.
+- Photos stay `imageUrls`, not inline images, so the question list keeps its thumbnail.
+
+**Known limitations**
+- The link tool is a native prompt, as in the story editor.
+- Older questions' farming chips still link to crop / season / region / soil filters on `/questions`; new questions
+  carry none.
+- `welcome.test.tsx` "no Google button without a client id" fails when `.env` sets `VITE_GOOGLE_CLIENT_ID`.
 
 ---
 

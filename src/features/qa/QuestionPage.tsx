@@ -106,7 +106,7 @@ function QuestionView({ question }: { question: Question }) {
       <div className="mt-6">
         <div className="min-w-0">
         {/* A question is a request for help: interface type, not the story's reading serif. */}
-        <SafeHtml html={question.content} className="text-base leading-relaxed whitespace-pre-line sm:text-lg [&>*+*]:mt-4" />
+        <SafeHtml html={question.content} className="post-body whitespace-pre-line" />
         {(question.imageUrls?.length ?? 0) > 0 && (
           <ul aria-label={t('Photos')} className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
             {question.imageUrls!.map((url, index) => (

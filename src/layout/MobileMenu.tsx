@@ -17,7 +17,7 @@ export function MobileMenu({ signedIn, anonymous }: { signedIn: boolean; anonymo
   const close = () => setOpen(false)
   const row = ({ isActive }: { isActive: boolean }) =>
     cn(
-      'flex h-12 items-center gap-3 rounded-md px-3 text-base transition-colors duration-150',
+      'flex h-12 items-center gap-3 rounded-full px-4 text-base transition-colors duration-150',
       isActive ? 'bg-secondary font-semibold text-primary' : 'text-foreground hover:bg-muted',
     )
 

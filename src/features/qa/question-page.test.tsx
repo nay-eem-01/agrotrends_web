@@ -174,3 +174,18 @@ test('Ctrl+Enter posts an answer once, Enter alone adds a line', async () => {
   await userEvent.keyboard('{Control>}{Enter}{Enter}{/Control}')
   await waitFor(() => expect(api.mock.calls.filter(([url]) => url === '/api/answers/create')).toHaveLength(1))
 })
+
+test('the tags sit under the title, before the question text', async () => {
+  mockApi({
+    'GET /api/questions/id/5': () => envelope(200, { ...question, tags: ['boro rice', 'cold injury'] }),
+    'GET /api/answers/question/5': () => envelope(200, []),
+  })
+  renderWithProviders(<App />, '/questions/5')
+
+  const title = await screen.findByRole('heading', { level: 1, name: 'Why are my boro seedlings yellow?' })
+  const tags = screen.getByRole('list', { name: 'Tags' })
+  const text = screen.getByText('After the cold week.')
+  expect(title.compareDocumentPosition(tags) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  expect(tags.compareDocumentPosition(text) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  expect(within(tags).getByRole('link', { name: 'cold injury' })).toHaveAttribute('href', '/questions?tag=cold%20injury')
+})

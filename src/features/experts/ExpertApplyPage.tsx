@@ -1,4 +1,4 @@
-import { Check, Clock, SealCheck, ShieldWarning, X } from '@phosphor-icons/react'
+import { Check, Clock, SealCheck, ShieldWarning, Sparkle, X } from '@phosphor-icons/react'
 import { useState, type FormEvent } from 'react'
 import { cn } from 'cn'
 import { useCategories } from '../../api/categories'
@@ -17,7 +17,6 @@ import { useT } from '../../lib/i18n'
 import { Button, ButtonLink } from '../../ui/Button'
 import { Spinner } from '../../ui/Spinner'
 import { TextField } from '../../ui/TextField'
-import { Select } from '../farming/FarmingFields'
 import { PhotoPicker } from '../qa/PhotoPicker'
 
 /** `/experts/apply`: apply to be a Verified Expert in 1–3 topics, or see where the latest application stands. */
@@ -28,29 +27,80 @@ export function ExpertApplyPage() {
   const [reapply, setReapply] = useState(false)
 
   return (
-    <section className="mx-auto max-w-(--container-feed) px-4 pt-10 pb-20 sm:px-6">
+    <section className="mx-auto grid max-w-[68rem] gap-10 px-4 pt-10 pb-20 sm:px-8 lg:grid-cols-[18rem_minmax(0,1fr)] lg:gap-14">
       <title>{t('Become a verified expert – AgroTrends')}</title>
-      <h1 className="text-2xl sm:text-3xl">{t('Become a verified expert')}</h1>
-      <p className="mt-2 max-w-prose text-muted-foreground">
-        {t('Verified experts check the AI answers in their topics and carry a badge on their answers. An admin looks at your proof and approves some or all of the topics you ask for.')}
-      </p>
-      {mine.isPending ? (
-        <div className="py-12 text-muted-foreground">
-          <Spinner label={t('Loading')} />
-        </div>
-      ) : latest && (latest.status === 'PENDING' || !reapply) ? (
-        <div className="mt-8">
-          <ApplicationStatus application={latest} />
-          {latest.status !== 'PENDING' && (
-            <Button variant="secondary" size="sm" className="mt-4" onClick={() => setReapply(true)}>
-              {t('Apply again')}
-            </Button>
-          )}
-        </div>
-      ) : (
-        <ApplyForm />
-      )}
+      <WhyApply />
+      <div className="min-w-0">
+        {mine.isPending ? (
+          <div className="py-12 text-muted-foreground">
+            <Spinner label={t('Loading')} />
+          </div>
+        ) : latest && (latest.status === 'PENDING' || !reapply) ? (
+          <div>
+            <ApplicationStatus application={latest} />
+            {latest.status !== 'PENDING' && (
+              <Button variant="secondary" size="sm" className="mt-4" onClick={() => setReapply(true)}>
+                {t('Apply again')}
+              </Button>
+            )}
+          </div>
+        ) : (
+          <ApplyForm />
+        )}
+      </div>
     </section>
+  )
+}
+
+/** Why it's worth applying and what happens after, beside the form (above it on phones). */
+function WhyApply() {
+  const t = useT()
+  const perks = [
+    { icon: SealCheck, title: t('A badge on everything you write'), text: t('Your answers, stories and profile') },
+    { icon: Sparkle, title: t('Check the AI advisor'), text: t('Confirm or correct its answers in your topics') },
+  ]
+  const steps = [
+    { title: t('Send your application'), text: t('About three minutes') },
+    { title: t('An admin looks at your proof'), text: t('They may approve some of your topics') },
+    { title: t('Your badge appears'), text: t('We send you a notification') },
+  ]
+  return (
+    <div>
+      <span className="inline-flex h-7 items-center gap-1.5 rounded-full bg-mustard-soft px-3 text-xs font-semibold text-mustard-ink">
+        <SealCheck size={14} weight="fill" aria-hidden="true" />
+        {t('Verified expert')}
+      </span>
+      <h1 className="mt-4 font-serif text-[1.75rem] leading-tight font-semibold sm:text-[2.125rem]">{t('Become a verified expert')}</h1>
+      <p className="mt-3 text-muted-foreground">{t('Farmers trust an answer more when they know who gave it. Tell us your field and show one proof.')}</p>
+      <ul className="mt-6 flex flex-col gap-4">
+        {perks.map(({ icon: Icon, title, text }) => (
+          <li key={title} className="flex gap-3">
+            <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-full bg-mustard-soft text-mustard-ink">
+              <Icon size={20} />
+            </span>
+            <span className="text-sm">
+              <span className="block text-base font-semibold">{title}</span>
+              <span className="text-muted-foreground">{text}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
+      <h2 className="mt-8 font-sans text-sm font-semibold">{t('What happens next')}</h2>
+      <ol className="mt-3 flex flex-col">
+        {steps.map(({ title, text }, index) => (
+          <li key={title} className="relative flex gap-3 pb-4 text-sm last:pb-0">
+            {index < steps.length - 1 && <span aria-hidden="true" className="absolute top-7 bottom-0 left-3 w-px bg-border" />}
+            <span aria-hidden="true" className="flex size-6 shrink-0 items-center justify-center rounded-full bg-surface text-xs font-bold text-muted-foreground tabular-nums">
+              {index + 1}
+            </span>
+            <span>
+              <span className="block font-semibold">{title}</span>
+              <span className="text-muted-foreground">{text}</span>
+            </span>
+          </li>
+        ))}
+      </ol>
+    </div>
   )
 }
 
@@ -68,7 +118,7 @@ export function ApplicationStatus({ application }: { application: ExpertApplicat
   return (
     <section aria-label={t('Expert application')} className={cn('rounded-xl p-5', status.tone)}>
       <h2 className="flex items-center gap-2 font-sans text-base font-semibold">
-        <Icon size={20} weight="fill" className={application.status === 'APPROVED' ? 'text-mustard' : 'text-foreground'} aria-hidden="true" />
+        <Icon size={20} weight="fill" className={application.status === 'APPROVED' ? 'text-mustard-ink' : 'text-foreground'} aria-hidden="true" />
         {t(status.title)}
       </h2>
       <p className="mt-2 text-sm">
@@ -132,7 +182,7 @@ function ApplyForm() {
   }
 
   return (
-    <form onSubmit={submit} noValidate className="mt-8 flex flex-col gap-6">
+    <form onSubmit={submit} noValidate className="flex flex-col gap-7">
       <fieldset aria-describedby="topics-hint">
         <legend className="text-sm font-medium">{t('Topics (up to {n})', { n: EXPERT_LIMITS.topics })}</legend>
         <ul className="mt-2 flex flex-wrap gap-2">
@@ -143,13 +193,13 @@ function ApplyForm() {
               <li key={category.id}>
                 <label
                   className={cn(
-                    'inline-flex h-10 cursor-pointer items-center gap-2 rounded-full px-4 text-sm ring-1 transition-colors duration-150 has-focus-visible:outline-2 has-focus-visible:outline-ring',
-                    chosen ? 'bg-primary text-primary-foreground ring-primary' : 'bg-card ring-input hover:bg-muted',
+                    'inline-flex h-10 cursor-pointer items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition-[color,background-color,border-color] duration-150 select-none has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-primary',
+                    chosen ? 'border-primary bg-secondary pl-3 text-primary' : 'border-border-strong hover:border-primary/50 hover:bg-surface',
                     full && 'cursor-not-allowed opacity-50',
                   )}
                 >
                   <input type="checkbox" className="sr-only" checked={chosen} disabled={full} onChange={() => toggle(category.id ?? 0)} />
-                  {chosen && <Check size={14} weight="bold" aria-hidden="true" />}
+                  {chosen && <Check size={16} weight="bold" aria-hidden="true" />}
                   {category.categoryName}
                 </label>
               </li>
@@ -160,30 +210,51 @@ function ApplyForm() {
           {errors.topics ?? t('The admin may approve some of them.')}
         </p>
       </fieldset>
-      <TextField
-        label={t('Your field')}
-        placeholder={t('Veterinarian, soil scientist, plant pathologist…')}
-        maxLength={EXPERT_LIMITS.field}
-        value={fieldTitle}
-        onChange={(event) => setFieldTitle(event.target.value)}
-        error={errors.field}
-      />
-      <TextField
-        label={t('Institution or workplace')}
-        placeholder={t('BRRI, a district livestock office, a university…')}
-        maxLength={EXPERT_LIMITS.institution}
-        value={institution}
-        onChange={(event) => setInstitution(event.target.value)}
-        error={errors.institution}
-      />
-      <Select
-        label={t('Your proof is a')}
-        value={credentialType}
-        error={errors.credential}
-        onChange={(value) => setCredentialType(value as CredentialType | '')}
-        options={(Object.keys(CREDENTIAL_LABELS) as CredentialType[]).map((value) => ({ value, label: t(CREDENTIAL_LABELS[value]) }))}
-        placeholder={t('Choose one')}
-      />
+      <div className="grid gap-6 sm:grid-cols-2">
+        <TextField
+          label={t('Your field')}
+          placeholder={t('Veterinarian, soil scientist, plant pathologist…')}
+          maxLength={EXPERT_LIMITS.field}
+          value={fieldTitle}
+          onChange={(event) => setFieldTitle(event.target.value)}
+          error={errors.field}
+        />
+        <TextField
+          label={t('Institution or workplace')}
+          placeholder={t('BRRI, a district livestock office, a university…')}
+          maxLength={EXPERT_LIMITS.institution}
+          value={institution}
+          onChange={(event) => setInstitution(event.target.value)}
+          error={errors.institution}
+        />
+      </div>
+      <fieldset aria-describedby={errors.credential ? 'credential-error' : undefined}>
+        <legend className="text-sm font-medium">{t('Your proof is a')}</legend>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {(Object.keys(CREDENTIAL_LABELS) as CredentialType[]).map((value) => {
+            const chosen = credentialType === value
+            return (
+              <label
+                key={value}
+                className={cn(
+                  'inline-flex h-10 cursor-pointer items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition-[color,background-color,border-color] duration-150 select-none has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-primary',
+                  chosen ? 'border-primary bg-secondary pl-3 text-primary' : 'border-border-strong hover:border-primary/50 hover:bg-surface',
+                  errors.credential && !chosen && 'border-destructive/50',
+                )}
+              >
+                <input type="radio" name="credential" value={value} className="sr-only" checked={chosen} onChange={() => setCredentialType(value)} />
+                {chosen && <Check size={16} weight="bold" aria-hidden="true" />}
+                {t(CREDENTIAL_LABELS[value])}
+              </label>
+            )
+          })}
+        </div>
+        {errors.credential && (
+          <p id="credential-error" className="mt-2 text-sm text-destructive">
+            {errors.credential}
+          </p>
+        )}
+      </fieldset>
       <PhotoPicker
         urls={images}
         onChange={setImages}
@@ -228,13 +299,14 @@ function ApplyForm() {
           {pending ? t('You already have an application waiting. Its status is shown here once it reloads.') : errorMessage(apply.error)}
         </p>
       )}
-      <div className="flex gap-3">
-        <Button type="submit" loading={apply.isPending}>
-          {t('Send application')}
-        </Button>
+      <div className="flex flex-wrap items-center gap-3 border-t border-border pt-5">
+        <p className="mr-auto text-sm text-muted-foreground">{t("If it isn't approved, you can apply again.")}</p>
         <ButtonLink to="/settings" variant="quiet">
           {t('Cancel')}
         </ButtonLink>
+        <Button type="submit" loading={apply.isPending}>
+          {t('Send application')}
+        </Button>
       </div>
     </form>
   )

@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Route, Routes } from 'react-router-dom'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
@@ -204,4 +204,20 @@ test('a phone number signs in too, sent without spaces or dashes', async () => {
   await userEvent.click(screen.getByRole('button', { name: 'Sign in' }))
   await waitFor(() => expect(fetchMock).toHaveBeenCalled())
   expect(body(0)).toEqual({ identifier: '01712345678', password: 'Paddy2026!' })
+})
+
+test('the sign-in page says what you get and switches to Bengali before typing', async () => {
+  renderWithProviders(<App />, '/sign-in')
+
+  const panel = await screen.findByRole('complementary', { name: 'Why join AgroTrends' })
+  expect(panel).toHaveTextContent('Verified experts')
+  const language = within(screen.getByRole('group', { name: 'Language' }))
+  expect(language.getByRole('button', { name: 'English' })).toHaveAttribute('aria-pressed', 'true')
+
+  await userEvent.click(language.getByRole('button', { name: 'বাংলা' }))
+  expect(await screen.findByRole('complementary', { name: 'কেন AgroTrends-এ যোগ দেবেন' })).toBeInTheDocument()
+  const bengali = within(screen.getByRole('group', { name: 'ভাষা' }))
+  expect(bengali.getByRole('button', { name: 'বাংলা' })).toHaveAttribute('aria-pressed', 'true')
+  expect(document.documentElement.lang).toBe('bn')
+  await userEvent.click(bengali.getByRole('button', { name: 'English' }))
 })

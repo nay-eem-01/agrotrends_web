@@ -46,14 +46,17 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 - Phase F20 on `feat/harvest-base` (stacked on F19's tip): F20.1 Harvest tokens (`feat/harvest-tokens`) and F20.2
   question page (`feat/harvest-question`) and F20.3 white page (`fix/harvest-white-page`) and F20.4 ask form
   redesign (`feat/ask-redesign`) done. Phase F20 is complete.
+- Phase F21 on `feat/paddy-base` (stacked on F20's tip): F21.1 Paddy Field tokens (`feat/paddy-tokens`) F21.2 shell (`feat/paddy-shell`) F21.3 sign in and sign up (`feat/paddy-auth`) F21.4 expert application (`feat/paddy-expert-apply`) F21.5 profile (`feat/paddy-profile`) F21.6 story editor (`feat/paddy-editor`) F21.7 question page (`feat/paddy-question`) F21.8 AI advisor (`feat/paddy-advisor`) F21.9 feeds (`feat/paddy-feeds`) F21.10 story page (`feat/paddy-story`) done. Phase F21 is complete.
 
 ## Next up
 
 1. **Nayeem:** PR F19.1, F19.2 then F19.3 into `feat/simple-ask-base`, then the base into `development`; then F20's
-   steps into `feat/harvest-base`.
-2. Pick an SMS provider (backend 10.5): until then codes only appear in the backend log as `[DEV SMS]`.
-3. Run the admin smoke step (`E2E_ADMIN_EMAIL` / `E2E_ADMIN_PASSWORD`) and the admin screens live once an admin login is at hand.
-4. Merge the backend's Phase 8 so F12–F14 run against its `development`.
+   steps into `feat/harvest-base`, then F21.1–F21.10 into `feat/paddy-base`, then each base into `development`.
+2. Screens not yet on the Paddy Field layouts (Discover sections, Stories feed, settings, admin) follow the tokens and
+   shapes already; restyle them when they are next touched.
+3. Pick an SMS provider (backend 10.5): until then codes only appear in the backend log as `[DEV SMS]`.
+4. Run the admin smoke step (`E2E_ADMIN_EMAIL` / `E2E_ADMIN_PASSWORD`) and the admin screens live once an admin login is at hand.
+5. Merge the backend's Phase 8 so F12–F14 run against its `development`.
 
 ## Open items
 
@@ -70,6 +73,174 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-31 (F21.10 Paddy story page)
+
+**Done**
+- The story page in Medium's order: back link, topic, the Lora headline (600), the byline (avatar, author, reading time
+  and date), the clap / report / save bar, then the cover (16:9, 18px corners, a little wider than the text) and the
+  reading column.
+- The header, the plain reading column and the footer share one text edge (the 680px column plus its gutters), so the
+  headline lines up with the first paragraph.
+- Test: `story/story.test.tsx` reads the byline's meta and checks the headline comes before the cover. Checked at 1280px
+  light and dark and at 390px.
+
+**Decisions**
+- No Follow in the byline: "Written by" at the end of the story keeps the author's follow.
+
+---
+
+## 2026-10-31 (F21.9 Paddy feeds)
+
+**Done**
+- Question rows (`qa/QuestionRow`, used on Questions, Discover, profiles and search) as feed rows: the topic (a link) and
+  date on top, the title in Lora, the excerpt, tags and farming context, then one stats line: votes, answers, a mustard
+  "Accepted" mark or "Unanswered", and the asker with reputation and badge. The first photo sits on the right at 18px
+  corners. The vote and answer boxes on the left are gone.
+- The Newest | Unanswered switch is a pill.
+- Test: `qa/questions.test.tsx` checks the row's order and stats line. Checked Questions and Discover at 1280px light
+  and dark and at 390px.
+
+**Decisions**
+- Story tiles keep their F15 layout: they already follow the shapes (18px covers, Lora titles).
+
+---
+
+## 2026-10-31 (F21.8 Paddy AI advisor)
+
+**Done**
+- Each advisor turn after Perplexity: the reader's question as a Lora heading (no green bubble), then "Sources" as
+  numbered cards on the leaf wash (title, and Story or Community answer), then the AI answer and the "not checked by an
+  expert" note. Turns are divided by a hairline. The composer loses its shadow.
+- `ai/Sources` takes `layout="cards"` for this; the AI answer card and the history keep the list.
+- Tests: `ai/advisor.test.tsx` checks the sources come before the answer, as numbered links to the story and the
+  question. Checked at 1280px light and dark and at 390px with a mocked answer.
+
+**Known limitations**
+- No numbered citations inside the answer text and no suggested follow-ups: the backend's answer has neither.
+
+---
+
+## 2026-10-31 (F21.7 Paddy question page)
+
+**Done**
+- Votes (`qa/VoteControl`): round 36px buttons (44px touch area); outlined when they stand beside an answer, inside a
+  pill on the question's "Useful question?" panel. Pressed up is filled paddy, pressed down a soft red; your own score is
+  a pill.
+- The question's tags moved under its title (before the author line and text), so what it's about reads first.
+- Test: `qa/question-page.test.tsx` checks the tags come between the title and the text. Checked at 1280px light and
+  dark and at 390px.
+
+---
+
+## 2026-10-31 (F21.6 Paddy story editor)
+
+**Done**
+- `/write`: the writing column with "Before you publish" beside it from 1024px: a title, some text and a cover (optional)
+  ticked off as the draft fills, the word count and reading time (200 words a minute), and a note that topic and tags
+  come in the publish step. Worked out from the draft; nothing new is sent.
+- The toolbar is a soft rounded bar on the leaf wash (pressed tools white with the paddy icon); an empty cover is a
+  dashed "Add a cover image" tile; the title is Lora 600.
+- Test: `editor/editor.test.tsx` checks the checklist and reading time as the draft changes. Checked at 1280px light and
+  dark and at 390px.
+
+**Decisions**
+- The publish sheet (topic, tags, farming details) stays a dialog: moving it into the side panel would change the
+  publish flow that `publish.test.tsx` covers, for little gain.
+- The mock-up's "Let the AI advisor cite this" switch is left out: the backend has no such setting.
+- F21.3's language switch moved from `role="group"` to a fieldset (a lint warning), committed on `feat/paddy-auth` and
+  merged forward into F21.4 and F21.5.
+
+---
+
+## 2026-10-31 (F21.5 Paddy profile)
+
+**Done**
+- `/users/:userId` after LinkedIn: a leaf-wash cover with a mustard sun, an 88px avatar over its edge, the name in Lora,
+  the expert headline (their expert field and a mustard "Verified expert in …" chip), and a row of numbers: reputation,
+  accepted answers, questions, topics. Below, "Answers questions on" (the topic list with points and badges) beside
+  "Questions asked" from 1024px.
+- Your own profile shows Edit profile (to settings) where others' show Report.
+- Tests: `users/reputation.test.tsx` reads the numbers row and the headline, and checks Edit profile on your own page.
+  Checked at 1280px light and dark and at 390px.
+
+**Known limitations**
+- No profile photo, cover, bio or credentials list yet: the backend has no public user read (open item); the cover is a
+  drawn wash until it does.
+
+---
+
+## 2026-10-31 (F21.4 Paddy expert application)
+
+**Done**
+- `/experts/apply` in two columns from 1024px: on the left a mustard "Verified expert" chip, a Lora title, why it's worth
+  it (a badge on everything you write; check the AI advisor in your topics) and "What happens next" as three numbered
+  steps (send, an admin looks at your proof, your badge appears with a notification). The form or the application's
+  status on the right; on phones the explainer comes first.
+- Form: field and institution side by side; topics and the proof type as pill chips with a tick (the proof type was a
+  select, now radios: one tap); the bottom bar has a note, Cancel and Send application.
+- Tests: `experts/apply.test.tsx` picks the proof type as a radio and checks the explainer's steps. Checked at 1280px
+  light and dark and at 390px.
+
+**Decisions**
+- No "usually within 3 days" or "questions come to you first": neither is promised by the backend.
+
+---
+
+## 2026-10-31 (F21.3 Paddy sign in and sign up)
+
+**Done**
+- `auth/AuthPage` (sign in, sign up, reset, verify): from 1024px a leaf-wash panel on the left (Lora "Grow better with
+  AgroTrends.", three things you get: ask anything, an AI advisor with sources, verified experts; "Free, in English and
+  Bengali."), with a mustard sun and the drawn sprig in the corner. The form sits on the right.
+- An English | বাংলা pill switch on the form, so a reader can change the language before typing; each name is written in
+  its own language.
+- Sign up: the "How we reach you" heading no longer overlaps its hint.
+- Test: `auth/auth.test.tsx` checks the panel and the language switch. Checked sign in and sign up at 1280px light and
+  dark and at 390px.
+
+**Decisions**
+- No member quote or member counts on the panel: the mock-up's were invented, and real numbers need an API.
+
+**Known limitations**
+- The Google button's text follows the browser's language (Google renders it), not the page's switch; Google stays under
+  the form, as `GoogleSignIn` has uncommitted local changes.
+
+---
+
+## 2026-10-31 (F21.2 Paddy shell)
+
+**Done**
+- Top bar: the search is a 288px pill on the leaf wash (no border) with a round Ctrl K hint; Ask is a pill with a plus;
+  the logo mark's corners match the softer shapes. The phone menu's rows are pills; the tab bar's Ask button loses its
+  shadow (no shadows on the page).
+- Test: `layout/topbar.test.tsx` checks the search pill and Ctrl+K open the same search dialog. Checked the question page
+  and Discover at 1280px light and dark and at 390px.
+
+---
+
+## 2026-10-31 (F21.1 Paddy Field tokens)
+
+**Done**
+- Nayeem compared five whole-app directions (an artifact with home, story, question, profile, AI advisor, phone, ask,
+  write, sign in, sign up and expert screens in each) and chose **A's colours and type with D's shapes**. Written into
+  `docs/DESIGN.md` as "Paddy Field": the direction, where each area takes its cue (Reddit, Stack Overflow, LinkedIn,
+  Medium, Perplexity, Khamari), five rules, and the colour, type and shape tables.
+- Tokens: paddy `#245C3A`, ink `#1C2B21`, stem `#59665D`, leaf wash `#F3F7F2`, hairline `#E4EAE3`; dark mode a deep
+  loam `#111712` with young-leaf green `#7CC495`. Field borders `#84958A` (3.2:1).
+- Mustard split in two: `mustard` `#D9A441` (the flower: borders, dots, fills) and the new `mustard-ink` `#8A5F0C` for
+  text and icons (5.9:1), since the flower itself is only 2.2:1 on white. `text-mustard` uses moved to `text-mustard-ink`.
+- Shape: `--radius` 12px (fields), cards 18px (`rounded-xl`), larger panels 21px; buttons are pills in Inter 600 with a
+  little more side padding. The question, answer and AI answer cards drop their shadow and move to 18px.
+
+**Decisions**
+- Lora and Inter stay (A's type); only the shapes come from D. D's yellow buttons are not used.
+
+**Known limitations**
+- Screens keep their F20 layouts until their F21 step; some page-level `rounded-2xl` panels are 21px instead of 18px
+  until then.
 
 ---
 

@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { clearSession } from '../../api/client'
@@ -7,6 +7,7 @@ import App from '../../App'
 import { loadLocalDraft, saveLocalDraft } from '../../lib/draft'
 import { envelope, mockApi } from '../../test/api'
 import { renderWithProviders } from '../../test/render'
+import { BeforePublish } from './EditorPage'
 
 const author = { id: 9, name: 'Nasrin', authorId: 3 }
 
@@ -112,4 +113,17 @@ test("someone else's story is not found", async () => {
   mockApi({ ...signedInAs(author), 'GET /api/blogs/id/99': () => envelope(404, null) })
   renderWithProviders(<App />, '/write/99')
   expect(await screen.findByRole('heading', { name: 'Page not found' })).toBeInTheDocument()
+})
+
+test('the checklist beside the editor follows the draft and says how long it reads', () => {
+  const words = Array.from({ length: 450 }, () => 'paddy').join(' ')
+  const { rerender } = render(<BeforePublish title="" html="" cover="" />)
+  expect(screen.getByText('A title').parentElement).toHaveTextContent('A title, not yet')
+  expect(screen.getByText('No words yet')).toBeInTheDocument()
+
+  rerender(<BeforePublish title="Oxygen in summer ponds" html={`<p>${words}</p>`} cover="" />)
+  expect(screen.getByText('A title').parentElement).toHaveTextContent('A title, done')
+  expect(screen.getByText('Some text').parentElement).toHaveTextContent('Some text, done')
+  expect(screen.getByText('A cover image (optional)').parentElement).toHaveTextContent('not yet')
+  expect(screen.getByText('450 words · about 2 min read')).toBeInTheDocument()
 })

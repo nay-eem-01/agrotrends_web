@@ -1,6 +1,5 @@
 import { ChatCircleText, CheckCircle, SealCheck } from '@phosphor-icons/react'
 import { Link } from 'react-router-dom'
-import { Badge } from '@/components/ui/badge'
 import { cn } from 'cn'
 import type { Question } from '../../api/questions'
 import { filterPath, SEASON_LABELS, SOIL_LABELS } from '../../lib/agri'
@@ -11,10 +10,10 @@ import { Avatar } from '../../ui/Avatar'
 import { TagList, type TagItem } from '../../ui/TagList'
 
 /**
- * One question in a list. A question is a request for help, so it reads like one: the votes and the answer state
- * on the left (accepted in the warm trust colour, answered in sage, unanswered plainly said), the question in
- * interface type, what the asker wrote, its topic and farming context, and the first photo when there is one.
- * The title link covers the row; chips and tags sit above it. `compact` drops the excerpt and chips (Discover).
+ * One question in a list, after a Reddit or Stack Overflow feed row: the topic and when, the question in Lora, what the
+ * asker wrote, its tags and farming context, then a stats line (votes, answers, the accepted mark in mustard or
+ * "Unanswered") with the asker, and the first photo on the right when there is one. The title link covers the row;
+ * links inside it sit above. `compact` drops the excerpt and tags (Discover).
  */
 export function QuestionCard({ question, compact = false }: { question: Question; compact?: boolean }) {
   const t = useT()
@@ -38,33 +37,17 @@ export function QuestionCard({ question, compact = false }: { question: Question
   ]
 
   return (
-    <li className={cn('group relative flex gap-4 border-b border-border sm:gap-5', compact ? 'py-4' : 'py-5')}>
-      <div className="flex w-14 shrink-0 flex-col items-center gap-2 pt-0.5 text-center sm:w-16">
-        <p className="flex flex-col leading-tight">
-          <span className="text-lg font-semibold tabular-nums">{formatNumber(score)}</span>
-          <span className="text-xs text-muted-foreground">{score === 1 || score === -1 ? t('vote') : t('votes')}</span>
-        </p>
-        <p
-          className={cn(
-            'flex w-full flex-col rounded-md px-1 py-1 leading-tight',
-            accepted ? 'bg-mustard-soft text-foreground' : answers > 0 ? 'bg-secondary text-primary' : 'border border-dashed border-border-strong text-muted-foreground',
-          )}
-        >
-          <span className="inline-flex items-center justify-center gap-1 text-base font-semibold tabular-nums">
-            {accepted && <CheckCircle size={14} weight="fill" className="text-mustard" aria-hidden="true" />}
-            {formatNumber(answers)}
-          </span>
-          <span className="text-xs">{answers === 1 ? t('answer') : t('answers')}</span>
-          {accepted && <span className="sr-only">{t('An answer was accepted')}</span>}
-        </p>
-      </div>
+    <li className={cn('group relative flex gap-4 border-b border-border sm:gap-6', compact ? 'py-4' : 'py-5')}>
       <div className="min-w-0 flex-1">
-        {!compact && question.category?.categoryName && (
-          <Badge variant="secondary" className="relative z-10 mb-2" render={<Link to={`/questions?categoryId=${question.category.id}`} />}>
-            {question.category.categoryName}
-          </Badge>
-        )}
-        <h2 className={cn('leading-snug font-semibold text-pretty', compact ? 'text-base' : 'text-lg')}>
+        <p className="flex flex-wrap items-center gap-x-2 text-xs text-muted-foreground">
+          {question.category?.categoryName && (
+            <Link to={`/questions?categoryId=${question.category.id}`} className="relative z-10 font-semibold text-primary hover:underline">
+              {question.category.categoryName}
+            </Link>
+          )}
+          <span>{storyDate(question.createdAt)}</span>
+        </p>
+        <h2 className={cn('mt-1 font-serif leading-snug font-semibold text-pretty', compact ? 'text-base' : 'text-lg sm:text-xl')}>
           <Link
             to={`/questions/${question.questionId}`}
             className="decoration-primary/60 decoration-2 underline-offset-4 transition-colors duration-150 after:absolute after:inset-0 group-hover:text-primary group-hover:underline"
@@ -73,7 +56,28 @@ export function QuestionCard({ question, compact = false }: { question: Question
           </Link>
         </h2>
         {!compact && preview && <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{preview}</p>}
-        <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-muted-foreground">
+        {!compact && <TagList items={tags} label={t('Tags')} className="mt-2.5" />}
+        <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-muted-foreground">
+          <span>
+            <b className="font-semibold text-foreground tabular-nums">{formatNumber(score)}</b> {score === 1 || score === -1 ? t('vote') : t('votes')}
+          </span>
+          <span>
+            <b className="font-semibold text-foreground tabular-nums">{formatNumber(answers)}</b> {answers === 1 ? t('answer') : t('answers')}
+          </span>
+          {accepted ? (
+            <span className="inline-flex items-center gap-1 font-semibold text-mustard-ink">
+              <CheckCircle size={14} weight="fill" aria-hidden="true" />
+              <span aria-hidden="true">{t('Accepted')}</span>
+              <span className="sr-only">{t('An answer was accepted')}</span>
+            </span>
+          ) : (
+            answers === 0 && (
+              <span className="inline-flex items-center gap-1 font-medium text-foreground">
+                <ChatCircleText size={14} aria-hidden="true" />
+                {t('Unanswered')}
+              </span>
+            )
+          )}
           <span className="inline-flex items-center gap-1.5">
             <Avatar name={question.authorName ?? '?'} size={20} />
             <span className="font-medium text-foreground">{question.authorName}</span>
@@ -82,18 +86,9 @@ export function QuestionCard({ question, compact = false }: { question: Question
                 <span className="sr-only">{t('Reputation')} </span>· {formatNumber(question.authorReputation)}
               </span>
             )}
-            {question.authorBadges?.includes('VERIFIED_EXPERT') && <SealCheck size={14} weight="fill" className="text-mustard" aria-label={t('Verified expert')} />}
-            <span>· {storyDate(question.createdAt)}</span>
+            {question.authorBadges?.includes('VERIFIED_EXPERT') && <SealCheck size={14} weight="fill" className="text-mustard-ink" aria-label={t('Verified expert')} />}
           </span>
-          {answers === 0 && (
-            <span className="inline-flex items-center gap-1 font-medium text-foreground">
-              <ChatCircleText size={14} aria-hidden="true" />
-              {t('Unanswered')}
-            </span>
-          )}
-          {compact && question.category?.categoryName && <span>· {question.category.categoryName}</span>}
         </div>
-        {!compact && <TagList items={tags} label={t('Tags')} className="mt-2.5" />}
       </div>
       {photo && (
         <img
@@ -102,7 +97,7 @@ export function QuestionCard({ question, compact = false }: { question: Question
           loading="lazy"
           decoding="async"
           onError={(event) => (event.currentTarget.hidden = true)}
-          className={cn('shrink-0 rounded-lg bg-muted object-cover', compact ? 'size-14' : 'size-16 sm:size-24')}
+          className={cn('shrink-0 rounded-xl bg-muted object-cover', compact ? 'size-14' : 'size-20 sm:size-28')}
         />
       )}
     </li>

@@ -18,7 +18,7 @@ export function BadgeMark({ badge, field, className }: { badge: Badge; field?: s
         className,
       )}
     >
-      <Icon size={14} weight="fill" className={expert ? 'text-mustard' : 'text-primary'} aria-hidden="true" />
+      <Icon size={14} weight="fill" className={expert ? 'text-mustard-ink' : 'text-primary'} aria-hidden="true" />
       {expert ? (field ? t('Verified expert · {field}', { field }) : t('Verified expert')) : t('Top contributor')}
     </span>
   )

@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend · ➡ moved to a later step
 
-**Progress:** 82 of 82 steps done
+**Progress:** 92 of 92 steps done
 
 ---
 
@@ -218,6 +218,24 @@ Endpoints and rules: `docs/BACKEND_CATCHUP_PLAN.md` § Admin dashboard.
 | F20.2 | Question page on Harvest: the question as a white card with a Lora title, a side panel (Useful question? vote, answer count, asked date, Answer) sticky from 1024px and a row under the question below it, answers as cards with a gold edge on the accepted one, list formatting in answers (`feat/harvest-question`) | ✅ |
 | F20.3 | The page stays white: the pale-green page background is dropped, the rest of Harvest stays (`fix/harvest-white-page`) | ✅ |
 | F20.4 | Ask form redesign: topics as one-tap chips (radios), tags with popular one-tap suggestions, a post bar that says what is still needed, Ctrl/⌘+Enter to post (`feat/ask-redesign`) | ✅ |
+
+## Phase F21 — Paddy Field look (`feat/paddy-base`, stacked on F20)
+
+Nayeem chose direction A's colours and type with D's shapes from five whole-app directions (2026-10-31). One screen
+per step, each checked in light, dark and at 390px.
+
+| # | Step | Status |
+|---|---|---|
+| F21.1 | Paddy Field tokens: paddy green `#245C3A`, mustard `#D9A441` with `mustard-ink` `#8A5F0C` for text, ink `#1C2B21`, leaf wash `#F3F7F2`; pill buttons, 18px cards, 12px fields; no shadows on cards; the direction written into DESIGN.md (`feat/paddy-tokens`) | ✅ |
+| F21.2 | Shell: pill search on the leaf wash, pill Write and Ask, avatar; bottom tab bar on phones (`feat/paddy-shell`) | ✅ |
+| F21.3 | Sign in and sign up: a leaf-wash side panel (headline, a member quote, what you get), Google first, one field for e-mail or phone, the language switch on the form (`feat/paddy-auth`) | ✅ |
+| F21.4 | Become a verified expert: why it's worth it and the three steps beside the form; topics and proof type as one-tap choices (`feat/paddy-expert-apply`) | ✅ |
+| F21.5 | Profile: cover wash, Lora name, headline, stats row, tabs; your own profile shows Edit profile (`feat/paddy-profile`) | ✅ |
+| F21.6 | Story editor: a quiet page (cover, Lora title and subtitle) with a publish panel beside it (`feat/paddy-editor`) | ✅ |
+| F21.7 | Question page: Lora title, tags under it, round votes beside the post, the accepted answer in a mustard card (`feat/paddy-question`) | ✅ |
+| F21.8 | AI advisor: sources as numbered cards above the answer, follow-up questions as rows, a pill ask bar (`feat/paddy-advisor`) | ✅ |
+| F21.9 | Questions and stories feeds: topic chips, rows with a thumbnail, stats line with the accepted mark (`feat/paddy-feeds`) | ✅ |
+| F21.10 | Story page: Medium-like reading column, byline with Follow, quiet save bar (`feat/paddy-story`) | ✅ |
 
 ## Needs from the backend
 

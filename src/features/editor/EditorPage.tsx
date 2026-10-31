@@ -1,4 +1,4 @@
-import { EyeSlash } from '@phosphor-icons/react'
+import { Check, Circle, EyeSlash } from '@phosphor-icons/react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
@@ -38,8 +38,46 @@ export function EditorPage() {
   return blogId ? <EditStory blogId={Number(blogId)} /> : <NewStory />
 }
 
-function Page({ children }: { children: ReactNode }) {
-  return <section className="mx-auto max-w-(--container-feed) px-4 pb-24 sm:px-6">{children}</section>
+/** The writing column, with the publish checklist beside it from 1024px. */
+function Page({ children, aside }: { children: ReactNode; aside?: ReactNode }) {
+  return (
+    <section className="mx-auto grid max-w-[68rem] gap-10 px-4 pb-24 sm:px-8 lg:grid-cols-[minmax(0,1fr)_15rem]">
+      <div className="min-w-0">{children}</div>
+      {aside && <aside className="hidden lg:block">{aside}</aside>}
+    </section>
+  )
+}
+
+const wordCount = (html: string) => html.replace(/<[^>]*>/g, ' ').split(/\s+/).filter(Boolean).length
+
+/** What a story needs before it goes out, and how long it reads; worked out from the draft itself. */
+export function BeforePublish({ title, html, cover }: { title: string; html: string; cover: string }) {
+  const words = wordCount(html)
+  const items = [
+    { label: 'A title', done: title.trim() !== '' },
+    { label: 'Some text', done: hasText(html) },
+    { label: 'A cover image (optional)', done: cover !== '' },
+  ]
+  return (
+    <div className="sticky top-24 flex flex-col gap-4 pt-6 text-sm">
+      <h2 className="font-sans text-sm font-semibold">Before you publish</h2>
+      <ul className="flex flex-col gap-2.5">
+        {items.map((item) => (
+          <li key={item.label} className={item.done ? 'flex items-center gap-2' : 'flex items-center gap-2 text-muted-foreground'}>
+            {item.done ? <Check size={16} weight="bold" className="text-primary" aria-hidden="true" /> : <Circle size={16} aria-hidden="true" />}
+            <span>
+              {item.label}
+              <span className="sr-only">{item.done ? ', done' : ', not yet'}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
+      <p className="border-t border-border pt-4 text-muted-foreground tabular-nums">
+        {words === 0 ? 'No words yet' : `${words.toLocaleString()} ${words === 1 ? 'word' : 'words'} · about ${Math.max(1, Math.round(words / 200))} min read`}
+      </p>
+      <p className="text-muted-foreground">Topic and tags come next, when you publish.</p>
+    </div>
+  )
 }
 
 function StatusBar({ status, children, heading }: { status: ReactNode; children?: ReactNode; heading: string }) {
@@ -96,7 +134,7 @@ function NewStory() {
   }
 
   return (
-    <Page>
+    <Page aside={<BeforePublish title={draft.title} html={draft.html} cover={draft.cover ?? ''} />}>
       <title>New story – AgroTrends</title>
       <StatusBar heading="New story" status={savedAt && !isBlank(content) ? 'Draft saved on this device' : 'New story'}>
         <Button size="sm" disabled={!ready} title={ready ? undefined : 'Add a title and some text first'} onClick={() => setSheetOpen(true)}>
@@ -206,7 +244,7 @@ function StoryForm({ story }: { story: BlogResponse }) {
             : (notice ?? 'Draft')
 
   return (
-    <Page>
+    <Page aside={<BeforePublish title={title} html={html} cover={cover} />}>
       <title>{`Editing ${story.title} – AgroTrends`}</title>
       <StatusBar heading={`Editing ${story.title}`} status={statusText}>
         {published && (

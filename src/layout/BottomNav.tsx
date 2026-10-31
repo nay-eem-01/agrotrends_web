@@ -41,7 +41,7 @@ export function BottomNav() {
           <NavLink
             to="/questions/ask"
             aria-label={t('Ask a question')}
-            className="flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm transition-[background-color,transform] duration-150 ease-(--ease-out) hover:bg-primary-active active:scale-[0.94]"
+            className="flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground transition-[background-color,transform] duration-150 ease-(--ease-out) hover:bg-primary-active active:scale-[0.94]"
           >
             <Plus size={24} weight="bold" aria-hidden="true" />
           </NavLink>

@@ -54,7 +54,7 @@ export function Answers({ questionId, askerId }: { questionId: number; askerId?:
         </ol>
       )}
       <div id="your-answer" className="mt-10 scroll-mt-24">
-        <div className="rounded-2xl border border-border bg-card p-4 shadow-xs sm:p-6">
+        <div className="rounded-xl border border-border bg-card p-4 sm:p-6">
           {status === 'signed-in' ? (
             <Composer
               label={t('Your answer')}
@@ -94,16 +94,16 @@ function AnswerCard({ questionId, answer, asker }: { questionId: number; answer:
       id={`answer-${id}`}
       aria-label={t('Answer by {name}', { name: answer.authorName ?? '' })}
       className={cn(
-        'flex scroll-mt-24 gap-2 rounded-2xl border bg-card p-4 shadow-xs sm:gap-4 sm:p-6',
+        'flex scroll-mt-24 gap-2 rounded-xl border bg-card p-4 sm:gap-4 sm:p-6',
         // The accepted answer is the one to read first: a gold edge as well as the label.
-        answer.accepted ? 'border-mustard/70 ring-1 ring-mustard/40' : 'border-border',
+        answer.accepted ? 'border-mustard ring-1 ring-mustard/40' : 'border-border',
       )}
     >
       <VoteControl target="answers" id={id} score={answer.score ?? 0} myVote={myVotes.data?.answers?.[String(id)]} own={user?.id != null && user.id === answer.userId} />
       <div className="min-w-0 flex-1">
         {answer.accepted && (
           <p className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-mustard-soft px-3 py-1 text-sm font-medium">
-            <CheckCircle size={16} weight="fill" className="text-mustard" aria-hidden="true" />
+            <CheckCircle size={16} weight="fill" className="text-mustard-ink" aria-hidden="true" />
             {t('Accepted by the asker')}
           </p>
         )}
@@ -196,7 +196,7 @@ function AcceptButton({ questionId, answerId, accepted }: { questionId: number; 
         onClick={() => accept.mutate({ answerId, accept: !accepted })}
         className={accepted ? 'text-foreground' : undefined}
       >
-        <CheckCircle size={18} weight={accepted ? 'fill' : 'regular'} className={accepted ? 'text-mustard' : undefined} aria-hidden="true" />
+        <CheckCircle size={18} weight={accepted ? 'fill' : 'regular'} className={accepted ? 'text-mustard-ink' : undefined} aria-hidden="true" />
         {accepted ? t('Accepted') : t('Accept answer')}
       </Button>
       {accept.isError && (

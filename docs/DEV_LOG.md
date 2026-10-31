@@ -46,14 +46,16 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 - Phase F20 on `feat/harvest-base` (stacked on F19's tip): F20.1 Harvest tokens (`feat/harvest-tokens`) and F20.2
   question page (`feat/harvest-question`) and F20.3 white page (`fix/harvest-white-page`) and F20.4 ask form
   redesign (`feat/ask-redesign`) done. Phase F20 is complete.
+- Phase F21 on `feat/paddy-base` (stacked on F20's tip): F21.1 Paddy Field tokens (`feat/paddy-tokens`) done.
 
 ## Next up
 
 1. **Nayeem:** PR F19.1, F19.2 then F19.3 into `feat/simple-ask-base`, then the base into `development`; then F20's
-   steps into `feat/harvest-base`.
-2. Pick an SMS provider (backend 10.5): until then codes only appear in the backend log as `[DEV SMS]`.
-3. Run the admin smoke step (`E2E_ADMIN_EMAIL` / `E2E_ADMIN_PASSWORD`) and the admin screens live once an admin login is at hand.
-4. Merge the backend's Phase 8 so F12–F14 run against its `development`.
+   steps into `feat/harvest-base`, then F21's into `feat/paddy-base`.
+2. F21.2 onwards: one screen per step on the Paddy Field look.
+3. Pick an SMS provider (backend 10.5): until then codes only appear in the backend log as `[DEV SMS]`.
+4. Run the admin smoke step (`E2E_ADMIN_EMAIL` / `E2E_ADMIN_PASSWORD`) and the admin screens live once an admin login is at hand.
+5. Merge the backend's Phase 8 so F12–F14 run against its `development`.
 
 ## Open items
 
@@ -70,6 +72,29 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-31 (F21.1 Paddy Field tokens)
+
+**Done**
+- Nayeem compared five whole-app directions (an artifact with home, story, question, profile, AI advisor, phone, ask,
+  write, sign in, sign up and expert screens in each) and chose **A's colours and type with D's shapes**. Written into
+  `docs/DESIGN.md` as "Paddy Field": the direction, where each area takes its cue (Reddit, Stack Overflow, LinkedIn,
+  Medium, Perplexity, Khamari), five rules, and the colour, type and shape tables.
+- Tokens: paddy `#245C3A`, ink `#1C2B21`, stem `#59665D`, leaf wash `#F3F7F2`, hairline `#E4EAE3`; dark mode a deep
+  loam `#111712` with young-leaf green `#7CC495`. Field borders `#84958A` (3.2:1).
+- Mustard split in two: `mustard` `#D9A441` (the flower: borders, dots, fills) and the new `mustard-ink` `#8A5F0C` for
+  text and icons (5.9:1), since the flower itself is only 2.2:1 on white. `text-mustard` uses moved to `text-mustard-ink`.
+- Shape: `--radius` 12px (fields), cards 18px (`rounded-xl`), larger panels 21px; buttons are pills in Inter 600 with a
+  little more side padding. The question, answer and AI answer cards drop their shadow and move to 18px.
+
+**Decisions**
+- Lora and Inter stay (A's type); only the shapes come from D. D's yellow buttons are not used.
+
+**Known limitations**
+- Screens keep their F20 layouts until their F21 step; some page-level `rounded-2xl` panels are 21px instead of 18px
+  until then.
 
 ---
 

@@ -2,7 +2,8 @@ import { ChatCircleText, SealCheck, Sparkle, WarningCircle } from '@phosphor-ico
 import type { ReactNode } from 'react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { cn } from 'cn'
-import { setLang, useLang, useT } from '../../lib/i18n'
+import { usePublicStats } from '../../api/stats'
+import { formatNumber, setLang, useLang, useT } from '../../lib/i18n'
 import { Sprig } from '../../ui/Botanical'
 
 /**
@@ -11,6 +12,11 @@ import { Sprig } from '../../ui/Botanical'
  */
 export function AuthPage({ title, intro, children }: { title: string; intro: string; children: ReactNode }) {
   const t = useT()
+  const stats = usePublicStats()
+  const facts = [
+    stats.data?.members != null && { value: stats.data.members, label: t('farmers, experts and students') },
+    stats.data?.verifiedExperts != null && { value: stats.data.verifiedExperts, label: t('verified experts') },
+  ].filter((fact): fact is { value: number; label: string } => Boolean(fact))
   const perks = [
     { icon: ChatCircleText, title: t('Ask anything'), text: t('Crops, fish, livestock or your studies') },
     { icon: Sparkle, title: t('An AI advisor with sources'), text: t('Answers that cite the stories shared here') },
@@ -39,7 +45,19 @@ export function AuthPage({ title, intro, children }: { title: string; intro: str
             </li>
           ))}
         </ul>
-        <p className="mt-auto text-sm text-muted-foreground">{t('Free, in English and Bengali.')}</p>
+        <div className="mt-auto flex flex-col gap-5">
+          {facts.length > 0 && (
+            <dl className="flex flex-wrap gap-8">
+              {facts.map((fact) => (
+                <div key={fact.label} className="flex flex-col-reverse">
+                  <dt className="text-sm text-muted-foreground">{fact.label}</dt>
+                  <dd className="text-2xl font-semibold tabular-nums">{formatNumber(fact.value)}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
+          <p className="text-sm text-muted-foreground">{t('Free, in English and Bengali.')}</p>
+        </div>
       </aside>
       <section className="mx-auto flex w-full max-w-md flex-col lg:justify-center">
         <LanguageSwitch />

@@ -32,7 +32,7 @@ function loadGoogle(): Promise<GoogleIdentity> {
   })
 }
 
-/** "Continue with Google" under the sign-in and sign-up forms; nothing at all without a client id. */
+/** "Continue with Google" above the sign-in and sign-up forms, then "or"; nothing at all without a client id. */
 export function GoogleSignIn({ next }: { next: string }) {
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined
   if (!clientId) return null
@@ -78,10 +78,10 @@ function GoogleButton({ clientId, next }: { clientId: string; next: string }) {
   }, [clientId])
 
   return (
-    <div className="mt-6 flex flex-col gap-3">
-      <p className="text-center text-sm text-muted-foreground">{t('or')}</p>
+    <div className="mb-6 flex flex-col gap-4">
       <div ref={slot} className="flex min-h-11 justify-center" />
       <FormError message={google.isError ? errorMessage(google.error) : null} />
+      <p className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 text-sm text-muted-foreground before:h-px before:bg-border after:h-px after:bg-border">{t('or')}</p>
     </div>
   )
 }

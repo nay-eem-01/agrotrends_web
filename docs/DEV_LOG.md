@@ -47,7 +47,7 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   question page (`feat/harvest-question`) and F20.3 white page (`fix/harvest-white-page`) and F20.4 ask form
   redesign (`feat/ask-redesign`) done. Phase F20 is complete.
 - Phase F21 on `feat/paddy-base` (stacked on F20's tip): F21.1 Paddy Field tokens (`feat/paddy-tokens`) F21.2 shell (`feat/paddy-shell`) F21.3 sign in and sign up (`feat/paddy-auth`) F21.4 expert application (`feat/paddy-expert-apply`) F21.5 profile (`feat/paddy-profile`) F21.6 story editor (`feat/paddy-editor`) F21.7 question page (`feat/paddy-question`) F21.8 AI advisor (`feat/paddy-advisor`) F21.9 feeds (`feat/paddy-feeds`) F21.10 story page (`feat/paddy-story`) done. Phase F21 is complete.
-- Phase F22 on `feat/mock-base` (stacked on F21's tip): F22.1 fields (`feat/mock-fields`) F22.2 home feed (`feat/mock-home`) F22.3 question page (`feat/mock-question`) done.
+- Phase F22 on `feat/mock-base` (stacked on F21's tip): F22.1 fields (`feat/mock-fields`) F22.2 home feed (`feat/mock-home`) F22.3 question page (`feat/mock-question`) F22.4 profile (`feat/mock-profile`) done.
 
 ## Next up
 
@@ -74,6 +74,31 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-31 (F22.4 profile as the mock-up)
+
+**Done**
+- `/users/:userId` after LinkedIn: cover (the profile's, or the wash), photo, Lora name, headline (the author's
+  designation or occupation and workplace, else the expert field), location, the Verified expert chip, followers and
+  join date; Follow (author follow) or Report for others, Share and Edit profile on your own.
+- Numbers row: reputation, answers, accepted, stories once the backend summary exists; until then reputation, accepted
+  answers, questions, topics.
+- Tabs: Overview, Stories (when there's an author), Questions, Answers (once §3 answers), and on your own Drafts and
+  Saved. Overview: About, Credentials (from the summary, else the expert topics), "Answers questions on" with points,
+  badges and specialities; beside it Recent contributions (questions, answers and stories by date) or, on your own,
+  Drafts with Continue and Your questions marked Accepted, Answered or Waiting. Your own profile shows how complete it
+  is with a bar and Finish profile.
+- `api/users.ts`: `useUserProfile` (§1) and `useUserAnswers` (§3), no retries, guarded against empty answers.
+  `docs/BACKEND_REQUESTS.md` §1–§2 narrowed: the author profile already has headline, bio, photo, followers and follow;
+  what's missing is user → author, location, cover, counts and credentials.
+- Tests: `users/reputation.test.tsx` (fallback page, your own page, and the full page with summary, author and answers).
+  Checked at 1280px light and dark and at 390px.
+
+**Known limitations**
+- Others' profiles show no headline, Follow or Stories until the backend gives `authorId` for a user (§1).
+- No Message button: AgroTrends has no messaging.
 
 ---
 

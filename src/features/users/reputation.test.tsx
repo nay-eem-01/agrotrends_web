@@ -72,8 +72,9 @@ test('the profile shows reputation by topic, the expert field, and their questio
   const numbers = screen.getAllByRole('term').map((term) => `${term.textContent} ${term.nextElementSibling?.textContent ?? term.previousElementSibling?.textContent}`)
   expect(numbers).toContain('Reputation 1,250')
   expect(numbers).toContain('Accepted answers 32')
-  expect(screen.getByText('Veterinarian')).toBeInTheDocument()
-  expect(screen.getByText('Verified expert in Livestock')).toBeInTheDocument()
+  expect(screen.getAllByText('Veterinarian')).toHaveLength(2) // the headline and the credential
+  expect(screen.getByRole('heading', { name: 'Credentials' })).toBeInTheDocument()
+  expect(screen.getAllByText('Verified expert in Livestock')).toHaveLength(2) // the headline chip and the credential
   expect(screen.queryByRole('link', { name: 'Edit profile' })).not.toBeInTheDocument()
   const livestock = screen.getByText('Livestock').closest('li')!
   expect(within(livestock).getByText('Verified expert · Veterinarian')).toBeInTheDocument()
@@ -94,4 +95,29 @@ test('your own profile offers Edit profile instead of Report', async () => {
 
   expect(await screen.findByRole('link', { name: 'Edit profile' })).toHaveAttribute('href', '/settings')
   expect(screen.queryByRole('button', { name: /Report/ })).not.toBeInTheDocument()
+})
+
+test('with the backend summary and author profile: headline, location, followers, Follow and credentials', async () => {
+  mockApi({
+    'GET /api/users/7/profile': () => envelope(200, { userId: 7, name: 'Dr Nasrin', authorId: 3, location: 'Mymensingh', answerCount: 184, acceptedAnswerCount: 92, storyCount: 12, credentials: [{ title: 'PhD, Aquaculture', institution: 'BAU', year: 2016 }] }),
+    'GET /api/authors/3': () => envelope(200, { authorId: 3, name: 'Dr Nasrin', designation: 'Fish health specialist', workPlaceOrInstitution: 'BAU', bio: 'Pond health.', followerCount: 1800, followedByMe: false, publishedPostCount: 12 }),
+    'GET /api/users/7/reputation': () => envelope(200, { total: 2310, topics: [] }),
+    'GET /api/questions/all/user/7': () => envelope(200, page([])),
+    'GET /api/answers/all/user/7': () => envelope(200, page([{ answerId: 4, questionId: 5, questionTitle: 'Tilapia gasping?', score: 18, accepted: true, createdAt: '2026-10-30T06:00:00Z' }])),
+    'GET /api/blogs/all/author/3': () => envelope(200, page([])),
+  })
+  renderWithProviders(<App />, '/users/7')
+
+  expect(await screen.findByText('Fish health specialist · BAU')).toBeInTheDocument()
+  expect(screen.getByText('Mymensingh')).toBeInTheDocument()
+  expect(screen.getByText('1,800 followers')).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Follow Dr Nasrin' })).toHaveAttribute('aria-pressed', 'false')
+  const numbers = screen.getAllByRole('term').map((term) => `${term.textContent} ${term.nextElementSibling?.textContent}`)
+  expect(numbers).toEqual(['Reputation 2,310', 'Answers 184', 'Accepted 92', 'Stories 12'])
+  expect(screen.getByText('PhD, Aquaculture')).toBeInTheDocument()
+  const recent = (await screen.findByRole('heading', { name: 'Recent contributions' })).closest('section')!
+  expect(await within(recent).findByRole('link', { name: 'Tilapia gasping?' })).toHaveAttribute('href', '/questions/5#answer-4')
+
+  const sections = within(screen.getByRole('navigation', { name: 'Profile sections' }))
+  expect(sections.getAllByRole('button').map((button) => button.textContent)).toEqual(['Overview', 'Stories12', 'Questions0', 'Answers1'])
 })

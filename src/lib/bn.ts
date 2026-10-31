@@ -651,4 +651,5 @@ export const BN: Record<string, string> = {
   'Your questions': 'আপনার প্রশ্ন',
   'Ask next': 'এরপর জিজ্ঞেস করুন',
   'Ask a follow-up…': 'পরের প্রশ্নটি করুন…',
+  'Already answered, might help': 'আগেই উত্তর আছে, কাজে লাগতে পারে',
 }

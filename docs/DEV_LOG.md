@@ -46,7 +46,7 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 - Phase F20 on `feat/harvest-base` (stacked on F19's tip): F20.1 Harvest tokens (`feat/harvest-tokens`) and F20.2
   question page (`feat/harvest-question`) and F20.3 white page (`fix/harvest-white-page`) and F20.4 ask form
   redesign (`feat/ask-redesign`) done. Phase F20 is complete.
-- Phase F21 on `feat/paddy-base` (stacked on F20's tip): F21.1 Paddy Field tokens (`feat/paddy-tokens`) F21.2 shell (`feat/paddy-shell`) F21.3 sign in and sign up (`feat/paddy-auth`) done.
+- Phase F21 on `feat/paddy-base` (stacked on F20's tip): F21.1 Paddy Field tokens (`feat/paddy-tokens`) F21.2 shell (`feat/paddy-shell`) F21.3 sign in and sign up (`feat/paddy-auth`) F21.4 expert application (`feat/paddy-expert-apply`) done.
 
 ## Next up
 
@@ -72,6 +72,23 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-31 (F21.4 Paddy expert application)
+
+**Done**
+- `/experts/apply` in two columns from 1024px: on the left a mustard "Verified expert" chip, a Lora title, why it's worth
+  it (a badge on everything you write; check the AI advisor in your topics) and "What happens next" as three numbered
+  steps (send, an admin looks at your proof, your badge appears with a notification). The form or the application's
+  status on the right; on phones the explainer comes first.
+- Form: field and institution side by side; topics and the proof type as pill chips with a tick (the proof type was a
+  select, now radios: one tap); the bottom bar has a note, Cancel and Send application.
+- Tests: `experts/apply.test.tsx` picks the proof type as a radio and checks the explainer's steps. Checked at 1280px
+  light and dark and at 390px.
+
+**Decisions**
+- No "usually within 3 days" or "questions come to you first": neither is promised by the backend.
 
 ---
 

@@ -31,9 +31,12 @@ export function Answers({ questionId, askerId }: { questionId: number; askerId?:
 
   return (
     <section aria-labelledby={headingId} className="mt-10">
-      <h2 id={headingId} className="text-xl">
-        {answers.data ? t(list.length === 1 ? '{n} answer' : '{n} answers', { n: formatNumber(list.length) }) : t('Answers')}
-      </h2>
+      <div className="flex items-baseline justify-between gap-3 border-b border-border pb-3">
+        <h2 id={headingId} className="text-xl">
+          {answers.data ? t(list.length === 1 ? '{n} answer' : '{n} answers', { n: formatNumber(list.length) }) : t('Answers')}
+        </h2>
+        {list.length > 1 && <p className="text-sm text-muted-foreground">{t('Accepted first, then by votes')}</p>}
+      </div>
       {answers.isPending ? (
         <div className="py-8 text-muted-foreground">
           <Spinner label={t('Loading')} />
@@ -45,7 +48,7 @@ export function Answers({ questionId, askerId }: { questionId: number; askerId?:
       ) : list.length === 0 ? (
         <p className="py-6 text-muted-foreground">{t('No answers yet. If you have grown this, your answer helps.')}</p>
       ) : (
-        <ol className="mt-4 flex flex-col gap-3">
+        <ol className="flex flex-col">
           {list.map((answer) => (
             <li key={answer.answerId}>
               <AnswerCard questionId={questionId} answer={answer} asker={user?.id != null && user.id === askerId} />
@@ -94,9 +97,12 @@ function AnswerCard({ questionId, answer, asker }: { questionId: number; answer:
       id={`answer-${id}`}
       aria-label={t('Answer by {name}', { name: answer.authorName ?? '' })}
       className={cn(
-        'flex scroll-mt-24 gap-2 rounded-xl border bg-card p-4 sm:gap-4 sm:p-6',
-        // The accepted answer is the one to read first: a gold edge as well as the label.
-        answer.accepted ? 'border-mustard ring-1 ring-mustard/40' : 'border-border',
+        'flex scroll-mt-24 gap-3 sm:gap-4',
+        // The accepted answer is the one to read first: a mustard card with a wash at its top, as well as the label;
+        // the others are plain rows divided by hairlines.
+        answer.accepted
+          ? 'my-4 rounded-xl border border-mustard bg-[linear-gradient(var(--color-mustard-soft),var(--color-card)_5rem)] p-4 sm:p-5'
+          : 'border-b border-border py-6',
       )}
     >
       <VoteControl target="answers" id={id} score={answer.score ?? 0} myVote={myVotes.data?.answers?.[String(id)]} own={user?.id != null && user.id === answer.userId} />

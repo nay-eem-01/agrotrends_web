@@ -47,7 +47,7 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   question page (`feat/harvest-question`) and F20.3 white page (`fix/harvest-white-page`) and F20.4 ask form
   redesign (`feat/ask-redesign`) done. Phase F20 is complete.
 - Phase F21 on `feat/paddy-base` (stacked on F20's tip): F21.1 Paddy Field tokens (`feat/paddy-tokens`) F21.2 shell (`feat/paddy-shell`) F21.3 sign in and sign up (`feat/paddy-auth`) F21.4 expert application (`feat/paddy-expert-apply`) F21.5 profile (`feat/paddy-profile`) F21.6 story editor (`feat/paddy-editor`) F21.7 question page (`feat/paddy-question`) F21.8 AI advisor (`feat/paddy-advisor`) F21.9 feeds (`feat/paddy-feeds`) F21.10 story page (`feat/paddy-story`) done. Phase F21 is complete.
-- Phase F22 on `feat/mock-base` (stacked on F21's tip): F22.1 fields (`feat/mock-fields`) F22.2 home feed (`feat/mock-home`) done.
+- Phase F22 on `feat/mock-base` (stacked on F21's tip): F22.1 fields (`feat/mock-fields`) F22.2 home feed (`feat/mock-home`) F22.3 question page (`feat/mock-question`) done.
 
 ## Next up
 
@@ -74,6 +74,25 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-31 (F22.3 question page as the mock-up)
+
+**Done**
+- The question is no longer a card: topic and Unanswered on top, the Lora title, tags, then the vote column (round
+  buttons, outlined) beside the question text, photos, farming chips and the author line. The vote keeps its
+  "Rate this question" group name and "Useful question?" for screen readers.
+- Side panel from 1024px, sticky: Answers, Views (once the backend sends `viewCount`, §7) and Asked; the AI advisor with
+  "Read the AI answer →"; Write an answer. On phones Write an answer sits under the question.
+- Answers: a header with "Accepted first, then by votes"; the accepted answer is a mustard card with a wash at its top,
+  the others plain rows divided by hairlines.
+- Test: `qa/question-page.test.tsx` reads the panel's numbers (with views) and its two links. Checked at 1280px light
+  and dark and at 390px.
+
+**Decisions**
+- "Useful question?" is no longer shown as text (the mock-up has none); the vote column sits against the question
+  text, apart from the answers' votes, and its buttons say "Upvote this question" on hover.
 
 ---
 

@@ -104,3 +104,18 @@ test('an author sees their own draft marked as one', async () => {
   const read = api.mock.calls.find(([url]) => String(url) === '/api/blogs/slug/draft')!
   expect((read[1]!.headers as Record<string, string>).Authorization).toBe('Bearer a1')
 })
+
+test('the byline offers Follow for the author, as on Medium', async () => {
+  mockApi({
+    'GET /api/blogs/slug/rice-blast-and-nitrogen': () => envelope(200, story),
+    'GET /api/comments/blog/402': () => envelope(200, []),
+    'GET /api/authors/1': () => envelope(200, { authorId: 1, name: 'Nasrin Akter', followerCount: 12, followedByMe: false }),
+  })
+  renderWithProviders(<App />, '/stories/rice-blast-and-nitrogen')
+
+  const title = await screen.findByRole('heading', { level: 1 })
+  const follow = (await screen.findAllByRole('button', { name: 'Follow Nasrin Akter' }))[0]
+  // The first Follow is the byline's, above the story text.
+  expect(title.compareDocumentPosition(follow) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  expect(follow.compareDocumentPosition(screen.getByText(/nitrogen/i, { selector: 'strong' })) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+})

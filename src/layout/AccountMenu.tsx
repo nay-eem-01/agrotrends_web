@@ -1,5 +1,5 @@
 import { setLang, useLang, useT } from '../lib/i18n'
-import { BookmarksSimple, GearSix, NotePencil, SealCheck, ShieldCheck, SignOut, Translate } from '@phosphor-icons/react'
+import { BookmarksSimple, GearSix, UserCircle, NotePencil, SealCheck, ShieldCheck, SignOut, Translate } from '@phosphor-icons/react'
 import { useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate } from 'react-router-dom'
 import {
@@ -53,6 +53,12 @@ export function AccountMenu() {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
+          {user?.id != null && (
+            <DropdownMenuItem className={item} render={<Link to={`/users/${user.id}`} state={{ name: user.name }} />}>
+              <UserCircle size={18} aria-hidden="true" />
+              {t('Your profile')}
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem className={item} render={<Link to="/me/stories" />}>
             <NotePencil size={18} aria-hidden="true" />
             {t('Your stories')}

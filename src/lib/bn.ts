@@ -671,4 +671,5 @@ export const BN: Record<string, string> = {
   'Hide navigation': 'নেভিগেশন লুকান',
   'Show navigation': 'নেভিগেশন দেখান',
   'Navigation': 'নেভিগেশন',
+  'Your profile': 'আপনার প্রোফাইল',
 }

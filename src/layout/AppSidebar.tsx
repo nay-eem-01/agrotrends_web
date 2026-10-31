@@ -1,4 +1,4 @@
-import { BookOpen, ChatCircleText, Compass, House, NotePencil, Newspaper, Plus, Sparkle, type Icon } from '@phosphor-icons/react'
+import { BookOpen, ChatCircleText, Compass, House, NotePencil, Newspaper, Plus, Sparkle, UserCircle, type Icon } from '@phosphor-icons/react'
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { cn } from 'cn'
@@ -50,7 +50,7 @@ export function useSidebar() {
 export function AppSidebar() {
   const t = useT()
   const { open } = useSidebar()
-  const { status } = useSession()
+  const { status, user } = useSession()
   const signedIn = status === 'signed-in'
   const followed = useFollowedTags(signedIn)
   const sections: { to: string; end?: boolean; label: string; icon: Icon }[] = [
@@ -61,6 +61,7 @@ export function AppSidebar() {
   ]
   const yours: { to: string; label: string; icon: Icon }[] = signedIn
     ? [
+        ...(user?.id != null ? [{ to: `/users/${user.id}`, label: t('Your profile'), icon: UserCircle }] : []),
         { to: '/library', label: t('Reading list'), icon: BookOpen },
         { to: '/me/stories', label: t('Your stories'), icon: NotePencil },
       ]

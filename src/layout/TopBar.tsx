@@ -1,7 +1,7 @@
 import { useT } from '../lib/i18n'
 import { List, MagnifyingGlass, NotePencil, Plus } from '@phosphor-icons/react'
-import { lazy, Suspense, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { lazy, Suspense, useEffect, useRef, useState, type FormEvent, type RefObject } from 'react'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { cn } from 'cn'
 import { useSession } from '../features/auth/session'
 import { ButtonLink } from '../ui/Button'
@@ -20,13 +20,18 @@ export function TopBar() {
   const { status } = useSession()
   const sidebar = useSidebar()
   const [searching, setSearching] = useState(false)
+  const inline = useRef<HTMLInputElement>(null)
+  const { pathname } = useLocation()
+  const [params] = useSearchParams()
+  const current = pathname === '/search' ? (params.get('q') ?? '') : ''
 
-  // Ctrl/⌘+K opens the search from anywhere.
+  // Ctrl/⌘+K goes to the search from anywhere: the field in the bar when it is shown, the dialog otherwise.
   useEffect(() => {
     function shortcut(event: KeyboardEvent) {
       if (event.key.toLowerCase() === 'k' && (event.ctrlKey || event.metaKey)) {
         event.preventDefault()
-        setSearching(true)
+        if (inline.current?.offsetParent) inline.current.focus()
+        else setSearching(true)
       }
     }
     document.addEventListener('keydown', shortcut)
@@ -48,26 +53,15 @@ export function TopBar() {
           <List size={22} aria-hidden="true" />
         </button>
         <Logo />
-        {/* Wide screens: the search is a pill on the leaf wash that opens the search dialog; Ctrl/⌘+K does the same. */}
-        <button
-          type="button"
-          onClick={() => setSearching(true)}
-          aria-keyshortcuts="Control+K Meta+K"
-          className="hidden h-10 w-72 items-center gap-2 rounded-full bg-surface pr-2 pl-4 text-sm text-muted-foreground transition-[background-color,color] duration-150 hover:bg-secondary hover:text-foreground xl:flex"
-        >
-          <MagnifyingGlass size={18} aria-hidden="true" />
-          <span className="flex-1 text-left">{t('Search')}</span>
-          <kbd aria-hidden="true" className="rounded-full bg-background px-2 py-0.5 font-sans text-xs">
-            Ctrl K
-          </kbd>
-        </button>
+        {/* Wide screens: the search is a field in the bar itself; it keeps the words on the results page. */}
+        <InlineSearch key={current} initial={current} field={inline} />
         <nav aria-label={t('Main')} className="ml-auto flex items-center gap-0 md:gap-1">
           <button
             type="button"
             onClick={() => setSearching(true)}
             aria-label={t('Search')}
             aria-keyshortcuts="Control+K Meta+K"
-            className="flex size-11 items-center justify-center rounded-full text-muted-foreground hover:text-foreground max-[379px]:hidden xl:hidden"
+            className="flex size-11 items-center justify-center rounded-full text-muted-foreground hover:text-foreground max-[379px]:hidden lg:hidden"
           >
             <MagnifyingGlass size={22} aria-hidden="true" />
           </button>
@@ -108,5 +102,48 @@ export function TopBar() {
         </Suspense>
       )}
     </header>
+  )
+}
+
+/** The bar's search field: Enter searches questions, stories and topics on `/search`; a blank search stays put. */
+function InlineSearch({ initial, field }: { initial: string; field: RefObject<HTMLInputElement | null> }) {
+  const t = useT()
+  const navigate = useNavigate()
+  const [query, setQuery] = useState(initial)
+
+  function submit(event: FormEvent) {
+    event.preventDefault()
+    const q = query.trim()
+    if (!q) return
+    field.current?.blur()
+    navigate(`/search?q=${encodeURIComponent(q)}`)
+  }
+
+  return (
+    <search className="hidden min-w-0 flex-1 lg:block lg:max-w-sm xl:max-w-md">
+      <form
+        onSubmit={submit}
+        className="flex h-10 items-center gap-2 rounded-full bg-surface pr-2 pl-4 text-sm text-muted-foreground transition-[background-color,box-shadow] duration-150 focus-within:bg-background focus-within:ring-2 focus-within:ring-ring/40 hover:bg-secondary focus-within:hover:bg-background"
+      >
+        <MagnifyingGlass size={18} aria-hidden="true" className="shrink-0" />
+        <input
+          ref={field}
+          type="search"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === 'Escape') event.currentTarget.blur()
+          }}
+          aria-label={t('Search AgroTrends')}
+          aria-keyshortcuts="Control+K Meta+K"
+          placeholder={t('Search questions, crops, pests')}
+          enterKeyHint="search"
+          className="h-full min-w-0 flex-1 bg-transparent text-foreground outline-none placeholder:text-muted-foreground [&::-webkit-search-cancel-button]:hidden"
+        />
+        <kbd aria-hidden="true" className="hidden rounded-full bg-background px-2 py-0.5 font-sans text-xs xl:inline">
+          Ctrl K
+        </kbd>
+      </form>
+    </search>
   )
 }

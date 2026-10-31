@@ -19,50 +19,50 @@
 
 /* Tokens from docs/DESIGN.md: shadcn's semantic roles, AgroTrends' colours. Components never use raw hex. */
 :root {
-  /* "The Living Field" (F15): a white page, forest green for action, sage for selection, a warm field accent. */
+  /* "Harvest" (F20): a white page, earth green for action, harvest gold for trust. */
   --background: #ffffff;
-  --foreground: #1c2b21;
-  --surface: #f5f8f3;
+  --foreground: #14532d;
+  --surface: #e7f6ec;
   --card: #ffffff;
-  --card-foreground: #1c2b21;
+  --card-foreground: #14532d;
   --popover: #ffffff;
-  --popover-foreground: #1c2b21;
-  --primary: #245c3a;
+  --popover-foreground: #14532d;
+  --primary: #15803d;
   --primary-foreground: #ffffff;
-  --primary-active: #19482d;
-  --secondary: #eaf3e8;
-  --secondary-foreground: #1c2b21;
-  --muted: #f5f8f3;
-  --muted-foreground: #59665d;
-  --subtle: #78847b;
-  --accent: #eaf3e8;
-  --accent-foreground: #1c2b21;
+  --primary-active: #166534;
+  --secondary: #dcfce7;
+  --secondary-foreground: #14532d;
+  --muted: #e7f6ec;
+  --muted-foreground: #4b5e52;
+  --subtle: #6b7f72;
+  --accent: #dcfce7;
+  --accent-foreground: #14532d;
   --destructive: #b42318;
   --destructive-soft: #fef3f2;
-  --success: #216e45;
-  --warning: #d9a441;
-  --warning-soft: #fbf3e1;
-  --border: #e2e8e1;
-  --border-strong: #c9d5c9;
-  --input: #c9d5c9;
-  --ring: #79a98a;
-  --mustard: #d9a441;
-  --mustard-soft: #fbf3e1;
-  --shade: #1c2b21;
-  --radius: 0.75rem;
-  --chart-1: #245c3a;
-  --chart-2: #d9a441;
-  --chart-3: #59665d;
-  --chart-4: #79a98a;
-  --chart-5: #19482d;
+  --success: #15803d;
+  --warning: #a16207;
+  --warning-soft: #fef3c7;
+  --border: #d3eedb;
+  --border-strong: #a7d7b5;
+  --input: #68a07a;
+  --ring: #86c99b;
+  --mustard: #a16207;
+  --mustard-soft: #fef3c7;
+  --shade: #14532d;
+  --radius: 1rem;
+  --chart-1: #15803d;
+  --chart-2: #a16207;
+  --chart-3: #4b5e52;
+  --chart-4: #86c99b;
+  --chart-5: #166534;
   --sidebar: #ffffff;
-  --sidebar-foreground: #1c2b21;
-  --sidebar-primary: #245c3a;
+  --sidebar-foreground: #14532d;
+  --sidebar-primary: #15803d;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #eaf3e8;
-  --sidebar-accent-foreground: #1c2b21;
-  --sidebar-border: #e2e8e1;
-  --sidebar-ring: #79a98a;
+  --sidebar-accent: #dcfce7;
+  --sidebar-accent-foreground: #14532d;
+  --sidebar-border: #d3eedb;
+  --sidebar-ring: #86c99b;
 
   /* Motion (Emil Kowalski's curves): enter and exit with ease-out, move on screen with ease-in-out. */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
@@ -70,88 +70,88 @@
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-/* Dark, "the field at night": deep loam, warm off-white ink, forest green lifted for contrast. */
+/* Dark, "the field at night": deep loam green, pale leaf ink, a bright young-leaf green for action. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --background: #121713;
-    --foreground: #e9eee8;
-    --surface: #182019;
-    --card: #161d17;
-    --card-foreground: #e9eee8;
-    --popover: #1b231c;
-    --popover-foreground: #e9eee8;
-    --primary: #7cc794;
-    --primary-foreground: #0c1a10;
-    --primary-active: #9ad8ad;
-    --secondary: #1f2b21;
-    --secondary-foreground: #e9eee8;
-    --muted: #182019;
-    --muted-foreground: #a7b3a9;
-    --subtle: #7f8c81;
-    --accent: #1f2b21;
-    --accent-foreground: #e9eee8;
+    --background: #0b1410;
+    --foreground: #dcfce7;
+    --surface: #12241a;
+    --card: #111d16;
+    --card-foreground: #dcfce7;
+    --popover: #15231a;
+    --popover-foreground: #dcfce7;
+    --primary: #4ade80;
+    --primary-foreground: #052e16;
+    --primary-active: #86efac;
+    --secondary: #14301f;
+    --secondary-foreground: #dcfce7;
+    --muted: #12241a;
+    --muted-foreground: #9db8a6;
+    --subtle: #7d9886;
+    --accent: #14301f;
+    --accent-foreground: #dcfce7;
     --destructive: #f2766d;
     --destructive-soft: #2c1714;
-    --success: #7cc794;
-    --warning: #e0b04a;
-    --warning-soft: #2b2412;
-    --border: #263027;
-    --border-strong: #354236;
-    --input: #435245;
-    --ring: #5f9a72;
-    --mustard: #e0b04a;
-    --mustard-soft: #2b2412;
+    --success: #4ade80;
+    --warning: #eab308;
+    --warning-soft: #2a2108;
+    --border: #1e3a28;
+    --border-strong: #2a4d36;
+    --input: #4f7d5f;
+    --ring: #22a356;
+    --mustard: #eab308;
+    --mustard-soft: #2a2108;
     --shade: #000000;
-    --sidebar: #161d17;
-    --sidebar-foreground: #e9eee8;
-    --sidebar-primary: #7cc794;
-    --sidebar-primary-foreground: #0c1a10;
-    --sidebar-accent: #1f2b21;
-    --sidebar-accent-foreground: #e9eee8;
-    --sidebar-border: #263027;
-    --sidebar-ring: #5f9a72;
+    --sidebar: #111d16;
+    --sidebar-foreground: #dcfce7;
+    --sidebar-primary: #4ade80;
+    --sidebar-primary-foreground: #052e16;
+    --sidebar-accent: #14301f;
+    --sidebar-accent-foreground: #dcfce7;
+    --sidebar-border: #1e3a28;
+    --sidebar-ring: #22a356;
     color-scheme: dark;
   }
 }
 
 :root[data-theme='dark'] {
-  --background: #121713;
-  --foreground: #e9eee8;
-  --surface: #182019;
-  --card: #161d17;
-  --card-foreground: #e9eee8;
-  --popover: #1b231c;
-  --popover-foreground: #e9eee8;
-  --primary: #7cc794;
-  --primary-foreground: #0c1a10;
-  --primary-active: #9ad8ad;
-  --secondary: #1f2b21;
-  --secondary-foreground: #e9eee8;
-  --muted: #182019;
-  --muted-foreground: #a7b3a9;
-  --subtle: #7f8c81;
-  --accent: #1f2b21;
-  --accent-foreground: #e9eee8;
+  --background: #0b1410;
+  --foreground: #dcfce7;
+  --surface: #12241a;
+  --card: #111d16;
+  --card-foreground: #dcfce7;
+  --popover: #15231a;
+  --popover-foreground: #dcfce7;
+  --primary: #4ade80;
+  --primary-foreground: #052e16;
+  --primary-active: #86efac;
+  --secondary: #14301f;
+  --secondary-foreground: #dcfce7;
+  --muted: #12241a;
+  --muted-foreground: #9db8a6;
+  --subtle: #7d9886;
+  --accent: #14301f;
+  --accent-foreground: #dcfce7;
   --destructive: #f2766d;
   --destructive-soft: #2c1714;
-  --success: #7cc794;
-  --warning: #e0b04a;
-  --warning-soft: #2b2412;
-  --border: #263027;
-  --border-strong: #354236;
-  --input: #435245;
-  --ring: #5f9a72;
-  --mustard: #e0b04a;
-  --mustard-soft: #2b2412;
+  --success: #4ade80;
+  --warning: #eab308;
+  --warning-soft: #2a2108;
+  --border: #1e3a28;
+  --border-strong: #2a4d36;
+  --input: #4f7d5f;
+  --ring: #22a356;
+  --mustard: #eab308;
+  --mustard-soft: #2a2108;
   --shade: #000000;
-  --sidebar: #161d17;
-  --sidebar-foreground: #e9eee8;
-  --sidebar-primary: #7cc794;
-  --sidebar-primary-foreground: #0c1a10;
-  --sidebar-accent: #1f2b21;
-  --sidebar-accent-foreground: #e9eee8;
-  --sidebar-border: #263027;
-  --sidebar-ring: #5f9a72;
+  --sidebar: #111d16;
+  --sidebar-foreground: #dcfce7;
+  --sidebar-primary: #4ade80;
+  --sidebar-primary-foreground: #052e16;
+  --sidebar-accent: #14301f;
+  --sidebar-accent-foreground: #dcfce7;
+  --sidebar-border: #1e3a28;
+  --sidebar-ring: #22a356;
   color-scheme: dark;
 }
 
@@ -217,14 +217,14 @@
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
 
-  /* Newsreader and Inter have no Bengali letters: the browser takes those glyphs from the next font in the stack. */
-  --font-serif: 'Newsreader Variable', 'Noto Serif Bengali Variable', Georgia, serif;
+  /* Lora and Inter have no Bengali letters: the browser takes those glyphs from the next font in the stack. */
+  --font-serif: 'Lora Variable', 'Noto Serif Bengali Variable', Georgia, serif;
   --font-sans: 'Inter Variable', 'Hind Siliguri', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-heading: var(--font-sans);
 }
 
 @theme {
-  /* Type scale: 13 · 14 · 16 · 18 · 22 · 28 · 40 · 52 (Inter for the interface, Newsreader for headlines) */
+  /* Type scale: 13 · 14 · 16 · 18 · 22 · 28 · 40 · 52 (Inter for the interface, Lora for headlines) */
   --text-xs: 0.8125rem;
   --text-xs--line-height: 1.4;
   --text-sm: 0.875rem;
@@ -261,14 +261,14 @@
     @apply border-border outline-ring/50;
   }
 
-  /* Headings are interface type (Inter); editorial headlines opt into Newsreader with `font-serif`. */
+  /* Headings are interface type (Inter); editorial headlines and question titles opt into Lora with `font-serif`. */
   h1,
   h2,
   h3 {
     @apply font-sans font-semibold tracking-[-0.015em] text-foreground;
   }
 
-  /* The forest-green outline is the focus indicator (7.9:1); components add the #79A98A ring as a soft halo. */
+  /* The earth-green outline is the focus indicator (5.0:1); components add the #86C99B ring as a soft halo. */
   :focus-visible {
     outline: 2px solid var(--color-primary);
     outline-offset: 2px;

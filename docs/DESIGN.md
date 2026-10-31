@@ -8,50 +8,57 @@ get a farmer from a question to an answer they can trust, and make clear who (or
 Built with **shadcn/ui** (`base-maia` style on Base UI, components in `src/components/ui/`), themed with the tokens
 below. The crop-season strip of F2 is gone (2026-10-15); season is an ordinary filter next to crop, region and soil.
 
-## Colour — "The Living Field" (F15, 2026-10-17)
+## Colour — "Harvest" (F20, 2026-10-31)
 
-A pure white page (`#FFFFFF`), forest green for action, sage for selection, a warm field accent. At least three
-quarters of any screen reads as white. Semantic shadcn roles in `src/index.css`; the F0–F6 names are aliases.
+Chosen with the ui-ux-pro-max skill (its Agriculture / Farm Tech profile, style "Organic Biophilic"): a white page
+(as before; the skill's pale-green page was tried and dropped), earth green for action, harvest gold for trust. Replaces F15's "Living
+Field" (white page, forest green `#245C3A`, mustard `#D9A441`). Semantic shadcn roles in `src/index.css`; the F0–F6
+names are aliases. Contrast is against white unless noted.
 
 | Role (class) | Light | Dark | Use |
 |---|---|---|---|
-| `background` / `card` / `popover` | `#FFFFFF` | `#121713` / `#161D17` / `#1B231C` | the page, forms, menus, dialogs |
-| `surface` / `muted` | `#F5F8F3` | `#182019` | pale green, sparingly: the advisor panel, the answer box, sources, hover rows, skeletons |
-| `foreground` | `#1C2B21` | `#E9EEE8` | text and headlines (14.8:1) |
-| `muted-foreground` | `#59665D` | `#A7B3A9` | secondary text, metadata (6.0:1) |
-| `subtle` / `input` | `#78847B` | `#7F8C81` / `#6D7A6F` | field borders and icons only: 3.9:1, too low for small text |
-| `border` / `border-strong` | `#E2E8E1` / `#C9D5C9` | `#263027` / `#354236` | hairlines; secondary buttons, outline chips |
-| `secondary` / `accent` | `#EAF3E8` | `#1F2B21` | selected chips and rows, topic labels |
-| `primary` / `primary-active` | `#245C3A` / `#19482D` | `#7CC794` / `#9AD8AD` | primary actions, active nav, links, the focus outline (7.9:1) |
-| `ring` | `#79A98A` | `#5F9A72` | the soft 3px focus halo (2.7:1, so always paired with the green outline or border) |
-| `mustard` / `mustard-soft` (= `warning`) | `#D9A441` / `#FBF3E1` | `#E0B04A` / `#2B2412` | the warm field accent: trust marks (accepted, Verified Expert), season labels, featured details, cautions. Decorative only (2.3:1): text on it is `foreground` |
+| `background` | `#FFFFFF` | `#0B1410` | the page: white, so at least three quarters of a screen reads as white |
+| `card` / `popover` | `#FFFFFF` | `#111D16` / `#15231A` | cards (with a hairline), forms, menus, dialogs |
+| `surface` / `muted` | `#E7F6EC` | `#12241A` | quiet panels on cards: the answer box, sources, hover rows, skeletons, the editor toolbar |
+| `foreground` | `#14532D` | `#DCFCE7` | text and headlines: deep leaf green (9.1:1) |
+| `muted-foreground` | `#4B5E52` | `#9DB8A6` | secondary text, metadata (7.0:1) |
+| `subtle` | `#6B7F72` | `#7D9886` | icons only (4.3:1) |
+| `border` / `border-strong` | `#D3EEDB` / `#A7D7B5` | `#1E3A28` / `#2A4D36` | hairlines; secondary buttons, outline chips |
+| `input` | `#68A07A` | `#4F7D5F` | field borders (3.0:1 / 3.7:1, the WCAG minimum for controls) |
+| `secondary` / `accent` | `#DCFCE7` | `#14301F` | selected chips and rows, topic labels |
+| `primary` / `primary-active` | `#15803D` / `#166534` | `#4ADE80` / `#86EFAC` | primary actions, active nav, links, the focus outline (5.0:1; white on it 5.0:1) |
+| `ring` | `#86C99B` | `#22A356` | the soft 3px focus halo, always with the green outline or border |
+| `mustard` / `mustard-soft` (= `warning`) | `#A16207` / `#FEF3C7` | `#EAB308` / `#2A2108` | harvest gold: trust marks (accepted, Verified Expert, expert-checked AI), cautions (4.9:1) |
 | `destructive` / `destructive-soft` | `#B42318` / `#FEF3F2` | `#F2766D` / `#2C1714` | errors |
-| `success` | `#216E45` | `#7CC794` | success text |
+| `success` | `#15803D` | `#4ADE80` | success text |
 
-No gradients, glass or heavy shadows. Meaning never rests on colour alone: selected chips have a tick or a
-different border, the active nav an underline, errors an icon, unanswered questions the word "Unanswered".
+No gradients or glass. Cards are white with a hairline and at most `shadow-xs`; real shadows stay on overlays. Meaning
+never rests on colour alone: selected chips have a tick or a different border, the active nav an underline, errors
+an icon, unanswered questions the word "Unanswered".
 
 ## Type
 
-- **Newsreader** (variable, optical sizes) — editorial only: the Discover headline, section headings on Discover,
-  story titles and story bodies, the Stories and Advisor page titles, the auth panel. Weight 500, slight negative
-  tracking.
+- **Lora** (variable, 400–700; F20, replacing Newsreader) — editorial: the Discover headline, section headings on
+  Discover, story titles and story bodies, the Stories and Advisor page titles, the auth panel, and question titles
+  on the question page. Weight 500–600, slight negative tracking.
 - **Inter** (variable) — everything else: navigation, questions and answers (a question is a request for help, not
   an article), the AI conversation, forms, metadata, buttons. Base headings (`h1`–`h3`) are Inter 600.
 - Bengali: neither face has Bengali letters, so the stacks continue with **Hind Siliguri** (after Inter) and **Noto
-  Serif Bengali** (after Newsreader); the browser takes Bengali glyphs from those.
+  Serif Bengali** (after Lora); the browser takes Bengali glyphs from those.
 - Scale (px): 13 · 14 · 16 · 18 · 22 · 28 · 40 · 52. Story body 18px on phones, 20px from 640px, measure ~68ch.
 
 ## Shape and controls (F16, 2026-10-17)
 
-- Radius from one token (`--radius: 0.75rem`): inputs, selects, buttons and compact controls `rounded-lg` (12px);
-  cards, menus and popovers `rounded-xl` (~17px); dialogs and large surfaces `rounded-xl`/`rounded-2xl` (17–22px);
+- Radius from one token (`--radius: 1rem`, F20): inputs, selects, buttons and compact controls `rounded-lg` (16px);
+  cards, menus and popovers `rounded-xl` (~22px); dialogs and large surfaces `rounded-xl`/`rounded-2xl` (22–29px);
   chips and badges fully round. No one-off radii on pages.
-- Fields: white, 44px high, 12px corners, `input` border `#C9D5C9`, darker (`subtle`) on hover, green border plus the
-  `#79A98A` halo on focus, red border and an icon with the message on error. Labels always visible; placeholders are
+- Fields: white, 44px high, 16px corners, `input` border `#68A07A`, darker (`subtle`) on hover, green border plus the
+  `#86C99B` halo on focus, red border and an icon with the message on error. Labels always visible; placeholders are
   examples, never the label.
 - Buttons: primary filled green; secondary white with `border-strong`; quiet is a ghost; danger a red wash.
-- Selects: every list is the shadcn Select (short fixed lists) or `SearchSelect` (topics). No native selects.
+- Selects: every list is the shadcn Select (short fixed lists) or `SearchSelect` (topics). No native selects. The ask
+  form shows topics as one-tap chips instead (`qa/TopicPicker`: radios styled as chips, a tick on the chosen one, the
+  first eight then "More topics" as a search).
 - Secondary post actions (Edit, Delete, Report) sit behind a "More actions" menu (`threads/PostMenu`) at the top right
   of each question, answer, reply and response; Reply, Show replies and Accept stay visible. Delete is red and still
   asks first.
@@ -74,7 +81,7 @@ Page width 1240px, gutters 16px (phones) / 32px; reading column 680px; feed colu
 - **Navigation:** white bar with a hairline: Discover · Questions · Stories · AI advisor · Write, Ask (signed in),
   bell, account menu; the current page green and underlined. Search opens a dialog (field-styled trigger from 1280px). Below 1024px a menu sheet;
   below 768px a bottom tab bar (Discover, Questions, Ask +, Stories, AI advisor).
-- **Discover (`/`):** hero (Newsreader headline, intro, Ask a question / Join) beside the drawn field (`FieldScene`) with
+- **Discover (`/`):** hero (Lora headline, intro, Ask a question / Join) beside the drawn field (`FieldScene`) with
   an advisor caption; "Help a farmer today" (up to three unanswered questions, each with Answer); "What farmers are
   asking" (one row of topic filters, then compact question rows) beside the advisor panel with
   seasonal questions that open `/advisor?q=`; "From the field": a featured story and three compact ones. Sections
@@ -83,7 +90,7 @@ Page width 1240px, gutters 16px (phones) / 32px; reading column 680px; feed colu
   that), Newest | Unanswered, Filter popover, active-filter chips; rows with votes, answer state and the first
   photo; sidebar: advisor card and "Getting a good answer". Question page: back link, Inter title, body, a horizontal
   vote bar with "Answer", the AI answer card, answers as rows.
-- **Stories (`/stories`):** Newsreader page title, feed tabs, a featured story (wide cover beside the headline), then
+- **Stories (`/stories`):** Lora page title, feed tabs, a featured story (wide cover beside the headline), then
   a three-column grid of tiles; covers keep 16:10; stories without a photo get `CoverFallback` (drawn sprig + crop or
   topic). Story page: back link, wide 21:9 cover, header in the reading column, and an "In this article" list built
   from the story's own `h2`s when it has two or more.

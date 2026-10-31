@@ -56,7 +56,7 @@ test('publishing a new story sends its details and opens it', async () => {
   await chooseOption(sheet.getByLabelText('Topic'), 'Crops')
   const topics = sheet.getByLabelText('Tags')
   await userEvent.type(topics, 'Ri')
-  await userEvent.click(await sheet.findByRole('button', { name: 'rice blast' }))
+  await userEvent.click(await sheet.findByRole('button', { name: 'Add tag rice blast' }))
   await userEvent.type(topics, 'Cold Stress{Enter}')
   await pickOption(sheet.getByLabelText('Season'), 'Rabi')
   await userEvent.type(sheet.getByLabelText('Crop'), ' boro rice ')

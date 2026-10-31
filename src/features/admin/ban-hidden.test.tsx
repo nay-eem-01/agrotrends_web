@@ -54,7 +54,7 @@ test('people who are not staff see no ban controls', async () => {
     'GET /api/questions/all/user/8': () => envelope(200, page([])),
   })
   renderWithProviders(<App />, '/users/8')
-  await screen.findByRole('heading', { name: 'Reputation by topic' })
+  await screen.findByRole('heading', { name: 'Answers questions on' })
   expect(screen.queryByRole('button', { name: 'Ban the account' })).not.toBeInTheDocument()
 })
 

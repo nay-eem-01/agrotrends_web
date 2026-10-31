@@ -46,7 +46,7 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 - Phase F20 on `feat/harvest-base` (stacked on F19's tip): F20.1 Harvest tokens (`feat/harvest-tokens`) and F20.2
   question page (`feat/harvest-question`) and F20.3 white page (`fix/harvest-white-page`) and F20.4 ask form
   redesign (`feat/ask-redesign`) done. Phase F20 is complete.
-- Phase F21 on `feat/paddy-base` (stacked on F20's tip): F21.1 Paddy Field tokens (`feat/paddy-tokens`) F21.2 shell (`feat/paddy-shell`) done.
+- Phase F21 on `feat/paddy-base` (stacked on F20's tip): F21.1 Paddy Field tokens (`feat/paddy-tokens`) F21.2 shell (`feat/paddy-shell`) F21.3 sign in and sign up (`feat/paddy-auth`) done.
 
 ## Next up
 
@@ -72,6 +72,27 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-31 (F21.3 Paddy sign in and sign up)
+
+**Done**
+- `auth/AuthPage` (sign in, sign up, reset, verify): from 1024px a leaf-wash panel on the left (Lora "Grow better with
+  AgroTrends.", three things you get: ask anything, an AI advisor with sources, verified experts; "Free, in English and
+  Bengali."), with a mustard sun and the drawn sprig in the corner. The form sits on the right.
+- An English | বাংলা pill switch on the form, so a reader can change the language before typing; each name is written in
+  its own language.
+- Sign up: the "How we reach you" heading no longer overlaps its hint.
+- Test: `auth/auth.test.tsx` checks the panel and the language switch. Checked sign in and sign up at 1280px light and
+  dark and at 390px.
+
+**Decisions**
+- No member quote or member counts on the panel: the mock-up's were invented, and real numbers need an API.
+
+**Known limitations**
+- The Google button's text follows the browser's language (Google renders it), not the page's switch; Google stays under
+  the form, as `GoogleSignIn` has uncommitted local changes.
 
 ---
 

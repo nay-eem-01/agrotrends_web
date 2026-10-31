@@ -11,7 +11,7 @@ import { Spinner } from '../../ui/Spinner'
 import { useSession } from '../auth/session'
 import { NotFoundPage } from '../errors/NotFoundPage'
 import { toAgri } from '../farming/FarmingFields'
-import { PublishSheet, type PublishAction, type StoryDetails } from './PublishSheet'
+import { AiCitableField, PublishSheet, SubtitleField, type PublishAction, type StoryDetails } from './PublishSheet'
 import { StoryEditor } from './StoryEditor'
 import { useCategories } from '../../api/categories'
 import { SearchSelect } from '../../ui/SearchSelect'
@@ -23,12 +23,23 @@ const hasText = (html: string) => html.replace(/<[^>]*>/g, '').trim() !== '' || 
 
 function detailsOf(story?: BlogResponse): StoryDetails {
   const agri = story?.agri ?? {}
-  return { categoryId: story?.category?.id, tags: story?.tags ?? [], crop: agri.crop ?? '', season: agri.season, region: agri.region ?? '', soil: agri.soil }
+  return {
+    subtitle: story?.subtitle ?? '',
+    aiCitable: story?.aiCitable ?? true,
+    categoryId: story?.category?.id,
+    tags: story?.tags ?? [],
+    crop: agri.crop ?? '',
+    season: agri.season,
+    region: agri.region ?? '',
+    soil: agri.soil,
+  }
 }
 
-/** The request fields the publish sheet controls. Empty farming details are sent as absent. */
+/** The request fields the publish sheet controls. Empty farming details are sent as absent; a blank subtitle is sent as "" so an update clears it. */
 function detailFields(details: StoryDetails) {
   return {
+    subtitle: details.subtitle.trim(),
+    aiCitable: details.aiCitable,
     categoryId: details.categoryId ?? 0,
     tags: details.tags,
     agri: toAgri(details),
@@ -125,6 +136,8 @@ function TopicAndTags({ details, onChange }: { details: StoryDetails; onChange: 
         onChange={(value) => onChange({ ...details, categoryId: value ? Number(value) : undefined })}
       />
       <TagInput tags={details.tags} onChange={(tags) => onChange({ ...details, tags })} />
+      <SubtitleField value={details.subtitle} onChange={(subtitle) => onChange({ ...details, subtitle })} />
+      <AiCitableField checked={details.aiCitable} onChange={(aiCitable) => onChange({ ...details, aiCitable })} />
     </>
   )
 }

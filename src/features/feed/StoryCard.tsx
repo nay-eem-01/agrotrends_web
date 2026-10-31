@@ -21,8 +21,8 @@ export function StoryCard({ story }: { story: StorySummary }) {
   const t = useT()
   const href = `/stories/${story.slug}`
   const author = story.author
-  // Lists carry a plain-text excerpt (up to 200 characters) instead of the body.
-  const preview = story.excerpt
+  // The author's subtitle, else the plain-text excerpt (up to 200 characters) lists carry instead of the body.
+  const preview = story.subtitle || story.excerpt
   const crop = story.agri?.crop
   const season = story.agri?.season
   const meta = [storyDate(story.publishedAt), story.readingTimeMinutes ? t('{n} min read', { n: formatNumber(story.readingTimeMinutes) }) : null].filter(Boolean)

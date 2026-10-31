@@ -119,3 +119,15 @@ test('the byline offers Follow for the author, as on Medium', async () => {
   expect(title.compareDocumentPosition(follow) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   expect(follow.compareDocumentPosition(screen.getByText(/nitrogen/i, { selector: 'strong' })) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
 })
+
+test('the subtitle sits under the title', async () => {
+  mockApi({
+    'GET /api/blogs/slug/rice-blast-and-nitrogen': () => envelope(200, { ...story, subtitle: 'Why split doses beat one big one' }),
+    'GET /api/comments/blog/402': () => envelope(200, []),
+  })
+  renderWithProviders(<App />, '/stories/rice-blast-and-nitrogen')
+
+  const title = await screen.findByRole('heading', { level: 1, name: 'Rice blast and nitrogen' })
+  const subtitle = screen.getByText('Why split doses beat one big one')
+  expect(title.nextElementSibling).toBe(subtitle)
+})

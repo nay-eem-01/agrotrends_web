@@ -61,10 +61,16 @@ test('publishing a new story sends its details and opens it', async () => {
   await pickOption(sheet.getByLabelText('Season'), 'Rabi')
   await userEvent.type(sheet.getByLabelText('Crop'), ' boro rice ')
   await pickOption(sheet.getByLabelText('Soil'), 'Clay loam')
+  await userEvent.type(sheet.getByLabelText('Subtitle (optional)'), ' What to do when nights drop below 12 °C ')
+  const cite = sheet.getByRole('checkbox', { name: /Let the AI advisor cite this story/ })
+  expect(cite).toBeChecked()
+  await userEvent.click(cite)
   await userEvent.click(sheet.getByRole('button', { name: 'Publish now' }))
 
   await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/stories/boro-cold'))
   expect(bodies(api, 'POST', '/api/blogs/create')[0]).toEqual({
+    subtitle: 'What to do when nights drop below 12 °C',
+    aiCitable: false,
     categoryId: 1,
     tags: ['rice blast', 'cold stress'],
     agri: { crop: 'boro rice', season: 'RABI', soil: 'CLAY_LOAM' },

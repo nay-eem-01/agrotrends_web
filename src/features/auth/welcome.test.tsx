@@ -53,6 +53,8 @@ test('saving the profile step goes on to where the reader was heading', async ()
 })
 
 test('no Google button without a client id', async () => {
+  // A local .env may set the id; this test is about running without one.
+  vi.stubEnv('VITE_GOOGLE_CLIENT_ID', '')
   mockApi({})
   renderWithProviders(<App />, '/sign-in')
   await screen.findByRole('button', { name: 'Sign in' })

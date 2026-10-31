@@ -40,7 +40,7 @@ export function TagInput({ tags, onChange, popular = false }: { tags: string[]; 
       <label htmlFor={inputId} className="text-sm font-medium">
         {t('Tags')} {popular && <span className="font-normal text-muted-foreground">{t('(optional)')}</span>}
       </label>
-      <div className="flex min-h-11 flex-wrap items-center gap-2 rounded-lg border border-input bg-card px-2 py-1.5 transition-[border-color,box-shadow] duration-150 focus-within:border-primary focus-within:ring-[3px] focus-within:ring-ring/60 hover:border-subtle">
+      <div className="flex min-h-11 flex-wrap items-center gap-2 rounded-[1.375rem] border border-input bg-card px-2 py-1.5 transition-[border-color,box-shadow] duration-150 focus-within:border-primary focus-within:ring-[3px] focus-within:ring-ring/60 hover:border-subtle">
         {tags.map((tag) => (
           <span key={tag} className="inline-flex h-8 items-center gap-1 rounded-full bg-secondary pr-1 pl-3 text-sm text-secondary-foreground">
             {tag}

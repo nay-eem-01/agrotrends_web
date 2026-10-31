@@ -47,13 +47,15 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   question page (`feat/harvest-question`) and F20.3 white page (`fix/harvest-white-page`) and F20.4 ask form
   redesign (`feat/ask-redesign`) done. Phase F20 is complete.
 - Phase F21 on `feat/paddy-base` (stacked on F20's tip): F21.1 Paddy Field tokens (`feat/paddy-tokens`) F21.2 shell (`feat/paddy-shell`) F21.3 sign in and sign up (`feat/paddy-auth`) F21.4 expert application (`feat/paddy-expert-apply`) F21.5 profile (`feat/paddy-profile`) F21.6 story editor (`feat/paddy-editor`) F21.7 question page (`feat/paddy-question`) F21.8 AI advisor (`feat/paddy-advisor`) F21.9 feeds (`feat/paddy-feeds`) F21.10 story page (`feat/paddy-story`) done. Phase F21 is complete.
-- Phase F22 on `feat/mock-base` (stacked on F21's tip): F22.1 fields (`feat/mock-fields`) F22.2 home feed (`feat/mock-home`) F22.3 question page (`feat/mock-question`) F22.4 profile (`feat/mock-profile`) F22.5 AI advisor (`feat/mock-advisor`) F22.6 ask page (`feat/mock-ask`) F22.7 story editor (`feat/mock-editor`) F22.8 sign in and sign up (`feat/mock-auth`) done.
+- Phase F22 on `feat/mock-base` (stacked on F21's tip): F22.1 fields (`feat/mock-fields`) F22.2 home feed (`feat/mock-home`) F22.3 question page (`feat/mock-question`) F22.4 profile (`feat/mock-profile`) F22.5 AI advisor (`feat/mock-advisor`) F22.6 ask page (`feat/mock-ask`) F22.7 story editor (`feat/mock-editor`) F22.8 sign in and sign up (`feat/mock-auth`) F22.9 story page (`feat/mock-story`) done. Phase F22 is complete.
 
 ## Next up
 
 1. **Nayeem:** PR F19.1, F19.2 then F19.3 into `feat/simple-ask-base`, then the base into `development`; then F20's
-   steps into `feat/harvest-base`, then F21.1–F21.10 into `feat/paddy-base`, then each base into `development`.
-2. Screens not yet on the Paddy Field layouts (Discover sections, Stories feed, settings, admin) follow the tokens and
+   steps into `feat/harvest-base`, then F21.1–F21.10 into `feat/paddy-base`, then F22.1–F22.9 into `feat/mock-base`,
+   then each base into `development`.
+2. **Backend:** the endpoints in `docs/BACKEND_REQUESTS.md`; each F22 section lights up once its endpoint answers.
+3. Screens not yet on the Paddy Field layouts (Discover sections, Stories feed, settings, admin) follow the tokens and
    shapes already; restyle them when they are next touched.
 3. Pick an SMS provider (backend 10.5): until then codes only appear in the backend log as `[DEV SMS]`.
 4. Run the admin smoke step (`E2E_ADMIN_EMAIL` / `E2E_ADMIN_PASSWORD`) and the admin screens live once an admin login is at hand.
@@ -74,6 +76,20 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-31 (F22.9 story page as the mock-up)
+
+**Done**
+- Follow in the byline for other readers' stories (the author's profile, shared with "Written by" so it's read once;
+  `FollowAuthorButton`); your own stories keep Edit story there.
+- Test: `story/story.test.tsx` finds the byline's Follow above the story text. Checked at 1280px light and dark and at
+  390px.
+
+**Decisions**
+- No second Save in a top bar: the clap / report / save bar sits right under the byline already.
+- No subtitle until the backend has one (§9).
 
 ---
 

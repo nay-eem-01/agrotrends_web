@@ -44,8 +44,9 @@ test('signed in, home is one feed of stories and questions with your topics besi
   expect(titles.indexOf('Why are my tilapia gasping?')).toBeLessThan(titles.indexOf('Keeping oxygen up in summer ponds'))
   expect(within(feed).getByRole('link', { name: 'Ask the community, or ask the AI advisor…' })).toHaveAttribute('href', '/questions/ask')
 
-  const sections = screen.getByRole('complementary', { name: 'Sections' })
-  expect(await within(sections).findByRole('link', { name: 'tilapia' })).toHaveAttribute('href', '/tags/tilapia')
+  // Your topics live in the app's sidebar, not in the feed.
+  const navigation = screen.getByRole('complementary', { name: 'Navigation' })
+  expect(await within(navigation).findByRole('link', { name: 'tilapia' })).toHaveAttribute('href', '/tags/tilapia')
   const rail = screen.getByRole('complementary', { name: 'More to read' })
   expect(await within(rail).findByRole('heading', { name: 'Trending now' })).toBeInTheDocument()
   // No experts list until the backend has one.

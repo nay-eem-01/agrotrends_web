@@ -168,7 +168,7 @@ test('the topic and tags chosen beside the story carry into the publish step', a
   mockApi(signedInAuthor())
   renderWithProviders(<App />, '/write')
 
-  const panel = within(await screen.findByRole('complementary'))
+  const panel = within(await screen.findByRole('complementary', { name: 'Story settings' }))
   await chooseOption(panel.getByLabelText('Topic'), 'Fisheries')
   expect(panel.getByText('A topic').parentElement).toHaveTextContent('A topic, done')
 

@@ -1,12 +1,13 @@
 import { useT } from '../lib/i18n'
-import { MagnifyingGlass, NotePencil, Plus } from '@phosphor-icons/react'
+import { List, MagnifyingGlass, NotePencil, Plus } from '@phosphor-icons/react'
 import { lazy, Suspense, useEffect, useState } from 'react'
-import { Link, NavLink } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { cn } from 'cn'
 import { useSession } from '../features/auth/session'
 import { ButtonLink } from '../ui/Button'
 import { NotificationBell } from './NotificationBell'
 import { Logo } from './Logo'
+import { useSidebar } from './AppSidebar'
 
 // The menus (dialog and menu code) load just after the page; a same-size space holds their place meanwhile.
 const AccountMenu = lazy(() => import('./AccountMenu').then((m) => ({ default: m.AccountMenu })))
@@ -14,18 +15,10 @@ const MobileMenu = lazy(() => import('./MobileMenu').then((m) => ({ default: m.M
 const SearchDialog = lazy(() => import('./SearchDialog').then((m) => ({ default: m.SearchDialog })))
 const placeholder = (className: string) => <span aria-hidden="true" className={cn('size-11 shrink-0', className)} />
 
-// The current page is green and underlined at the bar's bottom edge, so it doesn't rely on colour alone.
-const navClass = ({ isActive }: { isActive: boolean }) =>
-  cn(
-    'relative hidden h-11 items-center gap-1.5 px-2.5 text-sm whitespace-nowrap transition-colors duration-150 lg:flex',
-    isActive
-      ? 'font-semibold text-primary after:absolute after:inset-x-2.5 after:-bottom-[10px] after:h-0.5 after:rounded-full after:bg-primary'
-      : 'text-muted-foreground hover:text-foreground',
-  )
-
 export function TopBar() {
   const t = useT()
   const { status } = useSession()
+  const sidebar = useSidebar()
   const [searching, setSearching] = useState(false)
 
   // Ctrl/⌘+K opens the search from anywhere.
@@ -42,7 +35,18 @@ export function TopBar() {
 
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-background">
-      <div className="mx-auto flex h-16 max-w-(--container-page) items-center gap-2 px-4 sm:gap-4 sm:px-6">
+      <div className="flex h-16 items-center gap-2 px-4 sm:gap-4 sm:px-6 lg:pl-4">
+        {/* The sections live in the sidebar (layout/AppSidebar); this opens it or hides it to icons. */}
+        <button
+          type="button"
+          onClick={sidebar.toggle}
+          aria-expanded={sidebar.open}
+          aria-controls="app-sidebar"
+          aria-label={sidebar.open ? t('Hide navigation') : t('Show navigation')}
+          className="hidden size-10 items-center justify-center rounded-full text-muted-foreground transition-colors duration-150 hover:bg-surface hover:text-foreground lg:flex"
+        >
+          <List size={22} aria-hidden="true" />
+        </button>
         <Logo />
         {/* Wide screens: the search is a pill on the leaf wash that opens the search dialog; Ctrl/⌘+K does the same. */}
         <button
@@ -67,22 +71,10 @@ export function TopBar() {
           >
             <MagnifyingGlass size={22} aria-hidden="true" />
           </button>
-          <NavLink to="/" end className={navClass}>
-            {t('Discover')}
-          </NavLink>
-          <NavLink to="/questions" className={navClass}>
-            {t('Questions')}
-          </NavLink>
-          <NavLink to="/stories" className={navClass}>
-            {t('Stories')}
-          </NavLink>
-          <NavLink to="/advisor" className={navClass}>
-            {t('AI advisor')}
-          </NavLink>
-          <NavLink to="/write" className={navClass}>
-            <NotePencil size={18} aria-hidden="true" />
+          <ButtonLink to="/write" variant="secondary" size="sm" className="mx-1 hidden lg:inline-flex">
+            <NotePencil size={16} aria-hidden="true" />
             {t('Write')}
-          </NavLink>
+          </ButtonLink>
           {status === 'signed-in' && (
             <>
               <ButtonLink to="/questions/ask" size="sm" className="mx-1 hidden lg:inline-flex">

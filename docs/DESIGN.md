@@ -102,7 +102,7 @@ an underline, errors an icon, accepted answers the word "Accepted", unanswered q
 
 Page width 1240px, gutters 16px (phones) / 32px; reading column 680px; feed column 720px.
 
-- **Navigation (F22.10):** one place for the sections, the left sidebar (`layout/AppSidebar`), on every page from
+- **Navigation (F22.10):** one place for the sections, the left sidebar (`layout/AppSidebar`), on every page from Sign in, sign up, forgot and reset password and verify e-mail are focused pages (F22.12): no sidebar, search or tab bar, only the logo and "Back to AgroTrends". Beside the sidebar the footer has no top rule, so the two lines never meet on short pages.
   1024px: Home (Discover for visitors), Questions, Stories, AI advisor; signed in, Reading list, Your stories and
   your topics. The top bar's menu button hides it to an icon strip (names in tooltips and for screen readers) and
   opens it again; the choice is remembered. The top bar holds no section tabs: logo, search, Write, Ask, bell,

@@ -672,4 +672,5 @@ export const BN: Record<string, string> = {
   'Show navigation': 'নেভিগেশন দেখান',
   'Navigation': 'নেভিগেশন',
   'Your profile': 'আপনার প্রোফাইল',
+  'Back to AgroTrends': 'অ্যাগ্রোট্রেন্ডসে ফিরে যান',
 }

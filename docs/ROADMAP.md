@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend · ➡ moved to a later step
 
-**Progress:** 103 of 103 steps done
+**Progress:** 104 of 104 steps done
 
 ---
 
@@ -256,6 +256,7 @@ that need new endpoints are built and stay hidden until the backend answers; the
 | F22.9 | Story page: Follow in the byline and Save in the top bar (`feat/mock-story`) | ✅ |
 | F22.10 | Navigation in one place: the sidebar on every page from 1024px, hidden to icons or open from the top bar's menu button; no section tabs in the top bar; the home feed drops its own sidebar (`feat/mock-sidebar`) | ✅ |
 | F22.11 | Search as a field in the top bar (no pop-up from 1024px; Ctrl/⌘+K focuses it); Your profile in the sidebar and the account menu (`feat/mock-topbar`) | ✅ |
+| F22.12 | Quieter frame: the footer drops its rule beside the sidebar; sign in, sign up and the password and e-mail steps are focused pages with only the logo and a way back (`feat/mock-chrome`) | ✅ |
 
 ## Needs from the backend
 

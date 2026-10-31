@@ -49,7 +49,7 @@ function Card({ answer, topicId }: { answer: AiAnswer; topicId?: number }) {
       className={cn('mt-6 rounded-xl border p-5 sm:p-6', confirmed ? 'border-mustard bg-card ring-1 ring-mustard/40' : 'border-dashed border-input bg-card/70')}
     >
       <header className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <h2 id="ai-answer" className="flex items-center gap-2 font-sans text-base font-semibold">
+        <h2 id="ai-answer" className="flex scroll-mt-24 items-center gap-2 font-sans text-base font-semibold">
           <Sparkle size={18} weight="fill" className="text-primary" aria-hidden="true" />
           {t('AI answer')}
         </h2>

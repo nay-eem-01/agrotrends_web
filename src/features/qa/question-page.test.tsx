@@ -189,3 +189,17 @@ test('the tags sit under the title, before the question text', async () => {
   expect(tags.compareDocumentPosition(text) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   expect(within(tags).getByRole('link', { name: 'cold injury' })).toHaveAttribute('href', '/questions?tag=cold%20injury')
 })
+
+test('the side panel gives the numbers, a way to the AI answer and Write an answer; views once counted', async () => {
+  mockApi({
+    'GET /api/questions/id/5': () => envelope(200, { ...question, answerCount: 2, viewCount: 1204 }),
+    'GET /api/answers/question/5': () => envelope(200, [answer(1)]),
+  })
+  renderWithProviders(<App />, '/questions/5')
+
+  const panel = await screen.findByRole('complementary', { name: 'About this question' })
+  const numbers = within(panel).getAllByRole('term').map((term) => `${term.textContent} ${term.nextElementSibling?.textContent}`)
+  expect(numbers).toEqual(['Answers 2', 'Views 1,204', 'Asked Oct 8'])
+  expect(within(panel).getByRole('link', { name: /Read the AI answer/ })).toHaveAttribute('href', '#ai-answer')
+  expect(within(panel).getByRole('link', { name: 'Write an answer' })).toHaveAttribute('href', '#your-answer')
+})

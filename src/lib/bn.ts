@@ -615,4 +615,9 @@ export const BN: Record<string, string> = {
   'More to read': 'আরও পড়ুন',
   'Trending now': 'এখন জনপ্রিয়',
   'Experts to follow': 'অনুসরণ করার মতো বিশেষজ্ঞ',
+  'Accepted first, then by votes': 'আগে গৃহীত উত্তর, তারপর ভোট অনুযায়ী',
+  'Views': 'দেখা হয়েছে',
+  'Write an answer': 'উত্তর লিখুন',
+  'Read the AI answer': 'এআই উত্তর পড়ুন',
+  'An answer written from AgroTrends stories, before people reply.': 'মানুষ উত্তর দেওয়ার আগে AgroTrends-এর লেখা থেকে তৈরি একটি উত্তর।',
 }

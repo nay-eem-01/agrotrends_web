@@ -114,3 +114,17 @@ export function useRelatedStories(blogId: number, enabled: boolean) {
     retry: false,
   })
 }
+
+/** Published stories in one topic (a category), or all of them, newest first. Public. */
+export function useTopicStories(categoryId?: number) {
+  return useInfiniteQuery({
+    queryKey: ['blogs', 'topic', categoryId ?? null],
+    queryFn: ({ pageParam, signal }) =>
+      api<Page<StorySummary>>(categoryId ? `/api/blogs/all/category/${categoryId}` : '/api/blogs/all', {
+        params: { pageNo: pageParam, pageSize: FEED_PAGE_SIZE, sortBy: 'creationDate', ascOrDesc: 'desc' },
+        signal,
+      }),
+    initialPageParam: 0,
+    getNextPageParam: (page) => (page.last ? undefined : page.number + 1),
+  })
+}

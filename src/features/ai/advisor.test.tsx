@@ -38,7 +38,7 @@ test('an answer shows with the stories it came from, and the box clears for the 
   const conversation = await screen.findByRole('list', { name: 'This conversation' })
   expect(within(conversation).getByText('When should I transplant aman seedlings?')).toBeInTheDocument()
   expect(within(conversation).getByText('Transplant 25-30 day seedlings in July.')).toBeInTheDocument()
-  expect(within(conversation).getByRole('link', { name: 'Aman transplanting' })).toHaveAttribute('href', '/s/40')
+  expect(within(conversation).getByRole('link', { name: /^Aman transplanting,? ?Story$/ })).toHaveAttribute('href', '/s/40')
   expect(screen.getByLabelText('Ask another question')).toHaveValue('')
   const sent = api.mock.calls.find(([url]) => url === '/api/ai/ask')!
   expect(JSON.parse(sent[1]!.body as string)).toEqual({ question: 'When should I transplant aman seedlings?' })
@@ -127,4 +127,17 @@ test('Enter asks, Shift+Enter adds a line, and nothing is sent while an input me
   expect(api.mock.calls.some(([url]) => url === '/api/ai/ask')).toBe(false)
   await userEvent.keyboard('{Enter}')
   await waitFor(() => expect(api.mock.calls.filter(([url]) => url === '/api/ai/ask')).toHaveLength(1))
+})
+
+test('in the advisor the sources come first, as numbered cards above the answer', async () => {
+  mockApi(signedIn(() => envelope(200, { answer: 'Drain the field.', sources: [{ blogId: 41, title: 'After the flood' }, { type: 'answer', questionId: 7, title: 'Waterlogged aman' }] })))
+  renderWithProviders(<App />, '/advisor')
+
+  await userEvent.type(await screen.findByLabelText(/Your question/), 'Field flooded{Enter}')
+  const sources = await screen.findByRole('region', { name: 'Sources' })
+  const answer = screen.getByText('Drain the field.')
+  expect(sources.compareDocumentPosition(answer) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  expect(within(sources).getByRole('link', { name: /^After the flood,? ?Story$/ })).toHaveAttribute('href', '/s/41')
+  expect(within(sources).getByRole('link', { name: /^Waterlogged aman,? ?Community answer$/ })).toHaveAttribute('href', '/questions/7')
+  expect(screen.getByRole('heading', { name: 'Field flooded' })).toBeInTheDocument()
 })

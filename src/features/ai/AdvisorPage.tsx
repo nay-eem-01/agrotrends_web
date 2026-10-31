@@ -272,7 +272,7 @@ function Composer({
     <div>
       <div
         className={cn(
-          'rounded-2xl border bg-card shadow-xs transition-[border-color,box-shadow] duration-150 focus-within:border-primary focus-within:ring-[3px] focus-within:ring-ring/60',
+          'rounded-2xl border bg-card transition-[border-color,box-shadow] duration-150 focus-within:border-primary focus-within:ring-[3px] focus-within:ring-ring/60',
           error ? 'border-destructive' : 'border-input hover:border-subtle',
         )}
       >
@@ -338,36 +338,30 @@ function AskError({ error }: { error: unknown }) {
 }
 
 /**
- * One turn. The reader's question on the right in green; the advisor's answer on the left beside its mark, labelled
- * as AI, its sources apart so they read as evidence, and a plain note to check them before acting.
+ * One turn, after Perplexity: the reader's question as a Lora heading, then the sources as numbered cards so the
+ * evidence reads first, then the answer labelled as AI and a plain note to check the sources before acting.
  */
 function ExchangeView({ exchange }: { exchange: Exchange }) {
   const t = useT()
   const sources = exchange.answer.sources ?? []
   return (
-    <article className="flex flex-col gap-5">
-      <p className="ml-auto max-w-[85%] rounded-2xl rounded-br-md bg-primary px-4 py-3 text-base leading-relaxed whitespace-pre-line text-primary-foreground">
-        {exchange.question}
-      </p>
-      <div className="flex gap-3 sm:gap-4">
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary">
-          <Sparkle size={18} weight="fill" aria-hidden="true" className="text-primary" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-primary">{t('AI answer')}</p>
-          <SafeHtml html={exchange.answer.answer} className="mt-1.5 text-base leading-relaxed whitespace-pre-line [&>p+p]:mt-4" />
-          {sources.length ? (
-            <div className="mt-5 rounded-xl border border-border bg-surface px-4 pt-0.5 pb-4">
-              <Sources sources={sources} />
-            </div>
-          ) : (
-            <p className="mt-4 text-sm text-muted-foreground">{t('No story on AgroTrends matched, so this answer is general advice.')}</p>
-          )}
-          <p className="mt-4 flex items-start gap-2 text-sm text-muted-foreground">
-            <Warning size={16} aria-hidden="true" className="mt-0.5 shrink-0" />
-            {t('Written by AI, not checked by an expert. Check the sources before you act on it.')}
-          </p>
-        </div>
+    <article className="flex flex-col gap-5 border-b border-border pb-8 last:border-b-0">
+      <h2 className="font-serif text-xl leading-snug font-semibold whitespace-pre-line sm:text-2xl">{exchange.question}</h2>
+      {sources.length ? (
+        <Sources sources={sources} layout="cards" />
+      ) : (
+        <p className="text-sm text-muted-foreground">{t('No story on AgroTrends matched, so this answer is general advice.')}</p>
+      )}
+      <div>
+        <p className="flex items-center gap-1.5 text-sm font-semibold text-primary">
+          <Sparkle size={16} weight="fill" aria-hidden="true" />
+          {t('AI answer')}
+        </p>
+        <SafeHtml html={exchange.answer.answer} className="mt-2 text-base leading-relaxed whitespace-pre-line [&>p+p]:mt-4" />
+        <p className="mt-4 flex items-start gap-2 text-sm text-muted-foreground">
+          <Warning size={16} aria-hidden="true" className="mt-0.5 shrink-0" />
+          {t('Written by AI, not checked by an expert. Check the sources before you act on it.')}
+        </p>
       </div>
     </article>
   )

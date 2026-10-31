@@ -595,4 +595,6 @@ export const BN: Record<string, string> = {
   'Accepted answers': 'গৃহীত উত্তর',
   'Verified expert in {topics}': '{topics}-এ যাচাই করা বিশেষজ্ঞ',
   'Answers questions on': 'যে বিষয়ে উত্তর দেন',
+  'Community answer': 'কমিউনিটির উত্তর',
+  'Story': 'লেখা',
 }

@@ -1,4 +1,4 @@
-import { excerpt, htmlToText, textToHtml } from './html'
+import { excerpt, htmlToText, textToHtml, withCitations } from './html'
 
 test('story HTML becomes plain text with paragraphs kept apart', () => {
   expect(htmlToText('<h2>Boro</h2><p>Transplant <b>early</b>.</p><p>Then&nbsp;irrigate.</p>')).toBe('Boro Transplant early. Then irrigate.')
@@ -22,4 +22,12 @@ test('plain text becomes escaped paragraphs; HTML is kept', () => {
   expect(textToHtml('After the cold.\n\nWeek two <3 & more')).toBe('<p>After the cold.</p><p>Week two &lt;3 &amp; more</p>')
   expect(textToHtml('<p>Already <strong>rich</strong></p>')).toBe('<p>Already <strong>rich</strong></p>')
   expect(textToHtml(undefined)).toBe('')
+})
+
+test('citation markers become numbered marks only when the source exists', () => {
+  expect(withCitations('Low oxygen [1]. Algae [2][3].', 2)).toBe(
+    'Low oxygen <sup aria-label="source 1">1</sup>. Algae <sup aria-label="source 2">2</sup>[3].',
+  )
+  expect(withCitations('No sources [1].', 0)).toBe('No sources [1].')
+  expect(withCitations(undefined, 3)).toBe('')
 })

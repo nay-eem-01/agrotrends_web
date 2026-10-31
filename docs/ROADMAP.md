@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend · ➡ moved to a later step
 
-**Progress:** 96 of 101 steps done
+**Progress:** 97 of 101 steps done
 
 ---
 
@@ -249,7 +249,7 @@ that need new endpoints are built and stay hidden until the backend answers; the
 | F22.2 | Home feed in three columns: navigation and your topics on the left, chips, a composer and a mixed feed in the middle, trending and experts to follow on the right; the phone home with quick actions and this week's tasks (`feat/mock-home`) | ✅ |
 | F22.3 | Question page: votes in a column beside the question and each answer, a side panel with answers, views, asked, the AI answer and Write an answer (`feat/mock-question`) | ✅ |
 | F22.4 | Profile after LinkedIn: Follow, location and followers, credentials, "answers questions on", recent contributions; your own profile with the completion nudge and Overview, Stories, Questions, Answers, Drafts, Saved tabs (`feat/mock-profile`) | ✅ |
-| F22.5 | AI advisor: follow-up questions as rows and a pill ask bar (`feat/mock-advisor`) | ⬜ |
+| F22.5 | AI advisor: follow-up questions as rows and a pill ask bar (`feat/mock-advisor`) | ✅ |
 | F22.6 | Ask a question: "Already answered, might help" while typing the title (`feat/mock-ask`) | ⬜ |
 | F22.7 | Story editor: draft status bar with Preview, topic and tags in the side panel beside the checklist (`feat/mock-editor`) | ⬜ |
 | F22.8 | Sign in and sign up: Google first, Forgot beside the password label, Show password, a Mobile / E-mail switch and a strength bar on sign-up (`feat/mock-auth`) | ⬜ |

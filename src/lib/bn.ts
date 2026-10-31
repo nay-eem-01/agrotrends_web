@@ -649,4 +649,6 @@ export const BN: Record<string, string> = {
   'Waiting': 'অপেক্ষায়',
   'Your profile is {n}% done': 'আপনার প্রোফাইল {n}% সম্পূর্ণ',
   'Your questions': 'আপনার প্রশ্ন',
+  'Ask next': 'এরপর জিজ্ঞেস করুন',
+  'Ask a follow-up…': 'পরের প্রশ্নটি করুন…',
 }

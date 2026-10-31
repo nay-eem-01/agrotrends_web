@@ -1,17 +1,18 @@
+import { CheckCircle, PaperPlaneTilt } from '@phosphor-icons/react'
 import { useT } from '../../lib/i18n'
-import { useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ApiError, errorMessage } from '../../api/errors'
 import { useCategories } from '../../api/categories'
 import { useQuestion, useQuestionWrite, type Question } from '../../api/questions'
 import { htmlToText, textToHtml } from '../../lib/html'
 import { Button } from '../../ui/Button'
-import { SearchSelect } from '../../ui/SearchSelect'
 import { Spinner } from '../../ui/Spinner'
 import { useSession } from '../auth/session'
 import { NotFoundPage } from '../errors/NotFoundPage'
 import { TagInput } from '../topics/TagInput'
 import { QuestionEditor } from './QuestionEditor'
+import { TopicPicker } from './TopicPicker'
 import { AskingWell } from './QuestionsPage'
 
 /** `/questions/ask`, and `/questions/:questionId/edit` for the asker. */
@@ -56,6 +57,26 @@ function QuestionForm({ question }: { question?: Question }) {
   const [details, setDetails] = useState(() => textToHtml(question?.content))
   const [errors, setErrors] = useState<{ title?: string; details?: string; topic?: string }>({})
 
+  const form = useRef<HTMLFormElement>(null)
+  // Ctrl/⌘+Enter posts from anywhere in the form, as answers do; never while a Bangla input method composes.
+  useEffect(() => {
+    const element = form.current
+    if (!element) return
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Enter' && (event.ctrlKey || event.metaKey) && !event.isComposing) {
+        event.preventDefault()
+        element.requestSubmit()
+      }
+    }
+    element.addEventListener('keydown', onKeyDown)
+    return () => element.removeEventListener('keydown', onKeyDown)
+  }, [])
+
+  // What still stands between the asker and Post, in their words.
+  const missing = [!title.trim() && t('a title'), !htmlToText(details) && t('details'), categoryId == null && t('a topic')].filter(
+    (item): item is string => Boolean(item),
+  )
+
   function submit(event: FormEvent) {
     event.preventDefault()
     const found = {
@@ -86,7 +107,12 @@ function QuestionForm({ question }: { question?: Question }) {
         <div className="max-w-(--container-feed) min-w-0">
           <h1 className="text-xl sm:text-2xl">{question ? t('Edit your question') : t('Ask a question')}</h1>
           <p className="mt-1.5 text-sm text-muted-foreground sm:text-base">{t('Say what you are working with, where, and what you have already tried. Specific questions get useful answers.')}</p>
-          <form onSubmit={submit} noValidate className="mt-8 flex flex-col gap-4">
+          <form
+            ref={form}
+            onSubmit={submit}
+            noValidate
+            className="mt-8 flex flex-col gap-5"
+          >
             <QuestionEditor
               title={title}
               html={details}
@@ -97,39 +123,34 @@ function QuestionForm({ question }: { question?: Question }) {
               onHtmlChange={setDetails}
               onPhotosChange={setImageUrls}
             />
-            {/* Topic and tags in one row, both typed: filter topics and press Enter; Enter or comma adds a tag. */}
-            <div className="flex flex-col gap-3 border-t border-border pt-5 sm:flex-row sm:items-start">
-              <div className="flex items-start gap-2.5 sm:w-64 sm:shrink-0">
-                <span aria-hidden="true" className="flex h-11 items-center text-sm font-medium">
-                  {t('Topic')}
-                </span>
-                <SearchSelect
-                  label={t('Topic')}
-                  hideLabel
-                  className="min-w-0 flex-1 [&_[data-slot=input-group]]:rounded-full [&_[data-slot=input-group]]:border-transparent [&_[data-slot=input-group]]:bg-muted/70 [&_[data-slot=input-group]:hover]:bg-muted"
-                  value={categoryId == null ? '' : String(categoryId)}
-                  error={errors.topic}
-                  disabled={categories.isPending}
-                  onChange={(value) => setCategoryId(value ? Number(value) : undefined)}
-                  options={(categories.data ?? []).map((c) => ({ value: String(c.id), label: c.categoryName ?? '' }))}
-                  placeholder={categories.isPending ? t('Loading…') : t('Choose one')}
-                />
-              </div>
-              <TagInput compact tags={tags} onChange={setTags} />
+            <div className="flex flex-col gap-7 border-t border-border pt-7">
+              <TopicPicker categories={categories.data ?? []} loading={categories.isPending} value={categoryId} error={errors.topic} onChange={setCategoryId} />
+              <TagInput popular tags={tags} onChange={setTags} />
             </div>
             {write.isError && (
               <p role="alert" className="text-sm text-destructive">
                 {errorMessage(write.error)}
               </p>
             )}
-            {/* The one primary action stays in reach however long the details get. */}
-            {/* On phones it sits on top of the bottom navigation (BottomNav, 3.5rem plus the safe area). */}
-            <div className="sticky bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-10 -mx-4 flex items-center gap-2 border-t border-border bg-background px-4 py-3 sm:mx-0 sm:px-0 md:bottom-0">
-              {!question && <p className="mr-auto hidden text-sm text-muted-foreground sm:block">{t('An AI answer comes right after you post.')}</p>}
-              <Button variant="quiet" className={question ? 'ml-auto' : 'ml-auto sm:ml-0'} onClick={() => navigate(-1)}>
+            {/* The one primary action stays in reach however long the details get; on phones it rides above the
+                bottom navigation (BottomNav, 3.5rem plus the safe area). */}
+            <div className="sticky bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-10 -mx-4 mt-2 flex items-center gap-3 border-t border-border bg-background/95 px-4 py-3 backdrop-blur-sm sm:mx-0 sm:px-0 md:bottom-0">
+              <p className="mr-auto hidden min-w-0 text-sm text-muted-foreground sm:block" aria-live="polite">
+                {missing.length > 0 ? (
+                  t('Still needed: {list}', { list: missing.join(', ') })
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 text-foreground">
+                    <CheckCircle size={16} weight="fill" className="text-primary" aria-hidden="true" />
+                    {question ? t('Ready to save') : t('Ready to post')}
+                    <kbd className="ml-1 rounded-md border border-border-strong px-1.5 font-sans text-xs text-muted-foreground">{t('Ctrl + Enter')}</kbd>
+                  </span>
+                )}
+              </p>
+              <Button variant="quiet" className="ml-auto sm:ml-0" onClick={() => navigate(-1)}>
                 {t('Cancel')}
               </Button>
-              <Button type="submit" loading={write.isPending}>
+              <Button type="submit" loading={write.isPending} className="min-w-36">
+                <PaperPlaneTilt size={18} weight="fill" aria-hidden="true" />
                 {question ? t('Save question') : t('Post question')}
               </Button>
             </div>

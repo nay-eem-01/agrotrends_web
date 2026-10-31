@@ -30,3 +30,14 @@ export function textToHtml(text: string | null | undefined): string {
     .map((line) => `<p>${escape(line)}</p>`)
     .join('')
 }
+
+/**
+ * The advisor's citation markers ("[1]", "[2] [3]") as small numbered marks that point at its sources. Only numbers
+ * that have a source are marked; anything else is left as written. The result still goes through SafeHtml (which drops classes, so the container styles the marks).
+ */
+export function withCitations(text: string | null | undefined, sources: number): string {
+  if (!text) return ''
+  return text.replace(/\[(\d{1,2})\]/g, (marker, n: string) =>
+    Number(n) >= 1 && Number(n) <= sources ? `<sup aria-label="source ${n}">${n}</sup>` : marker,
+  )
+}

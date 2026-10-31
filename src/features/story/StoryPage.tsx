@@ -16,7 +16,9 @@ import { Chip } from '../../ui/Chip'
 import { TagList } from '../../ui/TagList'
 import { SafeHtml } from '../../ui/SafeHtml'
 import { Spinner } from '../../ui/Spinner'
+import { useAuthor } from '../../api/authors'
 import { useSession } from '../auth/session'
+import { FollowAuthorButton } from '../authors/FollowAuthorButton'
 import { ReportButton } from '../reports/ReportButton'
 import { BookmarkButton } from '../reactions/BookmarkButton'
 import { ClapButton } from '../reactions/ClapButton'
@@ -86,10 +88,12 @@ function Story({ story }: { story: BlogResponse }) {
               </Link>
               <p className="text-muted-foreground">{meta.join(' · ')}</p>
             </div>
-            {own && (
+            {own ? (
               <ButtonLink to={`/write/${story.id}`} variant="secondary" size="sm" className="ml-auto">
                 {t('Edit story')}
               </ButtonLink>
+            ) : (
+              author.authorId != null && <BylineFollow authorId={author.authorId} />
             )}
           </div>
         )}
@@ -111,6 +115,17 @@ function Story({ story }: { story: BlogResponse }) {
         {story.id != null && story.status === 'PUBLISHED' && <Thread kind="comments" parentId={story.id} />}
       </div>
     </article>
+  )
+}
+
+/** Follow in the byline, as on Medium; the author's profile is shared with "Written by" below, so it's read once. */
+function BylineFollow({ authorId }: { authorId: number }) {
+  const profile = useAuthor(authorId)
+  if (!profile.data) return null
+  return (
+    <div className="ml-auto">
+      <FollowAuthorButton author={profile.data} />
+    </div>
   )
 }
 

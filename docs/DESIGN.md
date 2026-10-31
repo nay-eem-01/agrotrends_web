@@ -32,8 +32,9 @@ Rules of the direction:
    `surface` wash before reaching for a border; a border is a 1px hairline.
 2. **Colour only where it means something.** Green = action or link; mustard = accepted, verified expert,
    expert-checked AI; red = error. Everything else is ink and grey-green.
-3. **Pills for things you press, soft rectangles for things you read.** Buttons, chips, tags-as-filters, the search
-   field, segmented switches and badges are fully round. Cards are 18px; fields 12px.
+3. **Pills for things you press or type in, soft rectangles for things you read.** Buttons, chips, tags-as-filters,
+   single-line fields, selects, the search field, segmented switches and badges are fully round. Cards and
+   multi-line fields (text areas, editors) are 18px.
 4. **No shadows on the page.** Shadows are for overlays only (menus, popovers, dialogs, the sticky post bar's edge).
 5. **Bengali is not a fallback.** Every screen is checked with Bengali text; Hind Siliguri and Noto Serif Bengali sit
    right behind Inter and Lora.
@@ -75,13 +76,14 @@ an underline, errors an icon, accepted answers the word "Accepted", unanswered q
 
 ## Shape and controls
 
-- Radius from one token, `--radius: 0.75rem`: fields, selects and compact controls `rounded-lg` (12px); cards,
-  menus and popovers `rounded-xl` (18px); dialogs and large panels `rounded-2xl` (21px). Buttons, chips, badges,
-  the search field and segmented switches `rounded-full`. No one-off radii on pages.
+- Radius from one token, `--radius: 0.75rem`: compact controls `rounded-lg` (12px); cards, menus, popovers and text
+  areas `rounded-xl` (18px); dialogs and large panels `rounded-2xl` (21px). Buttons, chips, badges, single-line
+  fields, selects, the search field and segmented switches `rounded-full` (F22, after direction D). No one-off radii.
 - Buttons (`ui/Button`, shadcn `button`): pills, Inter 600. Primary filled paddy; secondary white with
   `border-strong`; quiet is a ghost; danger a red wash. 40px (sm) and 44px (md) high; press `scale(0.97)`.
-- Fields: white, 44px high, 12px corners, `input` border, darker (`subtle`) on hover, green border plus the halo on
-  focus, red border and an icon with the message on error. Labels always visible; placeholders are examples.
+- Fields: white pills, 44px high, `input` border, darker (`subtle`) on hover, green border plus the halo on focus, red
+  border and an icon with the message on error; text areas the same with 18px corners; a tag box wraps its pills
+  inside a pill. Labels always visible; placeholders are examples.
 - Cards: white, 18px, one hairline, no shadow. The accepted answer and an expert-checked AI answer get a mustard
   border and ring; nothing else is coloured.
 - Chips: 32–36px pills on the leaf wash; the selected one is ink on white or paddy with a tick. Topic pickers are
@@ -100,9 +102,12 @@ an underline, errors an icon, accepted answers the word "Accepted", unanswered q
 
 Page width 1240px, gutters 16px (phones) / 32px; reading column 680px; feed column 720px.
 
-- **Navigation:** white bar with a hairline: Discover · Questions · Stories · AI advisor · Write, Ask (signed in),
-  bell, account menu; the current page green and underlined. Search opens a dialog (field-styled trigger from 1280px). Below 1024px a menu sheet;
-  below 768px a bottom tab bar (Discover, Questions, Ask +, Stories, AI advisor).
+- **Navigation (F22.10):** one place for the sections, the left sidebar (`layout/AppSidebar`), on every page from
+  1024px: Home (Discover for visitors), Questions, Stories, AI advisor; signed in, Reading list, Your stories and
+  your topics. The top bar's menu button hides it to an icon strip (names in tooltips and for screen readers) and
+  opens it again; the choice is remembered. The top bar holds no section tabs: logo, search, Write, Ask, bell,
+  account. Below 1024px the menu sheet; below 768px the bottom tab bar (Discover, Questions, Ask +, Stories, AI
+  advisor). Pages never repeat the sidebar's links in their own sidebars.
 - **Discover (`/`):** hero (Lora headline, intro, Ask a question / Join) beside the drawn field (`FieldScene`) with
   an advisor caption; "Help a farmer today" (up to three unanswered questions, each with Answer); "What farmers are
   asking" (one row of topic filters, then compact question rows) beside the advisor panel with

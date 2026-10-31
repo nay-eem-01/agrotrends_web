@@ -78,7 +78,7 @@ export function QuestionEditor({ title, html, photos, titleError, detailsError, 
             editor?.commands.focus('start')
           }
         }}
-        className="block w-full resize-none bg-transparent pb-3 text-2xl leading-tight font-semibold tracking-[-0.01em] text-foreground [field-sizing:content] placeholder:text-muted-foreground/55 focus:outline-none sm:text-[1.75rem]"
+        className="block w-full resize-none bg-transparent pb-3 font-serif text-2xl leading-tight font-semibold tracking-[-0.015em] text-foreground [field-sizing:content] placeholder:text-muted-foreground/55 focus:outline-none sm:text-[1.75rem]"
       />
       {titleError && (
         <div className="pb-3">

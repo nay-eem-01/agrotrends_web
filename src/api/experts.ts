@@ -83,3 +83,28 @@ export function useExpertDecision() {
 
 /** The backend's limit on a decision note. */
 export const MAX_DECISION_NOTE = 500
+
+/** A verified expert in the "Experts to follow" list (docs/BACKEND_REQUESTS.md §4; not in the OpenAPI yet). */
+export interface ExpertSummary {
+  userId: number
+  name: string
+  authorId?: number | null
+  avatarUrl?: string | null
+  expertField?: string | null
+  institution?: string | null
+  topics?: { id?: number; categoryName?: string }[]
+  followedByMe?: boolean
+}
+
+/**
+ * Verified experts to follow, most accepted answers first. Until the backend has `GET /api/experts` this fails
+ * quietly (no retry) and the list stays hidden.
+ */
+export function useExperts(categoryId?: number) {
+  return useQuery({
+    queryKey: ['experts', 'list', categoryId ?? null],
+    queryFn: ({ signal }) => api<Page<ExpertSummary>>('/api/experts', { params: { categoryId, pageNo: 0, pageSize: 3 }, signal }),
+    retry: false,
+    staleTime: 10 * 60_000,
+  })
+}

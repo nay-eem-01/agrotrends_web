@@ -162,3 +162,17 @@ test('an author can open their own story in the editor', async () => {
   renderWithProviders(<App />, '/stories/mine')
   expect(await screen.findByRole('link', { name: 'Edit story' })).toHaveAttribute('href', '/write/74')
 })
+
+test('the topic and tags chosen beside the story carry into the publish step', async () => {
+  saveLocalDraft({ title: 'Boro in cold spells', html: '<p>Cover the seedbed.</p>', cover: '' })
+  mockApi(signedInAuthor())
+  renderWithProviders(<App />, '/write')
+
+  const panel = within(await screen.findByRole('complementary', { name: 'Story settings' }))
+  await chooseOption(panel.getByLabelText('Topic'), 'Fisheries')
+  expect(panel.getByText('A topic').parentElement).toHaveTextContent('A topic, done')
+
+  await userEvent.click(screen.getByRole('button', { name: 'Publish' }))
+  const sheet = within(await screen.findByRole('dialog', { name: 'Ready to publish?' }))
+  expect(sheet.getByLabelText('Topic')).toHaveValue('Fisheries')
+})

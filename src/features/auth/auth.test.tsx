@@ -76,6 +76,8 @@ test('signing up sends one kind of account, then signs in', async () => {
   renderWithProviders(<App />, '/sign-up')
 
   await userEvent.type(await screen.findByLabelText('Full name'), 'Nasrin Akter')
+  // Phone shows first; the e-mail is one tap away.
+  await userEvent.click(screen.getByRole('button', { name: 'Add an e-mail too' }))
   await userEvent.type(screen.getByLabelText('E-mail'), 'nasrin@farm.bd')
   await userEvent.type(screen.getByLabelText('Mobile number'), '1712345678')
   await userEvent.type(screen.getByLabelText('Password'), 'Paddy2026!')
@@ -99,6 +101,7 @@ test('sign-up checks the password rule before sending', async () => {
   renderWithProviders(<App />, '/sign-up')
 
   await userEvent.type(await screen.findByLabelText('Password'), 'paddy2026')
+  expect(screen.getByText('Fair')).toBeInTheDocument()
   await userEvent.click(screen.getByRole('button', { name: 'Create account' }))
 
   expect(screen.getByLabelText('Password')).toHaveAccessibleDescription('Include a capital letter, a number and a symbol.')
@@ -110,6 +113,7 @@ test('an account that was created but not signed in says so', async () => {
   renderWithProviders(<App />, '/sign-up')
 
   await userEvent.type(await screen.findByLabelText('Full name'), 'Karim')
+  await userEvent.click(screen.getByRole('button', { name: 'Add an e-mail too' }))
   await userEvent.type(screen.getByLabelText('E-mail'), 'karim@farm.bd')
   await userEvent.type(screen.getByLabelText('Mobile number'), '1812345678')
   await userEvent.type(screen.getByLabelText('Password'), 'Jute2026#')
@@ -220,4 +224,20 @@ test('the sign-in page says what you get and switches to Bengali before typing',
   expect(bengali.getByRole('button', { name: 'বাংলা' })).toHaveAttribute('aria-pressed', 'true')
   expect(document.documentElement.lang).toBe('bn')
   await userEvent.click(bengali.getByRole('button', { name: 'English' }))
+})
+
+test('the password can be shown, Forgot sits by its label, and sign-up switches between phone and e-mail', async () => {
+  const { unmount } = renderWithProviders(<App />, '/sign-in')
+  const password = await screen.findByLabelText('Password')
+  expect(password).toHaveAttribute('type', 'password')
+  await userEvent.click(screen.getByRole('button', { name: 'Show password' }))
+  expect(password).toHaveAttribute('type', 'text')
+  expect(screen.getByRole('link', { name: 'Forgot your password?' })).toHaveAttribute('href', '/forgot-password')
+  unmount()
+
+  renderWithProviders(<App />, '/sign-up')
+  expect(await screen.findByLabelText('Mobile number')).toBeInTheDocument()
+  await userEvent.click(screen.getByRole('button', { name: 'E-mail' }))
+  expect(screen.getByLabelText('E-mail')).toBeInTheDocument()
+  expect(screen.queryByLabelText('Mobile number')).not.toBeInTheDocument()
 })

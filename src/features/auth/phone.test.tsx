@@ -38,7 +38,8 @@ test('sign-up needs an e-mail or a phone, and a phone-only account goes on to co
   await userEvent.type(await screen.findByLabelText('Full name'), 'Rahim')
   await userEvent.type(screen.getByLabelText('Password'), 'Paddy2026!')
   await userEvent.click(screen.getByRole('button', { name: 'Create account' }))
-  expect(screen.getByLabelText('E-mail')).toHaveAccessibleDescription('Give an e-mail address, a phone number or both.')
+  expect(screen.getByLabelText('Mobile number')).toHaveAccessibleDescription('Give an e-mail address, a phone number or both.')
+  expect(screen.queryByLabelText('E-mail')).not.toBeInTheDocument()
 
   await userEvent.type(screen.getByLabelText('Mobile number'), '01712345678')
   await userEvent.click(screen.getByRole('button', { name: 'Create account' }))

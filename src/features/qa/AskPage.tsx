@@ -12,6 +12,7 @@ import { useSession } from '../auth/session'
 import { NotFoundPage } from '../errors/NotFoundPage'
 import { TagInput } from '../topics/TagInput'
 import { QuestionEditor } from './QuestionEditor'
+import { SimilarQuestions } from './SimilarQuestions'
 import { TopicPicker } from './TopicPicker'
 import { AskingWell } from './QuestionsPage'
 
@@ -123,6 +124,7 @@ function QuestionForm({ question }: { question?: Question }) {
               onHtmlChange={setDetails}
               onPhotosChange={setImageUrls}
             />
+            {!question && <SimilarQuestions title={title} />}
             <div className="flex flex-col gap-7 border-t border-border pt-7">
               <TopicPicker categories={categories.data ?? []} loading={categories.isPending} value={categoryId} error={errors.topic} onChange={setCategoryId} />
               <TagInput popular tags={tags} onChange={setTags} />

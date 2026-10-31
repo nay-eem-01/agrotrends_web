@@ -52,3 +52,21 @@ test('the search pill and Ctrl+K open the same search dialog', async () => {
   await userEvent.keyboard('{Control>}k{/Control}')
   expect(await screen.findByRole('dialog', { name: 'Search AgroTrends' })).toBeInTheDocument()
 })
+
+test('the sections live in the sidebar only, and the menu button hides it to icons and back', async () => {
+  mockApi({ 'GET /api/questions/all': () => envelope(200, page([])), 'GET /api/categories/all': () => envelope(200, page([])) })
+  renderWithProviders(<App />, '/questions')
+
+  const sidebar = await screen.findByRole('complementary', { name: 'Navigation' })
+  expect(within(sidebar).getByRole('link', { name: 'Questions' })).toHaveAttribute('aria-current', 'page')
+  // The top bar no longer repeats the sections.
+  expect(within(screen.getByRole('navigation', { name: 'Main' })).queryByRole('link', { name: 'Questions' })).not.toBeInTheDocument()
+
+  const toggle = screen.getByRole('button', { name: 'Hide navigation' })
+  expect(toggle).toHaveAttribute('aria-expanded', 'true')
+  await userEvent.click(toggle)
+  expect(screen.getByRole('button', { name: 'Show navigation' })).toHaveAttribute('aria-expanded', 'false')
+  // Hidden to icons, the links are still there and still named.
+  expect(within(sidebar).getByRole('link', { name: 'Questions' })).toHaveAttribute('title', 'Questions')
+  expect(localStorage.getItem('agrotrends.sidebar')).toBe('closed')
+})

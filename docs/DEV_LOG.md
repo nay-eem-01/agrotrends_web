@@ -47,12 +47,15 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   question page (`feat/harvest-question`) and F20.3 white page (`fix/harvest-white-page`) and F20.4 ask form
   redesign (`feat/ask-redesign`) done. Phase F20 is complete.
 - Phase F21 on `feat/paddy-base` (stacked on F20's tip): F21.1 Paddy Field tokens (`feat/paddy-tokens`) F21.2 shell (`feat/paddy-shell`) F21.3 sign in and sign up (`feat/paddy-auth`) F21.4 expert application (`feat/paddy-expert-apply`) F21.5 profile (`feat/paddy-profile`) F21.6 story editor (`feat/paddy-editor`) F21.7 question page (`feat/paddy-question`) F21.8 AI advisor (`feat/paddy-advisor`) F21.9 feeds (`feat/paddy-feeds`) F21.10 story page (`feat/paddy-story`) done. Phase F21 is complete.
+- Phase F22 on `feat/mock-base` (stacked on F21's tip): F22.1 fields (`feat/mock-fields`) F22.2 home feed (`feat/mock-home`) F22.3 question page (`feat/mock-question`) F22.4 profile (`feat/mock-profile`) F22.5 AI advisor (`feat/mock-advisor`) F22.6 ask page (`feat/mock-ask`) F22.7 story editor (`feat/mock-editor`) F22.8 sign in and sign up (`feat/mock-auth`) F22.9 story page (`feat/mock-story`) F22.10 navigation in the sidebar (`feat/mock-sidebar`) done. Phase F22 is complete.
 
 ## Next up
 
 1. **Nayeem:** PR F19.1, F19.2 then F19.3 into `feat/simple-ask-base`, then the base into `development`; then F20's
-   steps into `feat/harvest-base`, then F21.1–F21.10 into `feat/paddy-base`, then each base into `development`.
-2. Screens not yet on the Paddy Field layouts (Discover sections, Stories feed, settings, admin) follow the tokens and
+   steps into `feat/harvest-base`, then F21.1–F21.10 into `feat/paddy-base`, then F22.1–F22.9 into `feat/mock-base`,
+   then each base into `development`.
+2. **Backend:** the endpoints in `docs/BACKEND_REQUESTS.md`; each F22 section lights up once its endpoint answers.
+3. Screens not yet on the Paddy Field layouts (Discover sections, Stories feed, settings, admin) follow the tokens and
    shapes already; restyle them when they are next touched.
 3. Pick an SMS provider (backend 10.5): until then codes only appear in the backend log as `[DEV SMS]`.
 4. Run the admin smoke step (`E2E_ADMIN_EMAIL` / `E2E_ADMIN_PASSWORD`) and the admin screens live once an admin login is at hand.
@@ -73,6 +76,183 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-31 (F22.10 navigation in the sidebar)
+
+**Done**
+- Nayeem pointed out that the home sidebar repeated the top bar's tabs and that other pages had no sidebar. Navigation
+  now lives in one place: `layout/AppSidebar` on every page from 1024px (Home or Discover, Questions, Stories, AI
+  advisor; signed in, Reading list, Your stories and your topics with "+ Follow topics").
+- The top bar's menu button hides the sidebar to an icon strip (each icon keeps its name as a tooltip and for screen
+  readers) and opens it again; the choice is kept in `localStorage` (`agrotrends.sidebar`). Reading and writing pages
+  keep it too, so the sections are always one click away.
+- The top bar drops its section tabs: menu button, logo, search, Write and Ask pills, bell, account. Phones keep the
+  menu sheet and the bottom tab bar.
+- The home feed drops its own sidebar (two columns: feed and the trending rail).
+- Tests: `layout/topbar.test.tsx` (sections only in the sidebar, hide and show, remembered); the home, library and
+  publish tests now name the region they mean. Checked at 1280px open and hidden, light and dark, and at 390px.
+
+---
+
+## 2026-10-31 (F22.9 story page as the mock-up)
+
+**Done**
+- Follow in the byline for other readers' stories (the author's profile, shared with "Written by" so it's read once;
+  `FollowAuthorButton`); your own stories keep Edit story there.
+- Test: `story/story.test.tsx` finds the byline's Follow above the story text. Checked at 1280px light and dark and at
+  390px.
+
+**Decisions**
+- No second Save in a top bar: the clap / report / save bar sits right under the byline already.
+- No subtitle until the backend has one (§9).
+
+---
+
+## 2026-10-31 (F22.8 sign in and sign up as the mock-up)
+
+**Done**
+- Google comes first on both forms, then an "or" rule, then the form (`auth/GoogleSignIn`).
+- `ui/PasswordField`: Show / Hide inside the field, something beside the label (sign-in: "Forgot your password?"), and
+  on sign-up a four-step strength bar with a word (`lib/password` `passwordStrength`: length, capital, number, symbol).
+- Sign-up: "How we reach you" is a Mobile number | E-mail pill switch (phone first), with "We'll text a code" or "We'll
+  e-mail a link" and "Add an e-mail too" / "Add a phone number too" to give both. "Give an e-mail or a phone" shows on
+  the field that's visible.
+- The sign-in panel shows members and verified experts from `GET /api/stats/public` (§10), asked for only from 1024px,
+  hidden until the backend serves it.
+- Tests: `lib/password.test.ts`, `auth/auth.test.tsx` (Show, Forgot, the switch, the strength word), `auth/phone.test.tsx`
+  (the error on the phone field). Checked at 1280px light and dark and at 390px.
+
+**Decisions**
+- Only the Google change in `GoogleSignIn.tsx` is committed; Nayeem's local `console.log` there stays uncommitted.
+
+---
+
+## 2026-10-31 (F22.7 story editor as the mock-up)
+
+**Done**
+- The side panel now holds the story's Topic (searchable select) and Tags (the tag box) above "Before you publish",
+  which gains "A topic". What's chosen there opens in the publish sheet and is saved with a draft's autosave; changes
+  made in the sheet come back to the panel.
+- Saved stories get Preview (the story page, which shows drafts to their author) beside Save and Publish.
+- Test: `editor/publish.test.tsx` picks a topic in the panel and finds it in the publish sheet. Checked at 1280px light
+  and dark and at 390px (the panel is hidden below 1024px; the sheet still has everything).
+
+**Known limitations**
+- No subtitle and no "Let the AI advisor cite this" switch until the backend has `subtitle` and `aiCitable` (§9).
+
+---
+
+## 2026-10-31 (F22.6 ask page as the mock-up)
+
+**Done**
+- "Already answered, might help" (`qa/SimilarQuestions`): half a second after the title stops changing (12 characters
+  or more), matching questions from `/api/questions/search`, answered ones only, accepted first, up to three, each
+  opening in a new tab. Nothing shows on a miss or when editing.
+- The question title is set in Lora, as in the mock-up.
+- Test: `qa/ask.test.tsx` checks the search and that unanswered matches are left out. Checked at 1280px light and dark
+  and at 390px.
+
+---
+
+## 2026-10-31 (F22.5 AI advisor as the mock-up)
+
+**Done**
+- Each turn starts with an "AI advisor" label over the question; citation markers in the answer (`[1]`, `[2]`) become
+  small numbered chips pointing at the source cards (`lib/html` `withCitations`, only for numbers that have a source;
+  styled from the container since SafeHtml drops classes).
+- "Ask next": the backend's suggested follow-ups as rows with an arrow; one tap fills the ask bar.
+- The question box is a pill ask bar that grows with the text (label kept for screen readers; placeholder "Ask a
+  follow-up…" after the first answer), with an Ask pill inside; the count and the Enter hint sit under it.
+- Tests: `lib/html.test.ts` (markers), `ai/advisor.test.tsx` (a marked source and a follow-up filling the bar).
+  Checked at 1280px light and dark and at 390px.
+
+**Known limitations**
+- Markers and follow-ups appear once the backend sends them (`docs/BACKEND_REQUESTS.md` §8).
+
+---
+
+## 2026-10-31 (F22.4 profile as the mock-up)
+
+**Done**
+- `/users/:userId` after LinkedIn: cover (the profile's, or the wash), photo, Lora name, headline (the author's
+  designation or occupation and workplace, else the expert field), location, the Verified expert chip, followers and
+  join date; Follow (author follow) or Report for others, Share and Edit profile on your own.
+- Numbers row: reputation, answers, accepted, stories once the backend summary exists; until then reputation, accepted
+  answers, questions, topics.
+- Tabs: Overview, Stories (when there's an author), Questions, Answers (once §3 answers), and on your own Drafts and
+  Saved. Overview: About, Credentials (from the summary, else the expert topics), "Answers questions on" with points,
+  badges and specialities; beside it Recent contributions (questions, answers and stories by date) or, on your own,
+  Drafts with Continue and Your questions marked Accepted, Answered or Waiting. Your own profile shows how complete it
+  is with a bar and Finish profile.
+- `api/users.ts`: `useUserProfile` (§1) and `useUserAnswers` (§3), no retries, guarded against empty answers.
+  `docs/BACKEND_REQUESTS.md` §1–§2 narrowed: the author profile already has headline, bio, photo, followers and follow;
+  what's missing is user → author, location, cover, counts and credentials.
+- Tests: `users/reputation.test.tsx` (fallback page, your own page, and the full page with summary, author and answers).
+  Checked at 1280px light and dark and at 390px.
+
+**Known limitations**
+- Others' profiles show no headline, Follow or Stories until the backend gives `authorId` for a user (§1).
+- No Message button: AgroTrends has no messaging.
+
+---
+
+## 2026-10-31 (F22.3 question page as the mock-up)
+
+**Done**
+- The question is no longer a card: topic and Unanswered on top, the Lora title, tags, then the vote column (round
+  buttons, outlined) beside the question text, photos, farming chips and the author line. The vote keeps its
+  "Rate this question" group name and "Useful question?" for screen readers.
+- Side panel from 1024px, sticky: Answers, Views (once the backend sends `viewCount`, §7) and Asked; the AI advisor with
+  "Read the AI answer →"; Write an answer. On phones Write an answer sits under the question.
+- Answers: a header with "Accepted first, then by votes"; the accepted answer is a mustard card with a wash at its top,
+  the others plain rows divided by hairlines.
+- Test: `qa/question-page.test.tsx` reads the panel's numbers (with views) and its two links. Checked at 1280px light
+  and dark and at 390px.
+
+**Decisions**
+- "Useful question?" is no longer shown as text (the mock-up has none); the vote column sits against the question
+  text, apart from the answers' votes, and its buttons say "Upvote this question" on hover.
+
+---
+
+## 2026-10-31 (F22.2 home feed)
+
+**Done**
+- Signed-in readers get a home feed at `/` (`home/HomeFeed`, lazy) as in the mock-up; visitors keep Discover.
+  - Left (from 768px): Home, Questions, Stories, AI advisor, Reading list as pills; "Your topics" (followed tags, or
+    the first topics when none) and "+ Follow topics".
+  - Middle: For you and topic chips (`?topic=`), a composer pill ("Ask the community, or ask the AI advisor…" and an AI
+    pill), then one feed of stories and questions, newest first, merged from `/api/blogs/all` (or
+    `/all/category/{id}`) and `/api/questions/all`; Show more loads the next page of both. Stories get a feed row
+    like questions, with the cover or the drawn fallback.
+  - Right (from 1024px): Trending now (`/api/feed/trending`) and Experts to follow.
+  - Phones: a greeting by the hour, This week's tasks and four quick actions (Ask, AI advice, Read stories, Help
+    answer) above the feed.
+- New hooks for missing endpoints: `useExperts` (`GET /api/experts`), `useWeekTips` (`GET /api/tips/this-week`),
+  both without retries; their sections stay hidden until the backend answers. `useTopicStories` for the category feed.
+- Tests: `home/home-feed.test.tsx` (merged order, topics, trending, the topic chip's requests, hidden sections, and the
+  sections once the endpoints answer). Checked at 1280px light and dark and at 390px.
+
+**Known limitations**
+- Experts have no Follow button and "Your topics" are tags until the backend adds person and topic follows
+  (`docs/BACKEND_REQUESTS.md` §2, §5); the feed is two lists merged until §6.
+
+---
+
+## 2026-10-31 (F22.1 pill fields and backend requests)
+
+**Done**
+- Nayeem asked for the screens exactly as in the mock-ups, fields included, and for a list of what the backend must
+  add. Phase F22 matches each screen in turn; `docs/BACKEND_REQUESTS.md` holds twelve endpoint contracts (public
+  profile, follow a person, a user's answers, experts list, topic follows, home feed, question views, AI follow-ups and
+  citations, story subtitle and AI opt-out, public numbers, this week's tasks, question routing to experts).
+- Fields after direction D: inputs, selects, native selects and input groups are pills (more side padding); the tag
+  box and combobox chips wrap inside a 22px-round box; text areas are 18px.
+
+**Decisions**
+- Sections that need a missing endpoint are built now and stay hidden until it answers, so nothing shows an error.
 
 ---
 

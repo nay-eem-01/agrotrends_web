@@ -10,18 +10,18 @@ below. The crop-season strip of F2 is gone (2026-10-15); season is an ordinary f
 
 ## Colour — "Harvest" (F20, 2026-10-31)
 
-Chosen with the ui-ux-pro-max skill (its Agriculture / Farm Tech profile, style "Organic Biophilic"): a pale
-field-green page with white cards on it, earth green for action, harvest gold for trust. Replaces F15's "Living
+Chosen with the ui-ux-pro-max skill (its Agriculture / Farm Tech profile, style "Organic Biophilic"): a white page
+(as before; the skill's pale-green page was tried and dropped), earth green for action, harvest gold for trust. Replaces F15's "Living
 Field" (white page, forest green `#245C3A`, mustard `#D9A441`). Semantic shadcn roles in `src/index.css`; the F0–F6
 names are aliases. Contrast is against white unless noted.
 
 | Role (class) | Light | Dark | Use |
 |---|---|---|---|
-| `background` | `#F0FDF4` | `#0B1410` | the page: a pale field green |
-| `card` / `popover` | `#FFFFFF` | `#111D16` / `#15231A` | content sits on white cards; forms, menus, dialogs |
+| `background` | `#FFFFFF` | `#0B1410` | the page: white, so at least three quarters of a screen reads as white |
+| `card` / `popover` | `#FFFFFF` | `#111D16` / `#15231A` | cards (with a hairline), forms, menus, dialogs |
 | `surface` / `muted` | `#E7F6EC` | `#12241A` | quiet panels on cards: the answer box, sources, hover rows, skeletons, the editor toolbar |
-| `foreground` | `#14532D` | `#DCFCE7` | text and headlines: deep leaf green (8.7:1 on the page) |
-| `muted-foreground` | `#4B5E52` | `#9DB8A6` | secondary text, metadata (6.6:1 on the page) |
+| `foreground` | `#14532D` | `#DCFCE7` | text and headlines: deep leaf green (9.1:1) |
+| `muted-foreground` | `#4B5E52` | `#9DB8A6` | secondary text, metadata (7.0:1) |
 | `subtle` | `#6B7F72` | `#7D9886` | icons only (4.3:1) |
 | `border` / `border-strong` | `#D3EEDB` / `#A7D7B5` | `#1E3A28` / `#2A4D36` | hairlines; secondary buttons, outline chips |
 | `input` | `#68A07A` | `#4F7D5F` | field borders (3.0:1 / 3.7:1, the WCAG minimum for controls) |

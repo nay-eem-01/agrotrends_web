@@ -19,8 +19,8 @@
 
 /* Tokens from docs/DESIGN.md: shadcn's semantic roles, AgroTrends' colours. Components never use raw hex. */
 :root {
-  /* "Harvest" (F20): a pale field-green page with white cards, earth green for action, harvest gold for trust. */
-  --background: #f0fdf4;
+  /* "Harvest" (F20): a white page, earth green for action, harvest gold for trust. */
+  --background: #ffffff;
   --foreground: #14532d;
   --surface: #e7f6ec;
   --card: #ffffff;

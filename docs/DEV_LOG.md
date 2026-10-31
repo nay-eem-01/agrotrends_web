@@ -79,6 +79,14 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 
 ---
 
+## 2026-11-01 (fix: Google test with a local client id)
+
+**Done**
+- `welcome.test.tsx` "no Google button without a client id" failed on any machine whose `.env` sets
+  `VITE_GOOGLE_CLIENT_ID`, because Vite loads `.env` in tests. The test now clears the variable itself.
+
+---
+
 ## 2026-10-31 (F22.12 quieter frame, focused sign-in)
 
 **Done**

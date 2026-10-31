@@ -308,9 +308,12 @@ function ProfileNudge({ filled }: { filled: unknown[] }) {
       <div>
         <p className="text-sm font-semibold">{t('Your profile is {n}% done', { n: done })}</p>
         <p className="text-sm text-muted-foreground">{t('Add your work, a photo and what you know about, so people know who is answering.')}</p>
-        <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-background" role="progressbar" aria-label={t('Profile done')} aria-valuenow={done} aria-valuemin={0} aria-valuemax={100}>
-          <div className="h-full rounded-full bg-primary" style={{ width: `${done}%` }} />
-        </div>
+        <progress
+          value={done}
+          max={100}
+          aria-label={t('Profile done')}
+          className="mt-2.5 block h-1.5 w-full appearance-none overflow-hidden rounded-full bg-background [&::-moz-progress-bar]:bg-primary [&::-webkit-progress-bar]:bg-background [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:bg-primary"
+        />
       </div>
       <ButtonLink to="/settings" size="sm">
         {t('Finish profile')}

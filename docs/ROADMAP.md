@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend · ➡ moved to a later step
 
-**Progress:** 77 of 77 steps done
+**Progress:** 78 of 78 steps done
 
 ---
 
@@ -208,6 +208,7 @@ Endpoints and rules: `docs/BACKEND_CATCHUP_PLAN.md` § Admin dashboard.
 |---|---|---|
 | F19.1 | Question page: the question's own vote moves beside the author line as "Useful question?", apart from the answers' votes; vote arrows get a hover title (`feat/question-vote-label`) | ✅ |
 | F19.2 | Ask form in one place: title, rich-text details (bold, italic, lists, quote, link) with a photo button, topic and tags in one composer; no crop-specific farming fields (`feat/ask-editor`) | ✅ |
+| F19.3 | Ask form restyled: no boxed border, soft sticky toolbar, topic and tags typed in one row, Cancel and Post in a sticky bar above the phone's bottom navigation (`feat/ask-composer`) | ✅ |
 
 ## Needs from the backend
 

@@ -84,9 +84,9 @@ function QuestionForm({ question }: { question?: Question }) {
       <title>{question ? t('Edit question – AgroTrends') : t('Ask a question – AgroTrends')}</title>
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-14">
         <div className="max-w-(--container-feed) min-w-0">
-          <h1 className="text-2xl sm:text-[2rem]">{question ? t('Edit your question') : t('Ask a question')}</h1>
-          <p className="mt-2 text-muted-foreground">{t('Say what you are working with, where, and what you have already tried. Specific questions get useful answers.')}</p>
-          <form onSubmit={submit} noValidate className="mt-8 flex flex-col gap-5">
+          <h1 className="text-xl sm:text-2xl">{question ? t('Edit your question') : t('Ask a question')}</h1>
+          <p className="mt-1.5 text-sm text-muted-foreground sm:text-base">{t('Say what you are working with, where, and what you have already tried. Specific questions get useful answers.')}</p>
+          <form onSubmit={submit} noValidate className="mt-8 flex flex-col gap-4">
             <QuestionEditor
               title={title}
               html={details}
@@ -97,29 +97,40 @@ function QuestionForm({ question }: { question?: Question }) {
               onHtmlChange={setDetails}
               onPhotosChange={setImageUrls}
             />
-            <div className="grid gap-5 sm:grid-cols-2">
-              <SearchSelect
-                label={t('Topic')}
-                value={categoryId == null ? '' : String(categoryId)}
-                error={errors.topic}
-                disabled={categories.isPending}
-                onChange={(value) => setCategoryId(value ? Number(value) : undefined)}
-                options={(categories.data ?? []).map((c) => ({ value: String(c.id), label: c.categoryName ?? '' }))}
-                placeholder={categories.isPending ? t('Loading…') : t('Choose a topic')}
-              />
-              <TagInput tags={tags} onChange={setTags} />
+            {/* Topic and tags in one row, both typed: filter topics and press Enter; Enter or comma adds a tag. */}
+            <div className="flex flex-col gap-3 border-t border-border pt-5 sm:flex-row sm:items-start">
+              <div className="flex items-start gap-2.5 sm:w-64 sm:shrink-0">
+                <span aria-hidden="true" className="flex h-11 items-center text-sm font-medium">
+                  {t('Topic')}
+                </span>
+                <SearchSelect
+                  label={t('Topic')}
+                  hideLabel
+                  className="min-w-0 flex-1 [&_[data-slot=input-group]]:rounded-full [&_[data-slot=input-group]]:border-transparent [&_[data-slot=input-group]]:bg-muted/70 [&_[data-slot=input-group]:hover]:bg-muted"
+                  value={categoryId == null ? '' : String(categoryId)}
+                  error={errors.topic}
+                  disabled={categories.isPending}
+                  onChange={(value) => setCategoryId(value ? Number(value) : undefined)}
+                  options={(categories.data ?? []).map((c) => ({ value: String(c.id), label: c.categoryName ?? '' }))}
+                  placeholder={categories.isPending ? t('Loading…') : t('Choose one')}
+                />
+              </div>
+              <TagInput compact tags={tags} onChange={setTags} />
             </div>
             {write.isError && (
               <p role="alert" className="text-sm text-destructive">
                 {errorMessage(write.error)}
               </p>
             )}
-            <div className="flex gap-3">
+            {/* The one primary action stays in reach however long the details get. */}
+            {/* On phones it sits on top of the bottom navigation (BottomNav, 3.5rem plus the safe area). */}
+            <div className="sticky bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-10 -mx-4 flex items-center gap-2 border-t border-border bg-background px-4 py-3 sm:mx-0 sm:px-0 md:bottom-0">
+              {!question && <p className="mr-auto hidden text-sm text-muted-foreground sm:block">{t('An AI answer comes right after you post.')}</p>}
+              <Button variant="quiet" className={question ? 'ml-auto' : 'ml-auto sm:ml-0'} onClick={() => navigate(-1)}>
+                {t('Cancel')}
+              </Button>
               <Button type="submit" loading={write.isPending}>
                 {question ? t('Save question') : t('Post question')}
-              </Button>
-              <Button variant="quiet" onClick={() => navigate(-1)}>
-                {t('Cancel')}
               </Button>
             </div>
           </form>

@@ -46,7 +46,7 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 - Phase F20 on `feat/harvest-base` (stacked on F19's tip): F20.1 Harvest tokens (`feat/harvest-tokens`) and F20.2
   question page (`feat/harvest-question`) and F20.3 white page (`fix/harvest-white-page`) and F20.4 ask form
   redesign (`feat/ask-redesign`) done. Phase F20 is complete.
-- Phase F21 on `feat/paddy-base` (stacked on F20's tip): F21.1 Paddy Field tokens (`feat/paddy-tokens`) F21.2 shell (`feat/paddy-shell`) F21.3 sign in and sign up (`feat/paddy-auth`) F21.4 expert application (`feat/paddy-expert-apply`) F21.5 profile (`feat/paddy-profile`) done.
+- Phase F21 on `feat/paddy-base` (stacked on F20's tip): F21.1 Paddy Field tokens (`feat/paddy-tokens`) F21.2 shell (`feat/paddy-shell`) F21.3 sign in and sign up (`feat/paddy-auth`) F21.4 expert application (`feat/paddy-expert-apply`) F21.5 profile (`feat/paddy-profile`) F21.6 story editor (`feat/paddy-editor`) done.
 
 ## Next up
 
@@ -72,6 +72,26 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-31 (F21.6 Paddy story editor)
+
+**Done**
+- `/write`: the writing column with "Before you publish" beside it from 1024px: a title, some text and a cover (optional)
+  ticked off as the draft fills, the word count and reading time (200 words a minute), and a note that topic and tags
+  come in the publish step. Worked out from the draft; nothing new is sent.
+- The toolbar is a soft rounded bar on the leaf wash (pressed tools white with the paddy icon); an empty cover is a
+  dashed "Add a cover image" tile; the title is Lora 600.
+- Test: `editor/editor.test.tsx` checks the checklist and reading time as the draft changes. Checked at 1280px light and
+  dark and at 390px.
+
+**Decisions**
+- The publish sheet (topic, tags, farming details) stays a dialog: moving it into the side panel would change the
+  publish flow that `publish.test.tsx` covers, for little gain.
+- The mock-up's "Let the AI advisor cite this" switch is left out: the backend has no such setting.
+- F21.3's language switch moved from `role="group"` to a fieldset (a lint warning), committed on `feat/paddy-auth` and
+  merged forward into F21.4 and F21.5.
 
 ---
 

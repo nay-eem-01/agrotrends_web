@@ -54,7 +54,7 @@ export function StoryEditor({ title, html, cover, onTitleChange, onHtmlChange, o
             editor?.commands.focus('start')
           }
         }}
-        className="mt-8 w-full resize-none bg-transparent font-serif text-[2rem] leading-[1.15] font-bold tracking-[-0.01em] text-foreground [field-sizing:content] placeholder:text-muted-foreground/60 focus:outline-none sm:text-3xl"
+        className="mt-8 w-full resize-none bg-transparent font-serif text-[2rem] leading-[1.15] font-semibold tracking-[-0.015em] text-foreground [field-sizing:content] placeholder:text-muted-foreground/60 focus:outline-none sm:text-3xl"
       />
       <EditorContent editor={editor} className="mt-6" />
     </div>
@@ -88,7 +88,7 @@ function Toolbar({ editor }: { editor: Editor }) {
   }
 
   return (
-    <div role="toolbar" aria-label="Formatting" className="sticky top-16 z-10 -mx-2 flex flex-wrap gap-0.5 border-b border-border bg-background px-1 py-1">
+    <div role="toolbar" aria-label="Formatting" className="sticky top-16 z-10 flex flex-wrap items-center gap-0.5 rounded-2xl bg-muted/90 p-1 backdrop-blur-sm">
       <Tool label="Heading" pressed={state.h2} onClick={() => chain().toggleHeading({ level: 2 }).run()}>
         <TextHTwo size={20} />
       </Tool>
@@ -136,8 +136,8 @@ function Tool({ label, pressed, onClick, children }: { label: string; pressed: b
       onMouseDown={(event) => event.preventDefault()}
       onClick={onClick}
       className={cx(
-        'flex size-11 items-center justify-center rounded-md transition-colors duration-150',
-        pressed ? 'bg-secondary text-primary' : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+        'flex size-11 items-center justify-center rounded-xl transition-[color,background-color] duration-150',
+        pressed ? 'bg-card text-primary shadow-xs' : 'text-muted-foreground hover:bg-card hover:text-foreground',
       )}
     >
       {children}
@@ -168,30 +168,48 @@ function useImagePicker(onUploaded: (url: string) => void) {
   }
 }
 
-/** The cover: shown above the title as it will be on the story page; add, change or remove it. */
+/** The cover: a wide dashed tile until there is one, then shown as it will be on the story page, to change or remove. */
 function Cover({ cover, onChange }: { cover: string; onChange: (cover: string) => void }) {
   const picker = useImagePicker(onChange)
   return (
     <div className="mt-6">
-      {cover && <img src={cover} alt="" className="mb-3 max-h-80 w-full rounded-lg bg-muted object-cover" />}
-      <div className="flex flex-wrap items-center gap-2">
-        <Button variant="secondary" size="sm" loading={picker.uploading} onClick={picker.open}>
-          {cover ? 'Change cover' : 'Add a cover image'}
-        </Button>
-        {cover && (
-          <Button variant="quiet" size="sm" onClick={() => onChange('')}>
-            Remove cover
-          </Button>
-        )}
-        {picker.input}
-        {picker.error ? (
-          <span role="alert" className="text-sm text-destructive">
-            {picker.error}
-          </span>
-        ) : (
-          !cover && <span className="text-xs text-muted-foreground">JPEG, PNG or WebP, up to 5 MB</span>
-        )}
-      </div>
+      {cover ? (
+        <>
+          <img src={cover} alt="" className="mb-3 aspect-[21/9] max-h-80 w-full rounded-xl bg-muted object-cover" />
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="secondary" size="sm" loading={picker.uploading} onClick={picker.open}>
+              Change cover
+            </Button>
+            <Button variant="quiet" size="sm" onClick={() => onChange('')}>
+              Remove cover
+            </Button>
+          </div>
+        </>
+      ) : (
+        <button
+          type="button"
+          onClick={picker.open}
+          disabled={picker.uploading}
+          aria-busy={picker.uploading || undefined}
+          aria-describedby="cover-hint"
+          className="flex h-32 w-full flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-input bg-surface text-sm font-medium text-muted-foreground transition-[color,border-color] duration-150 hover:border-primary hover:text-foreground disabled:opacity-60"
+        >
+          {picker.uploading ? <Spinner size={20} label="Uploading image" /> : <ImageIcon size={22} aria-hidden="true" />}
+          Add a cover image
+        </button>
+      )}
+      {picker.input}
+      {picker.error ? (
+        <p role="alert" className="mt-2 text-sm text-destructive">
+          {picker.error}
+        </p>
+      ) : (
+        !cover && (
+          <p id="cover-hint" className="mt-2 text-xs text-muted-foreground">
+            Optional. JPEG, PNG or WebP, up to 5 MB
+          </p>
+        )
+      )}
     </div>
   )
 }

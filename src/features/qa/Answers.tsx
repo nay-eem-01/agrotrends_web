@@ -30,7 +30,7 @@ export function Answers({ questionId, askerId }: { questionId: number; askerId?:
   const list = answers.data ?? []
 
   return (
-    <section aria-labelledby={headingId} className="mt-12">
+    <section aria-labelledby={headingId} className="mt-10">
       <h2 id={headingId} className="text-xl">
         {answers.data ? t(list.length === 1 ? '{n} answer' : '{n} answers', { n: formatNumber(list.length) }) : t('Answers')}
       </h2>
@@ -45,7 +45,7 @@ export function Answers({ questionId, askerId }: { questionId: number; askerId?:
       ) : list.length === 0 ? (
         <p className="py-6 text-muted-foreground">{t('No answers yet. If you have grown this, your answer helps.')}</p>
       ) : (
-        <ol className="mt-4 border-b border-border">
+        <ol className="mt-4 flex flex-col gap-3">
           {list.map((answer) => (
             <li key={answer.answerId}>
               <AnswerCard questionId={questionId} answer={answer} asker={user?.id != null && user.id === askerId} />
@@ -54,7 +54,7 @@ export function Answers({ questionId, askerId }: { questionId: number; askerId?:
         </ol>
       )}
       <div id="your-answer" className="mt-10 scroll-mt-24">
-        <div className="rounded-xl bg-surface p-4 sm:p-5">
+        <div className="rounded-2xl border border-border bg-card p-4 shadow-xs sm:p-6">
           {status === 'signed-in' ? (
             <Composer
               label={t('Your answer')}
@@ -93,7 +93,11 @@ function AnswerCard({ questionId, answer, asker }: { questionId: number; answer:
     <article
       id={`answer-${id}`}
       aria-label={t('Answer by {name}', { name: answer.authorName ?? '' })}
-      className={cn('flex scroll-mt-24 gap-2 border-t border-border py-6 sm:gap-4', answer.accepted && 'border-l-[3px] border-l-mustard pl-2 sm:pl-3')}
+      className={cn(
+        'flex scroll-mt-24 gap-2 rounded-2xl border bg-card p-4 shadow-xs sm:gap-4 sm:p-6',
+        // The accepted answer is the one to read first: a gold edge as well as the label.
+        answer.accepted ? 'border-mustard/70 ring-1 ring-mustard/40' : 'border-border',
+      )}
     >
       <VoteControl target="answers" id={id} score={answer.score ?? 0} myVote={myVotes.data?.answers?.[String(id)]} own={user?.id != null && user.id === answer.userId} />
       <div className="min-w-0 flex-1">
@@ -253,7 +257,7 @@ function Post({ questionId, item, compact = false, actions }: { questionId: numb
           />
         </div>
       ) : (
-        <SafeHtml html={item.content} className={compact ? 'mt-1.5 text-base whitespace-pre-line' : 'mt-3 text-base leading-relaxed whitespace-pre-line [&>p+p]:mt-3'} />
+        <SafeHtml html={item.content} className={cn('post-body whitespace-pre-line sm:text-base', compact ? 'mt-1.5' : 'mt-3')} />
       )}
       {/* The conversation's own actions stay in view; edit, delete and report wait in the menu above. */}
       {mode === 'view' && actions && <div className="mt-2 -ml-3 flex flex-wrap items-center gap-1">{actions}</div>}

@@ -43,8 +43,8 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 - Phase F19 on `feat/simple-ask-base` (from `development`): F19.1 question vote label (`feat/question-vote-label`)
   F19.2 one-place ask form (`feat/ask-editor`) and F19.3 composer restyle (`feat/ask-composer`) done. Phase F19 is
   complete.
-- Phase F20 on `feat/harvest-base` (stacked on F19's tip): F20.1 Harvest tokens (`feat/harvest-tokens`) done; F20.2
-  question page next.
+- Phase F20 on `feat/harvest-base` (stacked on F19's tip): F20.1 Harvest tokens (`feat/harvest-tokens`) and F20.2
+  question page (`feat/harvest-question`) done. Phase F20 is complete.
 
 ## Next up
 
@@ -69,6 +69,25 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-31 (F20.2 Harvest question page)
+
+**Done**
+- The question is a white card on the field-green page: topic and Unanswered (a dashed gold pill), More actions, a
+  Lora title, author, body, photos, tags and older questions' farming chips.
+- A side panel holds the question's vote ("Useful question?"), the answer count, the asked date and a full-width
+  Answer. It is one element placed by the grid: a sticky card beside the question from 1024px, a row under the
+  question below that, so the vote is never rendered twice.
+- The AI answer and every answer are white cards; the accepted answer and an expert-confirmed AI answer get a gold
+  edge as well as their labels (the skill's anti-patterns for Q&A: unclear votes, a hidden accepted answer).
+- Answers and replies use `.post-body`, so their numbered and bulleted lists show (they rendered as bare lines).
+- Checked at 1280px light and dark and at 390px with the API mocked; existing Q&A tests pass unchanged.
+
+**Decisions**
+- No related questions in the panel: it would add a request to every question page, which already waits on a
+  request chain (open item).
 
 ---
 

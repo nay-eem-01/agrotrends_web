@@ -250,6 +250,8 @@ export const BN: Record<string, string> = {
   'Add what you have seen and tried.': 'কী দেখেছেন আর কী চেষ্টা করেছেন, লিখুন।',
   'AI-generated draft, not reviewed': 'এআই-এর তৈরি খসড়া, যাচাই করা হয়নি',
   Question: 'প্রশ্ন',
+  'About this question': 'এই প্রশ্ন সম্পর্কে',
+  Asked: 'জিজ্ঞাসা',
   'Asked {date}': '{date} জিজ্ঞেস করেছেন',
   'Delete this question and its answers?': 'এই প্রশ্ন ও এর উত্তরগুলো মুছবেন?',
   'Loading question': 'প্রশ্ন লোড হচ্ছে',

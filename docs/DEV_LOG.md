@@ -47,7 +47,7 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   question page (`feat/harvest-question`) and F20.3 white page (`fix/harvest-white-page`) and F20.4 ask form
   redesign (`feat/ask-redesign`) done. Phase F20 is complete.
 - Phase F21 on `feat/paddy-base` (stacked on F20's tip): F21.1 Paddy Field tokens (`feat/paddy-tokens`) F21.2 shell (`feat/paddy-shell`) F21.3 sign in and sign up (`feat/paddy-auth`) F21.4 expert application (`feat/paddy-expert-apply`) F21.5 profile (`feat/paddy-profile`) F21.6 story editor (`feat/paddy-editor`) F21.7 question page (`feat/paddy-question`) F21.8 AI advisor (`feat/paddy-advisor`) F21.9 feeds (`feat/paddy-feeds`) F21.10 story page (`feat/paddy-story`) done. Phase F21 is complete.
-- Phase F22 on `feat/mock-base` (stacked on F21's tip): F22.1 fields (`feat/mock-fields`) F22.2 home feed (`feat/mock-home`) F22.3 question page (`feat/mock-question`) F22.4 profile (`feat/mock-profile`) done.
+- Phase F22 on `feat/mock-base` (stacked on F21's tip): F22.1 fields (`feat/mock-fields`) F22.2 home feed (`feat/mock-home`) F22.3 question page (`feat/mock-question`) F22.4 profile (`feat/mock-profile`) F22.5 AI advisor (`feat/mock-advisor`) done.
 
 ## Next up
 
@@ -74,6 +74,23 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-31 (F22.5 AI advisor as the mock-up)
+
+**Done**
+- Each turn starts with an "AI advisor" label over the question; citation markers in the answer (`[1]`, `[2]`) become
+  small numbered chips pointing at the source cards (`lib/html` `withCitations`, only for numbers that have a source;
+  styled from the container since SafeHtml drops classes).
+- "Ask next": the backend's suggested follow-ups as rows with an arrow; one tap fills the ask bar.
+- The question box is a pill ask bar that grows with the text (label kept for screen readers; placeholder "Ask a
+  follow-up…" after the first answer), with an Ask pill inside; the count and the Enter hint sit under it.
+- Tests: `lib/html.test.ts` (markers), `ai/advisor.test.tsx` (a marked source and a follow-up filling the bar).
+  Checked at 1280px light and dark and at 390px.
+
+**Known limitations**
+- Markers and follow-ups appear once the backend sends them (`docs/BACKEND_REQUESTS.md` §8).
 
 ---
 

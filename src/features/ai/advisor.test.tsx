@@ -141,3 +141,14 @@ test('in the advisor the sources come first, as numbered cards above the answer'
   expect(within(sources).getByRole('link', { name: /^Waterlogged aman,? ?Community answer$/ })).toHaveAttribute('href', '/questions/7')
   expect(screen.getByRole('heading', { name: 'Field flooded' })).toBeInTheDocument()
 })
+
+test('citation markers point at the sources, and a suggested follow-up fills the ask bar', async () => {
+  mockApi(signedIn(() => envelope(200, { answer: 'Low oxygen [1].', sources: [{ blogId: 41, title: 'Oxygen' }], followUps: ['How much lime per decimal?'] })))
+  renderWithProviders(<App />, '/advisor')
+
+  await userEvent.type(await screen.findByLabelText('Your question'), 'Fish gasping{Enter}')
+  expect(await screen.findByLabelText('source 1')).toHaveTextContent('1')
+  const next = screen.getByRole('region', { name: 'Ask next' })
+  await userEvent.click(within(next).getByRole('button', { name: 'How much lime per decimal?' }))
+  expect(screen.getByLabelText('Ask another question')).toHaveValue('How much lime per decimal?')
+})

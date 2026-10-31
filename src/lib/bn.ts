@@ -570,4 +570,13 @@ export const BN: Record<string, string> = {
   'SMS code': 'এসএমএস কোড',
   'Use another number': 'অন্য নম্বর ব্যবহার করুন',
   'Enter the number without the country code.': 'দেশের কোড ছাড়া নম্বরটি লিখুন।',
+  'Why join AgroTrends': 'কেন AgroTrends-এ যোগ দেবেন',
+  'Ask anything': 'যেকোনো প্রশ্ন করুন',
+  'Crops, fish, livestock or your studies': 'ফসল, মাছ, গবাদিপশু বা আপনার পড়াশোনা',
+  'An AI advisor with sources': 'উৎসসহ এআই পরামর্শক',
+  'Answers that cite the stories shared here': 'এখানে শেয়ার করা লেখা থেকে উৎস দেখিয়ে উত্তর',
+  'Agronomists, vets and researchers answer': 'কৃষিবিদ, পশুচিকিৎসক ও গবেষকেরা উত্তর দেন',
+  'Free, in English and Bengali.': 'বিনামূল্যে, ইংরেজি ও বাংলায়।',
+  'Language': 'ভাষা',
+  'Verified experts': 'যাচাই করা বিশেষজ্ঞরা',
 }

@@ -100,8 +100,8 @@ export function SignUpPage() {
       <form onSubmit={submit} noValidate className="flex flex-col gap-5">
         <TextField label={t('Full name')} autoComplete="name" value={form.name} onChange={(e) => set('name', e.target.value)} error={errors.name} />
         <fieldset className="flex flex-col gap-4">
-          <legend className="text-sm font-medium">{t('How we reach you')}</legend>
-          <p className="-mt-2 text-sm text-muted-foreground">{t('An e-mail, a phone number or both. You can add the other later.')}</p>
+          <legend className="mb-1 text-sm font-medium">{t('How we reach you')}</legend>
+          <p className="text-sm text-muted-foreground">{t('An e-mail, a phone number or both. You can add the other later.')}</p>
           <TextField label={t('E-mail')} type="email" autoComplete="email" value={form.email} onChange={(e) => set('email', e.target.value)} error={errors.email} />
           <div className="grid grid-cols-[6rem_1fr] gap-3">
             <TextField

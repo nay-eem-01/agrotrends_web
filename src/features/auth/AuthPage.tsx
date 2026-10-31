@@ -70,10 +70,11 @@ function LanguageSwitch() {
     </button>
   )
   return (
-    <div role="group" aria-label={t('Language')} className="flex self-end rounded-full bg-surface p-0.5">
+    <fieldset className="flex self-end rounded-full bg-surface p-0.5">
+      <legend className="sr-only">{t('Language')}</legend>
       {option('en', 'English')}
       {option('bn', 'বাংলা')}
-    </div>
+    </fieldset>
   )
 }
 

@@ -30,7 +30,7 @@ test('settings edit the location and cover shown on your profile', async () => {
   const section = within((await screen.findByRole('heading', { name: 'Profile page' })).closest('section')!)
   const location = await section.findByLabelText('Location (optional)')
   expect(location).toHaveValue('Rangpur')
-  expect(section.getByRole('img', { name: 'Your cover photo' })).toHaveAttribute('src', '/uploads/field.jpg')
+  expect(section.getByRole('img', { name: 'Your current cover' })).toHaveAttribute('src', '/uploads/field.jpg')
 
   await userEvent.clear(location)
   await userEvent.type(location, ' Bogura ')

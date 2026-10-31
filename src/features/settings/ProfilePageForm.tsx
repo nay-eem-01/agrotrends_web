@@ -49,7 +49,7 @@ function Editor({ profile }: { profile: UserProfile }) {
       <div className="flex flex-col gap-2">
         <span className="text-sm font-medium">Cover photo</span>
         <div className="h-28 overflow-hidden rounded-xl bg-muted">
-          {cover ? <img src={cover} alt="Your cover photo" className="size-full object-cover" /> : <CoverFallback className="size-full" />}
+          {cover ? <img src={cover} alt="Your current cover" className="size-full object-cover" /> : <CoverFallback className="size-full" />}
         </div>
         <div className="flex flex-wrap gap-2">
           <Button variant="secondary" size="sm" loading={upload.isPending} onClick={() => fileInput.current?.click()}>

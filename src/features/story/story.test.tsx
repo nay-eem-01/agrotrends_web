@@ -40,7 +40,13 @@ test('a story shows its title, author, details and cleaned body', async () => {
 
   expect(await screen.findByRole('heading', { level: 1, name: 'Rice blast and nitrogen' })).toBeInTheDocument()
   expect(screen.getByRole('link', { name: 'Nasrin Akter' })).toHaveAttribute('href', '/authors/1')
-  expect(screen.getByText(/4 min read/)).toHaveTextContent('Crop diseases4 min read · Oct 6')
+  expect(screen.getByText('4 min read · Oct 6')).toBeInTheDocument()
+  expect(screen.getByText('Crop diseases')).toBeInTheDocument()
+  // After Medium: headline, byline and actions come before the cover.
+  const title = screen.getByRole('heading', { level: 1 })
+  const cover = document.querySelector('figure img')
+  expect(cover).not.toBeNull()
+  expect(title.compareDocumentPosition(cover!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   expect(screen.getByRole('heading', { level: 2, name: 'Why it matters' })).toBeInTheDocument()
   expect(screen.getByText('nitrogen', { selector: 'strong' })).toBeInTheDocument()
 

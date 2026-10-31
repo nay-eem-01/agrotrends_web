@@ -100,3 +100,15 @@ test('the sections live in the sidebar only, and the menu button hides it to ico
   expect(within(sidebar).getByRole('link', { name: 'Questions' })).toHaveAttribute('title', 'Questions')
   expect(localStorage.getItem('agrotrends.sidebar')).toBe('closed')
 })
+
+test('signing in is a focused page: only the logo and a way back, no sidebar, search or tab bar', async () => {
+  mockApi({})
+  renderWithProviders(<App />, '/sign-in')
+
+  expect(await screen.findByRole('heading', { level: 1, name: 'Sign in' })).toBeInTheDocument()
+  expect(screen.getByRole('link', { name: 'AgroTrends home' })).toBeInTheDocument()
+  expect(screen.getByRole('link', { name: 'Back to AgroTrends' })).toHaveAttribute('href', '/')
+  expect(screen.queryByRole('complementary', { name: 'Navigation' })).not.toBeInTheDocument()
+  expect(screen.queryByRole('searchbox', { name: 'Search AgroTrends' })).not.toBeInTheDocument()
+  expect(screen.queryByRole('navigation', { name: 'Sections' })).not.toBeInTheDocument()
+})

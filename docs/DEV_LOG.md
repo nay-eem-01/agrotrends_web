@@ -47,7 +47,7 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   question page (`feat/harvest-question`) and F20.3 white page (`fix/harvest-white-page`) and F20.4 ask form
   redesign (`feat/ask-redesign`) done. Phase F20 is complete.
 - Phase F21 on `feat/paddy-base` (stacked on F20's tip): F21.1 Paddy Field tokens (`feat/paddy-tokens`) F21.2 shell (`feat/paddy-shell`) F21.3 sign in and sign up (`feat/paddy-auth`) F21.4 expert application (`feat/paddy-expert-apply`) F21.5 profile (`feat/paddy-profile`) F21.6 story editor (`feat/paddy-editor`) F21.7 question page (`feat/paddy-question`) F21.8 AI advisor (`feat/paddy-advisor`) F21.9 feeds (`feat/paddy-feeds`) F21.10 story page (`feat/paddy-story`) done. Phase F21 is complete.
-- Phase F22 on `feat/mock-base` (stacked on F21's tip): F22.1 fields (`feat/mock-fields`) F22.2 home feed (`feat/mock-home`) F22.3 question page (`feat/mock-question`) F22.4 profile (`feat/mock-profile`) F22.5 AI advisor (`feat/mock-advisor`) F22.6 ask page (`feat/mock-ask`) F22.7 story editor (`feat/mock-editor`) F22.8 sign in and sign up (`feat/mock-auth`) F22.9 story page (`feat/mock-story`) F22.10 navigation in the sidebar (`feat/mock-sidebar`) F22.11 search in the bar (`feat/mock-topbar`) done. Phase F22 is complete.
+- Phase F22 on `feat/mock-base` (stacked on F21's tip): F22.1 fields (`feat/mock-fields`) F22.2 home feed (`feat/mock-home`) F22.3 question page (`feat/mock-question`) F22.4 profile (`feat/mock-profile`) F22.5 AI advisor (`feat/mock-advisor`) F22.6 ask page (`feat/mock-ask`) F22.7 story editor (`feat/mock-editor`) F22.8 sign in and sign up (`feat/mock-auth`) F22.9 story page (`feat/mock-story`) F22.10 navigation in the sidebar (`feat/mock-sidebar`) F22.11 search in the bar (`feat/mock-topbar`) F22.12 quieter frame (`feat/mock-chrome`) done. Phase F22 is complete.
 
 ## Next up
 
@@ -76,6 +76,22 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-31 (F22.12 quieter frame, focused sign-in)
+
+**Done**
+- Nayeem found the sidebar and footer borders odd on short pages: the footer's rule began at the sidebar's edge and
+  met its line in a "T". Beside the sidebar (from 1024px) the footer now has no rule; below 1024px, with no sidebar,
+  it keeps it.
+- Sign in, sign up, forgot and reset password and verify e-mail are focused pages (`FOCUSED` in `layout/AppLayout`):
+  no sidebar, search, Write or Sign in in the bar, and no phone tab bar; only the logo and "Back to AgroTrends".
+- Tests: `layout/topbar.test.tsx` (sign-in shows only the logo and the way back). Checked at 1280px and 390px.
+
+**Decisions**
+- Navigation stays on every other page (F22.10). Signing in or up is one task; the logo and "Back to AgroTrends" are
+  enough to leave it, as on Medium and LinkedIn.
 
 ---
 

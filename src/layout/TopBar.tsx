@@ -1,5 +1,5 @@
 import { useT } from '../lib/i18n'
-import { List, MagnifyingGlass, NotePencil, Plus } from '@phosphor-icons/react'
+import { ArrowLeft, List, MagnifyingGlass, NotePencil, Plus } from '@phosphor-icons/react'
 import { lazy, Suspense, useEffect, useRef, useState, type FormEvent, type RefObject } from 'react'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { cn } from 'cn'
@@ -15,7 +15,7 @@ const MobileMenu = lazy(() => import('./MobileMenu').then((m) => ({ default: m.M
 const SearchDialog = lazy(() => import('./SearchDialog').then((m) => ({ default: m.SearchDialog })))
 const placeholder = (className: string) => <span aria-hidden="true" className={cn('size-11 shrink-0', className)} />
 
-export function TopBar() {
+export function TopBar({ focused = false }: { focused?: boolean }) {
   const t = useT()
   const { status } = useSession()
   const sidebar = useSidebar()
@@ -37,6 +37,20 @@ export function TopBar() {
     document.addEventListener('keydown', shortcut)
     return () => document.removeEventListener('keydown', shortcut)
   }, [])
+
+  // Focused pages (signing in or up) keep only the logo and a way back.
+  if (focused)
+    return (
+      <header className="sticky top-0 z-20 bg-background">
+        <div className="mx-auto flex h-16 max-w-(--container-page) items-center justify-between px-4 sm:px-6">
+          <Logo />
+          <Link to="/" className="inline-flex h-11 items-center gap-1.5 rounded-full px-3 text-sm text-muted-foreground transition-colors duration-150 hover:bg-surface hover:text-foreground">
+            <ArrowLeft size={16} aria-hidden="true" />
+            {t('Back to AgroTrends')}
+          </Link>
+        </div>
+      </header>
+    )
 
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-background">

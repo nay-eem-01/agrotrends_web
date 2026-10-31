@@ -5,10 +5,11 @@ import { setTheme, useTheme } from '../lib/theme'
 
 const YEAR = new Date().getFullYear()
 
-export function Footer() {
+/** Beside the sidebar (from 1024px) the footer drops its rule, so it doesn't cross the sidebar's edge on short pages. */
+export function Footer({ besideSidebar = false }: { besideSidebar?: boolean }) {
   const t = useT()
   return (
-    <footer className="mt-24 border-t border-rule">
+    <footer className={besideSidebar ? 'mt-24 border-t border-rule lg:border-t-0' : 'mt-24 border-t border-rule'}>
       <div className="mx-auto flex max-w-(--container-page) flex-wrap items-center gap-x-6 gap-y-2 px-4 py-8 text-sm text-ink-muted sm:px-6">
         <span>© {YEAR} AgroTrends</span>
         <nav aria-label="Footer" className="flex flex-wrap gap-x-5 gap-y-2 sm:ml-auto">

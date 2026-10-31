@@ -46,7 +46,7 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 - Phase F20 on `feat/harvest-base` (stacked on F19's tip): F20.1 Harvest tokens (`feat/harvest-tokens`) and F20.2
   question page (`feat/harvest-question`) and F20.3 white page (`fix/harvest-white-page`) and F20.4 ask form
   redesign (`feat/ask-redesign`) done. Phase F20 is complete.
-- Phase F21 on `feat/paddy-base` (stacked on F20's tip): F21.1 Paddy Field tokens (`feat/paddy-tokens`) done.
+- Phase F21 on `feat/paddy-base` (stacked on F20's tip): F21.1 Paddy Field tokens (`feat/paddy-tokens`) F21.2 shell (`feat/paddy-shell`) done.
 
 ## Next up
 
@@ -72,6 +72,17 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-31 (F21.2 Paddy shell)
+
+**Done**
+- Top bar: the search is a 288px pill on the leaf wash (no border) with a round Ctrl K hint; Ask is a pill with a plus;
+  the logo mark's corners match the softer shapes. The phone menu's rows are pills; the tab bar's Ask button loses its
+  shadow (no shadows on the page).
+- Test: `layout/topbar.test.tsx` checks the search pill and Ctrl+K open the same search dialog. Checked the question page
+  and Discover at 1280px light and dark and at 390px.
 
 ---
 

@@ -1,5 +1,5 @@
 import { useT } from '../lib/i18n'
-import { MagnifyingGlass, NotePencil } from '@phosphor-icons/react'
+import { MagnifyingGlass, NotePencil, Plus } from '@phosphor-icons/react'
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { cn } from 'cn'
@@ -44,16 +44,16 @@ export function TopBar() {
     <header className="sticky top-0 z-20 border-b border-border bg-background">
       <div className="mx-auto flex h-16 max-w-(--container-page) items-center gap-2 px-4 sm:gap-4 sm:px-6">
         <Logo />
-        {/* Wide screens: the search looks like a field and opens the search dialog; Ctrl/⌘+K does the same. */}
+        {/* Wide screens: the search is a pill on the leaf wash that opens the search dialog; Ctrl/⌘+K does the same. */}
         <button
           type="button"
           onClick={() => setSearching(true)}
           aria-keyshortcuts="Control+K Meta+K"
-          className="hidden h-10 w-64 items-center gap-2 rounded-xl border border-border bg-surface px-3 text-sm text-muted-foreground transition-[border-color,background-color] duration-150 hover:border-border-strong hover:bg-background xl:flex"
+          className="hidden h-10 w-72 items-center gap-2 rounded-full bg-surface pr-2 pl-4 text-sm text-muted-foreground transition-[background-color,color] duration-150 hover:bg-secondary hover:text-foreground xl:flex"
         >
           <MagnifyingGlass size={18} aria-hidden="true" />
           <span className="flex-1 text-left">{t('Search')}</span>
-          <kbd aria-hidden="true" className="rounded-md border border-border bg-background px-1.5 py-0.5 font-sans text-xs">
+          <kbd aria-hidden="true" className="rounded-full bg-background px-2 py-0.5 font-sans text-xs">
             Ctrl K
           </kbd>
         </button>
@@ -86,6 +86,7 @@ export function TopBar() {
           {status === 'signed-in' && (
             <>
               <ButtonLink to="/questions/ask" size="sm" className="mx-1 hidden lg:inline-flex">
+                <Plus size={16} weight="bold" aria-hidden="true" />
                 {t('Ask')}
               </ButtonLink>
               <NotificationBell />

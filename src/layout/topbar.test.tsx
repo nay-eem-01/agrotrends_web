@@ -37,3 +37,18 @@ test('the phone tab bar marks the current section and leads to asking', async ()
   expect(tabs.getByRole('link', { name: 'Discover' })).not.toHaveAttribute('aria-current')
   expect(tabs.getByRole('link', { name: 'Ask a question' })).toHaveAttribute('href', '/questions/ask')
 })
+
+test('the search pill and Ctrl+K open the same search dialog', async () => {
+  mockApi({ 'GET /api/questions/all': () => envelope(200, page([])), 'GET /api/categories/all': () => envelope(200, page([])) })
+  renderWithProviders(<App />, '/')
+
+  const [pill] = await screen.findAllByRole('button', { name: 'Search' })
+  expect(pill).toHaveAttribute('aria-keyshortcuts', 'Control+K Meta+K')
+  await userEvent.click(pill)
+  expect(await screen.findByRole('dialog', { name: 'Search AgroTrends' })).toBeInTheDocument()
+  await userEvent.keyboard('{Escape}')
+  await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Search AgroTrends' })).not.toBeInTheDocument())
+
+  await userEvent.keyboard('{Control>}k{/Control}')
+  expect(await screen.findByRole('dialog', { name: 'Search AgroTrends' })).toBeInTheDocument()
+})

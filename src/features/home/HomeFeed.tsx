@@ -4,8 +4,9 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { cn } from 'cn'
 import { useTopicStories } from '../../api/blogs'
 import { useCategories } from '../../api/categories'
-import { useExperts } from '../../api/experts'
-import { useFeed } from '../../api/feed'
+import { useExperts, type ExpertSummary } from '../../api/experts'
+import { useFeed, useTrendingQuestions } from '../../api/feed'
+import { useToggleAuthorFollow } from '../../api/follows'
 import { useQuestions, type Question } from '../../api/questions'
 import type { StorySummary } from '../../api/types'
 import { storyDate } from '../../lib/dates'
@@ -15,6 +16,7 @@ import { CoverFallback } from '../../ui/Botanical'
 import { Button } from '../../ui/Button'
 import { Spinner } from '../../ui/Spinner'
 import { useSession } from '../auth/session'
+import { useRequireSignIn } from '../auth/useRequireSignIn'
 import { QuestionCard } from '../qa/QuestionRow'
 
 type Item = { kind: 'story'; at: string; story: StorySummary } | { kind: 'question'; at: string; question: Question }
@@ -198,33 +200,34 @@ function StoryItem({ story }: { story: StorySummary }) {
   )
 }
 
-/** Wide screens: trending stories, then experts to follow (hidden until the backend lists experts, §4). */
+/** Wide screens: trending questions and trending stories as two short lists, then experts to follow. */
 function Rail() {
   const t = useT()
   const trending = useFeed('trending')
+  const questions = useTrendingQuestions()
   const experts = useExperts()
   const top = (trending.data?.pages[0]?.content ?? []).slice(0, 4)
+  const asked = questions.data?.content ?? []
   return (
     <aside aria-label={t('More to read')} className="hidden lg:block">
       <div className="sticky top-24 flex flex-col gap-8">
+        {asked.length > 0 && (
+          <RailList id="trending-questions" title={t('Trending questions')}>
+            {asked.map((question) => (
+              <RailItem key={question.questionId} to={`/questions/${question.questionId}`} meta={t(question.answerCount === 1 ? '{n} answer' : '{n} answers', { n: formatNumber(question.answerCount ?? 0) })}>
+                {question.title}
+              </RailItem>
+            ))}
+          </RailList>
+        )}
         {top.length > 0 && (
-          <section aria-labelledby="trending">
-            <h2 id="trending" className="font-sans text-sm font-semibold">
-              {t('Trending now')}
-            </h2>
-            <ol className="mt-3 flex flex-col gap-3">
-              {top.map((story, index) => (
-                <li key={story.id} className="grid grid-cols-[1.25rem_minmax(0,1fr)] text-sm leading-snug">
-                  <span aria-hidden="true" className="text-muted-foreground tabular-nums">
-                    {index + 1}
-                  </span>
-                  <Link to={`/stories/${story.slug}`} className="hover:text-primary hover:underline">
-                    {story.title}
-                  </Link>
-                </li>
-              ))}
-            </ol>
-          </section>
+          <RailList id="trending-stories" title={t('Trending stories')}>
+            {top.map((story) => (
+              <RailItem key={story.id} to={`/stories/${story.slug}`} meta={story.author?.name}>
+                {story.title}
+              </RailItem>
+            ))}
+          </RailList>
         )}
         {(experts.data?.content?.length ?? 0) > 0 && (
           <section aria-labelledby="experts-to-follow">
@@ -239,6 +242,7 @@ function Rail() {
                     <span className="block truncate font-semibold hover:underline">{expert.name}</span>
                     <span className="block truncate text-xs text-muted-foreground">{[expert.expertField, expert.institution].filter(Boolean).join(' · ')}</span>
                   </Link>
+                  <RailFollow expert={expert} />
                 </li>
               ))}
             </ul>
@@ -246,5 +250,55 @@ function Rail() {
         )}
       </div>
     </aside>
+  )
+}
+
+/** A quiet Follow for the rail (a full pill would crowd the name); hidden on your own row. */
+function RailFollow({ expert }: { expert: ExpertSummary }) {
+  const t = useT()
+  const { status, user } = useSession()
+  const toggle = useToggleAuthorFollow()
+  const requireSignIn = useRequireSignIn()
+  if (expert.authorId == null || (user?.id != null && user.id === expert.userId)) return null
+  const following = status === 'signed-in' && Boolean(expert.followedByMe)
+  return (
+    <button
+      type="button"
+      aria-pressed={status === 'signed-in' ? following : undefined}
+      aria-label={`${following ? t('Following') : t('Follow')} ${expert.name ?? ''}`}
+      disabled={toggle.isPending}
+      onClick={() => requireSignIn(() => toggle.mutate({ authorId: expert.authorId!, follow: !following }))}
+      className={cn(
+        'h-8 shrink-0 rounded-full px-3 text-xs font-semibold transition-colors duration-150 disabled:opacity-60',
+        following ? 'text-muted-foreground hover:bg-surface hover:text-foreground' : 'bg-surface text-primary hover:bg-secondary',
+      )}
+    >
+      {following ? t('Following') : t('Follow')}
+    </button>
+  )
+}
+
+function RailList({ id, title, children }: { id: string; title: string; children: ReactNode }) {
+  return (
+    <section aria-labelledby={id}>
+      <h2 id={id} className="font-sans text-sm font-semibold">
+        {title}
+      </h2>
+      <ol className="mt-3 flex flex-col gap-3 [counter-reset:rail]">{children}</ol>
+    </section>
+  )
+}
+
+/** A numbered rail entry: the title as a link, a quiet line under it. */
+function RailItem({ to, meta, children }: { to: string; meta?: string; children: ReactNode }) {
+  return (
+    <li className="grid grid-cols-[1.25rem_minmax(0,1fr)] text-sm leading-snug [counter-increment:rail] before:text-muted-foreground before:tabular-nums before:content-[counter(rail)]">
+      <span>
+        <Link to={to} className="line-clamp-2 hover:text-primary hover:underline">
+          {children}
+        </Link>
+        {meta && <span className="mt-0.5 block truncate text-xs text-muted-foreground">{meta}</span>}
+      </span>
+    </li>
   )
 }

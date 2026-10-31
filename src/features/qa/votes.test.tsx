@@ -89,3 +89,19 @@ test('visitors are sent to sign in to vote', async () => {
   await userEvent.click(await screen.findByRole('button', { name: 'Upvote this question' }))
   await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/sign-in?next=%2Fquestions%2F5'))
 })
+
+test("the question's vote is labelled and kept apart from the answers' votes", async () => {
+  mockApi({
+    ...signedInAs({ id: 9, name: 'Salma' }),
+    'GET /api/questions/id/5': () => envelope(200, question),
+    'GET /api/answers/question/5': () => envelope(200, [answer(1)]),
+    'GET /api/questions/id/5/my-votes': () => envelope(200, { answers: {} }),
+  })
+  renderWithProviders(<App />, '/questions/5')
+
+  const rating = await screen.findByRole('group', { name: 'Rate this question' })
+  expect(within(rating).getByText('Useful question?')).toBeInTheDocument()
+  expect(within(rating).getByRole('button', { name: 'Upvote this question' })).toBeInTheDocument()
+  expect(within(rating).queryByRole('button', { name: 'Upvote this answer' })).not.toBeInTheDocument()
+  expect(await screen.findByRole('button', { name: 'Upvote this answer' })).toHaveAttribute('title', 'Upvote this answer')
+})

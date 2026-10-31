@@ -1,21 +1,17 @@
-import { CaretDown } from '@phosphor-icons/react'
 import { useT } from '../../lib/i18n'
 import { useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ApiError, errorMessage } from '../../api/errors'
 import { useCategories } from '../../api/categories'
 import { useQuestion, useQuestionWrite, type Question } from '../../api/questions'
-import { htmlToText } from '../../lib/html'
+import { htmlToText, textToHtml } from '../../lib/html'
 import { Button } from '../../ui/Button'
 import { SearchSelect } from '../../ui/SearchSelect'
 import { Spinner } from '../../ui/Spinner'
-import { TextArea } from '../../ui/TextArea'
-import { TextField } from '../../ui/TextField'
 import { useSession } from '../auth/session'
 import { NotFoundPage } from '../errors/NotFoundPage'
-import { FarmingFields, toAgri, type Farming } from '../farming/FarmingFields'
 import { TagInput } from '../topics/TagInput'
-import { PhotoPicker } from './PhotoPicker'
+import { QuestionEditor } from './QuestionEditor'
 import { AskingWell } from './QuestionsPage'
 
 /** `/questions/ask`, and `/questions/:questionId/edit` for the asker. */
@@ -56,28 +52,21 @@ function QuestionForm({ question }: { question?: Question }) {
   const [tags, setTags] = useState<string[]>(question?.tags ?? [])
   const [imageUrls, setImageUrls] = useState<string[]>(question?.imageUrls ?? [])
   const [title, setTitle] = useState(question?.title ?? '')
-  // Older questions were saved as HTML; they are edited as plain text.
-  const [details, setDetails] = useState(() => htmlToText(question?.content))
-  const [farming, setFarming] = useState<Farming>({
-    crop: question?.agri?.crop ?? '',
-    season: question?.agri?.season,
-    region: question?.agri?.region ?? '',
-    soil: question?.agri?.soil,
-  })
+  // Older questions were saved as plain text; they open as paragraphs.
+  const [details, setDetails] = useState(() => textToHtml(question?.content))
   const [errors, setErrors] = useState<{ title?: string; details?: string; topic?: string }>({})
-  // Read once: the section starts open when the question already has farming details, then the reader decides.
-  const [farmingOpen] = useState(() => Object.values(toAgri(farming)).some(Boolean))
 
   function submit(event: FormEvent) {
     event.preventDefault()
     const found = {
       title: title.trim() ? undefined : t('Write your question in a line.'),
-      details: details.trim() ? undefined : t('Add what you have seen and tried.'),
+      details: htmlToText(details) ? undefined : t('Add what you have seen and tried.'),
       topic: categoryId == null ? t('Choose a topic.') : undefined,
     }
     setErrors(found)
     if (found.title || found.details || categoryId == null) return
-    const fields = { title: title.trim(), content: details.trim(), categoryId, agri: toAgri(farming) }
+    // No `agri`: the form no longer asks for it, and an update without it keeps an older question's farming details.
+    const fields = { title: title.trim(), content: details, categoryId }
     // On an edit, tags and photos left as they were are omitted: the backend keeps the old ones.
     const same = (a: string[], b: string[] = []) => a.length === b.length && a.every((value, i) => value === b[i])
     const extras = question
@@ -95,60 +84,53 @@ function QuestionForm({ question }: { question?: Question }) {
       <title>{question ? t('Edit question – AgroTrends') : t('Ask a question – AgroTrends')}</title>
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-14">
         <div className="max-w-(--container-feed) min-w-0">
-          <h1 className="text-2xl sm:text-[2rem]">{question ? t('Edit your question') : t('Ask a question')}</h1>
-          <p className="mt-2 text-muted-foreground">{t('Say what you grow, where, and what you have already tried. Specific questions get useful answers.')}</p>
-          <p className="mt-1 text-sm text-muted-foreground">{t('Every field is needed unless it says optional.')}</p>
-          <form onSubmit={submit} noValidate className="mt-8 flex flex-col gap-6">
-            <TextField
-              label={t('Your question')}
-              placeholder={t('Why are my boro seedlings turning yellow?')}
-              maxLength={200}
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              error={errors.title}
+          <h1 className="text-xl sm:text-2xl">{question ? t('Edit your question') : t('Ask a question')}</h1>
+          <p className="mt-1.5 text-sm text-muted-foreground sm:text-base">{t('Say what you are working with, where, and what you have already tried. Specific questions get useful answers.')}</p>
+          <form onSubmit={submit} noValidate className="mt-8 flex flex-col gap-4">
+            <QuestionEditor
+              title={title}
+              html={details}
+              photos={imageUrls}
+              titleError={errors.title}
+              detailsError={errors.details}
+              onTitleChange={setTitle}
+              onHtmlChange={setDetails}
+              onPhotosChange={setImageUrls}
             />
-            <TextArea
-              label={t('Details')}
-              rows={7}
-              placeholder={t('Variety, age of the crop, weather, what you applied and when…')}
-              value={details}
-              onChange={(e) => setDetails(e.target.value)}
-              error={errors.details}
-            />
-            <SearchSelect
-              label={t('Topic')}
-              value={categoryId == null ? '' : String(categoryId)}
-              error={errors.topic}
-              disabled={categories.isPending}
-              onChange={(value) => setCategoryId(value ? Number(value) : undefined)}
-              options={(categories.data ?? []).map((c) => ({ value: String(c.id), label: c.categoryName ?? '' }))}
-              placeholder={categories.isPending ? t('Loading…') : t('Choose a topic')}
-            />
-            <TagInput tags={tags} onChange={setTags} />
-            <PhotoPicker urls={imageUrls} onChange={setImageUrls} />
-            {/* Optional, so folded away. */}
-            <details open={farmingOpen || undefined} className="group rounded-xl border border-border">
-              <summary className="flex h-12 cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-4 font-medium transition-colors duration-150 hover:bg-surface [&::-webkit-details-marker]:hidden">
-                <span>
-                  {t('Farming details')} <span className="font-normal text-muted-foreground">{t('(optional)')}</span>
+            {/* Topic and tags in one row, both typed: filter topics and press Enter; Enter or comma adds a tag. */}
+            <div className="flex flex-col gap-3 border-t border-border pt-5 sm:flex-row sm:items-start">
+              <div className="flex items-start gap-2.5 sm:w-64 sm:shrink-0">
+                <span aria-hidden="true" className="flex h-11 items-center text-sm font-medium">
+                  {t('Topic')}
                 </span>
-                <CaretDown size={18} aria-hidden="true" className="text-muted-foreground transition-transform duration-200 ease-(--ease-out) group-open:rotate-180" />
-              </summary>
-              <div className="border-t border-border p-4">
-                <FarmingFields value={farming} onChange={(changes) => setFarming((f) => ({ ...f, ...changes }))} hideLegend />
+                <SearchSelect
+                  label={t('Topic')}
+                  hideLabel
+                  className="min-w-0 flex-1 [&_[data-slot=input-group]]:rounded-full [&_[data-slot=input-group]]:border-transparent [&_[data-slot=input-group]]:bg-muted/70 [&_[data-slot=input-group]:hover]:bg-muted"
+                  value={categoryId == null ? '' : String(categoryId)}
+                  error={errors.topic}
+                  disabled={categories.isPending}
+                  onChange={(value) => setCategoryId(value ? Number(value) : undefined)}
+                  options={(categories.data ?? []).map((c) => ({ value: String(c.id), label: c.categoryName ?? '' }))}
+                  placeholder={categories.isPending ? t('Loading…') : t('Choose one')}
+                />
               </div>
-            </details>
+              <TagInput compact tags={tags} onChange={setTags} />
+            </div>
             {write.isError && (
               <p role="alert" className="text-sm text-destructive">
                 {errorMessage(write.error)}
               </p>
             )}
-            <div className="flex gap-3 border-t border-border pt-6">
+            {/* The one primary action stays in reach however long the details get. */}
+            {/* On phones it sits on top of the bottom navigation (BottomNav, 3.5rem plus the safe area). */}
+            <div className="sticky bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-10 -mx-4 flex items-center gap-2 border-t border-border bg-background px-4 py-3 sm:mx-0 sm:px-0 md:bottom-0">
+              {!question && <p className="mr-auto hidden text-sm text-muted-foreground sm:block">{t('An AI answer comes right after you post.')}</p>}
+              <Button variant="quiet" className={question ? 'ml-auto' : 'ml-auto sm:ml-0'} onClick={() => navigate(-1)}>
+                {t('Cancel')}
+              </Button>
               <Button type="submit" loading={write.isPending}>
                 {question ? t('Save question') : t('Post question')}
-              </Button>
-              <Button variant="quiet" onClick={() => navigate(-1)}>
-                {t('Cancel')}
               </Button>
             </div>
           </form>

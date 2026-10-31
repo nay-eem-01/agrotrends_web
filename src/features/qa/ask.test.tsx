@@ -4,7 +4,7 @@ import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { clearSession } from '../../api/client'
 import App from '../../App'
 import { envelope, mockApi, page } from '../../test/api'
-import { chooseOption, pickOption, renderWithProviders } from '../../test/render'
+import { chooseOption, renderWithProviders } from '../../test/render'
 
 function signedInAs(user: object) {
   localStorage.setItem('agrotrends.refreshToken', 'r0')
@@ -39,7 +39,7 @@ test('asking needs sign-in', async () => {
   await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/sign-in?next=%2Fquestions%2Fask'))
 })
 
-test('a question is checked, posted with its farming details and opened', async () => {
+test('a question is checked, posted as rich text without farming fields, and opened', async () => {
   const api = mockApi({
     ...signedInAs({ id: 9, name: 'Karim' }),
     ...categories,
@@ -51,42 +51,45 @@ test('a question is checked, posted with its farming details and opened', async 
 
   await userEvent.click(await screen.findByRole('button', { name: 'Post question' }))
   expect(screen.getByLabelText('Your question')).toHaveAccessibleDescription('Write your question in a line.')
-  expect(screen.getByLabelText('Details')).toHaveAccessibleDescription('Add what you have seen and tried.')
+  expect(screen.getByRole('textbox', { name: 'Details' })).toHaveAccessibleDescription('Add what you have seen and tried.')
   expect(screen.getByLabelText('Topic')).toHaveAccessibleDescription('Choose a topic.')
+  expect(screen.queryByLabelText('Crop')).not.toBeInTheDocument()
+  expect(screen.queryByText('Farming details')).not.toBeInTheDocument()
 
-  await userEvent.type(screen.getByLabelText('Your question'), ' Why are seedlings yellow? ')
-  await userEvent.type(screen.getByLabelText('Details'), 'BRRI dhan29, 30 days old.')
-  await chooseOption(await screen.findByLabelText('Topic'), 'Crops')
-  await pickOption(screen.getByLabelText('Season'), 'Rabi')
-  await userEvent.type(screen.getByLabelText('Crop'), 'boro rice')
+  await userEvent.type(screen.getByLabelText('Your question'), ' Why are my tilapia gasping? ')
+  await userEvent.click(screen.getByRole('textbox', { name: 'Details' }))
+  await userEvent.click(screen.getByRole('button', { name: 'Bold' }))
+  await userEvent.keyboard('Every morning')
+  await chooseOption(await screen.findByLabelText('Topic'), 'Fisheries')
   await userEvent.click(screen.getByRole('button', { name: 'Post question' }))
 
   await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/questions/12'))
   expect(body(api, '/api/questions/create')).toEqual({
-    title: 'Why are seedlings yellow?',
-    content: 'BRRI dhan29, 30 days old.',
-    categoryId: 1,
-    agri: { crop: 'boro rice', season: 'RABI' },
+    title: 'Why are my tilapia gasping?',
+    content: '<p><strong>Every morning</strong></p>',
+    categoryId: 2,
   })
 })
 
-test('the asker edits their question as plain text', async () => {
+test('the asker edits an older plain-text question as paragraphs, and its farming details are kept', async () => {
   const api = mockApi({
     ...signedInAs({ id: 9, name: 'Karim' }),
     ...categories,
-    'GET /api/questions/id/5': () => envelope(200, question),
+    'GET /api/questions/id/5': () => envelope(200, { ...question, content: 'After the cold.\nWeek two.' }),
     'PUT /api/questions/update': () => envelope(200, question),
     'GET /api/answers/question/5': () => envelope(200, []),
   })
   renderWithProviders(<App />, '/questions/5/edit')
 
   expect(await screen.findByLabelText('Your question')).toHaveValue('Yellow seedlings')
-  expect(screen.getByLabelText('Details')).toHaveValue('After the cold. Week two.')
-  expect(screen.getByLabelText('Crop')).toHaveValue('boro rice')
+  expect(screen.getByRole('textbox', { name: 'Details' }).querySelectorAll('p')).toHaveLength(2)
   await userEvent.click(screen.getByRole('button', { name: 'Save question' }))
 
   await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/questions/5'))
-  expect(body(api, '/api/questions/update')).toMatchObject({ questionId: 5, title: 'Yellow seedlings', categoryId: 1, agri: { crop: 'boro rice', season: 'RABI' } })
+  const sent = body(api, '/api/questions/update')
+  expect(sent).toMatchObject({ questionId: 5, title: 'Yellow seedlings', content: '<p>After the cold.</p><p>Week two.</p>', categoryId: 1 })
+  // Left out, so the backend keeps the crop and season the question was asked with.
+  expect(sent).not.toHaveProperty('agri')
 })
 
 test("someone else's question can't be edited", async () => {
@@ -108,7 +111,8 @@ test('a question carries tags and photos', async () => {
   renderWithProviders(<App />, '/questions/ask')
 
   await userEvent.type(await screen.findByLabelText('Your question'), 'Spots on leaves')
-  await userEvent.type(screen.getByLabelText('Details'), 'Brown spots after rain.')
+  await userEvent.click(screen.getByRole('textbox', { name: 'Details' }))
+  await userEvent.keyboard('Brown spots after rain.')
   await chooseOption(await screen.findByLabelText('Topic'), 'Crops')
   await userEvent.type(screen.getByLabelText('Tags'), 'Rice Blast{Enter}')
   await userEvent.upload(screen.getByLabelText('Add a photo', { selector: 'input' }), new File(['img'], 'leaf.webp', { type: 'image/webp' }))

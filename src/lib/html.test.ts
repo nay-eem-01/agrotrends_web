@@ -1,4 +1,4 @@
-import { excerpt, htmlToText } from './html'
+import { excerpt, htmlToText, textToHtml } from './html'
 
 test('story HTML becomes plain text with paragraphs kept apart', () => {
   expect(htmlToText('<h2>Boro</h2><p>Transplant <b>early</b>.</p><p>Then&nbsp;irrigate.</p>')).toBe('Boro Transplant early. Then irrigate.')
@@ -16,4 +16,10 @@ test('excerpts end on a word', () => {
   expect(excerpt('Short text.')).toBe('Short text.')
   expect(excerpt('Rice blast spreads fast in humid weather, so scout often.', 30)).toBe('Rice blast spreads fast in…')
   expect(excerpt('x'.repeat(50), 20)).toBe(`${'x'.repeat(20)}…`)
+})
+
+test('plain text becomes escaped paragraphs; HTML is kept', () => {
+  expect(textToHtml('After the cold.\n\nWeek two <3 & more')).toBe('<p>After the cold.</p><p>Week two &lt;3 &amp; more</p>')
+  expect(textToHtml('<p>Already <strong>rich</strong></p>')).toBe('<p>Already <strong>rich</strong></p>')
+  expect(textToHtml(undefined)).toBe('')
 })

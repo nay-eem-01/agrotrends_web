@@ -89,6 +89,11 @@ function QuestionView({ question }: { question: Question }) {
             meta={t('Asked {date}', { date: storyDate(question.createdAt) })}
           />
         </div>
+        {/* The question's own vote, named so it isn't mistaken for the answers' votes below. */}
+        <fieldset aria-label={t('Rate this question')} className="flex min-w-0 items-center gap-2">
+          {!own && <span className="text-sm text-muted-foreground">{t('Useful question?')}</span>}
+          <VoteControl target="questions" id={id} score={question.score ?? 0} myVote={myVotes.data?.question} own={own} orientation="horizontal" />
+        </fieldset>
         <PostMenu
           own={own}
           what={t('this question')}
@@ -101,7 +106,7 @@ function QuestionView({ question }: { question: Question }) {
       <div className="mt-6">
         <div className="min-w-0">
         {/* A question is a request for help: interface type, not the story's reading serif. */}
-        <SafeHtml html={question.content} className="text-base leading-relaxed whitespace-pre-line sm:text-lg [&>*+*]:mt-4" />
+        <SafeHtml html={question.content} className="post-body whitespace-pre-line" />
         {(question.imageUrls?.length ?? 0) > 0 && (
           <ul aria-label={t('Photos')} className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
             {question.imageUrls!.map((url, index) => (
@@ -135,8 +140,7 @@ function QuestionView({ question }: { question: Question }) {
         )}
         </div>
       </div>
-      <div className="mt-8 flex flex-wrap items-center gap-3 border-y border-border py-3">
-        <VoteControl target="questions" id={id} score={question.score ?? 0} myVote={myVotes.data?.question} own={own} orientation="horizontal" />
+      <div className="mt-8">
         <a href="#your-answer" className={buttonClass('secondary', 'md')}>
           <ChatCircleText size={18} aria-hidden="true" />
           {t('Answer')}

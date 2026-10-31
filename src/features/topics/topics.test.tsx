@@ -78,7 +78,8 @@ test('the topics page searches tags and shows the followed ones', async () => {
 
   const followed = await screen.findByRole('region', { name: 'Topics you follow' })
   expect(within(followed).getByRole('link', { name: 'jute' })).toHaveAttribute('href', '/tags/jute')
-  expect(within(screen.getByRole('list', { name: 'Topics' })).getAllByRole('link')).toHaveLength(3)
+  // The followed tags and the tag list load separately; wait for the list too.
+  await waitFor(() => expect(within(screen.getByRole('list', { name: 'Topics' })).getAllByRole('link')).toHaveLength(3))
 
   await userEvent.type(screen.getByLabelText('Find a topic'), 'Ri')
   await waitFor(() => expect(within(screen.getByRole('list', { name: 'Topics' })).getAllByRole('link').map((l) => l.textContent)).toEqual(['rice', 'rice blast']))

@@ -68,11 +68,30 @@ test('the profile shows reputation by topic, the expert field, and their questio
   await userEvent.click(await screen.findByRole('link', { name: 'Dr Nasrin' }))
   await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/users/7'))
   expect(await screen.findByRole('heading', { level: 1, name: 'Dr Nasrin' })).toBeInTheDocument()
-  expect(await screen.findByText('1,250 reputation')).toBeInTheDocument()
+  expect(await screen.findByText('1,250')).toBeInTheDocument()
+  const numbers = screen.getAllByRole('term').map((term) => `${term.textContent} ${term.nextElementSibling?.textContent ?? term.previousElementSibling?.textContent}`)
+  expect(numbers).toContain('Reputation 1,250')
+  expect(numbers).toContain('Accepted answers 32')
+  expect(screen.getByText('Veterinarian')).toBeInTheDocument()
+  expect(screen.getByText('Verified expert in Livestock')).toBeInTheDocument()
+  expect(screen.queryByRole('link', { name: 'Edit profile' })).not.toBeInTheDocument()
   const livestock = screen.getByText('Livestock').closest('li')!
   expect(within(livestock).getByText('Verified expert · Veterinarian')).toBeInTheDocument()
   expect(within(livestock).getByText(/1,100 points · 30 accepted/)).toBeInTheDocument()
   const crops = screen.getByText('Crops').closest('li')!
   expect(within(crops).queryByText(/Verified expert/)).not.toBeInTheDocument()
   expect(await screen.findByRole('link', { name: 'Best feed for calves?' })).toHaveAttribute('href', '/questions/9')
+})
+
+test('your own profile offers Edit profile instead of Report', async () => {
+  localStorage.setItem('agrotrends.refreshToken', 'r0')
+  mockApi({
+    'POST /api/auth/refresh-token': () => envelope(200, { accessToken: 'a1', refreshToken: 'r1', user: { id: 7, name: 'Dr Nasrin' } }),
+    'GET /api/users/7/reputation': () => envelope(200, { total: 0, topics: [] }),
+    'GET /api/questions/all/user/7': () => envelope(200, page([])),
+  })
+  renderWithProviders(<App />, '/users/7')
+
+  expect(await screen.findByRole('link', { name: 'Edit profile' })).toHaveAttribute('href', '/settings')
+  expect(screen.queryByRole('button', { name: /Report/ })).not.toBeInTheDocument()
 })

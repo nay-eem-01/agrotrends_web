@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { clearSession } from '../../api/client'
@@ -23,6 +23,7 @@ const question = {
 const categories = {
   'GET /api/categories/all': () => envelope(200, page([{ id: 1, categoryName: 'Crops' }, { id: 2, categoryName: 'Fisheries' }])),
   'GET /api/tags': () => envelope(200, ['tilapia', 'rice']),
+  'GET /api/questions/search': () => envelope(200, page([])),
 }
 
 function body(api: ReturnType<typeof mockApi>, path: string) {
@@ -168,4 +169,24 @@ test('a popular tag is one tap, and Ctrl+Enter posts', async () => {
 
   await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/questions/12'))
   expect(body(api, '/api/questions/create')).toMatchObject({ categoryId: 2, tags: ['tilapia'] })
+})
+
+test('while the title is typed, answered questions that match are offered first', async () => {
+  const api = mockApi({
+    ...signedInAs({ id: 9, name: 'Karim' }),
+    ...categories,
+    'GET /api/questions/search': () =>
+      envelope(200, page([
+        { questionId: 7, title: 'Tilapia gasping at dawn', answerCount: 2, acceptedAnswerId: 40 },
+        { questionId: 8, title: 'Tilapia not eating', answerCount: 0 },
+      ])),
+  })
+  renderWithProviders(<App />, '/questions/ask')
+
+  await userEvent.type(await screen.findByLabelText('Your question'), 'Why are my tilapia gasping?')
+  const similar = (await screen.findByRole('heading', { name: 'Already answered, might help' }, { timeout: 3000 })).closest('section')!
+  expect(within(similar).getByRole('link', { name: 'Tilapia gasping at dawn' })).toHaveAttribute('href', '/questions/7')
+  // Unanswered matches don't help yet, so they're left out.
+  expect(within(similar).queryByRole('link', { name: 'Tilapia not eating' })).not.toBeInTheDocument()
+  expect(new URL(String(api.mock.calls.find(([url]) => String(url).startsWith('/api/questions/search'))![0]), 'http://x').searchParams.get('q')).toBe('Why are my tilapia gasping?')
 })

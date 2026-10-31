@@ -108,6 +108,7 @@ function Arrow({ direction, pressed, disabled, label, onClick }: { direction: Di
     <button
       type="button"
       aria-label={label}
+      title={label}
       aria-pressed={pressed}
       disabled={disabled}
       onClick={onClick}

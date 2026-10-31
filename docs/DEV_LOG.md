@@ -40,6 +40,8 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 - Phase F18 on `feat/phone-auth-base` (stacked on F17's tip): F18.1 sign-in (`feat/phone-sign-in`) F18.2 sign-up and
   confirmation (`feat/phone-sign-up`) F18.3 reset (`feat/phone-reset`) and F18.4 settings (`feat/phone-settings`)
   done. Phase F18 is complete.
+- Phase F19 on `feat/simple-ask-base` (from `development`): F19.1 question vote label (`feat/question-vote-label`)
+  done; F19.2 one-place ask form next.
 
 ## Next up
 
@@ -63,6 +65,19 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-30 (F19.1 question vote label)
+
+**Done**
+- The question page had two kinds of votes and nothing said which was which. The question's own vote now sits beside
+  the author line in a "Rate this question" group with a visible "Useful question?" (just the score on your own
+  question); the bar under the question keeps only Answer. Vote arrows get a `title` with their label on hover.
+- Tests: `qa/votes.test.tsx` (the group holds the question's arrows and none of the answers').
+
+**Decisions**
+- Question votes stay: they rank questions and earn the asker reputation. Only the labelling was the problem.
 
 ---
 

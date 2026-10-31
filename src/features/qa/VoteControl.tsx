@@ -70,7 +70,7 @@ export function VoteControl({ target, id, score, myVote, own, orientation = 'ver
 
   if (own && status === 'signed-in') {
     return horizontal ? (
-      <div className="flex h-10 items-center gap-1.5 rounded-xl border border-border px-3 text-sm text-muted-foreground">
+      <div className="flex h-10 items-center gap-1.5 rounded-full border border-border px-4 text-sm text-muted-foreground">
         {scoreText} {t('votes')}
       </div>
     ) : (
@@ -79,10 +79,10 @@ export function VoteControl({ target, id, score, myVote, own, orientation = 'ver
   }
 
   return (
-    <div className={cn('relative flex items-center', horizontal ? 'h-10 gap-0.5 rounded-xl border border-border p-0.5' : 'w-9 flex-col gap-0.5')}>
-      <Arrow direction="UP" pressed={state.myVote === 'UP'} disabled={vote.isPending} label={target === 'questions' ? t('Upvote this question') : t('Upvote this answer')} onClick={() => cast('UP')} />
+    <div className={cn('relative flex items-center', horizontal ? 'h-10 gap-0.5 rounded-full border border-border p-0.5' : 'w-9 flex-col gap-1')}>
+      <Arrow direction="UP" pressed={state.myVote === 'UP'} disabled={vote.isPending} label={target === 'questions' ? t('Upvote this question') : t('Upvote this answer')} outlined={!horizontal} onClick={() => cast('UP')} />
       {scoreText}
-      <Arrow direction="DOWN" pressed={state.myVote === 'DOWN'} disabled={vote.isPending} label={target === 'questions' ? t('Downvote this question') : t('Downvote this answer')} onClick={() => cast('DOWN')} />
+      <Arrow direction="DOWN" pressed={state.myVote === 'DOWN'} disabled={vote.isPending} label={target === 'questions' ? t('Downvote this question') : t('Downvote this answer')} outlined={!horizontal} onClick={() => cast('DOWN')} />
       {refusal && (
         <p
           role="alert"
@@ -99,10 +99,24 @@ export function VoteControl({ target, id, score, myVote, own, orientation = 'ver
 }
 
 /**
- * One vote button: a caret at the same weight as the score beside it, in a 36px square whose touch area reaches 44px.
- * Pressed is a tint, not just a colour change: sage with green for up, a soft red for down.
+ * One vote button: a caret at the same weight as the score beside it, in a 36px circle whose touch area reaches 44px;
+ * outlined when it stands alone beside a post. Pressed up is filled paddy, pressed down a soft red.
  */
-function Arrow({ direction, pressed, disabled, label, onClick }: { direction: Direction; pressed: boolean; disabled: boolean; label: string; onClick: () => void }) {
+function Arrow({
+  direction,
+  pressed,
+  disabled,
+  label,
+  outlined,
+  onClick,
+}: {
+  direction: Direction
+  pressed: boolean
+  disabled: boolean
+  label: string
+  outlined: boolean
+  onClick: () => void
+}) {
   const Icon = direction === 'UP' ? CaretUp : CaretDown
   return (
     <button
@@ -113,12 +127,12 @@ function Arrow({ direction, pressed, disabled, label, onClick }: { direction: Di
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        'relative flex size-9 items-center justify-center rounded-lg transition-[color,background-color,transform] duration-150 ease-(--ease-out) after:absolute after:-inset-1 active:scale-[0.92] disabled:cursor-wait disabled:opacity-60',
+        'relative flex size-9 items-center justify-center rounded-full border transition-[color,background-color,border-color,transform] duration-150 ease-(--ease-out) after:absolute after:-inset-1 active:scale-[0.92] disabled:cursor-wait disabled:opacity-60',
         pressed
           ? direction === 'UP'
-            ? 'bg-secondary text-primary'
-            : 'bg-destructive-soft text-destructive'
-          : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+            ? 'border-primary bg-primary text-primary-foreground'
+            : 'border-destructive/30 bg-destructive-soft text-destructive'
+          : cn('text-muted-foreground hover:bg-muted hover:text-foreground', outlined ? 'border-border' : 'border-transparent'),
       )}
     >
       <Icon size={18} weight="bold" aria-hidden="true" />

@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend · ➡ moved to a later step
 
-**Progress:** 88 of 92 steps done
+**Progress:** 89 of 92 steps done
 
 ---
 
@@ -232,7 +232,7 @@ per step, each checked in light, dark and at 390px.
 | F21.4 | Become a verified expert: why it's worth it and the three steps beside the form; topics and proof type as one-tap choices (`feat/paddy-expert-apply`) | ✅ |
 | F21.5 | Profile: cover wash, Lora name, headline, stats row, tabs; your own profile shows Edit profile (`feat/paddy-profile`) | ✅ |
 | F21.6 | Story editor: a quiet page (cover, Lora title and subtitle) with a publish panel beside it (`feat/paddy-editor`) | ✅ |
-| F21.7 | Question page: Lora title, tags under it, round votes beside the post, the accepted answer in a mustard card (`feat/paddy-question`) | ⬜ |
+| F21.7 | Question page: Lora title, tags under it, round votes beside the post, the accepted answer in a mustard card (`feat/paddy-question`) | ✅ |
 | F21.8 | AI advisor: sources as numbered cards above the answer, follow-up questions as rows, a pill ask bar (`feat/paddy-advisor`) | ⬜ |
 | F21.9 | Questions and stories feeds: topic chips, rows with a thumbnail, stats line with the accepted mark (`feat/paddy-feeds`) | ⬜ |
 | F21.10 | Story page: Medium-like reading column, byline with Follow, quiet save bar (`feat/paddy-story`) | ⬜ |

@@ -93,7 +93,15 @@ function QuestionView({ question }: { question: Question }) {
             />
           </div>
           <h1 className="mt-3 font-serif text-[1.625rem] leading-tight font-semibold tracking-[-0.01em] text-balance sm:text-[2.125rem]">{question.title}</h1>
-          <div className="mt-4">
+          {(question.tags?.length ?? 0) > 0 && (
+            <TagList
+              size="md"
+              label={t('Tags')}
+              className="mt-4"
+              items={question.tags!.map((tag) => ({ label: tag, to: `/questions?tag=${encodeURIComponent(tag)}` }))}
+            />
+          )}
+          <div className="mt-5">
             <AuthorLine
               userId={question.userId}
               name={question.authorName}
@@ -115,14 +123,6 @@ function QuestionView({ question }: { question: Question }) {
                 </li>
               ))}
             </ul>
-          )}
-          {(question.tags?.length ?? 0) > 0 && (
-            <TagList
-              size="md"
-              label={t('Tags')}
-              className="mt-7"
-              items={question.tags!.map((tag) => ({ label: tag, to: `/questions?tag=${encodeURIComponent(tag)}` }))}
-            />
           )}
           {chips.length > 0 && (
             <ul aria-label={t('Farming context')} className="mt-3 flex flex-wrap gap-2">

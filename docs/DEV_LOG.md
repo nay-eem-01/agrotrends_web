@@ -47,7 +47,7 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   question page (`feat/harvest-question`) and F20.3 white page (`fix/harvest-white-page`) and F20.4 ask form
   redesign (`feat/ask-redesign`) done. Phase F20 is complete.
 - Phase F21 on `feat/paddy-base` (stacked on F20's tip): F21.1 Paddy Field tokens (`feat/paddy-tokens`) F21.2 shell (`feat/paddy-shell`) F21.3 sign in and sign up (`feat/paddy-auth`) F21.4 expert application (`feat/paddy-expert-apply`) F21.5 profile (`feat/paddy-profile`) F21.6 story editor (`feat/paddy-editor`) F21.7 question page (`feat/paddy-question`) F21.8 AI advisor (`feat/paddy-advisor`) F21.9 feeds (`feat/paddy-feeds`) F21.10 story page (`feat/paddy-story`) done. Phase F21 is complete.
-- Phase F22 on `feat/mock-base` (stacked on F21's tip): F22.1 fields (`feat/mock-fields`) F22.2 home feed (`feat/mock-home`) F22.3 question page (`feat/mock-question`) F22.4 profile (`feat/mock-profile`) F22.5 AI advisor (`feat/mock-advisor`) F22.6 ask page (`feat/mock-ask`) F22.7 story editor (`feat/mock-editor`) F22.8 sign in and sign up (`feat/mock-auth`) F22.9 story page (`feat/mock-story`) done. Phase F22 is complete.
+- Phase F22 on `feat/mock-base` (stacked on F21's tip): F22.1 fields (`feat/mock-fields`) F22.2 home feed (`feat/mock-home`) F22.3 question page (`feat/mock-question`) F22.4 profile (`feat/mock-profile`) F22.5 AI advisor (`feat/mock-advisor`) F22.6 ask page (`feat/mock-ask`) F22.7 story editor (`feat/mock-editor`) F22.8 sign in and sign up (`feat/mock-auth`) F22.9 story page (`feat/mock-story`) F22.10 navigation in the sidebar (`feat/mock-sidebar`) done. Phase F22 is complete.
 
 ## Next up
 
@@ -76,6 +76,23 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-31 (F22.10 navigation in the sidebar)
+
+**Done**
+- Nayeem pointed out that the home sidebar repeated the top bar's tabs and that other pages had no sidebar. Navigation
+  now lives in one place: `layout/AppSidebar` on every page from 1024px (Home or Discover, Questions, Stories, AI
+  advisor; signed in, Reading list, Your stories and your topics with "+ Follow topics").
+- The top bar's menu button hides the sidebar to an icon strip (each icon keeps its name as a tooltip and for screen
+  readers) and opens it again; the choice is kept in `localStorage` (`agrotrends.sidebar`). Reading and writing pages
+  keep it too, so the sections are always one click away.
+- The top bar drops its section tabs: menu button, logo, search, Write and Ask pills, bell, account. Phones keep the
+  menu sheet and the bottom tab bar.
+- The home feed drops its own sidebar (two columns: feed and the trending rail).
+- Tests: `layout/topbar.test.tsx` (sections only in the sidebar, hide and show, remembered); the home, library and
+  publish tests now name the region they mean. Checked at 1280px open and hidden, light and dark, and at 390px.
 
 ---
 

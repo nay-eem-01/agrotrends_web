@@ -102,9 +102,12 @@ an underline, errors an icon, accepted answers the word "Accepted", unanswered q
 
 Page width 1240px, gutters 16px (phones) / 32px; reading column 680px; feed column 720px.
 
-- **Navigation:** white bar with a hairline: Discover · Questions · Stories · AI advisor · Write, Ask (signed in),
-  bell, account menu; the current page green and underlined. Search opens a dialog (field-styled trigger from 1280px). Below 1024px a menu sheet;
-  below 768px a bottom tab bar (Discover, Questions, Ask +, Stories, AI advisor).
+- **Navigation (F22.10):** one place for the sections, the left sidebar (`layout/AppSidebar`), on every page from
+  1024px: Home (Discover for visitors), Questions, Stories, AI advisor; signed in, Reading list, Your stories and
+  your topics. The top bar's menu button hides it to an icon strip (names in tooltips and for screen readers) and
+  opens it again; the choice is remembered. The top bar holds no section tabs: logo, search, Write, Ask, bell,
+  account. Below 1024px the menu sheet; below 768px the bottom tab bar (Discover, Questions, Ask +, Stories, AI
+  advisor). Pages never repeat the sidebar's links in their own sidebars.
 - **Discover (`/`):** hero (Lora headline, intro, Ask a question / Join) beside the drawn field (`FieldScene`) with
   an advisor caption; "Help a farmer today" (up to three unanswered questions, each with Answer); "What farmers are
   asking" (one row of topic filters, then compact question rows) beside the advisor panel with

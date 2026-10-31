@@ -46,7 +46,7 @@ function Page({ children, aside }: { children: ReactNode; aside?: ReactNode }) {
   return (
     <section className="mx-auto grid max-w-[68rem] gap-10 px-4 pb-24 sm:px-8 lg:grid-cols-[minmax(0,1fr)_15rem]">
       <div className="min-w-0">{children}</div>
-      {aside && <aside className="hidden lg:block">{aside}</aside>}
+      {aside && <aside aria-label="Story settings" className="hidden lg:block">{aside}</aside>}
     </section>
   )
 }

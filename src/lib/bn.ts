@@ -668,4 +668,7 @@ export const BN: Record<string, string> = {
   'Show password': 'পাসওয়ার্ড দেখান',
   'farmers, experts and students': 'চাষি, বিশেষজ্ঞ ও শিক্ষার্থী',
   'verified experts': 'যাচাই করা বিশেষজ্ঞ',
+  'Hide navigation': 'নেভিগেশন লুকান',
+  'Show navigation': 'নেভিগেশন দেখান',
+  'Navigation': 'নেভিগেশন',
 }

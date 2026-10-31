@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend · ➡ moved to a later step
 
-**Progress:** 101 of 101 steps done
+**Progress:** 102 of 102 steps done
 
 ---
 
@@ -254,6 +254,7 @@ that need new endpoints are built and stay hidden until the backend answers; the
 | F22.7 | Story editor: draft status bar with Preview, topic and tags in the side panel beside the checklist (`feat/mock-editor`) | ✅ |
 | F22.8 | Sign in and sign up: Google first, Forgot beside the password label, Show password, a Mobile / E-mail switch and a strength bar on sign-up (`feat/mock-auth`) | ✅ |
 | F22.9 | Story page: Follow in the byline and Save in the top bar (`feat/mock-story`) | ✅ |
+| F22.10 | Navigation in one place: the sidebar on every page from 1024px, hidden to icons or open from the top bar's menu button; no section tabs in the top bar; the home feed drops its own sidebar (`feat/mock-sidebar`) | ✅ |
 
 ## Needs from the backend
 

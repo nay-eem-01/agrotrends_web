@@ -1,6 +1,6 @@
-import { BookOpen, ChatCircleText, House, Newspaper, Plus, SealCheck, Sparkle } from '@phosphor-icons/react'
+import { ChatCircleText, Newspaper, SealCheck, Sparkle } from '@phosphor-icons/react'
 import { useMemo, useState, type ReactNode } from 'react'
-import { Link, NavLink, useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { cn } from 'cn'
 import { useTopicStories } from '../../api/blogs'
 import { useCategories } from '../../api/categories'
@@ -8,7 +8,6 @@ import { useExperts } from '../../api/experts'
 import { useFeed } from '../../api/feed'
 import { useQuestions, type Question } from '../../api/questions'
 import { useWeekTips } from '../../api/tips'
-import { useFollowedTags } from '../../api/topics'
 import type { StorySummary } from '../../api/types'
 import { storyDate } from '../../lib/dates'
 import { formatNumber, useLang, useT } from '../../lib/i18n'
@@ -22,8 +21,8 @@ import { QuestionCard } from '../qa/QuestionRow'
 type Item = { kind: 'story'; at: string; story: StorySummary } | { kind: 'question'; at: string; question: Question }
 
 /**
- * `/` for signed-in readers, after a Reddit home: the sections and your topics on the left, topic chips, a composer and
- * one feed of stories and questions in the middle, what's trending and experts to follow on the right. On phones the
+ * `/` for signed-in readers, after a Reddit home: topic chips, a composer and one feed of stories and questions, with
+ * what's trending and experts to follow on the right (the sections and your topics are in the app's sidebar). On phones the
  * quick actions and this week's tasks come first. The feed merges stories and questions by date until the backend has
  * one home feed (docs/BACKEND_REQUESTS.md §6).
  */
@@ -45,10 +44,9 @@ export function HomeFeed() {
   const loading = questions.isPending || stories.isPending
 
   return (
-    <div className="mx-auto grid max-w-(--container-page) gap-8 px-4 pt-6 pb-20 sm:px-8 md:grid-cols-[11rem_minmax(0,1fr)] lg:grid-cols-[12.5rem_minmax(0,1fr)_16rem] lg:gap-10">
+    <div className="mx-auto grid max-w-[64rem] gap-8 px-4 pt-6 pb-20 sm:px-8 lg:grid-cols-[minmax(0,1fr)_16rem] lg:gap-10">
       <title>{t('AgroTrends – farming questions, stories and advice')}</title>
       <h1 className="sr-only">{t('Home')}</h1>
-      <Sidebar />
       <section aria-label={t('Your feed')} className="min-w-0">
         <QuickStart />
         <nav aria-label={t('Topics')} className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0">
@@ -108,58 +106,6 @@ function TopicChip({ to, current, children }: { to: string; current: boolean; ch
     >
       {children}
     </Link>
-  )
-}
-
-/** The sections, then the topics you follow (followed tags until topics can be followed, §5). */
-function Sidebar() {
-  const t = useT()
-  const followed = useFollowedTags(true)
-  const categories = useCategories()
-  const sections = [
-    { to: '/', end: true, label: t('Home'), icon: House },
-    { to: '/questions', label: t('Questions'), icon: ChatCircleText },
-    { to: '/stories', label: t('Stories'), icon: Newspaper },
-    { to: '/advisor', label: t('AI advisor'), icon: Sparkle },
-    { to: '/library', label: t('Reading list'), icon: BookOpen },
-  ]
-  const tags = followed.data ?? []
-  return (
-    <aside aria-label={t('Sections')} className="hidden md:block">
-      <nav className="sticky top-24 flex flex-col gap-0.5 text-sm">
-        {sections.map(({ to, end, label, icon: Icon }) => (
-          <NavLink
-            key={to}
-            to={to}
-            end={end}
-            className={({ isActive }) =>
-              cn('flex h-10 items-center gap-3 rounded-full px-3 font-medium transition-colors duration-150', isActive ? 'bg-surface text-primary' : 'text-foreground hover:bg-surface')
-            }
-          >
-            <Icon size={18} aria-hidden="true" />
-            {label}
-          </NavLink>
-        ))}
-        <h2 className="mt-6 mb-1 px-3 font-sans text-xs font-semibold text-muted-foreground">{t('Your topics')}</h2>
-        {tags.length > 0
-          ? tags.slice(0, 6).map((tag) => (
-              <Link key={tag} to={`/tags/${encodeURIComponent(tag)}`} className="flex h-9 items-center gap-3 rounded-full px-3 hover:bg-surface">
-                <span aria-hidden="true" className="size-2 rounded-full bg-primary" />
-                {tag}
-              </Link>
-            ))
-          : (categories.data ?? []).slice(0, 5).map((category) => (
-              <Link key={category.id} to={`/?topic=${category.id}`} className="flex h-9 items-center gap-3 rounded-full px-3 hover:bg-surface">
-                <span aria-hidden="true" className="size-2 rounded-full bg-mustard" />
-                {category.categoryName}
-              </Link>
-            ))}
-        <Link to="/topics" className="flex h-9 items-center gap-3 rounded-full px-3 text-muted-foreground hover:bg-surface hover:text-foreground">
-          <Plus size={14} aria-hidden="true" />
-          {t('Follow topics')}
-        </Link>
-      </nav>
-    </aside>
   )
 }
 

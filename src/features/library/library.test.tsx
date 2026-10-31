@@ -35,7 +35,7 @@ test('the reading list shows saved stories, marked as saved', async () => {
 
   const card = (await screen.findByRole('link', { name: 'A saved story' })).closest('article')!
   await waitFor(() => expect(within(card).getByRole('button', { name: 'Save “A saved story”' })).toHaveAttribute('aria-pressed', 'true'))
-  expect(screen.getByRole('link', { name: 'Reading list' })).toHaveAttribute('aria-current', 'page')
+  expect(within(screen.getByRole('navigation', { name: 'Library' })).getByRole('link', { name: 'Reading list' })).toHaveAttribute('aria-current', 'page')
 })
 
 test('an empty reading list says how to save', async () => {

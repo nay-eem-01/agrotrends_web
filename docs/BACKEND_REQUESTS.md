@@ -7,33 +7,32 @@ a fallback) until its endpoint answers, so nothing breaks while these are missin
 
 Priority: **P1** the page looks empty without it · **P2** a visible part of the mock-up · **P3** nice to have.
 
-## 1. Public user profile (P1) — profile page, author lines, "Experts to follow"
+## 1. Public user summary (P1) — profile page, "Experts to follow"
+
+The author profile (`GET /api/authors/{authorId}`) already gives headline (designation, occupation, workplace), bio,
+photo, specialities, followers and follow. What's missing is the way from a **user** (questions and answers carry
+`userId`) to that author, plus a few profile facts:
 
 `GET /api/users/{userId}/profile` (public)
 
 ```json
 {
   "userId": 7, "name": "Dr. Nasrin Akter", "authorId": 3,
-  "headline": "Fish health specialist · Associate professor, BAU",
-  "location": "Mymensingh", "bio": "…", "avatarUrl": null, "coverUrl": null,
-  "joinedAt": "2026-03-02T00:00:00Z",
-  "followerCount": 1800, "followingCount": 42, "followedByMe": false,
+  "location": "Mymensingh", "coverUrl": null, "joinedAt": "2026-03-02T00:00:00Z",
   "answerCount": 184, "acceptedAnswerCount": 92, "questionCount": 5, "storyCount": 12,
   "credentials": [ { "title": "PhD, Aquaculture", "institution": "Bangladesh Agricultural University", "year": 2016 } ]
 }
 ```
 
-- `credentials`: from approved expert applications (field + institution) plus anything the user adds in settings.
-- `followedByMe`: false for visitors.
-
-`PUT /api/user/profile` (signed in) — `{ headline?, location?, bio?, avatarUrl?, coverUrl? }`, returns the profile
-above. Lengths: headline ≤ 120, location ≤ 80, bio ≤ 600. Images come from the existing `POST /api/images`.
+- Every user should have an author row (or `authorId` may be null and the web hides Follow and Stories).
+- `credentials`: from approved expert applications (field + institution) plus any the user adds in settings.
+- `PUT /api/user/profile` (signed in) — `{ location?, coverUrl? }` (≤ 80 characters; images from `POST /api/images`).
+  Headline, bio and photo stay on `PUT /api/authors/me`.
 
 ## 2. Follow a person (P2) — Follow on profiles, bylines and "Experts to follow"
 
-`PUT /api/users/{userId}/follow` and `DELETE /api/users/{userId}/follow` (signed in), 204. Following yourself is a
-400. If following stays author-based, putting `authorId` in the profile (above) is enough and the web uses
-`/api/authors/{authorId}/follow`; then every user needs an author row.
+Nothing new if every user has an author row: the web follows through `/api/authors/{authorId}/follow` using the
+`authorId` from §1 (and from §4's experts).
 
 ## 3. A user's answers (P1) — "Answers" tab and "Recent contributions"
 

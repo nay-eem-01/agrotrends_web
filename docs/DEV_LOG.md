@@ -43,10 +43,13 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 - Phase F19 on `feat/simple-ask-base` (from `development`): F19.1 question vote label (`feat/question-vote-label`)
   F19.2 one-place ask form (`feat/ask-editor`) and F19.3 composer restyle (`feat/ask-composer`) done. Phase F19 is
   complete.
+- Phase F20 on `feat/harvest-base` (stacked on F19's tip): F20.1 Harvest tokens (`feat/harvest-tokens`) done; F20.2
+  question page next.
 
 ## Next up
 
-1. **Nayeem:** PR F19.1, F19.2 then F19.3 into `feat/simple-ask-base`, then the base into `development`.
+1. **Nayeem:** PR F19.1, F19.2 then F19.3 into `feat/simple-ask-base`, then the base into `development`; then F20's
+   steps into `feat/harvest-base`.
 2. Pick an SMS provider (backend 10.5): until then codes only appear in the backend log as `[DEV SMS]`.
 3. Run the admin smoke step (`E2E_ADMIN_EMAIL` / `E2E_ADMIN_PASSWORD`) and the admin screens live once an admin login is at hand.
 4. Merge the backend's Phase 8 so F12–F14 run against its `development`.
@@ -66,6 +69,23 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-10-31 (F20.1 Harvest tokens)
+
+**Done**
+- New visual direction from the ui-ux-pro-max skill. Its first design-system match for "community Q&A" was a
+  developer-forum look (blue, Fira Code), rejected; the agriculture query gave "Organic Biophilic" with the Farm Tech
+  palette, which Nayeem chose. Tokens in `src/index.css`, light and dark; table in `docs/DESIGN.md`.
+- Lora replaces Newsreader as the serif (`@fontsource-variable/lora`; Newsreader removed), so every `font-serif`
+  headline follows. Raleway, the skill's body face, was not taken: Inter reads better small and next to Hind Siliguri.
+- `--radius` 0.75rem to 1rem (the style's 16–24px corners).
+- Contrast checked: every text pair at 4.5:1 or more in both themes; field borders darkened to 3.0:1 / 3.7:1.
+- Looked at Discover, Questions and a question page at 1280px light and dark and at 390px with the API mocked.
+
+**Known limitations**
+- Every screen takes the new colours; only the question page gets a layout redesign in this phase.
 
 ---
 

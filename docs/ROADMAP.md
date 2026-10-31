@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend · ➡ moved to a later step
 
-**Progress:** 78 of 78 steps done
+**Progress:** 79 of 80 steps done
 
 ---
 
@@ -209,6 +209,13 @@ Endpoints and rules: `docs/BACKEND_CATCHUP_PLAN.md` § Admin dashboard.
 | F19.1 | Question page: the question's own vote moves beside the author line as "Useful question?", apart from the answers' votes; vote arrows get a hover title (`feat/question-vote-label`) | ✅ |
 | F19.2 | Ask form in one place: title, rich-text details (bold, italic, lists, quote, link) with a photo button, topic and tags in one composer; no crop-specific farming fields (`feat/ask-editor`) | ✅ |
 | F19.3 | Ask form restyled: no boxed border, soft sticky toolbar, topic and tags typed in one row, Cancel and Post in a sticky bar above the phone's bottom navigation (`feat/ask-composer`) | ✅ |
+
+## Phase F20 — Harvest look (`feat/harvest-base`, stacked on F19)
+
+| # | Step | Status |
+|---|---|---|
+| F20.1 | Harvest tokens from the ui-ux-pro-max agriculture profile: pale field-green page, white cards, earth green `#15803D`, harvest gold `#A16207`, Lora for editorial type, 16px radius; field borders to 3:1 (`feat/harvest-tokens`) | ✅ |
+| F20.2 | Question page redesign on Harvest (`feat/harvest-question`) | ⬜ |
 
 ## Needs from the backend
 

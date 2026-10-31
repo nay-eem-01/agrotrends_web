@@ -137,14 +137,14 @@ function Toolbar({ filters }: { filters: QuestionFilters }) {
         </nav>
       )}
       <div className="flex flex-wrap items-center gap-3">
-        <nav aria-label={t('Sort questions')} className="flex gap-1 rounded-lg bg-muted p-1">
+        <nav aria-label={t('Sort questions')} className="flex gap-1 rounded-full bg-muted p-1">
           {tabs.map((tab) => (
             <Link
               key={tab.label}
               to={tab.to}
               aria-current={tab.current ? 'page' : undefined}
               className={cn(
-                'flex h-9 items-center rounded-md px-3.5 text-sm transition-colors duration-150',
+                'flex h-9 items-center rounded-full px-4 text-sm transition-colors duration-150',
                 tab.current ? 'bg-card font-semibold text-primary shadow-xs ring-1 ring-border' : 'text-muted-foreground hover:text-foreground',
               )}
             >

@@ -111,6 +111,20 @@ test('cards show votes, answers and an accepted answer', async () => {
   expect(within(row).getByRole('link', { name: '#cold' })).toHaveAttribute('href', '/questions?tag=cold')
 })
 
+test('a row reads topic and date, the title, then a stats line with the asker', async () => {
+  mockApi({
+    'GET /api/questions/all': () => envelope(200, page([{ ...question, score: 1, answerCount: 0, category: { id: 2, categoryName: 'Crops' } }])),
+  })
+  renderWithProviders(<App />, '/questions')
+
+  const title = await screen.findByRole('link', { name: 'Why are my boro seedlings yellow?' })
+  const row = title.closest('li')!
+  expect(row).toHaveTextContent(/1 vote\s*0 answers\s*Unanswered/)
+  expect(within(row).queryByText('An answer was accepted')).not.toBeInTheDocument()
+  const topic = within(row).getByRole('link', { name: 'Crops' })
+  expect(topic.compareDocumentPosition(title) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+})
+
 test('Unanswered, topic and tag combine with the farming filters', async () => {
   const api = mockApi({
     'GET /api/questions/all': () => envelope(200, page([question])),

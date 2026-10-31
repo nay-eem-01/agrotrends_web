@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend · ➡ moved to a later step
 
-**Progress:** 107 of 108 steps done
+**Progress:** 108 of 108 steps done
 
 ---
 
@@ -268,7 +268,7 @@ and shows what the new endpoints allow.
 | F23.1 | Regenerated API types; profile, answers, experts and public numbers use them; this week's tasks removed (not wanted) (`feat/api2-types`) | ✅ |
 | F23.2 | Home rail: trending questions beside trending stories; Follow on experts to follow (`feat/api2-home`) | ✅ |
 | F23.3 | Story subtitle and "Let the AI advisor cite this story" in the editor; the subtitle on the story page and in lists (`feat/api2-stories`) | ✅ |
-| F23.4 | Location and cover photo on your profile; the "new question in your topic" notification (`feat/api2-profile`) | ⬜ |
+| F23.4 | Location and cover photo on your profile; the "new question in your topic" notification (`feat/api2-profile`) | ✅ |
 
 ## Needs from the backend
 

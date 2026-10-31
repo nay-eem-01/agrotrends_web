@@ -675,4 +675,5 @@ export const BN: Record<string, string> = {
   'Back to AgroTrends': 'অ্যাগ্রোট্রেন্ডসে ফিরে যান',
   'Trending questions': 'জনপ্রিয় প্রশ্ন',
   'Trending stories': 'জনপ্রিয় লেখা',
+  'New question in your topic, waiting for an expert': 'আপনার বিষয়ে নতুন প্রশ্ন, একজন বিশেষজ্ঞের অপেক্ষায়',
 }

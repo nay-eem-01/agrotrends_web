@@ -70,7 +70,7 @@ function QuestionView({ question }: { question: Question }) {
       </Link>
       {/* One panel (vote, counts, Answer): a sticky side card from 1024px, a row under the question below that. */}
       <div className="mt-2 lg:grid lg:grid-cols-[minmax(0,1fr)_17rem] lg:items-start lg:gap-x-8">
-        <section aria-label={t('Question')} className="min-w-0 rounded-2xl border border-border bg-card p-5 shadow-xs sm:p-8">
+        <section aria-label={t('Question')} className="min-w-0 rounded-xl border border-border bg-card p-5 sm:p-8">
           <div className="flex items-start gap-3">
             <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
               {question.category?.categoryName ? (
@@ -139,7 +139,7 @@ function QuestionView({ question }: { question: Question }) {
         </section>
         <aside
           aria-label={t('About this question')}
-          className="mt-3 flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-card p-3 lg:sticky lg:top-24 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mt-0 lg:flex-col lg:items-stretch lg:gap-5 lg:p-5"
+          className="mt-3 flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card p-3 lg:sticky lg:top-24 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mt-0 lg:flex-col lg:items-stretch lg:gap-5 lg:p-5"
         >
           {/* The question's own vote, named so it isn't mistaken for the answers' votes below. */}
           <fieldset aria-label={t('Rate this question')} className="flex min-w-0 items-center gap-2 lg:flex-col lg:items-start">

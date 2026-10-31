@@ -46,7 +46,7 @@ function Card({ answer, topicId }: { answer: AiAnswer; topicId?: number }) {
   return (
     <section
       aria-labelledby="ai-answer"
-      className={cn('mt-6 rounded-2xl border p-5 sm:p-6', confirmed ? 'border-mustard/70 bg-card shadow-xs ring-1 ring-mustard/40' : 'border-dashed border-input bg-card/70')}
+      className={cn('mt-6 rounded-xl border p-5 sm:p-6', confirmed ? 'border-mustard bg-card ring-1 ring-mustard/40' : 'border-dashed border-input bg-card/70')}
     >
       <header className="flex flex-wrap items-center gap-x-3 gap-y-2">
         <h2 id="ai-answer" className="flex items-center gap-2 font-sans text-base font-semibold">
@@ -82,7 +82,7 @@ function StatusLabel({ answer }: { answer: AiAnswer }) {
     const text = answer.status === 'CONFIRMED' ? t('Confirmed by {name}', { name: answer.reviewerName ?? '' }) : t('Corrected by {name}', { name: answer.reviewerName ?? '' })
     return (
       <span className={cn('inline-flex h-7 items-center gap-1.5 rounded-full px-3 text-sm', answer.status === 'CONFIRMED' ? 'bg-mustard-soft' : 'bg-secondary')}>
-        <SealCheck size={16} weight="fill" className={answer.status === 'CONFIRMED' ? 'text-mustard' : 'text-primary'} aria-hidden="true" />
+        <SealCheck size={16} weight="fill" className={answer.status === 'CONFIRMED' ? 'text-mustard-ink' : 'text-primary'} aria-hidden="true" />
         {text}
         {answer.reviewedAt && <span className="text-muted-foreground">· {storyDate(answer.reviewedAt)}</span>}
       </span>

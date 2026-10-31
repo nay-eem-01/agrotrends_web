@@ -51,7 +51,7 @@ export function QuestionCard({ question, compact = false }: { question: Question
           )}
         >
           <span className="inline-flex items-center justify-center gap-1 text-base font-semibold tabular-nums">
-            {accepted && <CheckCircle size={14} weight="fill" className="text-mustard" aria-hidden="true" />}
+            {accepted && <CheckCircle size={14} weight="fill" className="text-mustard-ink" aria-hidden="true" />}
             {formatNumber(answers)}
           </span>
           <span className="text-xs">{answers === 1 ? t('answer') : t('answers')}</span>
@@ -82,7 +82,7 @@ export function QuestionCard({ question, compact = false }: { question: Question
                 <span className="sr-only">{t('Reputation')} </span>· {formatNumber(question.authorReputation)}
               </span>
             )}
-            {question.authorBadges?.includes('VERIFIED_EXPERT') && <SealCheck size={14} weight="fill" className="text-mustard" aria-label={t('Verified expert')} />}
+            {question.authorBadges?.includes('VERIFIED_EXPERT') && <SealCheck size={14} weight="fill" className="text-mustard-ink" aria-label={t('Verified expert')} />}
             <span>· {storyDate(question.createdAt)}</span>
           </span>
           {answers === 0 && (

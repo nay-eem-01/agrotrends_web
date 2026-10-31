@@ -68,7 +68,7 @@ export function ApplicationStatus({ application }: { application: ExpertApplicat
   return (
     <section aria-label={t('Expert application')} className={cn('rounded-xl p-5', status.tone)}>
       <h2 className="flex items-center gap-2 font-sans text-base font-semibold">
-        <Icon size={20} weight="fill" className={application.status === 'APPROVED' ? 'text-mustard' : 'text-foreground'} aria-hidden="true" />
+        <Icon size={20} weight="fill" className={application.status === 'APPROVED' ? 'text-mustard-ink' : 'text-foreground'} aria-hidden="true" />
         {t(status.title)}
       </h2>
       <p className="mt-2 text-sm">

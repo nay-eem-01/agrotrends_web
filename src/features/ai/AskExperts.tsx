@@ -22,7 +22,7 @@ export function AskExperts({ item }: { item: AiHistoryItem }) {
   if (published != null) {
     return (
       <p className="mt-4 flex flex-wrap items-center gap-2 text-sm">
-        <SealCheck size={18} weight="fill" className="text-mustard" aria-hidden="true" />
+        <SealCheck size={18} weight="fill" className="text-mustard-ink" aria-hidden="true" />
         {t('Asked in public for the experts.')}
         <Link to={`/questions/${published}`} className="font-medium text-primary underline-offset-4 hover:underline">
           {t('Open the question')}

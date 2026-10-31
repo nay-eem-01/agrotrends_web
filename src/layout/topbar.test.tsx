@@ -38,19 +38,49 @@ test('the phone tab bar marks the current section and leads to asking', async ()
   expect(tabs.getByRole('link', { name: 'Ask a question' })).toHaveAttribute('href', '/questions/ask')
 })
 
-test('the search pill and Ctrl+K open the same search dialog', async () => {
+test('the search stays in the bar: typing there searches, and it keeps the words on the results page', async () => {
+  mockApi({ 'GET /api/questions/all': () => envelope(200, page([])), 'GET /api/categories/all': () => envelope(200, page([])), 'GET /api/search': () => envelope(200, page([])) })
+  renderWithProviders(<App />, '/')
+
+  const field = await screen.findByRole('searchbox', { name: 'Search AgroTrends' })
+  expect(field).toHaveAttribute('aria-keyshortcuts', 'Control+K Meta+K')
+  await userEvent.click(field)
+  // No dialog pops up; the field itself takes the words.
+  expect(screen.queryByRole('dialog', { name: 'Search AgroTrends' })).not.toBeInTheDocument()
+  await userEvent.type(field, 'boro rice{Enter}')
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/search?q=boro%20rice'))
+  expect(screen.getByRole('searchbox', { name: 'Search AgroTrends' })).toHaveValue('boro rice')
+})
+
+test('below 1024px the search icon and Ctrl+K open the search dialog', async () => {
   mockApi({ 'GET /api/questions/all': () => envelope(200, page([])), 'GET /api/categories/all': () => envelope(200, page([])) })
   renderWithProviders(<App />, '/')
 
-  const [pill] = await screen.findAllByRole('button', { name: 'Search' })
-  expect(pill).toHaveAttribute('aria-keyshortcuts', 'Control+K Meta+K')
-  await userEvent.click(pill)
+  const icon = await screen.findByRole('button', { name: 'Search' })
+  expect(icon).toHaveAttribute('aria-keyshortcuts', 'Control+K Meta+K')
+  await userEvent.click(icon)
   expect(await screen.findByRole('dialog', { name: 'Search AgroTrends' })).toBeInTheDocument()
   await userEvent.keyboard('{Escape}')
   await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Search AgroTrends' })).not.toBeInTheDocument())
 
+  // jsdom lays nothing out, so the bar's field counts as hidden and Ctrl+K falls back to the dialog.
   await userEvent.keyboard('{Control>}k{/Control}')
   expect(await screen.findByRole('dialog', { name: 'Search AgroTrends' })).toBeInTheDocument()
+})
+
+test('a signed-in reader reaches their profile from the sidebar and the account menu', async () => {
+  localStorage.setItem('agrotrends.refreshToken', 'r0')
+  mockApi({
+    'POST /api/auth/refresh-token': () => envelope(200, { accessToken: 'a1', refreshToken: 'r1', user: { id: 7, name: 'Rahim Uddin' } }),
+    'GET /api/questions/all': () => envelope(200, page([])),
+    'GET /api/categories/all': () => envelope(200, page([])),
+  })
+  renderWithProviders(<App />, '/questions')
+
+  const sidebar = await screen.findByRole('complementary', { name: 'Navigation' })
+  expect(await within(sidebar).findByRole('link', { name: 'Your profile' })).toHaveAttribute('href', '/users/7')
+  await userEvent.click(await screen.findByRole('button', { name: 'Account' }))
+  expect(await screen.findByRole('menuitem', { name: 'Your profile' })).toHaveAttribute('href', '/users/7')
 })
 
 test('the sections live in the sidebar only, and the menu button hides it to icons and back', async () => {

@@ -592,4 +592,7 @@ export const BN: Record<string, string> = {
   'Farmers trust an answer more when they know who gave it. Tell us your field and show one proof.': 'কে উত্তর দিয়েছেন জানলে চাষিরা উত্তরে বেশি ভরসা করেন। আপনার বিষয় জানান এবং একটি প্রমাণ দেখান।',
   'What happens next': 'এরপর কী হবে',
   "If it isn't approved, you can apply again.": 'অনুমোদন না হলে আবার আবেদন করতে পারবেন।',
+  'Accepted answers': 'গৃহীত উত্তর',
+  'Verified expert in {topics}': '{topics}-এ যাচাই করা বিশেষজ্ঞ',
+  'Answers questions on': 'যে বিষয়ে উত্তর দেন',
 }

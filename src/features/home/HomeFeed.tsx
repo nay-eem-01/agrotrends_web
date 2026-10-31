@@ -7,10 +7,9 @@ import { useCategories } from '../../api/categories'
 import { useExperts } from '../../api/experts'
 import { useFeed } from '../../api/feed'
 import { useQuestions, type Question } from '../../api/questions'
-import { useWeekTips } from '../../api/tips'
 import type { StorySummary } from '../../api/types'
 import { storyDate } from '../../lib/dates'
-import { formatNumber, useLang, useT } from '../../lib/i18n'
+import { formatNumber, useT } from '../../lib/i18n'
 import { Avatar } from '../../ui/Avatar'
 import { CoverFallback } from '../../ui/Botanical'
 import { Button } from '../../ui/Button'
@@ -127,12 +126,10 @@ function Composer() {
   )
 }
 
-/** Phones: a greeting, this week's tasks (when the backend has them, §11) and the four ways in. */
+/** Phones: a greeting and the four ways in. */
 function QuickStart() {
   const t = useT()
-  const lang = useLang()
   const { user } = useSession()
-  const tips = useWeekTips()
   const [hour] = useState(() => new Date().getHours())
   const name = (user?.name ?? '').split(' ')[0]
   const greeting = hour < 12 ? t('Good morning, {name}', { name }) : hour < 17 ? t('Good afternoon, {name}', { name }) : t('Good evening, {name}', { name })
@@ -145,21 +142,6 @@ function QuickStart() {
   return (
     <div className="mb-6 flex flex-col gap-4 md:hidden">
       <p className="font-serif text-2xl font-semibold">{greeting}</p>
-      {(tips.data?.length ?? 0) > 0 && (
-        <section aria-labelledby="week-tasks" className="rounded-xl bg-surface p-4">
-          <h2 id="week-tasks" className="font-sans text-base font-semibold">
-            {t("This week's tasks")}
-          </h2>
-          <ul className="mt-2 flex flex-col gap-2 text-sm">
-            {tips.data!.map((tip) => (
-              <li key={tip.id} className="flex gap-2">
-                <span aria-hidden="true" className="mt-2 size-1.5 shrink-0 rounded-full bg-primary" />
-                <span lang={lang === 'bn' && tip.textBn ? 'bn' : undefined}>{lang === 'bn' && tip.textBn ? tip.textBn : tip.text}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
       <nav aria-label={t('Quick actions')} className="grid grid-cols-2 gap-2.5">
         {actions.map(({ to, label, icon: Icon, main }) => (
           <Link
@@ -252,7 +234,7 @@ function Rail() {
             <ul className="mt-3 flex flex-col gap-3.5">
               {experts.data!.content.map((expert) => (
                 <li key={expert.userId} className="flex items-center gap-2.5 text-sm">
-                  <Avatar name={expert.name} src={expert.avatarUrl ?? undefined} size={32} />
+                  <Avatar name={expert.name ?? ''} src={expert.avatarUrl ?? undefined} size={32} />
                   <Link to={`/users/${expert.userId}`} state={{ name: expert.name }} className="min-w-0 flex-1">
                     <span className="block truncate font-semibold hover:underline">{expert.name}</span>
                     <span className="block truncate text-xs text-muted-foreground">{[expert.expertField, expert.institution].filter(Boolean).join(' · ')}</span>

@@ -3,24 +3,13 @@ import { api } from './client'
 import { FEED_PAGE_SIZE } from './feed'
 import type { Page, Schemas } from './types'
 
-/** A user's public summary (docs/BACKEND_REQUESTS.md §1; not in the OpenAPI yet). */
-export interface UserProfile {
-  userId: number
-  name?: string
-  authorId?: number | null
-  location?: string | null
-  coverUrl?: string | null
-  joinedAt?: string
-  answerCount?: number
-  acceptedAnswerCount?: number
-  questionCount?: number
-  storyCount?: number
-  credentials?: { title: string; institution?: string | null; year?: number | null }[]
-}
+/** A user's public summary; `authorId` equals `userId`. */
+export type UserProfile = Schemas['UserProfileResponse']
 
-export type UserAnswer = Schemas['AnswerResponse'] & { questionTitle?: string }
+/** One of a user's answers, with its question's title. */
+export type UserAnswer = Schemas['UserAnswerResponse']
 
-/** The profile summary; fails quietly (no retry) until the backend serves it, and the page falls back. */
+/** The profile summary (public); if it fails the page falls back to what it has. */
 export function useUserProfile(userId: number) {
   return useQuery({
     queryKey: ['users', userId, 'profile'],
@@ -30,14 +19,14 @@ export function useUserProfile(userId: number) {
   })
 }
 
-/** A user's answers, newest first (§3); the Answers tab stays hidden until this answers. */
+/** A user's answers, newest first; the Answers tab stays hidden if this fails. */
 export function useUserAnswers(userId: number) {
   return useInfiniteQuery({
     queryKey: ['users', userId, 'answers'],
     queryFn: ({ pageParam, signal }) =>
       api<Page<UserAnswer>>(`/api/answers/all/user/${userId}`, { params: { pageNo: pageParam, pageSize: FEED_PAGE_SIZE }, signal }),
     initialPageParam: 0,
-    // Guarded: until the endpoint exists a proxy or older backend may answer with no page at all.
+    // Guarded: an older backend may answer with no page at all.
     getNextPageParam: (page) => (page && page.last === false ? page.number + 1 : undefined),
     enabled: Number.isInteger(userId) && userId > 0,
     retry: false,

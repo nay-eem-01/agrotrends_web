@@ -7,6 +7,34 @@ a fallback) until its endpoint answers, so nothing breaks while these are missin
 
 Priority: **P1** the page looks empty without it · **P2** a visible part of the mock-up · **P3** nice to have.
 
+## Status (2026-11-01)
+
+The backend answered the list (its `docs/DEV_LOG.md`, 2026-10-31 and 2026-11-01). The web uses the regenerated
+`schema.d.ts` for every request below.
+
+| § | Request | Backend | Web |
+|---|---|---|---|
+| 1 | Public user summary, `PUT /api/user/profile` | done (4.16), no credential `year` | F23.1 types, F23.4 location and cover |
+| 2 | Follow a person | done (4.17): `authorId` equals `userId` | follow works for everyone |
+| 3 | A user's answers | done (`UserAnswerResponse`) | F23.1 |
+| 4 | Experts to follow | done (4.18) | F23.2 Follow in the rail |
+| 5 | Follow topics (categories) | **not built**: tags cover it | "Your topics" stays on followed tags |
+| 6 | One home feed | **changed**: `GET /api/feed/trending/questions` beside trending posts (4.19) | F23.2 "Trending questions" |
+| 7 | Question views | done (4.20) | already shown |
+| 8 | AI follow-ups and `[n]` citations | **not built**: the AI stays as it is | follow-ups and citations stay hidden |
+| 9 | Story subtitle and AI opt-out | done (4.21) | F23.3 |
+| 10 | Public numbers | done (4.22) | already shown |
+| 11 | This week's tasks | **not wanted** | removed from the phone home (F23.1) |
+| 12 | Questions reach experts first | done (4.23), `NEW_QUESTION_IN_TOPIC` | F23.4 notification |
+
+### Bug found while generating the types
+
+On an **empty database** the new backend fails its first start: seeding the super-admin's author profile throws
+`PersistentObjectException: detached entity passed to persist: User` (`AuthorService.profileOf` line 34, from
+`InitialDataLoader.onApplicationEvent` line 103). A second start works because the admin row was saved by then. Likely
+the `@MapsId` author is persisted with a `User` from another persistence context; merging (or re-reading) the user in
+the same transaction should fix it. Fresh installs, CI and Testcontainers would all hit it.
+
 ## 1. Public user summary (P1) — profile page, "Experts to follow"
 
 The author profile (`GET /api/authors/{authorId}`) already gives headline (designation, occupation, workplace), bio,

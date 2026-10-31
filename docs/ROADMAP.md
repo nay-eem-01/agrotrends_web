@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend · ➡ moved to a later step
 
-**Progress:** 104 of 104 steps done
+**Progress:** 105 of 108 steps done
 
 ---
 
@@ -257,6 +257,18 @@ that need new endpoints are built and stay hidden until the backend answers; the
 | F22.10 | Navigation in one place: the sidebar on every page from 1024px, hidden to icons or open from the top bar's menu button; no section tabs in the top bar; the home feed drops its own sidebar (`feat/mock-sidebar`) | ✅ |
 | F22.11 | Search as a field in the top bar (no pop-up from 1024px; Ctrl/⌘+K focuses it); Your profile in the sidebar and the account menu (`feat/mock-topbar`) | ✅ |
 | F22.12 | Quieter frame: the footer drops its rule beside the sidebar; sign in, sign up and the password and e-mail steps are focused pages with only the logo and a way back (`feat/mock-chrome`) | ✅ |
+
+## Phase F23 — The backend's second batch (`feat/api2-base`, stacked on F22)
+
+The backend built most of `docs/BACKEND_REQUESTS.md` (status table there). The web switches to the generated types
+and shows what the new endpoints allow.
+
+| # | Step | Status |
+|---|---|---|
+| F23.1 | Regenerated API types; profile, answers, experts and public numbers use them; this week's tasks removed (not wanted) (`feat/api2-types`) | ✅ |
+| F23.2 | Home rail: trending questions beside trending stories; Follow on experts to follow (`feat/api2-home`) | ⬜ |
+| F23.3 | Story subtitle and "Let the AI advisor cite this story" in the editor; the subtitle on the story page and in lists (`feat/api2-stories`) | ⬜ |
+| F23.4 | Location and cover photo on your profile; the "new question in your topic" notification (`feat/api2-profile`) | ⬜ |
 
 ## Needs from the backend
 

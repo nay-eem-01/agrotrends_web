@@ -1,15 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 import { api } from './client'
+import type { Schemas } from './types'
 
-/** Public numbers for the sign-in panel (docs/BACKEND_REQUESTS.md §10; not in the OpenAPI yet). */
-export interface PublicStats {
-  members?: number
-  verifiedExperts?: number
-  questions?: number
-  answeredQuestions?: number
-}
+/** Public numbers for the sign-in panel: members, verified experts, questions and answered questions. */
+export type PublicStats = Schemas['PublicStatsResponse']
 
-/** Hidden (no retry) until the backend serves them; asked for only where the panel shows (from 1024px). */
+/** Counted at most hourly by the backend; asked for only where the panel shows (from 1024px). */
 export function usePublicStats() {
   const wide = typeof window !== 'undefined' && window.matchMedia?.('(min-width: 1024px)').matches === true
   return useQuery({

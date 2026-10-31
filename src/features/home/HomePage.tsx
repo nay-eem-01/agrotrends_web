@@ -10,13 +10,23 @@ import { useSession } from '../auth/session'
 // Below the hero: topics, questions, the advisor and stories load just after it (their icons and lists are not
 // needed for the first paint), keeping the main bundle in budget.
 const DiscoverSections = lazy(() => import('./DiscoverSections').then((m) => ({ default: m.DiscoverSections })))
+const HomeFeed = lazy(() => import('./HomeFeed').then((m) => ({ default: m.HomeFeed })))
 
 /**
- * `/`: Discover. What AgroTrends is and how to start (search, ask), the topics, what people are asking now, the
- * advisor, and stories from the field. Every list is real data; a section with nothing to show says so or steps aside.
+ * `/`: signed-in readers get their home feed (`HomeFeed`). Visitors get Discover: what AgroTrends is and how to start
+ * (search, ask), the topics, what people are asking now, the advisor, and stories from the field. Every list is real
+ * data; a section with nothing to show says so or steps aside.
  */
 export function HomePage() {
   const t = useT()
+  const { status } = useSession()
+  if (status === 'signed-in') {
+    return (
+      <Suspense fallback={<Skeleton className="mx-auto mt-8 h-64 max-w-(--container-page) rounded-2xl" />}>
+        <HomeFeed />
+      </Suspense>
+    )
+  }
   return (
     <div className="pb-16">
       <title>{t('AgroTrends – farming questions, stories and advice')}</title>

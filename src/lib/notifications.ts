@@ -29,6 +29,8 @@ export function describeNotification(n: Notification): { text: string; values: {
       return { text: 'An expert reviewed the AI answer on your question', values: {}, to: question }
     case 'NEW_REVIEW_ITEM':
       return { text: 'New AI answer to review in your topic', values: {}, to: question }
+    case 'NEW_QUESTION_IN_TOPIC':
+      return { text: 'New question in your topic, waiting for an expert', values: {}, to: question }
     case 'COMMENT_REPLY':
       return { text: '{actor} replied to your comment', values: { actor }, to: n.targetId != null ? `/s/${n.targetId}` : null }
     case 'APPLICATION_DECIDED':

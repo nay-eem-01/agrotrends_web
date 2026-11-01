@@ -10,6 +10,8 @@ test('each type has its words and its place', () => {
   expect(describeNotification({ type: 'ANSWER_ACCEPTED', targetType: 'QUESTION', targetId: 5, actorName: 'Karim' }).to).toBe('/questions/5')
   expect(describeNotification({ type: 'AI_ANSWER_REVIEWED', targetType: 'QUESTION', targetId: 5 }).to).toBe('/questions/5')
   expect(describeNotification({ type: 'NEW_REVIEW_ITEM', targetType: 'QUESTION', targetId: 6 }).to).toBe('/questions/6')
+  // The AI gave no answer, so the question goes to the topic's experts.
+  expect(describeNotification({ type: 'NEW_QUESTION_IN_TOPIC', targetType: 'QUESTION', targetId: 7 })).toEqual({ text: 'New question in your topic, waiting for an expert', values: {}, to: '/questions/7' })
   expect(describeNotification({ type: 'COMMENT_REPLY', targetType: 'BLOG', targetId: 9, actorName: 'Salma' }).to).toBe('/s/9')
   expect(describeNotification({ type: 'APPLICATION_DECIDED', targetType: 'EXPERT_APPLICATION', targetId: 3 }).to).toBe('/experts/apply')
   expect(describeNotification({ type: 'CONTENT_RESTORED', targetType: 'BLOG', targetId: 9 }).to).toBe('/s/9')

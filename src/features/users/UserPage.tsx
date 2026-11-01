@@ -135,7 +135,7 @@ export function UserPage() {
             </span>
           )}
         </p>
-        {own && a && <ProfileNudge filled={[a.designation || a.occupation, a.workPlaceOrInstitution, a.bio, a.profileImageUrl, a.specialities?.length]} />}
+        {own && a && <ProfileNudge filled={[a.designation || a.occupation, a.workPlaceOrInstitution, a.bio, a.profileImageUrl, a.specialities?.length, p?.location]} />}
         <dl className="mt-6 grid grid-cols-2 border-y border-border sm:grid-cols-4">
           {stats.map((stat) => (
             <div key={stat.label} className="flex flex-col-reverse py-4">

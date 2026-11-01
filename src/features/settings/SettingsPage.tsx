@@ -10,6 +10,7 @@ import { FormError } from '../auth/AuthPage'
 import { ResendLink } from '../auth/confirmEmail'
 import { useSession } from '../auth/session'
 import { AuthorProfileForm } from './AuthorProfileForm'
+import { ProfilePageForm } from './ProfilePageForm'
 import { useMyApplications } from '../../api/experts'
 import { ApplicationStatus } from '../experts/ExpertApplyPage'
 import { ButtonLink } from '../../ui/Button'
@@ -28,6 +29,11 @@ export function SettingsPage() {
       <Section title="Profile" intro="Optional. People see it next to your stories and answers, and on your profile page.">
         <AuthorProfileForm name={user?.name ?? ''} />
       </Section>
+      {user?.id != null && (
+        <Section title="Profile page" intro="Optional. Shown at the top of your profile.">
+          <ProfilePageForm userId={user.id} />
+        </Section>
+      )}
       <Section title="Verified expert" intro="Experts check AI answers in their topics and carry a badge on their answers.">
         <ExpertStatus />
       </Section>

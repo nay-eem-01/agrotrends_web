@@ -176,6 +176,20 @@ export function SignUpPage() {
         <Button type="submit" loading={signUp.isPending} className="mt-1">
           {t('Create account')}
         </Button>
+        <p className="text-xs text-muted-foreground">
+          {/* The links sit where each language puts them, so the sentence is split on its placeholders. */}
+          {t('By creating an account you agree to the {terms} and the {privacy}.')
+            .split(/(\{\w+\})/)
+            .map((part) =>
+              part === '{terms}' ? (
+                <Link key={part} to="/terms" className="underline underline-offset-2 hover:text-foreground">{t('Terms of use')}</Link>
+              ) : part === '{privacy}' ? (
+                <Link key={part} to="/privacy" className="underline underline-offset-2 hover:text-foreground">{t('Privacy policy')}</Link>
+              ) : (
+                part
+              ),
+            )}
+        </p>
       </form>
       <p className="mt-8 text-sm text-muted-foreground">
         Already have an account?{' '}

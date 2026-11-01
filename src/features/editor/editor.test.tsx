@@ -20,6 +20,8 @@ const draft: BlogResponse = {
   id: 50,
   slug: 'draft-50',
   title: 'Jute retting',
+  subtitle: 'Three weeks in still water',
+  aiCitable: false,
   content: '<p>Steep the stalks.</p>',
   status: 'DRAFT',
   category: { id: 2, categoryName: 'Crops' },
@@ -80,6 +82,9 @@ test('a server draft saves itself with its other details intact', async () => {
     blogId: 50,
     title: 'Jute retting in ponds',
     content: '<p>Steep the stalks.</p>',
+    // The subtitle and the AI opt-out go back as they were.
+    subtitle: 'Three weeks in still water',
+    aiCitable: false,
     categoryId: 2,
     imageUrl: '/uploads/j.jpg',
     tags: ['jute'],

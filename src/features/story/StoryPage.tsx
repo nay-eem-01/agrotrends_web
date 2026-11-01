@@ -79,6 +79,7 @@ function Story({ story }: { story: BlogResponse }) {
           </div>
         )}
         <h1 className="mt-4 font-serif text-[2.25rem] leading-[1.1] font-semibold tracking-[-0.02em] text-balance sm:text-[3rem]">{story.title}</h1>
+        {story.subtitle && <p className="mt-3 font-serif text-xl leading-snug text-pretty text-muted-foreground sm:text-[1.375rem]">{story.subtitle}</p>}
         {author?.name && (
           <div className="mt-7 flex items-center gap-3">
             <Avatar name={author.name} size={44} />

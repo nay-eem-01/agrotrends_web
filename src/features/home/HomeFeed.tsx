@@ -182,7 +182,7 @@ function StoryItem({ story }: { story: StorySummary }) {
             {story.title}
           </Link>
         </h2>
-        {story.excerpt && <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{story.excerpt}</p>}
+        {(story.subtitle || story.excerpt) && <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{story.subtitle || story.excerpt}</p>}
         {story.author?.name && (
           <p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
             <Avatar name={story.author.name} size={20} />

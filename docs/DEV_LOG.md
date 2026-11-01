@@ -91,6 +91,10 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   and drops the questions-only sort, so a tab can be linked and Back works.
 - Each tab has its own empty state. Story rows drop the "Story" kicker (the tab says it).
 - Tests: tabs, only one list fetched, topic and sort in the URL, empty states. Bengali strings.
+- The rail is never blank: an "Ask the AI advisor" card on top; with nothing trending yet, "Waiting for an answer"
+  (unanswered questions) and "New stories" (`/api/feed/latest`) stand in, fetched only once their trending list is
+  empty. Checked against the restarted backend on local data: nothing trending, no experts, every question answered,
+  so the rail shows the advisor and New stories. `useQuestions` takes an `enabled` flag.
 
 **Decisions**
 - Questions is the default tab: the product is Q&A-first (DESIGN.md).

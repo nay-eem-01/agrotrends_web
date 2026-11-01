@@ -10,7 +10,7 @@ export type CreateQuestionRequest = Schemas['CreateQuestionRequest']
 export type UpdateQuestionRequest = Schemas['UpdateQuestionRequest']
 
 /** Questions, newest first, filtered by topic, tag, unanswered and farming context (all combinable). Public. */
-export function useQuestions(filters: QuestionFilters) {
+export function useQuestions(filters: QuestionFilters, enabled = true) {
   return useInfiniteQuery({
     queryKey: ['questions', 'list', filters],
     queryFn: ({ pageParam, signal }) =>
@@ -20,6 +20,7 @@ export function useQuestions(filters: QuestionFilters) {
       }),
     initialPageParam: 0,
     getNextPageParam: (page) => (page.last ? undefined : page.number + 1),
+    enabled,
   })
 }
 

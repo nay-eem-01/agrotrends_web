@@ -276,7 +276,11 @@ function StoryItem({ story }: { story: StorySummary }) {
   )
 }
 
-/** Wide screens: trending questions and trending stories as two short lists, then experts to follow. */
+/**
+ * Wide screens: the advisor, then trending questions and trending stories as two short lists, then experts to follow.
+ * A quiet site has nothing trending yet, so each list falls back (questions waiting for an answer, the newest stories)
+ * and the column is never blank.
+ */
 function Rail() {
   const t = useT()
   const trending = useFeed('trending')
@@ -284,10 +288,27 @@ function Rail() {
   const experts = useExperts()
   const top = (trending.data?.pages[0]?.content ?? []).slice(0, 4)
   const asked = questions.data?.content ?? []
+  // The fallbacks load only once their trending list has come back empty (or failed).
+  const noAsked = !questions.isPending && asked.length === 0
+  const noTop = !trending.isPending && top.length === 0
+  const waiting = useQuestions({ unanswered: true }, noAsked)
+  const latest = useFeed('latest', noTop)
+  const open = (waiting.data?.pages[0]?.content ?? []).slice(0, 4)
+  const fresh = (latest.data?.pages[0]?.content ?? []).slice(0, 4)
   return (
     <aside aria-label={t('More to read')} className="hidden lg:block">
       <div className="sticky top-24 flex flex-col gap-8">
-        {asked.length > 0 && (
+        <section aria-labelledby="ask-advisor" className="flex flex-col gap-2 rounded-xl bg-surface p-4">
+          <h2 id="ask-advisor" className="flex items-center gap-1.5 font-sans text-sm font-semibold">
+            <Sparkle size={16} aria-hidden="true" className="text-primary" />
+            {t('Ask the AI advisor')}
+          </h2>
+          <p className="text-sm leading-relaxed text-muted-foreground">{t('Answers come with the stories they draw on.')}</p>
+          <Link to="/advisor" className="mt-1 inline-flex h-9 items-center self-start rounded-full border border-border-strong bg-background px-3.5 text-sm font-semibold hover:border-subtle">
+            {t('Open the advisor')}
+          </Link>
+        </section>
+        {asked.length > 0 ? (
           <RailList id="trending-questions" title={t('Trending questions')}>
             {asked.map((question) => (
               <RailItem key={question.questionId} to={`/questions/${question.questionId}`} meta={t(question.answerCount === 1 ? '{n} answer' : '{n} answers', { n: formatNumber(question.answerCount ?? 0) })}>
@@ -295,8 +316,18 @@ function Rail() {
               </RailItem>
             ))}
           </RailList>
+        ) : (
+          open.length > 0 && (
+            <RailList id="waiting-questions" title={t('Waiting for an answer')}>
+              {open.map((question) => (
+                <RailItem key={question.questionId} to={`/questions/${question.questionId}`} meta={question.category?.categoryName}>
+                  {question.title}
+                </RailItem>
+              ))}
+            </RailList>
+          )
         )}
-        {top.length > 0 && (
+        {top.length > 0 ? (
           <RailList id="trending-stories" title={t('Trending stories')}>
             {top.map((story) => (
               <RailItem key={story.id} to={`/stories/${story.slug}`} meta={story.author?.name}>
@@ -304,6 +335,16 @@ function Rail() {
               </RailItem>
             ))}
           </RailList>
+        ) : (
+          fresh.length > 0 && (
+            <RailList id="new-stories" title={t('New stories')}>
+              {fresh.map((story) => (
+                <RailItem key={story.id} to={`/stories/${story.slug}`} meta={story.author?.name}>
+                  {story.title}
+                </RailItem>
+              ))}
+            </RailList>
+          )
         )}
         {(experts.data?.content?.length ?? 0) > 0 && (
           <section aria-labelledby="experts-to-follow">

@@ -56,6 +56,9 @@ test('signed in, home shows questions and stories as two tabs, never mixed', asy
   expect(within(asked).getByText('4 answers')).toBeInTheDocument()
   const stories = await within(rail).findByRole('region', { name: 'Trending stories' })
   expect(within(stories).getByRole('link', { name: 'Keeping oxygen up in summer ponds' })).toHaveAttribute('href', '/stories/oxygen')
+  // With something trending, the fallbacks are never fetched.
+  expect(within(rail).queryByRole('region', { name: 'New stories' })).not.toBeInTheDocument()
+  expect(api.mock.calls.some(([url]) => String(url).startsWith('/api/feed/latest'))).toBe(false)
   // No experts list until the backend has one.
   expect(within(rail).queryByRole('heading', { name: 'Experts to follow' })).not.toBeInTheDocument()
 
@@ -97,4 +100,24 @@ test('experts to follow appear once the backend serves them, and phones get the 
   await userEvent.click(within(rail).getByRole('button', { name: 'Follow Dr Nasrin' }))
   await waitFor(() => expect(api.mock.calls.some(([url, init]) => String(url) === '/api/authors/7/follow' && init?.method === 'PUT')).toBe(true))
   expect(within(screen.getByRole('navigation', { name: 'Quick actions' })).getByRole('link', { name: 'Ask a question' })).toHaveAttribute('href', '/questions/ask')
+})
+
+test('with nothing trending yet, the rail falls back to questions waiting for an answer and the newest stories', async () => {
+  const api = mockApi(
+    routes({
+      'GET /api/feed/trending': () => envelope(200, page([])),
+      'GET /api/feed/trending/questions': () => envelope(200, page([])),
+      'GET /api/feed/latest': () => envelope(200, page([{ ...story, id: 4, slug: 'fresh', title: 'Our first mustard harvest' }])),
+    }),
+  )
+  renderWithProviders(<App />, '/')
+
+  const rail = await screen.findByRole('complementary', { name: 'More to read' })
+  expect(within(rail).getByRole('link', { name: 'Open the advisor' })).toHaveAttribute('href', '/advisor')
+  const waiting = await within(rail).findByRole('region', { name: 'Waiting for an answer' })
+  expect(within(waiting).getByRole('link', { name: 'Why are my tilapia gasping?' })).toHaveAttribute('href', '/questions/5')
+  const fresh = await within(rail).findByRole('region', { name: 'New stories' })
+  expect(within(fresh).getByRole('link', { name: 'Our first mustard harvest' })).toHaveAttribute('href', '/stories/fresh')
+  expect(within(rail).queryByRole('region', { name: 'Trending questions' })).not.toBeInTheDocument()
+  expect(api.mock.calls.some(([url]) => String(url).includes('unanswered=true'))).toBe(true)
 })

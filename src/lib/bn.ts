@@ -677,4 +677,8 @@ export const BN: Record<string, string> = {
   'New question in your topic, waiting for an expert': 'আপনার বিষয়ে নতুন প্রশ্ন, একজন বিশেষজ্ঞের অপেক্ষায়',
   'No questions here yet. Ask the first one in this topic.': 'এখানে এখনো কোনো প্রশ্ন নেই। এই বিষয়ে প্রথম প্রশ্নটি করুন।',
   'No stories in this topic yet.': 'এই বিষয়ে এখনো কোনো লেখা নেই।',
+  'Ask the AI advisor': 'এআই পরামর্শককে জিজ্ঞেস করুন',
+  'Answers come with the stories they draw on.': 'প্রতিটি উত্তরের সাথে থাকে যে লেখাগুলো থেকে তা নেওয়া।',
+  'Waiting for an answer': 'উত্তরের অপেক্ষায়',
+  'New stories': 'নতুন লেখা',
 }

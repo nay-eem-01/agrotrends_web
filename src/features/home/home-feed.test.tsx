@@ -20,7 +20,6 @@ function routes(extra = {}) {
     'GET /api/feed/trending': () => envelope(200, page([story])),
     'GET /api/me/following/tags': () => envelope(200, page(['tilapia'])),
     'GET /api/experts': () => envelope(404, null, 'Not found'),
-    'GET /api/tips/this-week': () => envelope(404, null, 'Not found'),
     'GET /api/notifications/unread-count': () => envelope(200, 0),
     ...extra,
   }
@@ -57,17 +56,15 @@ test('signed in, home is one feed of stories and questions with your topics besi
   expect(api.mock.calls.some(([url]) => String(url).includes('categoryId=2'))).toBe(true)
 })
 
-test('experts to follow and this week’s tasks appear once the backend serves them', async () => {
+test('experts to follow appear once the backend serves them, and phones get the quick actions', async () => {
   mockApi(
     routes({
       'GET /api/experts': () => envelope(200, page([{ userId: 7, name: 'Dr Nasrin', expertField: 'Fish health', institution: 'BAU' }])),
-      'GET /api/tips/this-week': () => envelope(200, [{ id: 1, text: 'Keep 2–3 cm of water in aman fields.' }]),
     }),
   )
   renderWithProviders(<App />, '/')
 
   const rail = await screen.findByRole('complementary', { name: 'More to read' })
   expect(await within(rail).findByRole('link', { name: /Dr Nasrin/ })).toHaveAttribute('href', '/users/7')
-  expect(await screen.findByText('Keep 2–3 cm of water in aman fields.')).toBeInTheDocument()
   expect(within(screen.getByRole('navigation', { name: 'Quick actions' })).getByRole('link', { name: 'Ask a question' })).toHaveAttribute('href', '/questions/ask')
 })

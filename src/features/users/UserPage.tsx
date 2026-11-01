@@ -323,10 +323,10 @@ function ProfileNudge({ filled }: { filled: unknown[] }) {
 }
 
 /** Credentials from the profile (§1), or the topics they are a verified expert in until it exists. */
-function Credentials({ credentials, expertIn }: { credentials?: { title: string; institution?: string | null; year?: number | null }[]; expertIn: { categoryId?: number; categoryName?: string; expertField?: string | null }[] }) {
+function Credentials({ credentials, expertIn }: { credentials?: { title?: string; institution?: string }[]; expertIn: { categoryId?: number; categoryName?: string; expertField?: string | null }[] }) {
   const t = useT()
   const items = credentials?.length
-    ? credentials.map((credential, index) => ({ key: String(index), title: credential.title, text: [credential.institution, credential.year].filter(Boolean).join(' · ') }))
+    ? credentials.map((credential, index) => ({ key: String(index), title: credential.title ?? '', text: credential.institution ?? '' }))
     : expertIn.map((topic) => ({ key: String(topic.categoryId), title: topic.expertField || t('Verified expert'), text: t('Verified expert in {topics}', { topics: topic.categoryName ?? '' }) }))
   if (items.length === 0) return null
   return (

@@ -21,6 +21,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/user/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Edit your own location and cover photo */
+        put: operations["update_1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/tags/{tagName}/follow": {
         parameters: {
             query?: never;
@@ -83,7 +100,7 @@ export interface paths {
         };
         get?: never;
         /** Update comment */
-        put: operations["update_1"];
+        put: operations["update_2"];
         post?: never;
         delete?: never;
         options?: never;
@@ -242,7 +259,7 @@ export interface paths {
         /** Super-admin: every role with its privileges */
         get: operations["roles"];
         /** Super-admin: rename an ADMIN role or change its privileges */
-        put: operations["update_2"];
+        put: operations["update_3"];
         /** Super-admin: create an ADMIN role */
         post: operations["create"];
         delete?: never;
@@ -988,6 +1005,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/users/{userId}/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A user's public summary: authorId, location, cover, counts and checked credentials (public) */
+        get: operations["get_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/user/me": {
         parameters: {
             query?: never;
@@ -1031,6 +1065,23 @@ export interface paths {
         };
         /** Up to 20 tag names starting with q (empty q lists the first 20), for autocomplete */
         get: operations["suggest"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/stats/public": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Members, verified experts, questions and answered questions (public, refreshed hourly) */
+        get: operations["publicStats"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1243,6 +1294,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/feed/trending/questions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Questions from the last 14 days, highest score first, then most answered (the home page's other list) */
+        get: operations["trendingQuestions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/feed/latest": {
         parameters: {
             query?: never;
@@ -1269,6 +1337,23 @@ export interface paths {
         };
         /** Newest posts from authors and topics you follow (empty if you follow nothing) */
         get: operations["following"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/experts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Verified experts to follow, in one topic or all, most accepted answers first (public) */
+        get: operations["experts"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1541,7 +1626,7 @@ export interface paths {
             cookie?: never;
         };
         /** An author's public profile with post and follower counts (posts: /api/blogs/all/author/{authorId}); public, followedByMe is false when not signed in */
-        get: operations["get_1"];
+        get: operations["get_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1610,6 +1695,23 @@ export interface paths {
         };
         /** Get answer by id */
         get: operations["findById_4"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/answers/all/user/{userId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A user's public answers for their profile, newest first, with the question title and whether it was accepted */
+        get: operations["getAllByUser_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1872,13 +1974,6 @@ export interface components {
             /** @example 1712345678 */
             mobileNumber?: string;
         };
-        HttpResponse: {
-            /** @enum {string} */
-            status?: "100 CONTINUE" | "101 SWITCHING_PROTOCOLS" | "102 PROCESSING" | "103 EARLY_HINTS" | "103 CHECKPOINT" | "200 OK" | "201 CREATED" | "202 ACCEPTED" | "203 NON_AUTHORITATIVE_INFORMATION" | "204 NO_CONTENT" | "205 RESET_CONTENT" | "206 PARTIAL_CONTENT" | "207 MULTI_STATUS" | "208 ALREADY_REPORTED" | "226 IM_USED" | "300 MULTIPLE_CHOICES" | "301 MOVED_PERMANENTLY" | "302 FOUND" | "302 MOVED_TEMPORARILY" | "303 SEE_OTHER" | "304 NOT_MODIFIED" | "305 USE_PROXY" | "307 TEMPORARY_REDIRECT" | "308 PERMANENT_REDIRECT" | "400 BAD_REQUEST" | "401 UNAUTHORIZED" | "402 PAYMENT_REQUIRED" | "403 FORBIDDEN" | "404 NOT_FOUND" | "405 METHOD_NOT_ALLOWED" | "406 NOT_ACCEPTABLE" | "407 PROXY_AUTHENTICATION_REQUIRED" | "408 REQUEST_TIMEOUT" | "409 CONFLICT" | "410 GONE" | "411 LENGTH_REQUIRED" | "412 PRECONDITION_FAILED" | "413 PAYLOAD_TOO_LARGE" | "413 REQUEST_ENTITY_TOO_LARGE" | "414 URI_TOO_LONG" | "414 REQUEST_URI_TOO_LONG" | "415 UNSUPPORTED_MEDIA_TYPE" | "416 REQUESTED_RANGE_NOT_SATISFIABLE" | "417 EXPECTATION_FAILED" | "418 I_AM_A_TEAPOT" | "419 INSUFFICIENT_SPACE_ON_RESOURCE" | "420 METHOD_FAILURE" | "421 DESTINATION_LOCKED" | "422 UNPROCESSABLE_ENTITY" | "423 LOCKED" | "424 FAILED_DEPENDENCY" | "425 TOO_EARLY" | "426 UPGRADE_REQUIRED" | "428 PRECONDITION_REQUIRED" | "429 TOO_MANY_REQUESTS" | "431 REQUEST_HEADER_FIELDS_TOO_LARGE" | "451 UNAVAILABLE_FOR_LEGAL_REASONS" | "500 INTERNAL_SERVER_ERROR" | "501 NOT_IMPLEMENTED" | "502 BAD_GATEWAY" | "503 SERVICE_UNAVAILABLE" | "504 GATEWAY_TIMEOUT" | "505 HTTP_VERSION_NOT_SUPPORTED" | "506 VARIANT_ALSO_NEGOTIATES" | "507 INSUFFICIENT_STORAGE" | "508 LOOP_DETECTED" | "509 BANDWIDTH_LIMIT_EXCEEDED" | "510 NOT_EXTENDED" | "511 NETWORK_AUTHENTICATION_REQUIRED";
-            message?: string;
-            payload?: Record<string, never>;
-            success?: boolean;
-        };
         DefaultErrorResponse: {
             /** Format: int32 */
             status?: number;
@@ -1887,6 +1982,41 @@ export interface components {
             message?: string;
             trace?: string;
             path?: string;
+        };
+        HttpResponse: {
+            /** @enum {string} */
+            status?: "100 CONTINUE" | "101 SWITCHING_PROTOCOLS" | "102 PROCESSING" | "103 EARLY_HINTS" | "103 CHECKPOINT" | "200 OK" | "201 CREATED" | "202 ACCEPTED" | "203 NON_AUTHORITATIVE_INFORMATION" | "204 NO_CONTENT" | "205 RESET_CONTENT" | "206 PARTIAL_CONTENT" | "207 MULTI_STATUS" | "208 ALREADY_REPORTED" | "226 IM_USED" | "300 MULTIPLE_CHOICES" | "301 MOVED_PERMANENTLY" | "302 FOUND" | "302 MOVED_TEMPORARILY" | "303 SEE_OTHER" | "304 NOT_MODIFIED" | "305 USE_PROXY" | "307 TEMPORARY_REDIRECT" | "308 PERMANENT_REDIRECT" | "400 BAD_REQUEST" | "401 UNAUTHORIZED" | "402 PAYMENT_REQUIRED" | "403 FORBIDDEN" | "404 NOT_FOUND" | "405 METHOD_NOT_ALLOWED" | "406 NOT_ACCEPTABLE" | "407 PROXY_AUTHENTICATION_REQUIRED" | "408 REQUEST_TIMEOUT" | "409 CONFLICT" | "410 GONE" | "411 LENGTH_REQUIRED" | "412 PRECONDITION_FAILED" | "413 PAYLOAD_TOO_LARGE" | "413 REQUEST_ENTITY_TOO_LARGE" | "414 URI_TOO_LONG" | "414 REQUEST_URI_TOO_LONG" | "415 UNSUPPORTED_MEDIA_TYPE" | "416 REQUESTED_RANGE_NOT_SATISFIABLE" | "417 EXPECTATION_FAILED" | "418 I_AM_A_TEAPOT" | "419 INSUFFICIENT_SPACE_ON_RESOURCE" | "420 METHOD_FAILURE" | "421 DESTINATION_LOCKED" | "422 UNPROCESSABLE_ENTITY" | "423 LOCKED" | "424 FAILED_DEPENDENCY" | "425 TOO_EARLY" | "426 UPGRADE_REQUIRED" | "428 PRECONDITION_REQUIRED" | "429 TOO_MANY_REQUESTS" | "431 REQUEST_HEADER_FIELDS_TOO_LARGE" | "451 UNAVAILABLE_FOR_LEGAL_REASONS" | "500 INTERNAL_SERVER_ERROR" | "501 NOT_IMPLEMENTED" | "502 BAD_GATEWAY" | "503 SERVICE_UNAVAILABLE" | "504 GATEWAY_TIMEOUT" | "505 HTTP_VERSION_NOT_SUPPORTED" | "506 VARIANT_ALSO_NEGOTIATES" | "507 INSUFFICIENT_STORAGE" | "508 LOOP_DETECTED" | "509 BANDWIDTH_LIMIT_EXCEEDED" | "510 NOT_EXTENDED" | "511 NETWORK_AUTHENTICATION_REQUIRED";
+            message?: string;
+            payload?: Record<string, never>;
+            success?: boolean;
+        };
+        UpdateUserProfileRequest: {
+            location?: string;
+            coverUrl?: string;
+        };
+        Credential: {
+            title?: string;
+            institution?: string;
+        };
+        UserProfileResponse: {
+            /** Format: int64 */
+            userId?: number;
+            name?: string;
+            /** Format: int64 */
+            authorId?: number;
+            location?: string;
+            coverUrl?: string;
+            /** Format: date-time */
+            joinedAt?: string;
+            /** Format: int64 */
+            answerCount?: number;
+            /** Format: int64 */
+            acceptedAnswerCount?: number;
+            /** Format: int64 */
+            questionCount?: number;
+            /** Format: int64 */
+            storyCount?: number;
+            credentials?: components["schemas"]["Credential"][];
         };
         AgriInfo: {
             /** @example rice */
@@ -1944,6 +2074,8 @@ export interface components {
             /** Format: int64 */
             score?: number;
             /** Format: int64 */
+            viewCount?: number;
+            /** Format: int64 */
             acceptedAnswerId?: number;
         };
         VoteResponse: {
@@ -1960,14 +2092,14 @@ export interface components {
             blogId?: number;
         };
         Comment: {
-            /** Format: int64 */
-            id?: number;
             createdBy?: string;
             lastModifiedBy?: string;
             /** Format: date-time */
             creationDate?: string;
             /** Format: date-time */
             lastModifiedDate?: string;
+            /** Format: int64 */
+            id?: number;
             commentContent?: string;
             parentComment?: components["schemas"]["Comment"];
             hidden?: boolean;
@@ -1982,6 +2114,8 @@ export interface components {
             title: string;
             content: string;
             imageUrl?: string;
+            subtitle?: string;
+            aiCitable?: boolean;
             /** Format: int64 */
             categoryId: number;
             tags?: string[];
@@ -1997,6 +2131,7 @@ export interface components {
             id?: number;
             slug?: string;
             title?: string;
+            subtitle?: string;
             content?: string;
             imageUrl?: string;
             /** Format: int32 */
@@ -2015,6 +2150,7 @@ export interface components {
             createdAt?: string;
             /** Format: date-time */
             updatedAt?: string;
+            aiCitable?: boolean;
         };
         UpdateAuthorProfileRequest: {
             designation: string;
@@ -2023,10 +2159,13 @@ export interface components {
             workPlaceOrInstitution?: string;
             bio?: string;
             profileImageUrl?: string;
+            links?: string[];
         };
         AuthorProfileResponse: {
             /** Format: int64 */
             authorId?: number;
+            /** Format: int64 */
+            userId?: number;
             name?: string;
             designation?: string;
             occupation?: string;
@@ -2034,11 +2173,23 @@ export interface components {
             specialities?: string[];
             bio?: string;
             profileImageUrl?: string;
+            links?: string[];
+            expertTopics?: components["schemas"]["ExpertTopic"][];
             /** Format: int64 */
             publishedPostCount?: number;
             /** Format: int64 */
+            answerCount?: number;
+            /** Format: int64 */
+            acceptedAnswerCount?: number;
+            /** Format: int64 */
             followerCount?: number;
             followedByMe?: boolean;
+        };
+        ExpertTopic: {
+            /** Format: int64 */
+            topicId?: number;
+            topicName?: string;
+            fieldTitle?: string;
         };
         UpdateAnswerRequest: {
             /** Format: int64 */
@@ -2054,14 +2205,14 @@ export interface components {
             soil?: "CLAY" | "LOAM" | "CLAY_LOAM" | "SANDY" | "SANDY_LOAM" | "SILT" | "PEAT" | "SALINE" | "ACIDIC";
         };
         Answer: {
-            /** Format: int64 */
-            id?: number;
             createdBy?: string;
             lastModifiedBy?: string;
             /** Format: date-time */
             creationDate?: string;
             /** Format: date-time */
             lastModifiedDate?: string;
+            /** Format: int64 */
+            id?: number;
             content?: string;
             user?: components["schemas"]["User"];
             question?: components["schemas"]["Question"];
@@ -2075,14 +2226,14 @@ export interface components {
             creationDateTimeStamp?: number;
         };
         Category: {
-            /** Format: int64 */
-            id?: number;
             createdBy?: string;
             lastModifiedBy?: string;
             /** Format: date-time */
             creationDate?: string;
             /** Format: date-time */
             lastModifiedDate?: string;
+            /** Format: int64 */
+            id?: number;
             categoryName?: string;
             /** Format: int64 */
             lastModifiedDateTimeStamp?: number;
@@ -2090,14 +2241,14 @@ export interface components {
             creationDateTimeStamp?: number;
         };
         Privilege: {
-            /** Format: int64 */
-            id?: number;
             createdBy?: string;
             lastModifiedBy?: string;
             /** Format: date-time */
             creationDate?: string;
             /** Format: date-time */
             lastModifiedDate?: string;
+            /** Format: int64 */
+            id?: number;
             privilegeName?: string;
             description?: string;
             /** Format: int64 */
@@ -2106,14 +2257,14 @@ export interface components {
             creationDateTimeStamp?: number;
         };
         Question: {
-            /** Format: int64 */
-            id?: number;
             createdBy?: string;
             lastModifiedBy?: string;
             /** Format: date-time */
             creationDate?: string;
             /** Format: date-time */
             lastModifiedDate?: string;
+            /** Format: int64 */
+            id?: number;
             title?: string;
             content?: string;
             user?: components["schemas"]["User"];
@@ -2127,6 +2278,8 @@ export interface components {
             answerCount?: number;
             /** Format: int64 */
             score?: number;
+            /** Format: int64 */
+            viewCount?: number;
             agri?: components["schemas"]["AgriMetadata"];
             hidden?: boolean;
             /** Format: int64 */
@@ -2135,14 +2288,14 @@ export interface components {
             creationDateTimeStamp?: number;
         };
         Role: {
-            /** Format: int64 */
-            id?: number;
             createdBy?: string;
             lastModifiedBy?: string;
             /** Format: date-time */
             creationDate?: string;
             /** Format: date-time */
             lastModifiedDate?: string;
+            /** Format: int64 */
+            id?: number;
             roleName?: string;
             /** @enum {string} */
             roleType?: "USER" | "ADMIN" | "SUPER_ADMIN";
@@ -2153,14 +2306,14 @@ export interface components {
             creationDateTimeStamp?: number;
         };
         Tag: {
-            /** Format: int64 */
-            id?: number;
             createdBy?: string;
             lastModifiedBy?: string;
             /** Format: date-time */
             creationDate?: string;
             /** Format: date-time */
             lastModifiedDate?: string;
+            /** Format: int64 */
+            id?: number;
             name?: string;
             /** Format: int64 */
             lastModifiedDateTimeStamp?: number;
@@ -2168,14 +2321,14 @@ export interface components {
             creationDateTimeStamp?: number;
         };
         User: {
-            /** Format: int64 */
-            id?: number;
             createdBy?: string;
             lastModifiedBy?: string;
             /** Format: date-time */
             creationDate?: string;
             /** Format: date-time */
             lastModifiedDate?: string;
+            /** Format: int64 */
+            id?: number;
             name: string;
             email?: string;
             mobileNumber?: string;
@@ -2189,6 +2342,8 @@ export interface components {
             /** Format: date-time */
             bannedAt?: string;
             banReason?: string;
+            location?: string;
+            coverUrl?: string;
             contactVerified?: boolean;
             /** Format: int64 */
             lastModifiedDateTimeStamp?: number;
@@ -2312,7 +2467,7 @@ export interface components {
             /** Format: int64 */
             id?: number;
             /** @enum {string} */
-            type?: "ANSWER_ON_YOUR_QUESTION" | "ANSWER_ACCEPTED" | "AI_ANSWER_REVIEWED" | "NEW_REVIEW_ITEM" | "APPLICATION_DECIDED" | "COMMENT_REPLY" | "CONTENT_REMOVED" | "CONTENT_HIDDEN" | "CONTENT_RESTORED";
+            type?: "ANSWER_ON_YOUR_QUESTION" | "ANSWER_ACCEPTED" | "AI_ANSWER_REVIEWED" | "NEW_REVIEW_ITEM" | "NEW_QUESTION_IN_TOPIC" | "APPLICATION_DECIDED" | "COMMENT_REPLY" | "CONTENT_REMOVED" | "CONTENT_HIDDEN" | "CONTENT_RESTORED";
             /** @enum {string} */
             targetType?: "QUESTION" | "BLOG" | "EXPERT_APPLICATION";
             /** Format: int64 */
@@ -2378,6 +2533,8 @@ export interface components {
             title: string;
             content: string;
             imageUrl?: string;
+            subtitle?: string;
+            aiCitable?: boolean;
             /** @enum {string} */
             status?: "DRAFT" | "PUBLISHED" | "HIDDEN";
             tags?: string[];
@@ -2572,6 +2729,16 @@ export interface components {
             id?: number;
             name?: string;
         };
+        PublicStatsResponse: {
+            /** Format: int64 */
+            members?: number;
+            /** Format: int64 */
+            verifiedExperts?: number;
+            /** Format: int64 */
+            questions?: number;
+            /** Format: int64 */
+            answeredQuestions?: number;
+        };
         ReviewItemResponse: {
             /** Format: int64 */
             questionId?: number;
@@ -2592,6 +2759,7 @@ export interface components {
             id?: number;
             slug?: string;
             title?: string;
+            subtitle?: string;
             excerpt?: string;
             imageUrl?: string;
             /** Format: int32 */
@@ -2610,11 +2778,42 @@ export interface components {
             createdAt?: string;
             /** Format: date-time */
             updatedAt?: string;
+            aiCitable?: boolean;
+        };
+        ExpertSummaryResponse: {
+            /** Format: int64 */
+            userId?: number;
+            name?: string;
+            /** Format: int64 */
+            authorId?: number;
+            avatarUrl?: string;
+            expertField?: string;
+            institution?: string;
+            topics?: components["schemas"]["Topic"][];
+            followedByMe?: boolean;
+        };
+        Topic: {
+            /** Format: int64 */
+            id?: number;
+            categoryName?: string;
         };
         RelatedBlogResponse: {
             /** Format: int64 */
             blogId?: number;
             title?: string;
+        };
+        UserAnswerResponse: {
+            /** Format: int64 */
+            answerId?: number;
+            /** Format: int64 */
+            questionId?: number;
+            questionTitle?: string;
+            content?: string;
+            /** Format: int64 */
+            score?: number;
+            accepted?: boolean;
+            /** Format: date-time */
+            createdAt?: string;
         };
         AiHistoryItemResponse: {
             /** Format: int64 */
@@ -2697,6 +2896,86 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
+    update_1: {
+        parameters: {
+            query?: {
+                lang?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateUserProfileRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["UserProfileResponse"];
                 };
             };
             /** @description Bad Request */
@@ -3130,7 +3409,7 @@ export interface operations {
             };
         };
     };
-    update_1: {
+    update_2: {
         parameters: {
             query?: {
                 lang?: string;
@@ -4269,7 +4548,7 @@ export interface operations {
             };
         };
     };
-    update_2: {
+    update_3: {
         parameters: {
             query?: {
                 lang?: string;
@@ -5928,7 +6207,7 @@ export interface operations {
                     "*/*": components["schemas"]["HttpResponse"];
                 };
             };
-            /** @description Bad Request */
+            /** @description The code is wrong or has expired (5 wrong tries kill it); ask for a new one */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -6337,7 +6616,7 @@ export interface operations {
                     "*/*": components["schemas"]["HttpResponse"];
                 };
             };
-            /** @description Bad Request */
+            /** @description Weak password, or the code is wrong or has expired (5 wrong tries kill it) */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -8165,6 +8444,84 @@ export interface operations {
             };
         };
     };
+    get_1: {
+        parameters: {
+            query?: {
+                lang?: string;
+            };
+            header?: never;
+            path: {
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["UserProfileResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
     getUserInfo: {
         parameters: {
             query?: {
@@ -8330,6 +8687,80 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
+    publicStats: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PublicStatsResponse"];
+                };
+            };
             /** @description Bad Request */
             400: {
                 headers: {
@@ -9314,6 +9745,83 @@ export interface operations {
             };
         };
     };
+    trendingQuestions: {
+        parameters: {
+            query?: {
+                pageNo?: number;
+                pageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["QuestionResponse"][];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
     latest: {
         parameters: {
             query?: {
@@ -9411,6 +9919,84 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["BlogSummaryResponse"][];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
+    experts: {
+        parameters: {
+            query?: {
+                categoryId?: number;
+                pageNo?: number;
+                pageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ExpertSummaryResponse"][];
                 };
             };
             /** @description Bad Request */
@@ -10737,7 +11323,7 @@ export interface operations {
             };
         };
     };
-    get_1: {
+    get_2: {
         parameters: {
             query?: {
                 lang?: string;
@@ -11061,6 +11647,86 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["Answer"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
+    getAllByUser_1: {
+        parameters: {
+            query?: {
+                pageNo?: number;
+                pageSize?: number;
+                lang?: string;
+            };
+            header?: never;
+            path: {
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["UserAnswerResponse"][];
                 };
             };
             /** @description Bad Request */

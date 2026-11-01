@@ -43,6 +43,9 @@ const AdminRolesPage = page(() => import('./features/admin/AdminRolesPage'), 'Ad
 const AdminCategoriesPage = page(() => import('./features/admin/AdminCategoriesPage'), 'AdminCategoriesPage')
 const AdminExpertsPage = page(() => import('./features/admin/AdminExpertsPage'), 'AdminExpertsPage')
 const AdminReportsPage = page(() => import('./features/admin/AdminReportsPage'), 'AdminReportsPage')
+const AboutPage = page(() => import('./features/site/AboutPage'), 'AboutPage')
+const PrivacyPage = page(() => import('./features/site/PrivacyPage'), 'PrivacyPage')
+const TermsPage = page(() => import('./features/site/TermsPage'), 'TermsPage')
 const EditorPage = page(() => import('./features/editor/EditorPage'), 'EditorPage')
 
 export default function App() {
@@ -68,6 +71,9 @@ export default function App() {
         <Route path="/questions/:questionId" element={<QuestionPage />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/topics" element={<TopicsPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/terms" element={<TermsPage />} />
         <Route path="/sign-in" element={<SignInPage />} />
         <Route path="/sign-up" element={<SignUpPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />

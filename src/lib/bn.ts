@@ -599,7 +599,6 @@ export const BN: Record<string, string> = {
   'Story': 'লেখা',
   'Your feed': 'আপনার ফিড',
   'Loading your feed': 'আপনার ফিড লোড হচ্ছে',
-  'Nothing here yet. Ask the first question in this topic.': 'এখানে এখনো কিছু নেই। এই বিষয়ে প্রথম প্রশ্নটি করুন।',
   'Your topics': 'আপনার বিষয়',
   'Follow topics': 'বিষয় অনুসরণ করুন',
   'Ask the community, or ask the AI advisor…': 'কমিউনিটিকে বা এআই পরামর্শককে জিজ্ঞেস করুন…',
@@ -676,4 +675,10 @@ export const BN: Record<string, string> = {
   'Trending questions': 'জনপ্রিয় প্রশ্ন',
   'Trending stories': 'জনপ্রিয় লেখা',
   'New question in your topic, waiting for an expert': 'আপনার বিষয়ে নতুন প্রশ্ন, একজন বিশেষজ্ঞের অপেক্ষায়',
+  'No questions here yet. Ask the first one in this topic.': 'এখানে এখনো কোনো প্রশ্ন নেই। এই বিষয়ে প্রথম প্রশ্নটি করুন।',
+  'No stories in this topic yet.': 'এই বিষয়ে এখনো কোনো লেখা নেই।',
+  'Ask the AI advisor': 'এআই পরামর্শককে জিজ্ঞেস করুন',
+  'Answers come with the stories they draw on.': 'প্রতিটি উত্তরের সাথে থাকে যে লেখাগুলো থেকে তা নেওয়া।',
+  'Waiting for an answer': 'উত্তরের অপেক্ষায়',
+  'New stories': 'নতুন লেখা',
 }

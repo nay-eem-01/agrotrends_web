@@ -19,7 +19,7 @@ Where each part of the app takes its cue (inspiration, not imitation):
 
 | Area | After | What we keep |
 |---|---|---|
-| Home and community feed | Reddit | topic chips, followed topics, a mixed feed of stories and questions |
+| Home and community feed | Reddit | topic chips, followed topics; Questions and Stories as two tabs, never mixed (F23.5) |
 | Questions and answers | Stack Overflow | votes beside the post, tags, the accepted answer set apart |
 | Expert profiles | LinkedIn | headline, institution, credentials, "answers questions on" topics, contributions |
 | Stories | Medium | a quiet reading column, Lora headline and body, byline with follow |

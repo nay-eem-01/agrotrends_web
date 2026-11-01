@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { queryOptions, useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { QuestionFilters } from '../lib/agri'
 import { api } from './client'
 import { ApiError } from './errors'
@@ -35,13 +35,16 @@ export function useQuestionSearch(q: string) {
   })
 }
 
-export function useQuestion(questionId: number) {
-  return useQuery({
+/** One question; shared by `useQuestion` and the link prefetch so both fill the same cache entry. */
+export const questionQuery = (questionId: number) =>
+  queryOptions({
     queryKey: ['questions', 'id', questionId],
     queryFn: ({ signal }) => api<Question>(`/api/questions/id/${questionId}`, { signal }),
-    enabled: Number.isFinite(questionId),
     retry: (count, error) => !(error instanceof ApiError && error.status < 500) && count < 1,
   })
+
+export function useQuestion(questionId: number) {
+  return useQuery({ ...questionQuery(questionId), enabled: Number.isFinite(questionId) })
 }
 
 export type QuestionWrite =

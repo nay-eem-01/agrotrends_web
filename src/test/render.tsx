@@ -15,7 +15,9 @@ function CurrentPath() {
 /** Renders `ui` with the app's providers at `path`; `screen.getByTestId('path')` shows where it navigated. */
 export function renderWithProviders(ui: ReactNode, path = '/') {
   const queryClient = createQueryClient()
-  queryClient.setDefaultOptions({ queries: { retry: false }, mutations: { retry: false } })
+  // The app's own defaults (staleTime and the rest), without retries so failures show at once.
+  const defaults = queryClient.getDefaultOptions()
+  queryClient.setDefaultOptions({ queries: { ...defaults.queries, retry: false }, mutations: { ...defaults.mutations, retry: false } })
   return render(
     <QueryClientProvider client={queryClient}>
       <SessionProvider>

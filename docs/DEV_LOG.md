@@ -48,7 +48,7 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   redesign (`feat/ask-redesign`) done. Phase F20 is complete.
 - Phase F21 on `feat/paddy-base` (stacked on F20's tip): F21.1 Paddy Field tokens (`feat/paddy-tokens`) F21.2 shell (`feat/paddy-shell`) F21.3 sign in and sign up (`feat/paddy-auth`) F21.4 expert application (`feat/paddy-expert-apply`) F21.5 profile (`feat/paddy-profile`) F21.6 story editor (`feat/paddy-editor`) F21.7 question page (`feat/paddy-question`) F21.8 AI advisor (`feat/paddy-advisor`) F21.9 feeds (`feat/paddy-feeds`) F21.10 story page (`feat/paddy-story`) done. Phase F21 is complete.
 - Phase F22 on `feat/mock-base` (stacked on F21's tip): F22.1 fields (`feat/mock-fields`) F22.2 home feed (`feat/mock-home`) F22.3 question page (`feat/mock-question`) F22.4 profile (`feat/mock-profile`) F22.5 AI advisor (`feat/mock-advisor`) F22.6 ask page (`feat/mock-ask`) F22.7 story editor (`feat/mock-editor`) F22.8 sign in and sign up (`feat/mock-auth`) F22.9 story page (`feat/mock-story`) F22.10 navigation in the sidebar (`feat/mock-sidebar`) F22.11 search in the bar (`feat/mock-topbar`) F22.12 quieter frame (`feat/mock-chrome`) done. Phase F22 is complete.
-- Phase F23 on `feat/api2-base` (stacked on F22's tip and `fix/google-test`): F23.1 API types (`feat/api2-types`) F23.2 home rail (`feat/api2-home`) F23.3 story subtitle (`feat/api2-stories`) F23.4 profile page and notification (`feat/api2-profile`) F23.5 home tabs (`feat/home-tabs`) F23.6 admin design (`feat/admin-design`) F23.7 about, privacy, terms and footer (`feat/site-pages`) done. Phase F23 is complete.
+- Phase F23 on `feat/api2-base` (stacked on F22's tip and `fix/google-test`): F23.1 API types (`feat/api2-types`) F23.2 home rail (`feat/api2-home`) F23.3 story subtitle (`feat/api2-stories`) F23.4 profile page and notification (`feat/api2-profile`) F23.5 home tabs (`feat/home-tabs`) F23.6 admin design (`feat/admin-design`) F23.7 about, privacy, terms and footer (`feat/site-pages`) F23.8 faster pages (`perf/faster-pages`) done. Phase F23 is complete.
 
 ## Next up
 
@@ -77,6 +77,32 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-11-02 — F23.8 Faster pages (`perf/faster-pages`)
+
+**Done**
+- Checked the whole app for slow spots: bundle splitting (the editor's Tiptap already loads only on Write and Ask),
+  fonts (subset by `unicode-range`), images, polling, and request waterfalls on every page.
+- Question page: the answers, the AI answer and the reader's votes start beside the question instead of after it.
+  Measured on a 400 ms-latency connection: all data in by ~870 ms, where the answers used to start only at ~910 ms.
+- Link prefetch (`layout/useLinkPrefetch`): a pointer resting 80 ms on, a press on, or keyboard focus on a link to a
+  question or story starts that page's data (and the question page's code). Hover is skipped with Save-Data on, and
+  nothing runs while the session is restoring, so no anonymous copy is cached.
+- Shared query definitions (`questionQuery`, `answersQuery`, `aiAnswerQuery`, `storyQuery`) so the hooks and the
+  prefetch fill the same cache entries.
+- Images inside stories and comments load lazily (`sanitize.ts`).
+- My stories reads the author id from the session instead of waiting for `/api/authors/me`.
+- Test client keeps the app's query defaults (30 s staleTime) and only turns retries off, like production.
+
+**Decisions**
+- Left alone: the story page still waits for the story before comments and related stories (they need its id, and
+  there is no by-slug endpoint); the user page waits for the profile before the author (some users have no author row).
+- Hosting should serve `/assets/*` with a long `Cache-Control: immutable`; the file names are hashed.
+
+**Known limitations**
+- No prefetch for author, user or tag pages yet; they are visited less.
 
 ---
 

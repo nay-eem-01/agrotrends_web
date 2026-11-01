@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend · ➡ moved to a later step
 
-**Progress:** 109 of 109 steps done
+**Progress:** 110 of 110 steps done
 
 ---
 
@@ -270,6 +270,7 @@ and shows what the new endpoints allow.
 | F23.3 | Story subtitle and "Let the AI advisor cite this story" in the editor; the subtitle on the story page and in lists (`feat/api2-stories`) | ✅ |
 | F23.4 | Location and cover photo on your profile; the "new question in your topic" notification (`feat/api2-profile`) | ✅ |
 | F23.5 | Home as two tabs, Questions / Stories, over the topic chips (option A of four on the design canvas); one kind at a time, never mixed (`feat/home-tabs`) | ✅ |
+| F23.6 | Admin and review screens in the current design: the admin sections join the app sidebar (one rail; tabs on phones), Lora titles, no mustard on the overview, a pill search, the back link above a member's name, red Delete; the review queue in the sidebar for Verified Experts (`feat/admin-design`) | ✅ |
 
 ## Needs from the backend
 

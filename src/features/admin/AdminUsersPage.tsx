@@ -103,9 +103,9 @@ function UserSearch({ initial }: { initial: string }) {
   }
 
   return (
-    <search className="min-w-0 flex-1 sm:max-w-sm">
+    <search className="w-full min-w-0 sm:w-auto sm:max-w-sm sm:flex-1">
       <form onSubmit={submit}>
-        <label className="flex h-11 items-center gap-2.5 rounded-lg border border-input bg-card px-3.5 text-muted-foreground transition-[border-color,box-shadow] duration-150 focus-within:border-primary focus-within:ring-[3px] focus-within:ring-ring/60 hover:border-subtle">
+        <label className="flex h-11 items-center gap-2.5 rounded-full border border-input bg-card px-4 text-muted-foreground transition-[border-color,box-shadow] duration-150 focus-within:border-primary focus-within:ring-[3px] focus-within:ring-ring/60 hover:border-subtle">
           <MagnifyingGlass size={18} aria-hidden="true" />
           <span className="sr-only">Search members by name or e-mail</span>
           <input

@@ -107,7 +107,7 @@ Page width 1240px, gutters 16px (phones) / 32px; reading column 680px; feed colu
   your topics. The top bar's menu button hides it to an icon strip (names in tooltips and for screen readers) and
   opens it again; the choice is remembered. The top bar holds no section tabs: logo, search, Write, Ask, bell,
   account. Below 1024px the menu sheet; below 768px the bottom tab bar (Discover, Questions, Ask +, Stories, AI
-  advisor). Pages never repeat the sidebar's links in their own sidebars.
+  advisor). Pages never repeat the sidebar's links in their own sidebars. Staff get an Admin group in the sidebar (Overview, Users, Reports, Expert applications, Roles, Categories) and Verified Experts a Review queue link, so admin pages have no rail of their own; below 1024px the admin sections scroll as tabs on the page (F23.6).
 - **Discover (`/`):** hero (Lora headline, intro, Ask a question / Join) beside the drawn field (`FieldScene`) with
   an advisor caption; "Help a farmer today" (up to three unanswered questions, each with Answer); "What farmers are
   asking" (one row of topic filters, then compact question rows) beside the advisor panel with

@@ -1,9 +1,12 @@
-import { BookOpen, ChatCircleText, Compass, House, NotePencil, Newspaper, Plus, Sparkle, UserCircle, type Icon } from '@phosphor-icons/react'
+import { BookOpen, ChatCircleText, Compass, House, NotePencil, Newspaper, Plus, SealCheck, Sparkle, UserCircle, type Icon } from '@phosphor-icons/react'
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { cn } from 'cn'
+import { isAdmin } from '../api/auth'
 import { useFollowedTags } from '../api/topics'
+import { ADMIN_SECTIONS } from '../features/admin/sections'
 import { useSession } from '../features/auth/session'
+import { useMyBadges } from '../features/experts/useMyBadges'
 import { useT } from '../lib/i18n'
 
 const KEY = 'agrotrends.sidebar'
@@ -43,9 +46,10 @@ export function useSidebar() {
 }
 
 /**
- * The app's navigation from 1024px, on every page: the sections, then (signed in) your topics, reading list and
- * stories. Hidden, it keeps an icon strip, so the sections are one click away on reading and writing pages too; the
- * top bar's menu button opens and hides it. Below 1024px the menu sheet and the phone tab bar take over.
+ * The app's navigation from 1024px, on every page: the sections, then (signed in) your profile, reading list and
+ * stories, the review queue for Verified Experts, the Admin sections for staff (so admin pages need no rail of their
+ * own) and your topics. Hidden, it keeps an icon strip, so the sections are one click away on reading and writing pages
+ * too; the top bar's menu button opens and hides it. Below 1024px the menu sheet and the phone tab bar take over.
  */
 export function AppSidebar() {
   const t = useT()
@@ -53,6 +57,8 @@ export function AppSidebar() {
   const { status, user } = useSession()
   const signedIn = status === 'signed-in'
   const followed = useFollowedTags(signedIn)
+  const { expertAnywhere } = useMyBadges()
+  const staff = signedIn && isAdmin(user)
   const sections: { to: string; end?: boolean; label: string; icon: Icon }[] = [
     { to: '/', end: true, label: signedIn ? t('Home') : t('Discover'), icon: signedIn ? House : Compass },
     { to: '/questions', label: t('Questions'), icon: ChatCircleText },
@@ -64,6 +70,7 @@ export function AppSidebar() {
         ...(user?.id != null ? [{ to: `/users/${user.id}`, label: t('Your profile'), icon: UserCircle }] : []),
         { to: '/library', label: t('Reading list'), icon: BookOpen },
         { to: '/me/stories', label: t('Your stories'), icon: NotePencil },
+        ...(expertAnywhere ? [{ to: '/review', label: t('Review queue'), icon: SealCheck }] : []),
       ]
     : []
   const tags = followed.data ?? []
@@ -85,6 +92,15 @@ export function AppSidebar() {
         {yours.map((item) => (
           <Item key={item.to} {...item} open={open} />
         ))}
+        {staff && (
+          <>
+            <hr className="my-3 border-border" />
+            {open && <h2 className="mb-1 px-3 font-sans text-xs font-semibold text-muted-foreground">{t('Admin')}</h2>}
+            {ADMIN_SECTIONS.map((item) => (
+              <Item key={item.to} {...item} open={open} />
+            ))}
+          </>
+        )}
         {signedIn && open && (
           <>
             <h2 className="mt-5 mb-1 px-3 font-sans text-xs font-semibold text-muted-foreground">{t('Your topics')}</h2>

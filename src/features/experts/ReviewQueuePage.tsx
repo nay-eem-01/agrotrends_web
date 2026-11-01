@@ -19,7 +19,7 @@ export function ReviewQueuePage() {
   return (
     <section className="mx-auto max-w-(--container-feed) px-4 pt-10 pb-20 sm:px-6">
       <title>{t('Review queue – AgroTrends')}</title>
-      <h1 className="flex items-center gap-2 text-2xl sm:text-3xl">
+      <h1 className="flex items-center gap-2 font-serif text-[2rem] leading-tight font-medium sm:text-[2.5rem]">
         <SealCheck size={28} weight="fill" className="text-mustard-ink" aria-hidden="true" />
         {t('Review queue')}
       </h1>

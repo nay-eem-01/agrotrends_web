@@ -1,5 +1,5 @@
 import { ChatCircleText, Newspaper, SealCheck, Sparkle } from '@phosphor-icons/react'
-import { useMemo, useState, type ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { cn } from 'cn'
 import { useTopicStories } from '../../api/blogs'
@@ -7,7 +7,7 @@ import { useCategories } from '../../api/categories'
 import { useExperts, type ExpertSummary } from '../../api/experts'
 import { useFeed, useTrendingQuestions } from '../../api/feed'
 import { useToggleAuthorFollow } from '../../api/follows'
-import { useQuestions, type Question } from '../../api/questions'
+import { useQuestions } from '../../api/questions'
 import type { StorySummary } from '../../api/types'
 import { storyDate } from '../../lib/dates'
 import { formatNumber, useT } from '../../lib/i18n'
@@ -19,30 +19,36 @@ import { useSession } from '../auth/session'
 import { useRequireSignIn } from '../auth/useRequireSignIn'
 import { QuestionCard } from '../qa/QuestionRow'
 
-type Item = { kind: 'story'; at: string; story: StorySummary } | { kind: 'question'; at: string; question: Question }
+type Show = 'questions' | 'stories'
 
 /**
- * `/` for signed-in readers, after a Reddit home: topic chips, a composer and one feed of stories and questions, with
- * what's trending and experts to follow on the right (the sections and your topics are in the app's sidebar). On phones the
- * quick actions and this week's tasks come first. The feed merges stories and questions by date until the backend has
- * one home feed (docs/BACKEND_REQUESTS.md §6).
+ * `/` for signed-in readers: a composer, then Questions | Stories as two tabs over one row of topic chips, with what's
+ * trending and experts to follow on the right (the sections and your topics are in the app's sidebar). One kind at a
+ * time, never mixed. The tab, topic and sort live in the URL (`?show=stories&topic=2`, `?unanswered=true`), so a tab
+ * can be linked and Back works. On phones the quick actions come first.
  */
 export function HomeFeed() {
   const t = useT()
   const [params] = useSearchParams()
+  const show: Show = params.get('show') === 'stories' ? 'stories' : 'questions'
   const topic = Number(params.get('topic')) || undefined
+  const unanswered = show === 'questions' && params.get('unanswered') === 'true'
   const categories = useCategories()
-  const questions = useQuestions(topic ? { categoryId: topic } : {})
-  const stories = useTopicStories(topic)
-  const items = useMemo(() => {
-    const merged: Item[] = [
-      ...(stories.data?.pages.flatMap((page) => page.content) ?? []).map((story) => ({ kind: 'story' as const, at: story.publishedAt ?? story.createdAt ?? '', story })),
-      ...(questions.data?.pages.flatMap((page) => page.content) ?? []).map((question) => ({ kind: 'question' as const, at: question.createdAt ?? '', question })),
-    ]
-    return merged.sort((a, b) => b.at.localeCompare(a.at))
-  }, [stories.data, questions.data])
-  const more = questions.hasNextPage || stories.hasNextPage
-  const loading = questions.isPending || stories.isPending
+  // The tab, topic and sort as one link; switching tabs keeps the topic and drops the questions-only sort.
+  const to = (next: { show?: Show; topic?: number; unanswered?: boolean }) => {
+    const query = new URLSearchParams()
+    const tab = next.show ?? show
+    const id = 'topic' in next ? next.topic : topic
+    if (tab === 'stories') query.set('show', 'stories')
+    if (id) query.set('topic', String(id))
+    if (tab === 'questions' && ('unanswered' in next ? next.unanswered : unanswered)) query.set('unanswered', 'true')
+    const search = query.toString()
+    return search ? `/?${search}` : '/'
+  }
+  const tabs = [
+    { show: 'questions' as const, label: t('Questions') },
+    { show: 'stories' as const, label: t('Stories') },
+  ]
 
   return (
     <div className="mx-auto grid max-w-[64rem] gap-8 px-4 pt-6 pb-20 sm:px-8 lg:grid-cols-[minmax(0,1fr)_16rem] lg:gap-10">
@@ -50,48 +56,121 @@ export function HomeFeed() {
       <h1 className="sr-only">{t('Home')}</h1>
       <section aria-label={t('Your feed')} className="min-w-0">
         <QuickStart />
-        <nav aria-label={t('Topics')} className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0">
-          <TopicChip to="/" current={!topic}>
-            {t('For you')}
-          </TopicChip>
-          {(categories.data ?? []).slice(0, 6).map((category) => (
-            <TopicChip key={category.id} to={`/?topic=${category.id}`} current={topic === category.id}>
-              {category.categoryName}
-            </TopicChip>
+        <Composer />
+        <nav aria-label={t('Show')} className="mt-2 flex gap-7 border-b border-border">
+          {tabs.map((tab) => (
+            <Link
+              key={tab.show}
+              to={to({ show: tab.show })}
+              aria-current={show === tab.show ? 'page' : undefined}
+              className={cn(
+                '-mb-px flex h-12 items-center border-b-2 text-base transition-colors duration-150',
+                show === tab.show ? 'border-primary font-semibold text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground',
+              )}
+            >
+              {tab.label}
+            </Link>
           ))}
         </nav>
-        <Composer />
-        {loading ? (
-          <div className="py-12 text-muted-foreground">
-            <Spinner label={t('Loading your feed')} />
-          </div>
-        ) : items.length === 0 ? (
-          <p className="py-12 text-muted-foreground">{t('Nothing here yet. Ask the first question in this topic.')}</p>
-        ) : (
-          <ul className="border-t border-border">
-            {items.map((item) =>
-              item.kind === 'story' ? <StoryItem key={`s${item.story.id}`} story={item.story} /> : <QuestionCard key={`q${item.question.questionId}`} question={item.question} />,
-            )}
-          </ul>
-        )}
-        {more && (
-          <div className="flex justify-center py-6">
-            <Button
-              variant="secondary"
-              size="sm"
-              loading={questions.isFetchingNextPage || stories.isFetchingNextPage}
-              onClick={() => {
-                if (questions.hasNextPage) void questions.fetchNextPage()
-                if (stories.hasNextPage) void stories.fetchNextPage()
-              }}
-            >
-              {t('Show more')}
-            </Button>
-          </div>
-        )}
+        <div className="flex flex-wrap items-center gap-3 py-4">
+          <nav aria-label={t('Topics')} className="-mx-4 flex min-w-0 flex-1 basis-full gap-2 overflow-x-auto px-4 pb-1 sm:basis-0 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0">
+            <TopicChip to={to({ topic: undefined })} current={!topic}>
+              {t('For you')}
+            </TopicChip>
+            {(categories.data ?? []).slice(0, 6).map((category) => (
+              <TopicChip key={category.id} to={to({ topic: category.id })} current={topic === category.id}>
+                {category.categoryName}
+              </TopicChip>
+            ))}
+          </nav>
+          {show === 'questions' && (
+            <nav aria-label={t('Sort questions')} className="flex shrink-0 gap-1 rounded-full bg-muted p-1">
+              {[
+                { label: t('Newest'), current: !unanswered, link: to({ unanswered: false }) },
+                { label: t('Unanswered'), current: unanswered, link: to({ unanswered: true }) },
+              ].map((sort) => (
+                <Link
+                  key={sort.label}
+                  to={sort.link}
+                  aria-current={sort.current ? 'page' : undefined}
+                  className={cn(
+                    'flex h-8 items-center rounded-full px-3.5 text-sm transition-colors duration-150',
+                    sort.current ? 'bg-card font-semibold text-foreground shadow-xs ring-1 ring-border' : 'text-muted-foreground hover:text-foreground',
+                  )}
+                >
+                  {sort.label}
+                </Link>
+              ))}
+            </nav>
+          )}
+        </div>
+        {show === 'questions' ? <QuestionList topic={topic} unanswered={unanswered} /> : <StoryList topic={topic} />}
       </section>
       <Rail />
     </div>
+  )
+}
+
+/** The Questions tab: newest (or unanswered) questions in the topic. */
+function QuestionList({ topic, unanswered }: { topic?: number; unanswered: boolean }) {
+  const t = useT()
+  const questions = useQuestions({ ...(topic ? { categoryId: topic } : {}), ...(unanswered ? { unanswered: true } : {}) })
+  const items = questions.data?.pages.flatMap((page) => page.content) ?? []
+  return (
+    <FeedList
+      loading={questions.isPending}
+      empty={t('No questions here yet. Ask the first one in this topic.')}
+      more={questions.hasNextPage}
+      loadingMore={questions.isFetchingNextPage}
+      onMore={() => void questions.fetchNextPage()}
+    >
+      {items.map((question) => (
+        <QuestionCard key={question.questionId} question={question} />
+      ))}
+    </FeedList>
+  )
+}
+
+/** The Stories tab: the newest stories in the topic. */
+function StoryList({ topic }: { topic?: number }) {
+  const t = useT()
+  const stories = useTopicStories(topic)
+  const items = stories.data?.pages.flatMap((page) => page.content) ?? []
+  return (
+    <FeedList
+      loading={stories.isPending}
+      empty={t('No stories in this topic yet.')}
+      more={stories.hasNextPage}
+      loadingMore={stories.isFetchingNextPage}
+      onMore={() => void stories.fetchNextPage()}
+    >
+      {items.map((story) => (
+        <StoryItem key={story.id} story={story} />
+      ))}
+    </FeedList>
+  )
+}
+
+function FeedList({ loading, empty, more, loadingMore, onMore, children }: { loading: boolean; empty: string; more: boolean; loadingMore: boolean; onMore: () => void; children: ReactNode[] }) {
+  const t = useT()
+  if (loading)
+    return (
+      <div className="py-12 text-muted-foreground">
+        <Spinner label={t('Loading your feed')} />
+      </div>
+    )
+  if (children.length === 0) return <p className="py-12 text-muted-foreground">{empty}</p>
+  return (
+    <>
+      <ul className="border-t border-border">{children}</ul>
+      {more && (
+        <div className="flex justify-center py-6">
+          <Button variant="secondary" size="sm" loading={loadingMore} onClick={onMore}>
+            {t('Show more')}
+          </Button>
+        </div>
+      )}
+    </>
   )
 }
 
@@ -115,7 +194,7 @@ function Composer() {
   const t = useT()
   const { user } = useSession()
   return (
-    <div className="my-4 flex items-center gap-3 rounded-full bg-surface py-2 pr-2 pl-2">
+    <div className="mb-2 flex items-center gap-3 rounded-full bg-surface py-2 pr-2 pl-2">
       <Avatar name={user?.name ?? '?'} size={32} />
       <Link to="/questions/ask" className="min-w-0 flex-1 truncate text-sm text-muted-foreground hover:text-foreground">
         {t('Ask the community, or ask the AI advisor…')}
@@ -163,18 +242,15 @@ function QuickStart() {
   )
 }
 
-/** One story in the feed, in the same shape as a question row. */
+/** One story on the Stories tab, in the same shape as a question row. */
 function StoryItem({ story }: { story: StorySummary }) {
   const t = useT()
   const meta = [story.category?.categoryName, story.readingTimeMinutes ? t('{n} min read', { n: formatNumber(story.readingTimeMinutes) }) : null].filter(Boolean)
   return (
     <li className="group relative flex gap-4 border-b border-border py-5 sm:gap-6">
       <div className="min-w-0 flex-1">
-        <p className="flex flex-wrap items-center gap-x-2 text-xs text-muted-foreground">
-          <span className="font-semibold text-primary">{t('Story')}</span>
-          {meta.length > 0 && <span>{meta.join(' · ')}</span>}
-        </p>
-        <h2 className="mt-1 font-serif text-lg leading-snug font-semibold text-pretty sm:text-xl">
+        {meta.length > 0 && <p className="mb-1 text-xs text-muted-foreground">{meta.join(' · ')}</p>}
+        <h2 className="font-serif text-lg leading-snug font-semibold text-pretty sm:text-xl">
           <Link
             to={`/stories/${story.slug}`}
             className="decoration-primary/60 decoration-2 underline-offset-4 transition-colors duration-150 after:absolute after:inset-0 group-hover:text-primary group-hover:underline"

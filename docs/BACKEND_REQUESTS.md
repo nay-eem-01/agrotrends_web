@@ -19,7 +19,7 @@ The backend answered the list (its `docs/DEV_LOG.md`, 2026-10-31 and 2026-11-01)
 | 3 | A user's answers | done (`UserAnswerResponse`) | F23.1 |
 | 4 | Experts to follow | done (4.18) | F23.2 Follow in the rail |
 | 5 | Follow topics (categories) | **not built**: tags cover it | "Your topics" stays on followed tags |
-| 6 | One home feed | **changed**: `GET /api/feed/trending/questions` beside trending posts (4.19) | F23.2 "Trending questions" |
+| 6 | One home feed | **changed**: `GET /api/feed/trending/questions` beside trending posts (4.19) | F23.2 "Trending questions"; F23.5 home as Questions / Stories tabs, so no mixed feed is needed |
 | 7 | Question views | done (4.20) | already shown |
 | 8 | AI follow-ups and `[n]` citations | **not built**: the AI stays as it is | follow-ups and citations stay hidden |
 | 9 | Story subtitle and AI opt-out | done (4.21) | F23.3 |

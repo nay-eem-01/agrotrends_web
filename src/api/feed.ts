@@ -1,5 +1,6 @@
-import { useInfiniteQuery } from '@tanstack/react-query'
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { api } from './client'
+import type { Question } from './questions'
 import type { Page, StorySummary } from './types'
 
 export type FeedKind = 'following' | 'latest' | 'trending'
@@ -19,5 +20,14 @@ export function useFeed(kind: FeedKind, enabled = true) {
     initialPageParam: 0,
     getNextPageParam: (page) => (page.last ? undefined : page.number + 1),
     enabled,
+  })
+}
+
+/** The week's most-voted questions (last 14 days, hidden ones left out): public, one short list for the home rail. */
+export function useTrendingQuestions(size = 5) {
+  return useQuery({
+    queryKey: ['feed', 'trending-questions', size],
+    queryFn: ({ signal }) => api<Page<Question>>('/api/feed/trending/questions', { params: { pageNo: 0, pageSize: size }, signal }),
+    staleTime: 5 * 60_000,
   })
 }

@@ -18,6 +18,7 @@ function routes(extra = {}) {
     'GET /api/blogs/all': () => envelope(200, page([story])),
     'GET /api/blogs/all/category/2': () => envelope(200, page([story])),
     'GET /api/feed/trending': () => envelope(200, page([story])),
+    'GET /api/feed/trending/questions': () => envelope(200, page([{ ...question, questionId: 8, title: 'Boro seedlings turning yellow', answerCount: 4 }])),
     'GET /api/me/following/tags': () => envelope(200, page(['tilapia'])),
     'GET /api/experts': () => envelope(404, null, 'Not found'),
     'GET /api/notifications/unread-count': () => envelope(200, 0),
@@ -47,7 +48,12 @@ test('signed in, home is one feed of stories and questions with your topics besi
   const navigation = screen.getByRole('complementary', { name: 'Navigation' })
   expect(await within(navigation).findByRole('link', { name: 'tilapia' })).toHaveAttribute('href', '/tags/tilapia')
   const rail = screen.getByRole('complementary', { name: 'More to read' })
-  expect(await within(rail).findByRole('heading', { name: 'Trending now' })).toBeInTheDocument()
+  // Trending questions and trending stories are two separate lists.
+  const asked = await within(rail).findByRole('region', { name: 'Trending questions' })
+  expect(within(asked).getByRole('link', { name: 'Boro seedlings turning yellow' })).toHaveAttribute('href', '/questions/8')
+  expect(within(asked).getByText('4 answers')).toBeInTheDocument()
+  const stories = await within(rail).findByRole('region', { name: 'Trending stories' })
+  expect(within(stories).getByRole('link', { name: 'Keeping oxygen up in summer ponds' })).toHaveAttribute('href', '/stories/oxygen')
   // No experts list until the backend has one.
   expect(within(rail).queryByRole('heading', { name: 'Experts to follow' })).not.toBeInTheDocument()
 
@@ -57,14 +63,18 @@ test('signed in, home is one feed of stories and questions with your topics besi
 })
 
 test('experts to follow appear once the backend serves them, and phones get the quick actions', async () => {
-  mockApi(
+  const api = mockApi(
     routes({
-      'GET /api/experts': () => envelope(200, page([{ userId: 7, name: 'Dr Nasrin', expertField: 'Fish health', institution: 'BAU' }])),
+      'GET /api/experts': () => envelope(200, page([{ userId: 7, authorId: 7, name: 'Dr Nasrin', expertField: 'Fish health', institution: 'BAU', followedByMe: false }])),
+      'PUT /api/authors/7/follow': () => envelope(200, null),
     }),
   )
   renderWithProviders(<App />, '/')
 
   const rail = await screen.findByRole('complementary', { name: 'More to read' })
   expect(await within(rail).findByRole('link', { name: /Dr Nasrin/ })).toHaveAttribute('href', '/users/7')
+  // Follow right in the list; the author id is the user id.
+  await userEvent.click(within(rail).getByRole('button', { name: 'Follow Dr Nasrin' }))
+  await waitFor(() => expect(api.mock.calls.some(([url, init]) => String(url) === '/api/authors/7/follow' && init?.method === 'PUT')).toBe(true))
   expect(within(screen.getByRole('navigation', { name: 'Quick actions' })).getByRole('link', { name: 'Ask a question' })).toHaveAttribute('href', '/questions/ask')
 })

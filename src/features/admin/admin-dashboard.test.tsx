@@ -34,6 +34,27 @@ test('the overview puts waiting work first, each leading to its queue', async ()
   expect(totals.getByRole('link', { name: 'Banned' })).toHaveAttribute('href', '/admin/users?banned=true')
   expect(totals.getByText('+8 this week')).toBeInTheDocument()
   expect(within(screen.getByRole('navigation', { name: 'Admin sections' })).getByRole('link', { name: 'Overview' })).toHaveAttribute('aria-current', 'page')
+  // From 1024px the sections are the app sidebar's Admin group; the page has no rail of its own.
+  const sidebar = screen.getByRole('complementary', { name: 'Navigation' })
+  expect(within(sidebar).getByRole('heading', { name: 'Admin' })).toBeInTheDocument()
+  expect(within(sidebar).getByRole('link', { name: 'Overview' })).toHaveAttribute('aria-current', 'page')
+  expect(within(sidebar).getByRole('link', { name: 'Reports' })).toHaveAttribute('href', '/admin/reports')
+})
+
+test('members without a staff role get no Admin group in the sidebar', async () => {
+  localStorage.setItem('agrotrends.refreshToken', 'r0')
+  mockApi({
+    'POST /api/auth/refresh-token': () => envelope(200, { accessToken: 'a1', refreshToken: 'r1', user: { id: 9, name: 'Salma', roles: ['USER'] } }),
+    'GET /api/users/9/reputation': () => envelope(200, { total: 900, topics: [{ categoryId: 3, categoryName: 'Livestock', points: 900, badges: ['VERIFIED_EXPERT'] }] }),
+    'GET /api/questions/all': () => envelope(200, page([])),
+  })
+  renderWithProviders(<App />, '/')
+
+  const sidebar = await screen.findByRole('complementary', { name: 'Navigation' })
+  // A Verified Expert finds the review queue there instead.
+  expect(await within(sidebar).findByRole('link', { name: 'Review queue' })).toHaveAttribute('href', '/review')
+  expect(within(sidebar).queryByRole('heading', { name: 'Admin' })).not.toBeInTheDocument()
+  expect(within(sidebar).queryByRole('link', { name: 'Overview' })).not.toBeInTheDocument()
 })
 
 test('a missing privilege shows the backend message', async () => {

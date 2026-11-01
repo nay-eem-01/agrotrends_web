@@ -1,6 +1,6 @@
-import { ArrowLeft, CheckCircle, Circle, X } from '@phosphor-icons/react'
+import { CheckCircle, Circle, X } from '@phosphor-icons/react'
 import { useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useAdminUser, useRoles, useUserRole, type AdminUserDetail } from '../../api/admin'
@@ -20,11 +20,7 @@ export function AdminUserPage() {
   const detail = useAdminUser(userId)
 
   return (
-    <AdminPage title={detail.data?.user?.name ?? 'Member'}>
-      <Link to="/admin/users" className="mt-2 inline-flex h-11 items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground">
-        <ArrowLeft size={16} aria-hidden="true" />
-        All users
-      </Link>
+    <AdminPage title={detail.data?.user?.name ?? 'Member'} back={{ to: '/admin/users', label: 'All users' }}>
       {detail.isPending ? (
         <Skeleton className="mt-4 h-40 rounded-xl" />
       ) : detail.isError ? (

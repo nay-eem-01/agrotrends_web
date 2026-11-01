@@ -52,17 +52,18 @@ export function AdminOverviewPage() {
                 const body = (
                   <>
                     <span className="flex items-center justify-between gap-2">
-                      <span className={cn('flex size-9 items-center justify-center rounded-full', waiting ? 'bg-mustard-soft' : 'bg-secondary')}>
-                        <Icon size={18} weight={waiting ? 'fill' : 'regular'} aria-hidden="true" className={waiting ? 'text-foreground' : 'text-primary'} />
+                      <span className="flex size-9 items-center justify-center rounded-full bg-surface">
+                        <Icon size={18} weight={waiting ? 'fill' : 'regular'} aria-hidden="true" className="text-primary" />
                       </span>
                       {to && <ArrowRight size={16} aria-hidden="true" className="text-muted-foreground" />}
                     </span>
-                    <span className="mt-3 block text-3xl font-semibold tabular-nums">{formatNumber(count ?? 0)}</span>
+                    <span className={cn('mt-3 block text-3xl font-semibold tabular-nums', !waiting && 'text-muted-foreground')}>{formatNumber(count ?? 0)}</span>
                     <span className="mt-0.5 block text-sm font-medium">{label}</span>
                     <span className="mt-1 block text-xs text-muted-foreground">{hint}</span>
                   </>
                 )
-                const box = cn('block h-full rounded-xl border p-5 transition-colors duration-150', waiting ? 'border-mustard/50' : 'border-border')
+                // Mustard means trust, so waiting work is told apart by its count and a filled icon, not by colour.
+                const box = 'block h-full rounded-xl border border-border p-5 transition-colors duration-150'
                 return (
                   <li key={key}>
                     {to ? (

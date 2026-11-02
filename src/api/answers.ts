@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './client'
 import type { Schemas } from './types'
 
@@ -11,11 +11,14 @@ export const answerKeys = {
 }
 
 /** A question's direct answers, in the backend's order: accepted first, then by score, then oldest. Public. */
-export function useAnswers(questionId: number) {
-  return useQuery({
+export const answersQuery = (questionId: number) =>
+  queryOptions({
     queryKey: answerKeys.list(questionId),
     queryFn: ({ signal }) => api<Answer[]>(`/api/answers/question/${questionId}`, { signal }),
   })
+
+export function useAnswers(questionId: number, enabled = true) {
+  return useQuery({ ...answersQuery(questionId), enabled })
 }
 
 /** Replies under one answer, oldest first; read when the reader opens them (there is no reply count). */

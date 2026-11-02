@@ -3,6 +3,8 @@ import { useState } from 'react'
 import { ArrowLeft, ChatCircleText, Sparkle } from '@phosphor-icons/react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { ApiError, errorMessage } from '../../api/errors'
+import { useAiAnswer } from '../../api/aiAnswer'
+import { useAnswers } from '../../api/answers'
 import { useQuestion, useQuestionWrite, type Question } from '../../api/questions'
 import { filterPath, SEASON_LABELS, SOIL_LABELS } from '../../lib/agri'
 import { storyDate } from '../../lib/dates'
@@ -24,6 +26,14 @@ export function QuestionPage() {
   const t = useT()
   const questionId = Number(useParams().questionId)
   const question = useQuestion(questionId)
+  // The answers, the AI answer and the reader's votes need only the id, so they load beside the question instead of
+  // after it; the views below read the same cache entries.
+  const valid = Number.isFinite(questionId)
+  const { status } = useSession()
+  const askedAt = (useLocation().state as { askedAt?: number } | null)?.askedAt
+  useAnswers(questionId, valid)
+  useAiAnswer(questionId, askedAt, valid)
+  useMyVotes(questionId, valid && status === 'signed-in')
 
   if (question.isPending) {
     return (

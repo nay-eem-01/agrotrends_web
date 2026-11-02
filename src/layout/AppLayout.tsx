@@ -7,12 +7,14 @@ import { AppSidebar, SidebarProvider } from './AppSidebar'
 import { Footer } from './Footer'
 import { BottomNav } from './BottomNav'
 import { TopBar } from './TopBar'
+import { useLinkPrefetch } from './useLinkPrefetch'
 
 // Signing in, signing up and the password and e-mail steps are a single task: no navigation around them.
 const FOCUSED = ['/sign-in', '/sign-up', '/forgot-password', '/reset-password', '/verify-email']
 
 export function AppLayout() {
   const focused = FOCUSED.includes(useLocation().pathname)
+  useLinkPrefetch()
   return (
     <SidebarProvider>
       <div className={focused ? 'flex min-h-dvh flex-col' : 'flex min-h-dvh flex-col pb-16 md:pb-0'}>

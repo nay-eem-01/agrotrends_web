@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { queryOptions, useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { AgriFilters } from '../lib/agri'
 import { api } from './client'
 import { ApiError } from './errors'
@@ -25,14 +25,17 @@ export function useBlogs(filters: AgriFilters, enabled = true) {
 }
 
 /** A story by its URL slug: public when published; a draft only for its author (404 for anyone else). */
-export function useStory(slug: string, enabled = true) {
-  return useQuery({
+/** One story by slug; shared by `useStory` and the link prefetch. */
+export const storyQuery = (slug: string) =>
+  queryOptions({
     queryKey: ['blogs', 'slug', slug],
     queryFn: ({ signal }) => api<BlogResponse>(`/api/blogs/slug/${encodeURIComponent(slug)}`, { signal }),
-    enabled,
     // A 404 won't turn up on a second try.
     retry: (count, error) => !(error instanceof ApiError && error.status < 500) && count < 1,
   })
+
+export function useStory(slug: string, enabled = true) {
+  return useQuery({ ...storyQuery(slug), enabled })
 }
 
 /** Stories matching `q` (title, body and tags, ranked by the backend). Public; disabled for a blank query. */

@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { queryOptions, useQuery } from '@tanstack/react-query'
 import { api } from './client'
 import { ApiError } from './errors'
 import type { Schemas } from './types'
@@ -14,8 +14,8 @@ export const aiAnswerKeys = { of: (questionId: number) => ['ai-answer', question
  * The AI answer on a question, or null when there is none to show (not generated yet, failed, flagged, or the question
  * is hidden: all 404). Right after asking (`askedAt`), it polls every 3 s for up to a minute, then stops quietly.
  */
-export function useAiAnswer(questionId: number, askedAt?: number) {
-  return useQuery({
+export const aiAnswerQuery = (questionId: number) =>
+  queryOptions({
     queryKey: aiAnswerKeys.of(questionId),
     queryFn: async ({ signal }) => {
       try {
@@ -26,6 +26,12 @@ export function useAiAnswer(questionId: number, askedAt?: number) {
       }
     },
     retry: false,
+  })
+
+export function useAiAnswer(questionId: number, askedAt?: number, enabled = true) {
+  return useQuery({
+    ...aiAnswerQuery(questionId),
+    enabled,
     refetchInterval: (query) =>
       askedAt != null && query.state.data == null && Date.now() - askedAt < AI_POLL_FOR_MS ? AI_POLL_MS : false,
   })

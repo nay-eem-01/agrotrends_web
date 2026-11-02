@@ -10,8 +10,11 @@ import { Logo } from './Logo'
 const YEAR = new Date().getFullYear()
 const ICONS: Record<string, Icon> = { Facebook: FacebookLogo, Instagram: InstagramLogo }
 
-/** Beside the sidebar (from 1024px) the footer drops its rule, so it doesn't cross the sidebar's edge on short pages. */
-export function Footer({ besideSidebar = false }: { besideSidebar?: boolean }) {
+/**
+ * Full width under the page and the sidebar, on a tinted band: the sidebar's edge runs down to its top rule. The brand
+ * line sits on the left and the three link groups together on the right; the copyright and the switches below.
+ */
+export function Footer({ className }: { className?: string }) {
   const t = useT()
   const social = SOCIAL.filter((link): link is { label: string; href: string } => link.href != null)
   const groups: { title: string; links: { label: string; to?: string; href?: string }[] }[] = [
@@ -44,14 +47,14 @@ export function Footer({ besideSidebar = false }: { besideSidebar?: boolean }) {
   const link = 'rounded-sm text-muted-foreground transition-colors hover:text-foreground'
 
   return (
-    <footer className={cn('mt-24 border-t border-border', besideSidebar && 'lg:border-t-0')}>
-      <div className="mx-auto max-w-(--container-page) px-4 pt-12 pb-8 text-sm sm:px-6">
-        <div className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
-          <div className="col-span-2 max-w-xs sm:col-span-3 lg:col-span-1">
+    <footer className={cn('border-t border-border bg-surface', className)}>
+      <div className="mx-auto max-w-(--container-page) px-4 pt-12 pb-8 text-sm sm:px-8 sm:pt-14">
+        <div className="flex flex-col gap-10 lg:flex-row lg:justify-between lg:gap-16">
+          <div className="max-w-xs">
             <Logo link={false} />
-            <p className="mt-3 text-muted-foreground">{t('Farming knowledge from farmers, agronomists and students, with an AI advisor that cites them.')}</p>
+            <p className="mt-3 leading-relaxed text-muted-foreground">{t('Farming knowledge from farmers, agronomists and students, with an AI advisor that cites them.')}</p>
             {social.length > 0 && (
-              <ul aria-label={t('AgroTrends elsewhere')} className="mt-4 flex gap-2">
+              <ul aria-label={t('AgroTrends elsewhere')} className="mt-5 flex gap-2">
                 {social.map(({ label, href }) => {
                   const Glyph = ICONS[label]
                   return (
@@ -61,7 +64,7 @@ export function Footer({ besideSidebar = false }: { besideSidebar?: boolean }) {
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label={label}
-                        className="flex size-10 items-center justify-center rounded-full bg-surface text-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
+                        className="flex size-10 items-center justify-center rounded-full bg-background text-foreground ring-1 ring-border transition-colors hover:bg-primary hover:text-primary-foreground hover:ring-primary"
                       >
                         {Glyph ? <Glyph size={20} weight="fill" aria-hidden /> : label}
                       </a>
@@ -71,28 +74,30 @@ export function Footer({ besideSidebar = false }: { besideSidebar?: boolean }) {
               </ul>
             )}
           </div>
-          {groups.map((group) => (
-            <nav key={group.title} aria-label={group.title}>
-              <h2 className="text-sm font-semibold text-foreground">{group.title}</h2>
-              <ul className="mt-3 space-y-2.5">
-                {group.links.map((item) => (
-                  <li key={item.label}>
-                    {item.to ? (
-                      <Link to={item.to} className={link}>
-                        {item.label}
-                      </Link>
-                    ) : (
-                      <a href={item.href} className={link}>
-                        {item.label}
-                      </a>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          ))}
+          <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 sm:gap-x-16 xl:gap-x-24">
+            {groups.map((group) => (
+              <nav key={group.title} aria-label={group.title}>
+                <h2 className="text-sm font-semibold text-foreground">{group.title}</h2>
+                <ul className="mt-4 space-y-3">
+                  {group.links.map((item) => (
+                    <li key={item.label}>
+                      {item.to ? (
+                        <Link to={item.to} className={link}>
+                          {item.label}
+                        </Link>
+                      ) : (
+                        <a href={item.href} className={link}>
+                          {item.label}
+                        </a>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            ))}
+          </div>
         </div>
-        <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-border pt-6 text-muted-foreground">
+        <div className="mt-12 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-border pt-6 text-muted-foreground">
           <span>© {YEAR} AgroTrends</span>
           <div className="flex gap-x-5 sm:ml-auto">
             <LanguageSwitch className={link} />

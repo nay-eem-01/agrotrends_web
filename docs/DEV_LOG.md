@@ -48,7 +48,7 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   redesign (`feat/ask-redesign`) done. Phase F20 is complete.
 - Phase F21 on `feat/paddy-base` (stacked on F20's tip): F21.1 Paddy Field tokens (`feat/paddy-tokens`) F21.2 shell (`feat/paddy-shell`) F21.3 sign in and sign up (`feat/paddy-auth`) F21.4 expert application (`feat/paddy-expert-apply`) F21.5 profile (`feat/paddy-profile`) F21.6 story editor (`feat/paddy-editor`) F21.7 question page (`feat/paddy-question`) F21.8 AI advisor (`feat/paddy-advisor`) F21.9 feeds (`feat/paddy-feeds`) F21.10 story page (`feat/paddy-story`) done. Phase F21 is complete.
 - Phase F22 on `feat/mock-base` (stacked on F21's tip): F22.1 fields (`feat/mock-fields`) F22.2 home feed (`feat/mock-home`) F22.3 question page (`feat/mock-question`) F22.4 profile (`feat/mock-profile`) F22.5 AI advisor (`feat/mock-advisor`) F22.6 ask page (`feat/mock-ask`) F22.7 story editor (`feat/mock-editor`) F22.8 sign in and sign up (`feat/mock-auth`) F22.9 story page (`feat/mock-story`) F22.10 navigation in the sidebar (`feat/mock-sidebar`) F22.11 search in the bar (`feat/mock-topbar`) F22.12 quieter frame (`feat/mock-chrome`) done. Phase F22 is complete.
-- Phase F23 on `feat/api2-base` (stacked on F22's tip and `fix/google-test`): F23.1 API types (`feat/api2-types`) F23.2 home rail (`feat/api2-home`) F23.3 story subtitle (`feat/api2-stories`) F23.4 profile page and notification (`feat/api2-profile`) F23.5 home tabs (`feat/home-tabs`) F23.6 admin design (`feat/admin-design`) F23.7 about, privacy, terms and footer (`feat/site-pages`) F23.8 faster pages (`perf/faster-pages`) done. Phase F23 is complete.
+- Phase F23 on `feat/api2-base` (stacked on F22's tip and `fix/google-test`): F23.1 API types (`feat/api2-types`) F23.2 home rail (`feat/api2-home`) F23.3 story subtitle (`feat/api2-stories`) F23.4 profile page and notification (`feat/api2-profile`) F23.5 home tabs (`feat/home-tabs`) F23.6 admin design (`feat/admin-design`) F23.7 about, privacy, terms and footer (`feat/site-pages`) F23.8 faster pages (`perf/faster-pages`) F23.9 profile pictures (`fix/profile-images`) done. Phase F23 is complete.
 
 ## Next up
 
@@ -77,6 +77,24 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-11-02 — F23.9 Profile pictures open, and your photo in the top bar (`fix/profile-images`)
+
+**Done**
+- `ui/ImageViewer`: wraps a picture in a button that opens it full size in a dialog (Esc, Close or a click outside
+  closes it). Used for the profile photo and cover on `/users/:id`, and the photo on `/authors/:id`. With no picture
+  there is nothing to open.
+- The account menu in the top bar shows your profile photo. The session's user has no photo, so it reads
+  `/api/authors/me` (already cached by Settings, which updates it in place after a change).
+
+**Decisions**
+- The opened picture is sized against the screen (85% of its height, the width less the gutters), not the dialog,
+  since the dialog takes its width from the picture.
+
+**Known limitations**
+- Question photos still open in a new tab; they could use the same viewer later.
 
 ---
 

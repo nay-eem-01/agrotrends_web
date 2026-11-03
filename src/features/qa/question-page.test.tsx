@@ -70,12 +70,42 @@ test('replies load when opened and stay under their answer', async () => {
   expect(within(second).queryByRole('article', { name: 'Reply by Salma' })).not.toBeInTheDocument()
   expect(api.mock.calls.some(([url]) => url === '/api/answers/replies/2')).toBe(false)
 
-  await userEvent.click(within(first).getByRole('button', { name: 'Reply' }))
-  await userEvent.type(within(first).getByLabelText('Reply to Nasrin'), 'Thanks, it worked.')
-  await userEvent.click(within(first).getByRole('button', { name: 'Reply' }))
+  // The answer's own Reply comes before its replies' ones.
+  await userEvent.click(within(first).getAllByRole('button', { name: 'Reply' })[0])
+  const field = within(first).getByLabelText('Reply to Nasrin')
+  expect(field).toHaveValue('')
+  await userEvent.type(field, 'Thanks, it worked.')
+  await userEvent.click(within(field.closest('form')!).getByRole('button', { name: 'Reply' }))
   await waitFor(() => expect(api.mock.calls.some(([url]) => url === '/api/answers/reply')).toBe(true))
   const sent = api.mock.calls.find(([url]) => url === '/api/answers/reply')!
   expect(JSON.parse(sent[1]!.body as string)).toEqual({ questionId: 5, parentAnswerId: 1, content: 'Thanks, it worked.' })
+})
+
+test('a reply can be answered: the box starts with @name and is sent with that reply as the parent', async () => {
+  const api = mockApi({
+    ...signedInAs({ id: 9, name: 'Karim' }),
+    'GET /api/questions/id/5': () => envelope(200, question),
+    'GET /api/answers/question/5': () => envelope(200, [answer(1)]),
+    'GET /api/answers/replies/1': () => envelope(200, [answer(3, { userId: 8, authorName: 'Salma', content: 'Same here' })]),
+    'POST /api/answers/reply': () => envelope(200, answer(4, { userId: 9, authorName: 'Karim' })),
+  })
+  renderWithProviders(<App />, '/questions/5')
+
+  const card = await screen.findByRole('article', { name: 'Answer by Nasrin' })
+  await userEvent.click(within(card).getByRole('button', { name: 'Show replies' }))
+  const salma = await within(card).findByRole('article', { name: 'Reply by Salma' })
+  await userEvent.click(within(salma).getByRole('button', { name: 'Reply' }))
+
+  const field = within(card).getByLabelText('Reply to Salma')
+  expect(field).toHaveValue('@Salma ')
+  expect(field).toHaveFocus()
+  expect(within(salma).queryByRole('button', { name: 'Reply' })).not.toBeInTheDocument()
+  await userEvent.type(field, 'which lime?')
+  await userEvent.click(within(field.closest('form')!).getByRole('button', { name: 'Reply' }))
+  await waitFor(() => expect(api.mock.calls.some(([url]) => url === '/api/answers/reply')).toBe(true))
+  const sent = api.mock.calls.find(([url]) => url === '/api/answers/reply')!
+  expect(JSON.parse(sent[1]!.body as string)).toEqual({ questionId: 5, parentAnswerId: 3, content: '@Salma which lime?' })
+  await waitFor(() => expect(within(card).queryByLabelText('Reply to Salma')).not.toBeInTheDocument())
 })
 
 test('answering posts to the question', async () => {

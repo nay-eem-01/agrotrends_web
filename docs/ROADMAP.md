@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend · ➡ moved to a later step
 
-**Progress:** 114 of 114 steps done
+**Progress:** 115 of 115 steps done
 
 ---
 
@@ -275,6 +275,7 @@ and shows what the new endpoints allow.
 | F23.8 | Faster pages: the question page loads its answers, AI answer and votes beside the question; hovering, pressing or focusing a question or story link starts its page; lazy images in stories; My stories skips a profile read (`perf/faster-pages`) | ✅ |
 | F23.9 | Profile photo and cover open full size (an image viewer); your photo on the account menu in the top bar (`fix/profile-images`) | ✅ |
 | F23.10 | Footer full width under the page and the sidebar on a tinted band, link groups together on the right; the signed-in home feed widened to 84rem with a wider rail (`fix/footer-home-width`) | ✅ |
+| F23.11 | Reply to a reply, two levels deep like Facebook: Reply on replies to answers and to story responses, the box starts with `@name`, sent with that reply's id (backend 4.26) (`feat/reply-to-reply`) | ✅ |
 
 ## Needs from the backend
 

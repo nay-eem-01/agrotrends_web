@@ -87,7 +87,14 @@ function AnswerCard({ questionId, answer, asker }: { questionId: number; answer:
   const myVotes = useMyVotes(questionId, status === 'signed-in')
   const requireSignIn = useRequireSignIn()
   const [open, setOpen] = useState(false)
-  const [replying, setReplying] = useState(false)
+  // Who the open reply box answers: the answer itself, or one of its replies (two levels, like Facebook).
+  const [replyTo, setReplyTo] = useState<Answer | null>(null)
+  const replying = replyTo != null
+  const reply = (to: Answer) =>
+    requireSignIn(() => {
+      setOpen(true)
+      setReplyTo(to)
+    })
   const repliesId = useId()
   const replies = useAnswerReplies(id, open)
   const write = useAnswerWrite(questionId)
@@ -128,17 +135,8 @@ function AnswerCard({ questionId, answer, asker }: { questionId: number; answer:
                 {open ? t('Hide replies') : t('Show replies')}
               </Button>
               {asker && <AcceptButton questionId={questionId} answerId={id} accepted={Boolean(answer.accepted)} />}
-              {!replying && (
-                <Button
-                  variant="quiet"
-                  size="sm"
-                  onClick={() =>
-                    requireSignIn(() => {
-                      setOpen(true)
-                      setReplying(true)
-                    })
-                  }
-                >
+              {replyTo?.answerId !== id && (
+                <Button variant="quiet" size="sm" onClick={() => reply(answer)}>
                   {t('Reply')}
                 </Button>
               )}
@@ -157,27 +155,40 @@ function AnswerCard({ questionId, answer, asker }: { questionId: number; answer:
               <p className="text-sm text-muted-foreground">{t('No replies yet.')}</p>
             ) : (
               <ol className="flex flex-col gap-5">
-                {replies.data.map((reply) => (
-                  <li key={reply.answerId}>
-                    <article aria-label={t('Reply by {name}', { name: reply.authorName ?? '' })}>
-                      <Post questionId={questionId} item={reply} compact />
+                {replies.data.map((each) => (
+                  <li key={each.answerId}>
+                    <article aria-label={t('Reply by {name}', { name: each.authorName ?? '' })}>
+                      <Post
+                        questionId={questionId}
+                        item={each}
+                        compact
+                        actions={
+                          replyTo?.answerId !== each.answerId && (
+                            <Button variant="quiet" size="sm" onClick={() => reply(each)}>
+                              {t('Reply')}
+                            </Button>
+                          )
+                        }
+                      />
                     </article>
                   </li>
                 ))}
               </ol>
             )}
-            {replying && status === 'signed-in' && (
+            {replyTo && status === 'signed-in' && (
               <div className="mt-4">
                 <Composer
-                  label={t('Reply to {name}', { name: answer.authorName ?? '' })}
+                  key={replyTo.answerId}
+                  label={t('Reply to {name}', { name: replyTo.authorName ?? '' })}
+                  initial={replyTo.answerId === id ? '' : `@${replyTo.authorName ?? ''} `}
                   submitLabel={t('Reply')}
                   doneLabel={t('Reply posted')}
                   focusOnOpen
                   pending={write.isPending}
                   error={write.isError ? write.error : null}
-                  onSubmit={(content, done) => write.mutate({ action: 'reply', answerId: id, content }, { onSuccess: done })}
-                  onCancel={() => setReplying(false)}
-                  onDone={() => setReplying(false)}
+                  onSubmit={(content, done) => write.mutate({ action: 'reply', answerId: replyTo.answerId ?? id, content }, { onSuccess: done })}
+                  onCancel={() => setReplyTo(null)}
+                  onDone={() => setReplyTo(null)}
                 />
               </div>
             )}

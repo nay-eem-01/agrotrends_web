@@ -37,7 +37,7 @@ interface ThreadProps {
   whenEmpty?: ReactNode
 }
 
-/** Responses under a story: one level of replies, like Medium; owners edit and delete. Answers have their own component. */
+/** Responses under a story with their replies (a reply can be answered too); owners edit and delete. Answers have their own component. */
 export function Thread({ kind, parentId, whenEmpty }: ThreadProps) {
   const t = useT()
   const copy = COPY[kind]
@@ -96,33 +96,40 @@ interface ItemProps {
   copy: Copy
 }
 
+/**
+ * A response and its replies, two levels deep like Facebook: Reply on a reply starts "@name " and is sent with that
+ * reply's id; the backend files it under the same response.
+ */
 function Conversation({ kind, parentId, copy, item, replies }: ItemProps & { item: ThreadItem; replies: ThreadItem[] }) {
   const { status } = useSession()
   const requireSignIn = useRequireSignIn()
-  const [replying, setReplying] = useState(false)
+  const [replyTo, setReplyTo] = useState<ThreadItem | null>(null)
+  const reply = (to: ThreadItem) => (replyTo?.id === to.id ? undefined : () => requireSignIn(() => setReplyTo(to)))
 
   return (
     <>
-      <Item kind={kind} parentId={parentId} copy={copy} item={item} onReply={replying ? undefined : () => requireSignIn(() => setReplying(true))} />
-      {(replies.length > 0 || replying) && (
+      <Item kind={kind} parentId={parentId} copy={copy} item={item} onReply={reply(item)} />
+      {(replies.length > 0 || replyTo) && (
         <ol className="mt-4 ml-3 flex flex-col gap-5 border-l-2 border-field pl-5 sm:ml-5">
-          {replies.map((reply) => (
-            <li key={reply.id}>
-              <Item kind={kind} parentId={parentId} copy={copy} item={reply} />
+          {replies.map((each) => (
+            <li key={each.id}>
+              <Item kind={kind} parentId={parentId} copy={copy} item={each} onReply={reply(each)} />
             </li>
           ))}
-          {replying && status === 'signed-in' && (
+          {replyTo && status === 'signed-in' && (
             <li>
               <ThreadComposer
+                key={replyTo.id}
                 kind={kind}
                 parentId={parentId}
-                replyTo={item.id}
-                label={`Reply to ${item.authorName}`}
+                replyTo={replyTo.id}
+                initial={replyTo.id === item.id ? '' : `@${replyTo.authorName} `}
+                label={`Reply to ${replyTo.authorName}`}
                 submitLabel="Reply"
                 doneLabel="Reply posted"
                 focusOnOpen
-                onCancel={() => setReplying(false)}
-                onDone={() => setReplying(false)}
+                onCancel={() => setReplyTo(null)}
+                onDone={() => setReplyTo(null)}
               />
             </li>
           )}

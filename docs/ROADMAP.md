@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend · ➡ moved to a later step
 
-**Progress:** 128 of 134 steps done
+**Progress:** 129 of 134 steps done
 
 ---
 
@@ -302,7 +302,7 @@ web can't do alone is in `docs/BACKEND_REQUESTS_AUDIT.md` (B1–B12); those step
 | F24.15 | "Cited in N AI answers" and an impact line on profiles (B9) (`feat/impact`) | ✅ |
 | F24.16 | Digest preview for admins (B10) (`feat/digest-preview`) | ✅ |
 | F24.17 | Notify me on a question (B11) (`feat/follow-question`) | ⏸ |
-| F24.18 | Refresh token from the HttpOnly cookie (B12) (`feat/refresh-cookie`) | ⬜ |
+| F24.18 | Refresh token from the HttpOnly cookie (B12) (`feat/refresh-cookie`) | ✅ |
 
 ## Needs from the backend
 

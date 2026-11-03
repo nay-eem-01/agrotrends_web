@@ -61,7 +61,7 @@ test('a network failure is a friendly ApiError', async () => {
   await expect(api('/api/blogs/all')).rejects.toEqual(new ApiError(0, NETWORK_ERROR_MESSAGE))
 })
 
-test('a 401 refreshes once, rotates the tokens and retries', async () => {
+test('a 401 refreshes once through the cookie and retries; no token is stored', async () => {
   startSession({ accessToken: 'old', refreshToken: 'r1' })
   fetchMock
     .mockResolvedValueOnce(envelope(401, null, 'Token expired'))
@@ -70,10 +70,33 @@ test('a 401 refreshes once, rotates the tokens and retries', async () => {
 
   await expect(api('/api/bookmarks')).resolves.toBe('done')
   expect(fetchMock.mock.calls[1][0]).toBe('/api/auth/refresh-token')
-  expect((fetchMock.mock.calls[1][1] as RequestInit).body).toBe('{"refreshToken":"r1"}')
+  // The refresh token is the HttpOnly cookie's: no body, and the cookie goes along.
+  expect((fetchMock.mock.calls[1][1] as RequestInit).body).toBeUndefined()
+  expect((fetchMock.mock.calls[1][1] as RequestInit).credentials).toBe('include')
   expect(authHeader(1)).toBeUndefined()
   expect(authHeader(2)).toBe('Bearer new')
-  expect(localStorage.getItem('agrotrends.refreshToken')).toBe('r2')
+  expect(localStorage.getItem('agrotrends.refreshToken')).toBeNull()
+  expect(localStorage.getItem('agrotrends.session')).toBe('1')
+  expect(JSON.stringify(localStorage)).not.toContain('r2')
+})
+
+test('a session from before the cookie sends its stored token once, then forgets it', async () => {
+  localStorage.setItem('agrotrends.refreshToken', 'legacy')
+  fetchMock.mockResolvedValueOnce(envelope(200, { accessToken: 'a1', refreshToken: 'r2' }))
+
+  await expect(restoreSession()).resolves.toMatchObject({ accessToken: 'a1' })
+  expect((fetchMock.mock.calls[0][1] as RequestInit).body).toBe('{"refreshToken":"legacy"}')
+  expect(localStorage.getItem('agrotrends.refreshToken')).toBeNull()
+  expect(hasStoredSession()).toBe(true)
+})
+
+test('signing out on this device leaves nothing behind; other reads keep same-origin credentials', async () => {
+  startSession({ accessToken: 'a1', refreshToken: 'r1' })
+  clearSession()
+  expect(hasStoredSession()).toBe(false)
+  fetchMock.mockResolvedValueOnce(envelope(200, []))
+  await api('/api/blogs/all')
+  expect((fetchMock.mock.calls[0][1] as RequestInit).credentials).toBe('same-origin')
 })
 
 test('concurrent 401s share a single refresh', async () => {

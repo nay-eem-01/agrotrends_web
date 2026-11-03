@@ -46,7 +46,9 @@ test('signing in stores the session and goes back where the reader was', async (
   expect(fetchMock.mock.calls[0][0]).toBe('/api/auth/sign-in')
   expect(body(0)).toEqual({ identifier: 'nasrin@farm.bd', password: 'Paddy2026!' })
   expect(getAccessToken()).toBe('a1')
-  expect(localStorage.getItem('agrotrends.refreshToken')).toBe('r1')
+  // The refresh token stays in its HttpOnly cookie; only the fact of a session is kept here.
+  expect(localStorage.getItem('agrotrends.refreshToken')).toBeNull()
+  expect(localStorage.getItem('agrotrends.session')).toBe('1')
   expect(await screen.findByRole('button', { name: 'Account' })).toBeInTheDocument()
 })
 

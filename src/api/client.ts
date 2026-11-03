@@ -13,7 +13,10 @@ interface Envelope<T> {
 /** Empty in development (the Vite proxy forwards `/api`); set VITE_API_BASE_URL only for a split deploy. */
 const BASE_URL: string = import.meta.env?.VITE_API_BASE_URL ?? ''
 
-const REFRESH_TOKEN_KEY = 'agrotrends.refreshToken'
+/** Sessions from before the cookie kept the refresh token here; it is read once, sent, and removed (F24.18). */
+const LEGACY_REFRESH_TOKEN_KEY = 'agrotrends.refreshToken'
+/** Only that a session exists on this device, so a reload knows to refresh; no token, nothing secret. */
+const SESSION_KEY = 'agrotrends.session'
 const REFRESH_PATH = '/api/auth/refresh-token'
 
 /**
@@ -23,8 +26,8 @@ const REFRESH_PATH = '/api/auth/refresh-token'
 const REFRESH_AHEAD_MS = 60_000
 
 /**
- * The access token lives in memory only. The refresh token has to survive a reload, and the backend returns it in
- * the JSON body (not an HttpOnly cookie), so it is kept in localStorage until the backend changes that.
+ * The access token lives in memory only. The refresh token lives in an HttpOnly cookie the backend sets on every
+ * sign-in and refresh (`agrotrends_refresh`, path /api/auth, backend 4.37), out of reach of any script on the page.
  */
 let accessToken: string | null = null
 let accessTokenExpiresAt: number | null = null
@@ -36,20 +39,25 @@ export function getAccessToken(): string | null {
 }
 
 export function hasStoredSession(): boolean {
-  return readRefreshToken() !== null
+  return readStorage(SESSION_KEY) !== null || readStorage(LEGACY_REFRESH_TOKEN_KEY) !== null
 }
 
-/** Store the tokens from sign-in, sign-up or a refresh. */
+/**
+ * Start the session from sign-in, sign-up or a refresh. The body's `refreshToken` (still sent for one release) is
+ * ignored: the cookie carries it.
+ */
 export function startSession(tokens: Pick<WebTokenResponse, 'accessToken' | 'refreshToken'>): void {
   accessToken = tokens.accessToken ?? null
   accessTokenExpiresAt = accessToken ? tokenExpiry(accessToken) : null
-  writeRefreshToken(tokens.refreshToken ?? null)
+  writeStorage(SESSION_KEY, accessToken ? '1' : null)
+  writeStorage(LEGACY_REFRESH_TOKEN_KEY, null)
 }
 
 export function clearSession(): void {
   accessToken = null
   accessTokenExpiresAt = null
-  writeRefreshToken(null)
+  writeStorage(SESSION_KEY, null)
+  writeStorage(LEGACY_REFRESH_TOKEN_KEY, null)
 }
 
 /**
@@ -134,10 +142,11 @@ export function tokenExpiry(token: string): number | null {
 }
 
 async function doRefresh(): Promise<WebTokenResponse> {
-  const refreshToken = readRefreshToken()
-  if (!refreshToken) throw new ApiError(401, 'Please sign in again.')
-  // A network failure throws before the try: the stored token is kept so a later attempt can still succeed.
-  const response = await send(REFRESH_PATH, { method: 'POST', body: { refreshToken } }, false)
+  if (!hasStoredSession()) throw new ApiError(401, 'Please sign in again.')
+  // The cookie goes with the request; a session from before it still has its token here, sent this once.
+  const legacy = readStorage(LEGACY_REFRESH_TOKEN_KEY)
+  // A network failure throws before the try: the session is kept so a later attempt can still succeed.
+  const response = await send(REFRESH_PATH, { method: 'POST', body: legacy ? { refreshToken: legacy } : undefined }, false)
   try {
     const tokens = await parse<WebTokenResponse>(response)
     startSession(tokens)
@@ -173,6 +182,8 @@ async function send(path: string, options: RequestOptions, withToken = true): Pr
       method: options.method ?? 'GET',
       headers,
       body,
+      // The refresh cookie only travels to /api/auth; `include` also sends it to an API on another origin.
+      credentials: path.startsWith('/api/auth/') ? 'include' : 'same-origin',
       signal: options.signal,
     })
   } catch (error) {
@@ -212,18 +223,18 @@ async function parse<T>(response: Response, html = false): Promise<T> {
   throw new ApiError(response.status, envelope?.message || SERVER_ERROR_MESSAGE)
 }
 
-function readRefreshToken(): string | null {
+function readStorage(key: string): string | null {
   try {
-    return localStorage.getItem(REFRESH_TOKEN_KEY)
+    return localStorage.getItem(key)
   } catch {
     return null
   }
 }
 
-function writeRefreshToken(token: string | null): void {
+function writeStorage(key: string, value: string | null): void {
   try {
-    if (token) localStorage.setItem(REFRESH_TOKEN_KEY, token)
-    else localStorage.removeItem(REFRESH_TOKEN_KEY)
+    if (value) localStorage.setItem(key, value)
+    else localStorage.removeItem(key)
   } catch {
     // Storage blocked (private mode): the session lasts until reload.
   }

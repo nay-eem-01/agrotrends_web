@@ -7,9 +7,9 @@ Update this file in the same PR that finishes a step.
 Each step is **one small PR** (at most 20 files; generated shadcn components are listed but not counted). Steps of a phase are stacked: each step branch is taken from the
 previous one and PRs into the phase's base branch (see `.claude/skills/git-workflow`).
 
-**Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend · ➡ moved to a later step
+**Legend:** ✅ done · 🔄 in progress ·\1✅ not started · ⏸ waiting on the backend · ➡ moved to a later step
 
-**Progress:** 120 of 134 steps done
+**Progress:** 121 of 134 steps done
 
 ---
 
@@ -172,10 +172,10 @@ Endpoints and rules: `docs/BACKEND_CATCHUP_PLAN.md` § Admin dashboard.
 
 | # | Step | Status |
 |---|---|---|
-| F15.1 | Admin home: overview cards from `/api/admin/stats` linking to their pages; nav gains Overview, Users, Roles | ⬜ |
-| F15.2 | Users page: search, All / Banned / Active tabs, table, paging | ⬜ |
-| F15.3 | User page: counts, expert topics with revoke, Ban or Unban from the known state, grant and remove admin roles | ⬜ |
-| F15.4 | Roles page: create, edit and delete admin roles with privilege checkboxes; Bengali strings; smoke grants a moderator | ⬜ |
+| F15.1 | Admin home: overview cards from `/api/admin/stats` linking to their pages; nav gains Overview, Users, Roles |\1✅ |
+| F15.2 | Users page: search, All / Banned / Active tabs, table, paging |\1✅ |
+| F15.3 | User page: counts, expert topics with revoke, Ban or Unban from the known state, grant and remove admin roles |\1✅ |
+| F15.4 | Roles page: create, edit and delete admin roles with privilege checkboxes; Bengali strings; smoke grants a moderator |\1✅ |
 
 ## Phase F16 — Refinement: less clutter, better inputs (`feat/refine-base`)
 
@@ -289,9 +289,9 @@ web can't do alone is in `docs/BACKEND_REQUESTS_AUDIT.md` (B1–B12); those step
 | F24.2 | Share on questions and stories to every social (the phone's share sheet, Facebook, WhatsApp, Messenger, X, LinkedIn, Telegram, copy link); the Facebook and Instagram pages in the footer (`feat/share`) | ✅ |
 | F24.3 | Discover for visitors (Hallmark pass): one Ask, claims only what's live, one advisor promo, an honest day-one state (`feat/discover-hallmark`) | ✅ |
 | F24.4 | About page (Hallmark pass): who runs it and how an answer gets checked (`feat/about-hallmark`) | ✅ |
-| F24.5 | Small honest fixes: Ask instead of Write for visitors, empty lists with their action, Google's button in the page's language, topic chips in one row, "All" until "For you" is real (`fix/audit-small`) | ⬜ |
-| F24.6 | Where you are on Ask: an optional place, prefilled from your profile (`feat/ask-place`) | ⬜ |
-| F24.7 | One Ask: post publicly (AI now, experts check) or ask privately (AI only, not checked); the advisor says its answers aren't checked (`feat/one-ask`) | ⬜ |
+| F24.5 | Small honest fixes: Ask instead of Write for visitors, empty lists with their action, Google's button in the page's language, topic chips in one row, "All" until "For you" is real (`fix/audit-small`) | ✅ |
+| F24.6 | Where you are on Ask: an optional place, prefilled from your profile (`feat/ask-place`) |\1✅ |
+| F24.7 | One Ask: post publicly (AI now, experts check) or ask privately (AI only, not checked); the advisor says its answers aren't checked (`feat/one-ask`) |\1✅ |
 | F24.8 | Link-preview card: the default `og:image` and the `/share` links (B7) (`feat/share-card`) | ⏸ |
 | F24.9 | Reply counts: "3 replies", nothing at 0 (B1) (`feat/reply-counts`) | ⏸ |
 | F24.10 | "7 of 10 left today" in the advisor (B2) (`feat/ai-allowance`) | ⏸ |

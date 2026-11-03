@@ -91,3 +91,26 @@ test('Google sign-in sends the ID token and signs in', async () => {
   const call = api.mock.calls.find(([url]) => url === '/api/auth/google')!
   expect(JSON.parse(call[1]!.body as string)).toEqual({ idToken: 'google-id-token' })
 })
+
+test("Google's button is drawn in the page's language and redrawn when it changes", async () => {
+  vi.stubEnv('VITE_GOOGLE_CLIENT_ID', 'client-1.apps.googleusercontent.com')
+  const locales: unknown[] = []
+  window.google = {
+    accounts: {
+      id: {
+        initialize: () => {},
+        renderButton: (parent, options) => {
+          locales.push(options.locale)
+          parent.textContent = `Google (${String(options.locale)})`
+        },
+      },
+    },
+  }
+  mockApi({ 'GET /api/tags': () => envelope(200, []) })
+  renderWithProviders(<App />, '/sign-in')
+
+  expect(await screen.findByText('Google (en)')).toBeInTheDocument()
+  await userEvent.click(screen.getAllByRole('button', { name: 'বাংলা' })[0])
+  expect(await screen.findByText('Google (bn)')).toBeInTheDocument()
+  expect(locales).toEqual(['en', 'bn'])
+})

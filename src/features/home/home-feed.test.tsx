@@ -77,12 +77,17 @@ test('signed in, home shows questions and stories as two tabs, never mixed', asy
   expect(api.mock.calls.some(([url]) => String(url).startsWith('/api/blogs/all/category/2'))).toBe(true)
 })
 
-test('each tab has its own empty state', async () => {
+test('each tab has its own empty state, with the action that fills it', async () => {
   mockApi(routes({ 'GET /api/questions/all': () => envelope(200, page([])), 'GET /api/blogs/all': () => envelope(200, page([])) }))
   renderWithProviders(<App />, '/')
-  expect(await screen.findByText('No questions here yet. Ask the first one in this topic.')).toBeInTheDocument()
+  const feed = screen.getByRole('main')
+  expect(await screen.findByText('No questions yet. Ask the first one.')).toBeInTheDocument()
+  expect(within(feed).getAllByRole('link', { name: 'Ask a question' }).some((link) => link.getAttribute('href') === '/questions/ask')).toBe(true)
+  // Not personalised yet, so the first chip says what it shows.
+  expect(within(screen.getByRole('navigation', { name: 'Topics' })).getByRole('link', { name: 'All' })).toHaveAttribute('aria-current', 'page')
   await userEvent.click(within(screen.getByRole('navigation', { name: 'Show' })).getByRole('link', { name: 'Stories' }))
-  expect(await screen.findByText('No stories in this topic yet.')).toBeInTheDocument()
+  expect(await screen.findByText('No stories yet.')).toBeInTheDocument()
+  expect(within(feed).getByRole('link', { name: 'Write a story' })).toHaveAttribute('href', '/write')
 })
 
 test('experts to follow appear once the backend serves them, and phones get the quick actions', async () => {

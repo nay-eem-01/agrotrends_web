@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useGoogleSignIn } from '../../api/auth'
 import { errorMessage } from '../../api/errors'
-import { useT } from '../../lib/i18n'
+import { useLang, useT } from '../../lib/i18n'
 import { FormError } from './AuthPage'
 import { useSession } from './session'
 
@@ -41,6 +41,7 @@ export function GoogleSignIn({ next }: { next: string }) {
 
 function GoogleButton({ clientId, next }: { clientId: string; next: string }) {
   const t = useT()
+  const lang = useLang()
   const slot = useRef<HTMLDivElement>(null)
   const session = useSession()
   const navigate = useNavigate()
@@ -67,7 +68,9 @@ function GoogleButton({ clientId, next }: { clientId: string; next: string }) {
             })
           },
         })
-        identity.renderButton(slot.current, { theme: 'outline', size: 'large', shape: 'pill', text: 'continue_with', width: 320 })
+        // In the page's language, not the browser's; redrawn when the reader switches.
+        slot.current.replaceChildren()
+        identity.renderButton(slot.current, { theme: 'outline', size: 'large', shape: 'pill', text: 'continue_with', width: 320, locale: lang })
       })
       .catch(() => {
         // No Google button (blocked or offline); e-mail sign-in still works.
@@ -75,7 +78,7 @@ function GoogleButton({ clientId, next }: { clientId: string; next: string }) {
     return () => {
       active = false
     }
-  }, [clientId])
+  }, [clientId, lang])
 
   return (
     <div className="mb-6 flex flex-col gap-4">

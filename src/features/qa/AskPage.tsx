@@ -1,10 +1,11 @@
 import { CheckCircle, PaperPlaneTilt } from '@phosphor-icons/react'
 import { useT } from '../../lib/i18n'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { ApiError, errorMessage } from '../../api/errors'
 import { useCategories } from '../../api/categories'
 import { useQuestion, useQuestionWrite, type Question } from '../../api/questions'
+import { splitAskDraft } from '../../lib/askDraft'
 import { htmlToText, textToHtml } from '../../lib/html'
 import { Button } from '../../ui/Button'
 import { Spinner } from '../../ui/Spinner'
@@ -54,9 +55,12 @@ function QuestionForm({ question }: { question?: Question }) {
   const [categoryId, setCategoryId] = useState<number | undefined>(question?.category?.id)
   const [tags, setTags] = useState<string[]>(question?.tags ?? [])
   const [imageUrls, setImageUrls] = useState<string[]>(question?.imageUrls ?? [])
-  const [title, setTitle] = useState(question?.title ?? '')
+  // A new question can arrive typed already, from Discover's ask box (`?q=`), split into a title and details.
+  const [params] = useSearchParams()
+  const [draft] = useState(() => (question ? null : splitAskDraft(params.get('q') ?? '')))
+  const [title, setTitle] = useState(question?.title ?? draft?.title ?? '')
   // Older questions were saved as plain text; they open as paragraphs.
-  const [details, setDetails] = useState(() => textToHtml(question?.content))
+  const [details, setDetails] = useState(() => textToHtml(question ? question.content : draft?.details))
   const [errors, setErrors] = useState<{ title?: string; details?: string; topic?: string }>({})
 
   const form = useRef<HTMLFormElement>(null)

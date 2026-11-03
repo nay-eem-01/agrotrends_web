@@ -49,7 +49,7 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 - Phase F21 on `feat/paddy-base` (stacked on F20's tip): F21.1 Paddy Field tokens (`feat/paddy-tokens`) F21.2 shell (`feat/paddy-shell`) F21.3 sign in and sign up (`feat/paddy-auth`) F21.4 expert application (`feat/paddy-expert-apply`) F21.5 profile (`feat/paddy-profile`) F21.6 story editor (`feat/paddy-editor`) F21.7 question page (`feat/paddy-question`) F21.8 AI advisor (`feat/paddy-advisor`) F21.9 feeds (`feat/paddy-feeds`) F21.10 story page (`feat/paddy-story`) done. Phase F21 is complete.
 - Phase F22 on `feat/mock-base` (stacked on F21's tip): F22.1 fields (`feat/mock-fields`) F22.2 home feed (`feat/mock-home`) F22.3 question page (`feat/mock-question`) F22.4 profile (`feat/mock-profile`) F22.5 AI advisor (`feat/mock-advisor`) F22.6 ask page (`feat/mock-ask`) F22.7 story editor (`feat/mock-editor`) F22.8 sign in and sign up (`feat/mock-auth`) F22.9 story page (`feat/mock-story`) F22.10 navigation in the sidebar (`feat/mock-sidebar`) F22.11 search in the bar (`feat/mock-topbar`) F22.12 quieter frame (`feat/mock-chrome`) done. Phase F22 is complete.
 - Phase F23 on `feat/api2-base` (stacked on F22's tip and `fix/google-test`): F23.1 API types (`feat/api2-types`) F23.2 home rail (`feat/api2-home`) F23.3 story subtitle (`feat/api2-stories`) F23.4 profile page and notification (`feat/api2-profile`) F23.5 home tabs (`feat/home-tabs`) F23.6 admin design (`feat/admin-design`) F23.7 about, privacy, terms and footer (`feat/site-pages`) F23.8 faster pages (`perf/faster-pages`) F23.9 profile pictures (`fix/profile-images`) F23.10 footer and home width (`fix/footer-home-width`) F23.11 reply to a reply (`feat/reply-to-reply`) F23.12 answer reply notification (`feat/answer-reply-notification`) done. Phase F23 is complete and merged into `development`.
-- Phase F24 on `feat/audit-base` (from `development`), the audit fixes: F24.1 Ask and Write on phones (`feat/phone-tasks`) F24.2 share (`feat/share`) done.
+- Phase F24 on `feat/audit-base` (from `development`), the audit fixes: F24.1 Ask and Write on phones (`feat/phone-tasks`) F24.2 share (`feat/share`) F24.3 Discover (`feat/discover-hallmark`) done.
 
 ## Next up
 
@@ -74,6 +74,40 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-11-03 — F24.3 Discover, a Hallmark redesign (`feat/discover-hallmark`)
+
+**Done**
+- Hallmark (Nutlope/hallmark, pinned) ran a full redesign of `/` for visitors, inside the locked DESIGN.md system:
+  recorded before, built hero first, swept, and reviewed twice in fresh context (hero review: 4 findings, 4
+  resolved; finish review: 6 findings, 6 resolved). Sweep: before 2 Floor failures and 10 Reflex, now 0 and 0; 36 of
+  37 links kept, the one dropped on record. The stamp and its records are the first lines of `src/index.css`; the
+  build is logged in `.hallmark/log.json` (screenshots and records stay out of git).
+- The first screen is the job: the headline and "An AI answer in seconds, then farmers and agronomists weigh in."
+  beside the ask box ("What's happening on your farm?"). What is typed goes to `/questions/ask?q=…`, through
+  sign-in for visitors, and the ask form splits it into a title and details (`src/lib/askDraft.ts`: first line or
+  first sentence, nothing lost). On phones the box is on the first screen.
+- One advisor offer instead of two: "Or ask the AI advisor privately", a step quieter, with the caution that experts
+  don't check those answers and they can be wrong, this season's questions (now in Bengali too, here and in the
+  advisor) and "Ask the advisor something else". The drawn field scene and the side advisor panel are gone.
+- Claims only what is live: "{n} verified experts check the answers" shows only when the public count is above zero
+  (`usePublicStats({ everywhere: true })`). Today it is 0, so the line is hidden.
+- With no questions, "What farmers are asking" offers to ask the first one with the Ask button. Question rows sit at
+  the 720px feed measure; section heads are Lora 40px from 640px; no arrows glued to links.
+- Found by the sweep and fixed for every page: the top bar's search pill gets the field edge (`input`, 3:1) and the
+  paddy focus outline (its edge was 1.00:1 and the halo too faint); the footer's language and theme switches are 44px
+  tall; html and body clip sideways overflow; the dark dialog scrim is tinted, not pure black; scrollbars themed.
+
+**Decisions**
+- No photographs: the platform has none licensed, and Hallmark's library photos would be stand-ins for farms that
+  aren't ours. The product (the ask box) is the picture.
+- The headline is the owner's and stays; the reviewers' wording notes went into the sentence under it.
+- "Join AgroTrends" left the hero: the top bar's Get started is the same link.
+
+**Known limitations**
+- `npm run e2e` was not run for this step.
 
 ---
 

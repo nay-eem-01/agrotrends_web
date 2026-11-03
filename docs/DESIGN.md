@@ -95,8 +95,8 @@ an underline, errors an icon, accepted answers the word "Accepted", unanswered q
 - Tags (`ui/TagList`): three chips, then "+N" opening the full list in a popover.
 - Composers: the advisor sends on Enter (Shift+Enter for a new line); answers, responses and the ask form send on
   Ctrl/⌘+Enter. Nothing sends while an input method (Bangla) is composing.
-- Search: one entry point, the top bar: a pill on the leaf wash from 1280px, an icon below; Ctrl/⌘+K opens the
-  search dialog.
+- Search: one entry point, the top bar: a pill on the leaf wash with the field edge (`input`, 3:1) from 1280px, the
+  paddy outline when focused, an icon below; Ctrl/⌘+K opens the search dialog.
 
 ## Layout
 
@@ -108,11 +108,16 @@ Page width 1240px, gutters 16px (phones) / 32px; reading column 680px; feed colu
   opens it again; the choice is remembered. The top bar holds no section tabs: logo, search, Write, Ask, bell,
   account. Below 1024px the menu sheet; below 768px the bottom tab bar (Discover, Questions, Ask +, Stories, AI
   advisor). Pages never repeat the sidebar's links in their own sidebars. Staff get an Admin group in the sidebar (Overview, Users, Reports, Expert applications, Roles, Categories) and Verified Experts a Review queue link, so admin pages have no rail of their own; below 1024px the admin sections scroll as tabs on the page (F23.6).
-- **Discover (`/`):** hero (Lora headline, intro, Ask a question / Join) beside the drawn field (`FieldScene`) with
-  an advisor caption; "Help a farmer today" (up to three unanswered questions, each with Answer); "What farmers are
-  asking" (one row of topic filters, then compact question rows) beside the advisor panel with
-  seasonal questions that open `/advisor?q=`; "From the field": a featured story and three compact ones. Sections
-  below the hero load lazily.
+- **Discover (`/`, F24.3, a Hallmark redesign):** the first screen is the job. On the left the Lora headline and
+  one sentence; on the right the ask box on the leaf wash ("What's happening on your farm?", a 3-line field, Ask a
+  question, "Public: anyone can read and answer it"), which carries what is typed into the ask form (`?q=`, through
+  sign-in for visitors). Under it, a step quieter, "Or ask the AI advisor privately": the caution that experts don't
+  check those answers and they can be wrong, this season's questions (`/advisor?q=`) and "Ask the advisor something
+  else". The hero names verified experts only once there are some. Then "Help a farmer today" (up to three
+  unanswered, each with Answer; hidden when none), "What farmers are asking" (topic filters, compact rows at the
+  720px feed measure; with no questions, "Ask the first one" with the Ask button), and "From the field". Section heads
+  Lora 28px, 40px from 640px; no arrows after links. No drawn scene: the product is the picture. The Hallmark stamp
+  and its records are the first lines of `src/index.css`; `.hallmark/log.json` keeps the build.
 - **Questions (`/questions`):** header + Ask, topics as chips (first six; "More topics" picker past
   that), Newest | Unanswered, Filter popover, active-filter chips; rows with votes, answer state and the first
   photo; sidebar: advisor card and "Getting a good answer". Question page: back link, Inter title, body, a horizontal

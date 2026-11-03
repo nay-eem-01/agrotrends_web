@@ -1,29 +1,23 @@
-import { ArrowRight, ChatCircleText, Plant, Sparkle } from '@phosphor-icons/react'
-import { useState } from 'react'
+import { ChatCircleText, PaperPlaneTilt } from '@phosphor-icons/react'
 import { Link } from 'react-router-dom'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useCategories } from '../../api/categories'
 import { errorMessage } from '../../api/errors'
 import { useFeed } from '../../api/feed'
 import { useQuestions } from '../../api/questions'
-import { seasonCalendar, SEASON_LABELS, type Season } from '../../lib/agri'
 import { storyDate } from '../../lib/dates'
 import { useT } from '../../lib/i18n'
 import { ButtonLink } from '../../ui/Button'
-import { Sprig } from '../../ui/Botanical'
-import { ADVISOR_EXAMPLES } from '../ai/examples'
 import { StoryCompact, StoryFeature } from '../feed/StoryTiles'
 import { QuestionCard } from '../qa/QuestionRow'
 
-/** Discover below the hero: questions that need an answer, what people are asking beside the advisor, and stories. */
+/** Discover below the hero: questions that need an answer, what people are asking, and stories. The advisor lives in
+ * the hero's ask box, so it isn't offered twice. */
 export function DiscoverSections() {
   return (
     <>
       <NeedsAnswer />
-      <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-12">
-        <RecentQuestions />
-        <AdvisorPanel />
-      </div>
+      <RecentQuestions />
       <FromTheField />
     </>
   )
@@ -32,13 +26,12 @@ export function DiscoverSections() {
 function SectionHeading({ id, title, link }: { id: string; title: string; link?: { to: string; label: string } }) {
   return (
     <div className="flex items-end justify-between gap-4">
-      <h2 id={id} className="font-serif text-[1.625rem] leading-tight font-medium sm:text-[1.875rem]">
+      <h2 id={id} className="font-serif text-[1.75rem] leading-tight font-medium tracking-[-0.015em] text-balance [overflow-wrap:break-word] sm:text-[2.5rem]">
         {title}
       </h2>
       {link && (
-        <Link to={link.to} className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-primary underline-offset-4 hover:underline">
+        <Link to={link.to} className="inline-flex min-h-11 shrink-0 items-center text-sm font-medium text-primary underline-offset-4 hover:underline">
           {link.label}
-          <ArrowRight size={14} weight="bold" aria-hidden="true" />
         </Link>
       )}
     </div>
@@ -113,7 +106,7 @@ function RecentQuestions() {
   const list = (questions.data?.pages[0]?.content ?? []).slice(0, 6)
 
   return (
-    <section aria-labelledby="discover-questions" className="min-w-0">
+    <section aria-labelledby="discover-questions" className="min-w-0 max-w-(--container-feed)">
       <SectionHeading id="discover-questions" title={t('What farmers are asking')} link={{ to: '/questions', label: t('All questions') }} />
       <TopicFilters />
       {questions.isPending ? (
@@ -128,9 +121,15 @@ function RecentQuestions() {
           {errorMessage(questions.error)}
         </p>
       ) : list.length === 0 ? (
-        <div className="mt-4 rounded-xl border border-dashed border-border-strong p-6">
-          <p className="font-medium">{t('No questions yet')}</p>
-          <p className="mt-1 text-sm text-muted-foreground">{t('Ask the first one. Farmers and agronomists answer here.')}</p>
+        <div className="mt-6 flex flex-col items-start gap-4 rounded-xl bg-surface p-6 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="font-medium">{t('No questions yet')}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{t('Ask the first one. Farmers and agronomists answer here.')}</p>
+          </div>
+          <ButtonLink to="/questions/ask" className="shrink-0">
+            <PaperPlaneTilt size={18} weight="fill" aria-hidden="true" />
+            {t('Ask a question')}
+          </ButtonLink>
         </div>
       ) : (
         <>
@@ -142,45 +141,6 @@ function RecentQuestions() {
         </>
       )}
     </section>
-  )
-}
-
-/** The advisor, with questions that fit the season to start from (they open the advisor with the question filled in). */
-function AdvisorPanel() {
-  const t = useT()
-  const [today] = useState(() => new Date())
-  const season = seasonCalendar(today).current as Exclude<Season, 'YEAR_ROUND'>
-  return (
-    <aside aria-labelledby="discover-advisor" className="relative self-start overflow-hidden rounded-2xl bg-surface p-6 sm:p-7">
-      <Sprig className="pointer-events-none absolute -top-6 -right-6 h-40 opacity-25" />
-      <span className="relative flex size-10 items-center justify-center rounded-full bg-background ring-1 ring-border">
-        <Sparkle size={20} weight="fill" aria-hidden="true" className="text-primary" />
-      </span>
-      <h2 id="discover-advisor" className="relative mt-4 font-serif text-[1.625rem] leading-tight font-medium">
-        {t('Ask the advisor')}
-      </h2>
-      <p className="relative mt-2 text-sm leading-relaxed text-muted-foreground">
-        {t('A private answer in seconds, written from what farmers here have shared, with sources.')}
-      </p>
-      <p className="relative mt-5 text-xs font-semibold text-foreground">{t('For this {season} season', { season: t(SEASON_LABELS[season]) })}</p>
-      <ul className="relative mt-2 flex flex-col gap-2">
-        {ADVISOR_EXAMPLES[season].map((example) => (
-          <li key={example}>
-            <Link
-              to={`/advisor?q=${encodeURIComponent(example)}`}
-              className="flex min-h-11 items-center gap-2.5 rounded-lg bg-background px-3 py-2 text-sm ring-1 ring-border transition-[box-shadow,color] duration-150 hover:text-primary hover:ring-primary/40"
-            >
-              <Plant size={16} aria-hidden="true" className="shrink-0 text-primary" />
-              {example}
-            </Link>
-          </li>
-        ))}
-      </ul>
-      <ButtonLink to="/advisor" className="relative mt-5 w-full">
-        {t('Open the advisor')}
-      </ButtonLink>
-      <p className="relative mt-3 text-xs text-muted-foreground">{t('AI answers can be wrong. Check the sources before you act.')}</p>
-    </aside>
   )
 }
 

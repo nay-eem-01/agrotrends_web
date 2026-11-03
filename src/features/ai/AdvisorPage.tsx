@@ -211,9 +211,9 @@ function Suggestions({ season, onPick }: { season: Exclude<Season, 'YEAR_ROUND'>
         <ul className="mt-3 grid gap-3 sm:grid-cols-3">
           {ADVISOR_EXAMPLES[season].map((example) => (
             <li key={example}>
-              <button type="button" onClick={() => onPick(example)} className={card}>
+              <button type="button" onClick={() => onPick(t(example))} className={card}>
                 <Plant size={18} aria-hidden="true" className="mt-px shrink-0 text-primary" />
-                {example}
+                {t(example)}
               </button>
             </li>
           ))}

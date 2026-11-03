@@ -1,0 +1,40 @@
+[
+ {
+  "mode": "redesign",
+  "depth": "full",
+  "scope": "page",
+  "prompt": "Discover, the visitor home of a Bangladeshi farming Q&A site; job: ask a question",
+  "shape": "Counter-led feed",
+  "theme": "locked: docs/DESIGN.md (Paddy Field)",
+  "hero": "Counter",
+  "nav": "project top bar and sidebar (kept)",
+  "footer": "project footer (kept)",
+  "imagery": "none; the product ask box",
+  "photos": [],
+  "entry": "/",
+  "sections": [
+   "Hero (ask box + private advisor)",
+   "Help a farmer today (rows of unanswered, when any)",
+   "What farmers are asking (index at the feed measure)",
+   "From the field (feature + compact stories)",
+   "Footer"
+  ],
+  "signature": "the question box that carries what is typed into the ask form",
+  "waived": [
+   "49b"
+  ],
+  "fingerprint": {
+   "shape": "counter-feed",
+   "hero": "Counter",
+   "nav": "shell",
+   "footer": "shell",
+   "imagery": "none",
+   "lead": "form"
+  },
+  "axes": {
+   "palette": "locked",
+   "type": "locked"
+  },
+  "date": "2026-11-03"
+ }
+]

@@ -190,3 +190,48 @@ test('while the title is typed, answered questions that match are offered first'
   expect(within(similar).queryByRole('link', { name: 'Tilapia not eating' })).not.toBeInTheDocument()
   expect(new URL(String(api.mock.calls.find(([url]) => String(url).startsWith('/api/questions/search'))![0]), 'http://x').searchParams.get('q')).toBe('Why are my tilapia gasping?')
 })
+
+test('where you are starts from your profile and goes with the question', async () => {
+  const api = mockApi({
+    ...signedInAs({ id: 9, name: 'Karim' }),
+    ...categories,
+    'GET /api/users/9/profile': () => envelope(200, { userId: 9, name: 'Karim', location: 'Mymensingh' }),
+    'POST /api/questions/create': () => envelope(200, { ...question, questionId: 12 }),
+    'GET /api/questions/id/12': () => envelope(200, { ...question, questionId: 12 }),
+    'GET /api/answers/question/12': () => envelope(200, []),
+  })
+  renderWithProviders(<App />, '/questions/ask')
+
+  const place = await screen.findByLabelText('Where are you? (optional)')
+  await waitFor(() => expect(place).toHaveValue('Mymensingh'))
+  await userEvent.clear(place)
+  await userEvent.type(place, ' Trishal ')
+  await userEvent.type(screen.getByLabelText('Your question'), 'Fish gasping at dawn')
+  await userEvent.click(screen.getByRole('textbox', { name: 'Details' }))
+  await userEvent.keyboard('Every morning')
+  await userEvent.click(await screen.findByRole('radio', { name: 'Fisheries' }))
+  await userEvent.click(screen.getByRole('button', { name: 'Post question' }))
+
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/questions/12'))
+  expect(body(api, '/api/questions/create').agri).toEqual({ region: 'Trishal' })
+})
+
+test('changing the place on an edit keeps the question’s other farming details', async () => {
+  const api = mockApi({
+    ...signedInAs({ id: 9, name: 'Karim' }),
+    ...categories,
+    'GET /api/questions/id/5': () => envelope(200, { ...question, agri: { crop: 'boro rice', season: 'RABI', region: 'rangpur' } }),
+    'PUT /api/questions/update': () => envelope(200, question),
+    'GET /api/answers/question/5': () => envelope(200, []),
+  })
+  renderWithProviders(<App />, '/questions/5/edit')
+
+  const place = await screen.findByLabelText('Where are you? (optional)')
+  expect(place).toHaveValue('rangpur')
+  await userEvent.clear(place)
+  await userEvent.type(place, 'Dinajpur')
+  await userEvent.click(screen.getByRole('button', { name: 'Save question' }))
+
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/questions/5'))
+  expect(body(api, '/api/questions/update').agri).toEqual({ crop: 'boro rice', season: 'RABI', region: 'Dinajpur' })
+})

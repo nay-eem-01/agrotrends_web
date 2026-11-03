@@ -54,10 +54,14 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 
 ## Next up
 
-1. **Backend:** `docs/BACKEND_REQUESTS_AUDIT.md` (B1–B12, smallest first; B7 link previews is the one launch needs most).
-2. **Web:** F24.2 onwards in `docs/ROADMAP.md`, smallest first; the ⏸ steps start as their backend item lands.
-3. **Nayeem:** PR each F24 step into `feat/audit-base` in order, then the base into `development`.
-4. Pick an SMS provider (backend 10.5): until then codes only appear in the backend log as `[DEV SMS]`.
+1. **Nayeem:** PR the second half of F24 into `feat/audit2-base` in this order: `feat/api3-types`, `feat/ai-allowance`,
+   `feat/for-you`, `feat/email-settings`, `feat/launch-metrics`, `feat/impact`, `feat/digest-preview`,
+   `feat/refresh-cookie`, `feat/share-card`, `feat/ask-place`, `feat/one-ask`; then the base into `development`.
+2. **Nayeem decides:** B3 (relax the password rule; F24.11 waits) and when to do B11 (follow a question; F24.17).
+3. **Before launch:** restart the dev backend on the merged code (the one on 8080 is older); on the host, either
+   proxy `/share` to the API or set `VITE_SHARE_BASE_URL` to the API's address; check five shared links in
+   Facebook's Sharing Debugger once the site is public.
+4. Pick an SMS provider (backend 10.5): until then phone-only accounts get no codes and no answer e-mails.
 5. Run the admin smoke step (`E2E_ADMIN_EMAIL` / `E2E_ADMIN_PASSWORD`) once an admin login is at hand.
 
 ## Open items

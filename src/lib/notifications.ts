@@ -31,6 +31,9 @@ export function describeNotification(n: Notification): { text: string; values: {
       return { text: 'New AI answer to review in your topic', values: {}, to: question }
     case 'NEW_QUESTION_IN_TOPIC':
       return { text: 'New question in your topic, waiting for an expert', values: {}, to: question }
+    case 'ANSWER_REPLY':
+      // Also a reply to your reply under an answer; the question page holds both.
+      return { text: '{actor} replied to your answer', values: { actor }, to: question }
     case 'COMMENT_REPLY':
       return { text: '{actor} replied to your comment', values: { actor }, to: n.targetId != null ? `/s/${n.targetId}` : null }
     case 'APPLICATION_DECIDED':

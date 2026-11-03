@@ -36,6 +36,7 @@ test('the page lists every type in words, page by page', async () => {
                 n(1, 'ANSWER_ACCEPTED', { actorName: 'Karim' }),
                 n(2, 'APPLICATION_DECIDED', { targetType: 'EXPERT_APPLICATION', read: true }),
                 n(3, 'CONTENT_REMOVED', { read: true }),
+                n(5, 'ANSWER_REPLY', { targetType: 'QUESTION', targetId: 6, actorName: 'Rafiq', read: true }),
               ],
               0,
               false,
@@ -52,6 +53,10 @@ test('the page lists every type in words, page by page', async () => {
 
   await userEvent.click(screen.getByRole('button', { name: 'Show older notifications' }))
   expect(await screen.findByText('Salma replied to your comment')).toBeInTheDocument()
+
+  // A reply under your answer opens its question.
+  await userEvent.click(screen.getByText('Rafiq replied to your answer'))
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/questions/6'))
 })
 
 test('the Unread tab asks for unread only', async () => {

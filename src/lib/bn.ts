@@ -415,6 +415,7 @@ export const BN: Record<string, string> = {
   'An expert reviewed the AI answer on your question': 'একজন বিশেষজ্ঞ আপনার প্রশ্নের এআই-উত্তর যাচাই করেছেন',
   'New AI answer to review in your topic': 'আপনার বিষয়ে যাচাইয়ের জন্য নতুন এআই-উত্তর',
   '{actor} replied to your comment': '{actor} আপনার মন্তব্যের জবাব দিয়েছেন',
+  '{actor} replied to your answer': '{actor} আপনার উত্তরের জবাব দিয়েছেন',
   'Your expert application was decided': 'আপনার বিশেষজ্ঞ আবেদনের সিদ্ধান্ত হয়েছে',
   'One of your posts is hidden while moderators review reports': 'অভিযোগ যাচাই চলাকালে আপনার একটি পোস্ট লুকানো আছে',
   'Your post is visible again': 'আপনার পোস্ট আবার দেখা যাচ্ছে',

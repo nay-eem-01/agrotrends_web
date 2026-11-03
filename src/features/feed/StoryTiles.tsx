@@ -1,4 +1,4 @@
-import { HandsClapping } from '@phosphor-icons/react'
+import { HandsClapping, Sparkle } from '@phosphor-icons/react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { cn } from 'cn'
@@ -48,6 +48,12 @@ function Meta({ story, className }: { story: StorySummary; className?: string })
         <span className="inline-flex items-center gap-1" aria-label={`${claps} claps`}>
           <HandsClapping size={14} aria-hidden="true" />
           {formatNumber(claps)}
+        </span>
+      )}
+      {(story.citedCount ?? 0) > 0 && (
+        <span className="inline-flex items-center gap-1">
+          <Sparkle size={14} aria-hidden="true" />
+          {t('Cited in {n} AI answers', { n: formatNumber(story.citedCount ?? 0) })}
         </span>
       )}
       {crop && (

@@ -1,4 +1,4 @@
-import { CalendarBlank, Certificate, MapPin, PencilSimple, SealCheck } from '@phosphor-icons/react'
+import { CalendarBlank, Certificate, MapPin, PencilSimple, SealCheck, Sparkle } from '@phosphor-icons/react'
 import type { ReactNode } from 'react'
 import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import { cn } from 'cn'
@@ -9,7 +9,7 @@ import { errorMessage } from '../../api/errors'
 import { useReadingList, useToggleAuthorFollow } from '../../api/follows'
 import { useReputation, useUserQuestions } from '../../api/reputation'
 import type { StorySummary } from '../../api/types'
-import { useUserAnswers, useUserProfile } from '../../api/users'
+import { useUserAnswers, useUserImpact, useUserProfile } from '../../api/users'
 import { storyDate } from '../../lib/dates'
 import { formatNumber, useT } from '../../lib/i18n'
 import { Avatar } from '../../ui/Avatar'
@@ -155,6 +155,7 @@ export function UserPage() {
             </div>
           ))}
         </dl>
+        <Impact userId={userId} />
       </div>
 
       {isAdmin(user) && !own && (
@@ -346,6 +347,31 @@ function Credentials({ credentials, expertIn }: { credentials?: { title?: string
 }
 
 /** Others' profiles: their latest questions, answers and stories as one short list. */
+/**
+ * What this person's work did, beyond the counts above: the readers their answers reached and the AI answers that cite
+ * them. Only the parts that are above zero; nothing at all for someone just starting.
+ */
+function Impact({ userId }: { userId: number }) {
+  const t = useT()
+  const impact = useUserImpact(userId).data
+  if (!impact) return null
+  const parts = [
+    (impact.readersReached ?? 0) > 0 && t('Their answers reached {n} readers', { n: formatNumber(impact.readersReached ?? 0) }),
+    (impact.citedInAiAnswers ?? 0) > 0 && t('cited in {n} AI answers', { n: formatNumber(impact.citedInAiAnswers ?? 0) }),
+    (impact.storyCitations ?? 0) > 0 && t('their stories cited {n} times', { n: formatNumber(impact.storyCitations ?? 0) }),
+  ].filter((part): part is string => Boolean(part))
+  if (parts.length === 0) return null
+  const sentence = parts.join(t(', '))
+  return (
+    <p className="mt-4 flex items-start gap-2 text-sm text-muted-foreground">
+      <Sparkle size={16} weight="fill" aria-hidden="true" className="mt-0.5 shrink-0 text-primary" />
+      <span>
+        <span className="font-medium text-foreground">{t('Impact')}</span> {sentence.charAt(0).toUpperCase() + sentence.slice(1)}.
+      </span>
+    </p>
+  )
+}
+
 function RecentContributions({ questions, answers, authorId }: { questions: { questionId?: number; title?: string; createdAt?: string; answerCount?: number }[]; answers: { answerId?: number; questionId?: number; questionTitle?: string; createdAt?: string; score?: number; accepted?: boolean }[]; authorId?: number }) {
   const t = useT()
   const stories = useAuthorStories(authorId ?? NaN)

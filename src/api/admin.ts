@@ -31,6 +31,11 @@ export function useLaunchMetrics(weeks = 8) {
   })
 }
 
+/** Your own weekly digest as the e-mail's HTML, not sent: to check the copy. Admin. */
+export function useDigestPreview() {
+  return useMutation({ mutationFn: () => api<string>('/api/admin/digest/preview', { method: 'POST', html: true }) })
+}
+
 /** Members, newest first: `q` inside the name or e-mail, `banned` true or false (left out for everyone). */
 export function useAdminUsers(q: string, banned?: boolean) {
   return useInfiniteQuery({

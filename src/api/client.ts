@@ -69,6 +69,8 @@ interface RequestOptions {
   params?: Record<string, QueryValue>
   /** Sent as text/plain instead of `body`, for the one endpoint that reads a raw string (category rename). */
   text?: string
+  /** Asks for text/html and returns the body as a string (the digest preview); errors still come as the envelope. */
+  html?: boolean
   signal?: AbortSignal
 }
 
@@ -87,11 +89,11 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
     try {
       await refreshSession()
     } catch {
-      return parse<T>(first)
+      return parse<T>(first, options.html)
     }
-    return parse<T>(await send(path, options))
+    return parse<T>(await send(path, options), options.html)
   }
-  return parse<T>(first)
+  return parse<T>(first, options.html)
 }
 
 /** Get a new access token with the stored refresh token. Concurrent callers share one request. */
@@ -151,7 +153,7 @@ async function doRefresh(): Promise<WebTokenResponse> {
 }
 
 async function send(path: string, options: RequestOptions, withToken = true): Promise<Response> {
-  const headers: Record<string, string> = { Accept: 'application/json' }
+  const headers: Record<string, string> = { Accept: options.html ? 'text/html' : 'application/json' }
   let body: BodyInit | undefined
   if (options.text !== undefined) {
     headers['Content-Type'] = 'text/plain'
@@ -189,7 +191,8 @@ export function queryString(params?: Record<string, QueryValue>): string {
   return text ? `?${text}` : ''
 }
 
-async function parse<T>(response: Response): Promise<T> {
+async function parse<T>(response: Response, html = false): Promise<T> {
+  if (html && response.ok) return (await response.text()) as T
   let envelope: Envelope<T> | null = null
   try {
     envelope = (await response.json()) as Envelope<T>

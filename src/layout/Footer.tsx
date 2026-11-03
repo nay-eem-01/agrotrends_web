@@ -64,7 +64,7 @@ export function Footer({ className }: { className?: string }) {
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label={label}
-                        className="flex size-10 items-center justify-center rounded-full bg-background text-foreground ring-1 ring-border transition-colors hover:bg-primary hover:text-primary-foreground hover:ring-primary"
+                        className="flex size-11 items-center justify-center rounded-full bg-background text-foreground ring-1 ring-border transition-colors hover:bg-primary hover:text-primary-foreground hover:ring-primary"
                       >
                         {Glyph ? <Glyph size={20} weight="fill" aria-hidden /> : label}
                       </a>

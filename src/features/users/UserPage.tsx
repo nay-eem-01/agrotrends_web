@@ -1,5 +1,5 @@
-import { CalendarBlank, Certificate, MapPin, PencilSimple, SealCheck, ShareNetwork } from '@phosphor-icons/react'
-import { useState, type ReactNode } from 'react'
+import { CalendarBlank, Certificate, MapPin, PencilSimple, SealCheck } from '@phosphor-icons/react'
+import type { ReactNode } from 'react'
 import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import { cn } from 'cn'
 import { isAdmin } from '../../api/auth'
@@ -24,6 +24,7 @@ import { StoryCard } from '../feed/StoryCard'
 import { BadgeMark } from '../qa/AuthorLine'
 import { QuestionCard } from '../qa/QuestionRow'
 import { ReportButton } from '../reports/ReportButton'
+import { ShareButton } from '../share/ShareButton'
 
 type Tab = 'overview' | 'stories' | 'questions' | 'answers' | 'drafts' | 'saved'
 
@@ -107,7 +108,7 @@ export function UserPage() {
         <div className="flex items-center gap-2">
           {own ? (
             <>
-              <ShareButton />
+              <ShareButton path={`/users/${userId}`} title={name} variant="secondary" />
               <ButtonLink to="/settings" variant="secondary" size="sm">
                 <PencilSimple size={16} aria-hidden="true" />
                 {t('Edit profile')}
@@ -271,23 +272,6 @@ export function UserPage() {
         {tab === 'saved' && own && <Saved />}
       </div>
     </section>
-  )
-}
-
-function ShareButton() {
-  const t = useT()
-  const [copied, setCopied] = useState(false)
-  return (
-    <Button
-      variant="secondary"
-      size="sm"
-      onClick={() => {
-        void navigator.clipboard?.writeText(window.location.href).then(() => setCopied(true))
-      }}
-    >
-      <ShareNetwork size={16} aria-hidden="true" />
-      {copied ? t('Link copied') : t('Share')}
-    </Button>
   )
 }
 

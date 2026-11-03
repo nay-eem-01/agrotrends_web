@@ -100,8 +100,9 @@ export function Footer({ className }: { className?: string }) {
         <div className="mt-12 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-border pt-6 text-muted-foreground">
           <span>© {YEAR} AgroTrends</span>
           <div className="flex gap-x-5 sm:ml-auto">
-            <LanguageSwitch className={link} />
-            <ThemeSwitch className={link} />
+            {/* 44px tall, so a thumb can hit them on a phone. */}
+            <LanguageSwitch className={`${link} inline-flex min-h-11 items-center`} />
+            <ThemeSwitch className={`${link} inline-flex min-h-11 items-center`} />
           </div>
         </div>
       </div>

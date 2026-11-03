@@ -134,10 +134,11 @@ function InlineSearch({ initial, field }: { initial: string; field: RefObject<HT
   }
 
   return (
+    // The pill keeps the field edge (`input`, 3:1) like every other field, and the paddy outline when focused.
     <search className="hidden min-w-0 flex-1 lg:block lg:max-w-sm xl:max-w-md">
       <form
         onSubmit={submit}
-        className="flex h-10 items-center gap-2 rounded-full bg-surface pr-2 pl-4 text-sm text-muted-foreground transition-[background-color,box-shadow] duration-150 focus-within:bg-background focus-within:ring-2 focus-within:ring-ring/40 hover:bg-secondary focus-within:hover:bg-background"
+        className="flex h-10 items-center gap-2 rounded-full bg-surface pr-2 pl-4 text-sm text-muted-foreground ring-1 ring-input transition-[background-color,box-shadow] duration-150 focus-within:bg-background focus-within:ring-2 focus-within:ring-primary hover:bg-secondary focus-within:hover:bg-background"
       >
         <MagnifyingGlass size={18} aria-hidden="true" className="shrink-0" />
         <input

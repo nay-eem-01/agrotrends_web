@@ -78,16 +78,43 @@ test('signed in, home shows questions and stories as two tabs, never mixed', asy
 })
 
 test('each tab has its own empty state, with the action that fills it', async () => {
-  mockApi(routes({ 'GET /api/questions/all': () => envelope(200, page([])), 'GET /api/blogs/all': () => envelope(200, page([])) }))
+  // Following no topics: All is the first view.
+  mockApi(routes({ 'GET /api/questions/all': () => envelope(200, page([])), 'GET /api/blogs/all': () => envelope(200, page([])), 'GET /api/me/following/tags': () => envelope(200, page([])) }))
   renderWithProviders(<App />, '/')
   const feed = screen.getByRole('main')
   expect(await screen.findByText('No questions yet. Ask the first one.')).toBeInTheDocument()
   expect(within(feed).getAllByRole('link', { name: 'Ask a question' }).some((link) => link.getAttribute('href') === '/questions/ask')).toBe(true)
-  // Not personalised yet, so the first chip says what it shows.
   expect(within(screen.getByRole('navigation', { name: 'Topics' })).getByRole('link', { name: 'All' })).toHaveAttribute('aria-current', 'page')
   await userEvent.click(within(screen.getByRole('navigation', { name: 'Show' })).getByRole('link', { name: 'Stories' }))
   expect(await screen.findByText('No stories yet.')).toBeInTheDocument()
   expect(within(feed).getByRole('link', { name: 'Write a story' })).toHaveAttribute('href', '/write')
+  // For you is for questions only.
+  expect(within(screen.getByRole('navigation', { name: 'Topics' })).queryByRole('link', { name: 'For you' })).not.toBeInTheDocument()
+})
+
+test('following topics, For you comes first with questions in those topics; All shows every question', async () => {
+  const api = mockApi(routes())
+  renderWithProviders(<App />, '/')
+  const chips = within(await screen.findByRole('navigation', { name: 'Topics' }))
+  await waitFor(() => expect(chips.getByRole('link', { name: 'For you' })).toHaveAttribute('aria-current', 'page'))
+  // The feed's reads (the rail's unanswered fallback is its own list).
+  const lists = () =>
+    api.mock.calls.map(([url]) => new URL(String(url), 'http://x')).filter((url) => url.pathname === '/api/questions/all' && url.searchParams.get('unanswered') !== 'true')
+  await waitFor(() => expect(lists().some((url) => url.searchParams.get('following') === 'true')).toBe(true))
+  // The default wasn't guessed first: no unfiltered read before the followed tags came back.
+  expect(lists().every((url) => url.searchParams.get('following') === 'true')).toBe(true)
+
+  await userEvent.click(chips.getByRole('link', { name: 'All' }))
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/?scope=all'))
+  expect(chips.getByRole('link', { name: 'All' })).toHaveAttribute('aria-current', 'page')
+  await waitFor(() => expect(lists().some((url) => !url.searchParams.has('following'))).toBe(true))
+})
+
+test('For you with nothing in the followed topics offers more topics', async () => {
+  mockApi(routes({ 'GET /api/questions/all': () => envelope(200, page([])) }))
+  renderWithProviders(<App />, '/?scope=following')
+  expect(await screen.findByText('Nothing yet in the topics you follow. Follow more topics, or see all questions.')).toBeInTheDocument()
+  expect(within(screen.getByRole('main')).getByRole('link', { name: 'Follow topics' })).toHaveAttribute('href', '/topics')
 })
 
 test('experts to follow appear once the backend serves them, and phones get the quick actions', async () => {

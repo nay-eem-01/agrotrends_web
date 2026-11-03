@@ -8,6 +8,7 @@ import { useExperts, type ExpertSummary } from '../../api/experts'
 import { useFeed, useTrendingQuestions } from '../../api/feed'
 import { useToggleAuthorFollow } from '../../api/follows'
 import { useQuestions } from '../../api/questions'
+import { useFollowedTags } from '../../api/topics'
 import type { StorySummary } from '../../api/types'
 import { storyDate } from '../../lib/dates'
 import { formatNumber, useT } from '../../lib/i18n'
@@ -34,13 +35,21 @@ export function HomeFeed() {
   const topic = Number(params.get('topic')) || undefined
   const unanswered = show === 'questions' && params.get('unanswered') === 'true'
   const categories = useCategories()
+  // For you: questions in the tags you follow. It is the first view once you follow any; `?scope=all` asks for all.
+  const followed = useFollowedTags(true)
+  const scope = params.get('scope')
+  const forYou = show === 'questions' && !topic && (scope === 'following' || (scope !== 'all' && (followed.data?.length ?? 0) > 0))
+  // Until the followed tags are known, the default view isn't either; nothing is read twice.
+  const deciding = show === 'questions' && !topic && scope == null && followed.isPending
   // The tab, topic and sort as one link; switching tabs keeps the topic and drops the questions-only sort.
-  const to = (next: { show?: Show; topic?: number; unanswered?: boolean }) => {
+  const to = (next: { show?: Show; topic?: number; unanswered?: boolean; scope?: 'following' | 'all' }) => {
     const query = new URLSearchParams()
     const tab = next.show ?? show
     const id = 'topic' in next ? next.topic : topic
     if (tab === 'stories') query.set('show', 'stories')
     if (id) query.set('topic', String(id))
+    else if (tab === 'questions' && next.scope) query.set('scope', next.scope)
+    else if (tab === 'questions' && !('topic' in next) && scope) query.set('scope', scope)
     if (tab === 'questions' && ('unanswered' in next ? next.unanswered : unanswered)) query.set('unanswered', 'true')
     const search = query.toString()
     return search ? `/?${search}` : '/'
@@ -75,8 +84,12 @@ export function HomeFeed() {
         <div className="flex flex-wrap items-center gap-3 py-4">
           {/* One row that scrolls at every width, so a long topic never sits alone on a second line. */}
           <nav aria-label={t('Topics')} className="-mx-4 flex min-w-0 flex-1 basis-full gap-2 overflow-x-auto px-4 pb-1 sm:basis-0 [scrollbar-width:none] sm:mx-0 sm:px-0">
-            {/* "All" until the backend can show the topics you follow (BACKEND_REQUESTS_AUDIT.md B4). */}
-            <TopicChip to={to({ topic: undefined })} current={!topic}>
+            {show === 'questions' && (
+              <TopicChip to={to({ topic: undefined, scope: 'following' })} current={forYou}>
+                {t('For you')}
+              </TopicChip>
+            )}
+            <TopicChip to={to({ topic: undefined, scope: 'all' })} current={!topic && !forYou}>
               {t('All')}
             </TopicChip>
             {(categories.data ?? []).slice(0, 6).map((category) => (
@@ -106,27 +119,39 @@ export function HomeFeed() {
             </nav>
           )}
         </div>
-        {show === 'questions' ? <QuestionList topic={topic} unanswered={unanswered} /> : <StoryList topic={topic} />}
+        {show === 'questions' ? <QuestionList topic={topic} unanswered={unanswered} following={forYou} waiting={deciding} /> : <StoryList topic={topic} />}
       </section>
       <Rail />
     </div>
   )
 }
 
-/** The Questions tab: newest (or unanswered) questions in the topic. */
-function QuestionList({ topic, unanswered }: { topic?: number; unanswered: boolean }) {
+/** The Questions tab: newest (or unanswered) questions in the topic, or in the tags you follow (For you). */
+function QuestionList({ topic, unanswered, following, waiting }: { topic?: number; unanswered: boolean; following: boolean; waiting: boolean }) {
   const t = useT()
-  const questions = useQuestions({ ...(topic ? { categoryId: topic } : {}), ...(unanswered ? { unanswered: true } : {}) })
+  const questions = useQuestions({ ...(topic ? { categoryId: topic } : {}), ...(unanswered ? { unanswered: true } : {}), ...(following ? { following: true } : {}) }, !waiting)
   const items = questions.data?.pages.flatMap((page) => page.content) ?? []
   return (
     <FeedList
-      loading={questions.isPending}
-      empty={topic ? t('No questions in this topic yet. Ask the first one.') : t('No questions yet. Ask the first one.')}
+      loading={waiting || questions.isPending}
+      empty={
+        following
+          ? t('Nothing yet in the topics you follow. Follow more topics, or see all questions.')
+          : topic
+            ? t('No questions in this topic yet. Ask the first one.')
+            : t('No questions yet. Ask the first one.')
+      }
       action={
-        <ButtonLink to="/questions/ask">
-          <ChatCircleText size={18} aria-hidden="true" />
-          {t('Ask a question')}
-        </ButtonLink>
+        following ? (
+          <ButtonLink to="/topics" variant="secondary">
+            {t('Follow topics')}
+          </ButtonLink>
+        ) : (
+          <ButtonLink to="/questions/ask">
+            <ChatCircleText size={18} aria-hidden="true" />
+            {t('Ask a question')}
+          </ButtonLink>
+        )
       }
       more={questions.hasNextPage}
       loadingMore={questions.isFetchingNextPage}

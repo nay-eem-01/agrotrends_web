@@ -120,6 +120,8 @@ export interface QuestionFilters extends AgriFilters {
   categoryId?: number
   tag?: string
   unanswered?: boolean
+  /** Only questions carrying a tag the reader follows (signed in). */
+  following?: boolean
 }
 
 export function readQuestionFilters(params: URLSearchParams): QuestionFilters {

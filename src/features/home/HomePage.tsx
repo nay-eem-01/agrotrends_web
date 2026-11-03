@@ -22,6 +22,8 @@ const HomeFeed = lazy(() => import('./HomeFeed').then((m) => ({ default: m.HomeF
 export function HomePage() {
   const t = useT()
   const { status } = useSession()
+  // Until the session is known, neither page: a returning member would otherwise read Discover's lists first.
+  if (status === 'restoring') return <Skeleton className="mx-auto mt-8 h-64 max-w-(--container-page) rounded-2xl" />
   if (status === 'signed-in') {
     return (
       <Suspense fallback={<Skeleton className="mx-auto mt-8 h-64 max-w-(--container-page) rounded-2xl" />}>

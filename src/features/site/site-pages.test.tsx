@@ -24,6 +24,9 @@ test('the footer links to every section, the about page and both legal pages, an
   expect(await screen.findByRole('heading', { level: 1, name: 'About us' })).toBeInTheDocument()
 
   const footer = screen.getByRole('contentinfo')
+  // Under the page and the sidebar, not beside the sidebar inside the page column.
+  expect(screen.getByRole('main').contains(footer)).toBe(false)
+  expect(footer.parentElement?.contains(screen.getByRole('main'))).toBe(true)
   const explore = within(footer).getByRole('navigation', { name: 'Explore' })
   expect(within(explore).getByRole('link', { name: 'Topics' })).toHaveAttribute('href', '/topics')
   const about = within(footer).getByRole('navigation', { name: 'AgroTrends' })

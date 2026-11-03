@@ -51,7 +51,7 @@ export function HomeFeed() {
   ]
 
   return (
-    <div className="mx-auto grid max-w-[64rem] gap-8 px-4 pt-6 pb-20 sm:px-8 lg:grid-cols-[minmax(0,1fr)_16rem] lg:gap-10">
+    <div className="mx-auto grid max-w-[84rem] gap-8 px-4 pt-6 pb-4 sm:px-8 lg:grid-cols-[minmax(0,1fr)_17rem] lg:gap-10 xl:grid-cols-[minmax(0,1fr)_20rem] xl:gap-14">
       <title>{t('AgroTrends – farming questions, stories and advice')}</title>
       <h1 className="sr-only">{t('Home')}</h1>
       <section aria-label={t('Your feed')} className="min-w-0">

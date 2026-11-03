@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend · ➡ moved to a later step
 
-**Progress:** 113 of 113 steps done
+**Progress:** 114 of 114 steps done
 
 ---
 
@@ -274,6 +274,7 @@ and shows what the new endpoints allow.
 | F23.7 | About us, Privacy policy and Terms of use pages; a full footer (brand line, Explore / AgroTrends / Legal, contact e-mail, social links once their URLs are set); "you agree to the terms" on sign-up (`feat/site-pages`) | ✅ |
 | F23.8 | Faster pages: the question page loads its answers, AI answer and votes beside the question; hovering, pressing or focusing a question or story link starts its page; lazy images in stories; My stories skips a profile read (`perf/faster-pages`) | ✅ |
 | F23.9 | Profile photo and cover open full size (an image viewer); your photo on the account menu in the top bar (`fix/profile-images`) | ✅ |
+| F23.10 | Footer full width under the page and the sidebar on a tinted band, link groups together on the right; the signed-in home feed widened to 84rem with a wider rail (`fix/footer-home-width`) | ✅ |
 
 ## Needs from the backend
 

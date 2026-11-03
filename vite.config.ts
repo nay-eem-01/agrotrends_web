@@ -22,6 +22,8 @@ export default defineConfig({
         },
       },
       '/uploads': apiTarget,
+      // Link previews for shared questions and stories (the backend's /share pages).
+      '/share': apiTarget,
     },
   },
   test: {

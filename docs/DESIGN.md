@@ -123,6 +123,9 @@ Page width 1240px, gutters 16px (phones) / 32px; reading column 680px; feed colu
   on answers (Unanswered, Not yet checked by an expert, Confirmed, Accepted) at the product's size. Then "Why we
   started" (head beside its first sentence and the text), "What you can do here" as rows, Verified experts on the leaf
   wash beside Who we are, and Talk to us with the address set large. One composition for both languages (`COPY`).
+- **Share card (`public/og-default.png`, F24.8):** 1200 x 630 on the leaf wash: the mark and Lora wordmark, the
+  Discover headline and line, and a white panel with the three marks an answer earns. The fallback preview image when
+  a shared question or story has no picture; redraw it from the same tokens if the headline changes.
 - **Questions (`/questions`):** header + Ask, topics as chips (first six; "More topics" picker past
   that), Newest | Unanswered, Filter popover, active-filter chips; rows with votes, answer state and the first
   photo; sidebar: advisor card and "Getting a good answer". Question page: back link, Inter title, body, a horizontal

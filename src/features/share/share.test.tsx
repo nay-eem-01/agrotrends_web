@@ -40,7 +40,7 @@ test('on a computer, Share offers Copy link and each service with the question a
 
   await userEvent.click(await screen.findByRole('button', { name: 'Share' }))
   const menu = await screen.findByRole('menu')
-  const address = `${window.location.origin}/questions/5`
+  const address = `${window.location.origin}/share/questions/5`
   expect(within(menu).getByRole('menuitem', { name: 'Facebook' })).toHaveAttribute('href', `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(address)}`)
   expect(within(menu).getByRole('menuitem', { name: 'WhatsApp' })).toHaveAttribute('target', '_blank')
   for (const name of ['X', 'LinkedIn', 'Telegram', 'E-mail']) expect(within(menu).getByRole('menuitem', { name })).toBeInTheDocument()
@@ -60,7 +60,7 @@ test("on a phone, Share opens the phone's own share sheet with the title and add
   renderWithProviders(<App />, '/questions/5')
 
   await userEvent.click(await screen.findByRole('button', { name: 'Share' }))
-  expect(share).toHaveBeenCalledWith({ title: 'Yellow seedlings', text: 'Yellow seedlings', url: `${window.location.origin}/questions/5` })
+  expect(share).toHaveBeenCalledWith({ title: 'Yellow seedlings', text: 'Yellow seedlings', url: `${window.location.origin}/share/questions/5` })
   expect(screen.queryByRole('menu')).not.toBeInTheDocument()
 })
 

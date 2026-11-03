@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend · ➡ moved to a later step
 
-**Progress:** 112 of 112 steps done
+**Progress:** 113 of 113 steps done
 
 ---
 
@@ -273,6 +273,7 @@ and shows what the new endpoints allow.
 | F23.6 | Admin and review screens in the current design: the admin sections join the app sidebar (one rail; tabs on phones), Lora titles, no mustard on the overview, a pill search, the back link above a member's name, red Delete; the review queue in the sidebar for Verified Experts (`feat/admin-design`) | ✅ |
 | F23.7 | About us, Privacy policy and Terms of use pages; a full footer (brand line, Explore / AgroTrends / Legal, contact e-mail, social links once their URLs are set); "you agree to the terms" on sign-up (`feat/site-pages`) | ✅ |
 | F23.8 | Faster pages: the question page loads its answers, AI answer and votes beside the question; hovering, pressing or focusing a question or story link starts its page; lazy images in stories; My stories skips a profile read (`perf/faster-pages`) | ✅ |
+| F23.9 | Profile photo and cover open full size (an image viewer); your photo on the account menu in the top bar (`fix/profile-images`) | ✅ |
 
 ## Needs from the backend
 

@@ -693,4 +693,6 @@ export const BN: Record<string, string> = {
   'Last updated {date}': 'সর্বশেষ হালনাগাদ {date}',
   'This page is in English for now. A Bengali version is coming.': 'এই পাতাটি আপাতত ইংরেজিতে। বাংলা সংস্করণ শীঘ্রই আসছে।',
   'By creating an account you agree to the {terms} and the {privacy}.': 'অ্যাকাউন্ট খুলে আপনি {terms} ও {privacy} মেনে নিচ্ছেন।',
+  "{name}'s cover photo": '{name}-এর কভার ছবি',
+  "{name}'s profile photo": '{name}-এর প্রোফাইল ছবি',
 }

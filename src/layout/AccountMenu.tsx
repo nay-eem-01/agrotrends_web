@@ -14,6 +14,7 @@ import {
 import { isAdmin } from '../api/auth'
 import { useSession } from '../features/auth/session'
 import { useMyBadges } from '../features/experts/useMyBadges'
+import { useMyAuthorProfile } from '../api/authors'
 import { Avatar } from '../ui/Avatar'
 
 const item = 'min-h-11 text-muted-foreground'
@@ -29,6 +30,8 @@ export function AccountMenu() {
   const lang = useLang()
   const queryClient = useQueryClient()
   const name = user?.name || t('Your account')
+  // The session has no photo; the author profile does, and Settings updates it in place after a change.
+  const photo = useMyAuthorProfile(user != null).data?.profileImageUrl || undefined
   // The review queue is for Verified Experts; the entry stays hidden for everyone else.
   const { expertAnywhere } = useMyBadges()
   const nextLang = lang === 'bn' ? 'en' : 'bn'
@@ -42,7 +45,7 @@ export function AccountMenu() {
     <DropdownMenu>
       <DropdownMenuTrigger className="flex size-11 items-center justify-center rounded-full transition-transform duration-150 ease-(--ease-out) active:scale-[0.94]">
         <span className="sr-only">{t('Account')}</span>
-        <Avatar name={name} size={32} />
+        <Avatar name={name} src={photo} size={32} />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-64">
         <DropdownMenuGroup>

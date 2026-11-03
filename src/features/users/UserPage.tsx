@@ -13,6 +13,7 @@ import { useUserAnswers, useUserProfile } from '../../api/users'
 import { storyDate } from '../../lib/dates'
 import { formatNumber, useT } from '../../lib/i18n'
 import { Avatar } from '../../ui/Avatar'
+import { ImageViewer } from '../../ui/ImageViewer'
 import { Button, ButtonLink } from '../../ui/Button'
 import { Spinner } from '../../ui/Spinner'
 import { BanControls } from '../admin/BanControls'
@@ -85,15 +86,24 @@ export function UserPage() {
   return (
     <section className="mx-auto max-w-[68rem] px-4 pt-6 pb-20 sm:px-8">
       <title>{`${name} – AgroTrends`}</title>
-      <div aria-hidden="true" className="relative h-28 overflow-hidden rounded-2xl bg-surface sm:h-36">
-        {p?.coverUrl ? (
+      {/* Cover and photo open full size when there is a picture to show. */}
+      {p?.coverUrl ? (
+        <ImageViewer src={p.coverUrl} label={t("{name}'s cover photo", { name })} className="block h-28 w-full overflow-hidden rounded-2xl bg-surface sm:h-36">
           <img src={p.coverUrl} alt="" className="size-full object-cover" />
-        ) : (
+        </ImageViewer>
+      ) : (
+        <div aria-hidden="true" className="relative h-28 overflow-hidden rounded-2xl bg-surface sm:h-36">
           <span className="absolute -top-16 right-10 size-48 rounded-full bg-mustard-soft" />
-        )}
-      </div>
+        </div>
+      )}
       <div className="flex flex-wrap items-end justify-between gap-3 px-1 sm:px-6">
-        <Avatar name={name} src={a?.profileImageUrl || undefined} size={88} className="relative -mt-11 ring-4 ring-background" />
+        {a?.profileImageUrl ? (
+          <ImageViewer src={a.profileImageUrl} label={t("{name}'s profile photo", { name })} className="relative -mt-11 rounded-full">
+            <Avatar name={name} src={a.profileImageUrl} size={88} className="block ring-4 ring-background" />
+          </ImageViewer>
+        ) : (
+          <Avatar name={name} size={88} className="relative -mt-11 ring-4 ring-background" />
+        )}
         <div className="flex items-center gap-2">
           {own ? (
             <>

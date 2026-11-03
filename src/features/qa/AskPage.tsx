@@ -11,6 +11,7 @@ import { Spinner } from '../../ui/Spinner'
 import { useSession } from '../auth/session'
 import { NotFoundPage } from '../errors/NotFoundPage'
 import { TagInput } from '../topics/TagInput'
+import { PhotoPicker } from './PhotoPicker'
 import { QuestionEditor } from './QuestionEditor'
 import { SimilarQuestions } from './SimilarQuestions'
 import { TopicPicker } from './TopicPicker'
@@ -102,7 +103,7 @@ function QuestionForm({ question }: { question?: Question }) {
   }
 
   return (
-    <section className="mx-auto max-w-(--container-page) px-4 pt-8 pb-20 sm:px-8 sm:pt-10">
+    <section className="mx-auto max-w-(--container-page) px-4 pt-6 pb-8 sm:px-8 sm:pt-10 sm:pb-20">
       <title>{question ? t('Edit question – AgroTrends') : t('Ask a question – AgroTrends')}</title>
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-14">
         <div className="max-w-(--container-feed) min-w-0">
@@ -117,13 +118,12 @@ function QuestionForm({ question }: { question?: Question }) {
             <QuestionEditor
               title={title}
               html={details}
-              photos={imageUrls}
               titleError={errors.title}
               detailsError={errors.details}
               onTitleChange={setTitle}
               onHtmlChange={setDetails}
-              onPhotosChange={setImageUrls}
             />
+            <PhotoPicker urls={imageUrls} onChange={setImageUrls} />
             {!question && <SimilarQuestions title={title} />}
             <div className="flex flex-col gap-7 border-t border-border pt-7">
               <TopicPicker categories={categories.data ?? []} loading={categories.isPending} value={categoryId} error={errors.topic} onChange={setCategoryId} />
@@ -134,9 +134,9 @@ function QuestionForm({ question }: { question?: Question }) {
                 {errorMessage(write.error)}
               </p>
             )}
-            {/* The one primary action stays in reach however long the details get; on phones it rides above the
-                bottom navigation (BottomNav, 3.5rem plus the safe area). */}
-            <div className="sticky bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-10 -mx-4 mt-2 flex items-center gap-3 border-t border-border bg-background/95 px-4 py-3 backdrop-blur-sm sm:mx-0 sm:px-0 md:bottom-0">
+            {/* The one primary action stays in reach however long the details get. Asking is a task page (AppLayout):
+                no tab bar under it on phones, so the bar sits on the screen's edge, clear of the home indicator. */}
+            <div className="sticky bottom-0 z-10 -mx-4 mt-2 flex items-center gap-3 border-t border-border bg-background/95 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur-sm sm:mx-0 sm:px-0">
               <p className="mr-auto hidden min-w-0 text-sm text-muted-foreground sm:block" aria-live="polite">
                 {missing.length > 0 ? (
                   t('Still needed: {list}', { list: missing.join(', ') })
@@ -151,7 +151,7 @@ function QuestionForm({ question }: { question?: Question }) {
               <Button variant="quiet" className="ml-auto sm:ml-0" onClick={() => navigate(-1)}>
                 {t('Cancel')}
               </Button>
-              <Button type="submit" loading={write.isPending} className="min-w-36">
+              <Button type="submit" loading={write.isPending} className="min-w-36 flex-1 sm:flex-none">
                 <PaperPlaneTilt size={18} weight="fill" aria-hidden="true" />
                 {question ? t('Save question') : t('Post question')}
               </Button>

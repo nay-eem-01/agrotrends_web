@@ -235,3 +235,39 @@ test('changing the place on an edit keeps the question’s other farming details
   await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/questions/5'))
   expect(body(api, '/api/questions/update').agri).toEqual({ crop: 'boro rice', season: 'RABI', region: 'Dinajpur' })
 })
+
+test('asking can be private: only the question is needed, and it opens the advisor with it instead of posting', async () => {
+  const api = mockApi({ ...signedInAs({ id: 9, name: 'Karim' }), ...categories })
+  renderWithProviders(<App />, '/questions/ask')
+
+  const choice = within(await screen.findByRole('group', { name: 'Who should answer?' }))
+  expect(choice.getByRole('radio', { name: 'Everyone, in public' })).toBeChecked()
+  expect(screen.getByRole('group', { name: 'Topic' })).toBeVisible()
+
+  await userEvent.click(choice.getByRole('radio', { name: 'Only the AI, privately' }))
+  expect(choice.getByRole('radio', { name: 'Only the AI, privately' })).toHaveAccessibleDescription('Only you see it. An answer in seconds with sources; no expert checks it.')
+  // Topic, place, tags and photos are for public questions.
+  expect(screen.queryByRole('group', { name: 'Topic' })).not.toBeInTheDocument()
+  expect(screen.queryByRole('group', { name: 'Photos (optional)' })).not.toBeInTheDocument()
+
+  await userEvent.type(screen.getByLabelText('Your question'), 'Fish gasping at dawn')
+  await userEvent.click(screen.getByRole('textbox', { name: 'Details' }))
+  await userEvent.keyboard('Pond of 30 decimals')
+  await userEvent.click(screen.getByRole('button', { name: 'Ask the AI privately' }))
+
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent(/^\/advisor\?q=/))
+  expect(new URLSearchParams(screen.getByTestId('path').textContent!.split('?')[1]).get('q')).toBe('Fish gasping at dawn\n\nPond of 30 decimals')
+  expect(api.mock.calls.some(([url]) => url === '/api/questions/create')).toBe(false)
+})
+
+test('an edit has no choice: it stays the public question it is', async () => {
+  mockApi({
+    ...signedInAs({ id: 9, name: 'Karim' }),
+    ...categories,
+    'GET /api/questions/id/5': () => envelope(200, question),
+    'GET /api/answers/question/5': () => envelope(200, []),
+  })
+  renderWithProviders(<App />, '/questions/5/edit')
+  await screen.findByRole('button', { name: 'Save question' })
+  expect(screen.queryByRole('group', { name: 'Who should answer?' })).not.toBeInTheDocument()
+})

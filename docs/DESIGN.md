@@ -126,6 +126,9 @@ Page width 1240px, gutters 16px (phones) / 32px; reading column 680px; feed colu
 - **Share card (`public/og-default.png`, F24.8):** 1200 x 630 on the leaf wash: the mark and Lora wordmark, the
   Discover headline and line, and a white panel with the three marks an answer earns. The fallback preview image when
   a shared question or story has no picture; redraw it from the same tokens if the headline changes.
+- **Ask (`/questions/ask`, F24.1, F24.6, F24.7):** "Who should answer?" first (Everyone, in public / Only the AI,
+  privately, as radio cards); the title, the editor, Photos as a labelled field, then Topic, "Where are you?" and
+  Tags; the Post bar on the screen's edge (no tab bar). Private hides the public-only fields and opens the advisor.
 - **Questions (`/questions`):** header + Ask, topics as chips (first six; "More topics" picker past
   that), Newest | Unanswered, Filter popover, active-filter chips; rows with votes, answer state and the first
   photo; sidebar: advisor card and "Getting a good answer". Question page: back link, Inter title, body, a horizontal

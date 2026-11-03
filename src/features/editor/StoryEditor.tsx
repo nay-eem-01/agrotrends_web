@@ -87,41 +87,44 @@ function Toolbar({ editor }: { editor: Editor }) {
     chain().setLink({ href: /^(https?:|mailto:|\/)/i.test(url) ? url : `https://${url}` }).run()
   }
 
+  // One row that scrolls sideways on phones, as the question editor's does; it wraps once there's room.
   return (
-    <div role="toolbar" aria-label="Formatting" className="sticky top-16 z-10 flex flex-wrap items-center gap-0.5 rounded-2xl bg-muted/90 p-1 backdrop-blur-sm">
-      <Tool label="Heading" pressed={state.h2} onClick={() => chain().toggleHeading({ level: 2 }).run()}>
-        <TextHTwo size={20} />
-      </Tool>
-      <Tool label="Subheading" pressed={state.h3} onClick={() => chain().toggleHeading({ level: 3 }).run()}>
-        <TextHThree size={20} />
-      </Tool>
-      <Tool label="Bold" pressed={state.bold} onClick={() => chain().toggleBold().run()}>
-        <TextB size={20} />
-      </Tool>
-      <Tool label="Italic" pressed={state.italic} onClick={() => chain().toggleItalic().run()}>
-        <TextItalic size={20} />
-      </Tool>
-      <Tool label="Link" pressed={state.link} onClick={toggleLink}>
-        <LinkSimple size={20} />
-      </Tool>
-      <Tool label="Image" pressed={false} onClick={picker.open}>
-        {picker.uploading ? <Spinner size={18} label="Uploading image" /> : <ImageIcon size={20} />}
-      </Tool>
-      {picker.input}
+    <div className="sticky top-16 z-10">
+      <div role="toolbar" aria-label="Formatting" className="flex items-center gap-0.5 overflow-x-auto rounded-2xl bg-muted/90 p-1 backdrop-blur-sm [scrollbar-width:none] sm:flex-wrap sm:overflow-visible">
+        <Tool label="Heading" pressed={state.h2} onClick={() => chain().toggleHeading({ level: 2 }).run()}>
+          <TextHTwo size={20} />
+        </Tool>
+        <Tool label="Subheading" pressed={state.h3} onClick={() => chain().toggleHeading({ level: 3 }).run()}>
+          <TextHThree size={20} />
+        </Tool>
+        <Tool label="Bold" pressed={state.bold} onClick={() => chain().toggleBold().run()}>
+          <TextB size={20} />
+        </Tool>
+        <Tool label="Italic" pressed={state.italic} onClick={() => chain().toggleItalic().run()}>
+          <TextItalic size={20} />
+        </Tool>
+        <Tool label="Link" pressed={state.link} onClick={toggleLink}>
+          <LinkSimple size={20} />
+        </Tool>
+        <Tool label="Image" pressed={false} onClick={picker.open}>
+          {picker.uploading ? <Spinner size={18} label="Uploading image" /> : <ImageIcon size={20} />}
+        </Tool>
+        {picker.input}
+        <Tool label="Quote" pressed={state.quote} onClick={() => chain().toggleBlockquote().run()}>
+          <Quotes size={20} />
+        </Tool>
+        <Tool label="Bulleted list" pressed={state.bullets} onClick={() => chain().toggleBulletList().run()}>
+          <ListBullets size={20} />
+        </Tool>
+        <Tool label="Numbered list" pressed={state.numbers} onClick={() => chain().toggleOrderedList().run()}>
+          <ListNumbers size={20} />
+        </Tool>
+      </div>
       {picker.error && (
-        <p role="alert" className="flex items-center px-2 text-sm text-destructive">
+        <p role="alert" className="mt-1 rounded-xl bg-background px-2 py-1 text-sm text-destructive">
           {picker.error}
         </p>
       )}
-      <Tool label="Quote" pressed={state.quote} onClick={() => chain().toggleBlockquote().run()}>
-        <Quotes size={20} />
-      </Tool>
-      <Tool label="Bulleted list" pressed={state.bullets} onClick={() => chain().toggleBulletList().run()}>
-        <ListBullets size={20} />
-      </Tool>
-      <Tool label="Numbered list" pressed={state.numbers} onClick={() => chain().toggleOrderedList().run()}>
-        <ListNumbers size={20} />
-      </Tool>
     </div>
   )
 }
@@ -136,7 +139,7 @@ function Tool({ label, pressed, onClick, children }: { label: string; pressed: b
       onMouseDown={(event) => event.preventDefault()}
       onClick={onClick}
       className={cx(
-        'flex size-11 items-center justify-center rounded-xl transition-[color,background-color] duration-150',
+        'flex size-11 shrink-0 items-center justify-center rounded-xl transition-[color,background-color] duration-150',
         pressed ? 'bg-card text-primary shadow-xs' : 'text-muted-foreground hover:bg-card hover:text-foreground',
       )}
     >

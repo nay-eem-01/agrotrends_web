@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend · ➡ moved to a later step
 
-**Progress:** 116 of 116 steps done
+**Progress:** 117 of 134 steps done
 
 ---
 
@@ -277,6 +277,32 @@ and shows what the new endpoints allow.
 | F23.10 | Footer full width under the page and the sidebar on a tinted band, link groups together on the right; the signed-in home feed widened to 84rem with a wider rail (`fix/footer-home-width`) | ✅ |
 | F23.11 | Reply to a reply, two levels deep like Facebook: Reply on replies to answers and to story responses, the box starts with `@name`, sent with that reply's id (backend 4.26) (`feat/reply-to-reply`) | ✅ |
 | F23.12 | The "replied to your answer" notification (`ANSWER_REPLY`, backend 4.27), opening the question (`feat/answer-reply-notification`) | ✅ |
+
+## Phase F24 — Audit fixes (`feat/audit-base`, from `development`)
+
+The product and UX audit of 2026-11-03 (https://claude.ai/artifact/MPuLZ9XMhPQop8JEqwzCQz), smallest first. What the
+web can't do alone is in `docs/BACKEND_REQUESTS_AUDIT.md` (B1–B12); those steps wait for their item.
+
+| # | Step | Status |
+|---|---|---|
+| F24.1 | Ask and Write on phones: no tab bar on composing pages (the Post bar takes the bottom edge), no footer under Ask, Write or the advisor, photos as a labelled field under the details, the story toolbar in one scrolling row (`feat/phone-tasks`) | ✅ |
+| F24.2 | Share on questions and stories to every social (the phone's share sheet, Facebook, WhatsApp, Messenger, X, LinkedIn, Telegram, copy link); the Facebook and Instagram pages in the footer (`feat/share`) | ⬜ |
+| F24.3 | Discover for visitors (Hallmark pass): one Ask, claims only what's live, one advisor promo, an honest day-one state (`feat/discover-hallmark`) | ⬜ |
+| F24.4 | About page (Hallmark pass): who runs it and how an answer gets checked (`feat/about-hallmark`) | ⬜ |
+| F24.5 | Small honest fixes: Ask instead of Write for visitors, empty lists with their action, Google's button in the page's language, topic chips in one row, "All" until "For you" is real (`fix/audit-small`) | ⬜ |
+| F24.6 | Where you are on Ask: an optional place, prefilled from your profile (`feat/ask-place`) | ⬜ |
+| F24.7 | One Ask: post publicly (AI now, experts check) or ask privately (AI only, not checked); the advisor says its answers aren't checked (`feat/one-ask`) | ⬜ |
+| F24.8 | Link-preview card: the default `og:image` and the `/share` links (B7) (`feat/share-card`) | ⏸ |
+| F24.9 | Reply counts: "3 replies", nothing at 0 (B1) (`feat/reply-counts`) | ⏸ |
+| F24.10 | "7 of 10 left today" in the advisor (B2) (`feat/ai-allowance`) | ⏸ |
+| F24.11 | The relaxed password rule (B3) (`feat/password-rule`) | ⏸ |
+| F24.12 | "For you" from the topics you follow (B4) (`feat/for-you`) | ⏸ |
+| F24.13 | E-mail settings, your language and the unsubscribe page; "we'll e-mail you" after asking (B5, B8) (`feat/email-settings`) | ⏸ |
+| F24.14 | Launch-test panel in admin (B6) (`feat/launch-metrics`) | ⏸ |
+| F24.15 | "Cited in N AI answers" and an impact line on profiles (B9) (`feat/impact`) | ⏸ |
+| F24.16 | Digest preview for admins (B10) (`feat/digest-preview`) | ⏸ |
+| F24.17 | Notify me on a question (B11) (`feat/follow-question`) | ⏸ |
+| F24.18 | Refresh token from the HttpOnly cookie (B12) (`feat/refresh-cookie`) | ⏸ |
 
 ## Needs from the backend
 

@@ -1,5 +1,6 @@
 import { Suspense } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
+import { cn } from 'cn'
 import { Toaster } from '@/components/ui/sonner'
 import { ConfirmEmailHost, EmailBanner } from '../features/auth/confirmEmail'
 import { Spinner } from '../ui/Spinner'
@@ -11,9 +12,19 @@ import { useLinkPrefetch } from './useLinkPrefetch'
 
 // Signing in, signing up and the password and e-mail steps are a single task: no navigation around them.
 const FOCUSED = ['/sign-in', '/sign-up', '/forgot-password', '/reset-password', '/verify-email']
+// Writing a question or a story: the sidebar stays on wide screens, but phones lose the tab bar (its bar of actions
+// takes the bottom edge instead) and no page has the footer under the form.
+const COMPOSING = [/^\/questions\/ask$/, /^\/questions\/\d+\/edit$/, /^\/write(\/\d+)?$/]
+// The advisor is a conversation with its composer at the bottom; a footer under it only gets in the way.
+const NO_FOOTER = [...COMPOSING, /^\/advisor$/]
+
+export const isComposing = (path: string) => COMPOSING.some((pattern) => pattern.test(path))
 
 export function AppLayout() {
-  const focused = FOCUSED.includes(useLocation().pathname)
+  const { pathname } = useLocation()
+  const focused = FOCUSED.includes(pathname)
+  const composing = isComposing(pathname)
+  const footer = !NO_FOOTER.some((pattern) => pattern.test(pathname))
   useLinkPrefetch()
   return (
     <SidebarProvider>
@@ -28,7 +39,7 @@ export function AppLayout() {
         <div className="flex flex-1">
           {!focused && <AppSidebar />}
           <div className="flex min-w-0 flex-1 flex-col">
-            <main id="main" className="flex-1 pb-16">
+            <main id="main" className={cn('flex-1', footer && 'pb-16')}>
               <Suspense
                 fallback={
                   <div className="flex justify-center py-24 text-ink-muted">
@@ -42,8 +53,8 @@ export function AppLayout() {
           </div>
         </div>
         {/* Below 768px the footer's band also runs under the fixed tab bar. */}
-        <Footer className={focused ? undefined : 'pb-16 md:pb-0'} />
-        {!focused && <BottomNav />}
+        {footer && <Footer className={focused ? undefined : 'pb-16 md:pb-0'} />}
+        {!focused && !composing && <BottomNav />}
         <ConfirmEmailHost />
         <Toaster position="bottom-center" mobileOffset={{ bottom: 80 }} />
       </div>

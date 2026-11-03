@@ -21,6 +21,7 @@ import { PostMenu } from '../threads/PostMenu'
 import { AiAnswerCard } from './AiAnswerCard'
 import { AuthorLine } from './AuthorLine'
 import { VoteControl } from './VoteControl'
+import { ShareButton } from '../share/ShareButton'
 
 export function QuestionPage() {
   const t = useT()
@@ -153,10 +154,13 @@ function QuestionView({ question }: { question: Question }) {
                     badges={question.authorBadges}
                     meta={t('Asked {date}', { date: storyDate(question.createdAt) })}
                   />
-                  <a href="#your-answer" className={buttonClass('primary', 'sm', 'lg:hidden')}>
-                    <ChatCircleText size={16} aria-hidden="true" />
-                    {t('Write an answer')}
-                  </a>
+                  <div className="flex items-center gap-2">
+                    <ShareButton path={`/questions/${id}`} title={question.title ?? ''} />
+                    <a href="#your-answer" className={buttonClass('primary', 'sm', 'lg:hidden')}>
+                      <ChatCircleText size={16} aria-hidden="true" />
+                      {t('Write an answer')}
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>

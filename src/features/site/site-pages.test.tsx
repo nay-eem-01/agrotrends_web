@@ -19,7 +19,7 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
-test('the footer links to every section, the about page and both legal pages, and to the contact address', async () => {
+test('the footer links to every section, the about page, both legal pages, the contact address and our social pages', async () => {
   renderWithProviders(<App />, '/about')
   expect(await screen.findByRole('heading', { level: 1, name: 'About us' })).toBeInTheDocument()
 
@@ -33,8 +33,9 @@ test('the footer links to every section, the about page and both legal pages, an
   expect(within(about).getByRole('link', { name: 'About us' })).toHaveAttribute('href', '/about')
   expect(within(about).getByRole('link', { name: 'Contact us' })).toHaveAttribute('href', `mailto:${CONTACT_EMAIL}`)
   const legal = within(footer).getByRole('navigation', { name: 'Legal' })
-  // Social links stay hidden until their pages are filled in.
-  expect(within(footer).queryByRole('list', { name: 'AgroTrends elsewhere' })).not.toBeInTheDocument()
+  const elsewhere = within(footer).getByRole('list', { name: 'AgroTrends elsewhere' })
+  expect(within(elsewhere).getByRole('link', { name: 'Facebook' })).toHaveAttribute('href', 'https://www.facebook.com/AgroTrends')
+  expect(within(elsewhere).getByRole('link', { name: 'Instagram' })).toHaveAttribute('href', 'https://www.instagram.com/agrotrendsbd')
 
   await userEvent.click(within(legal).getByRole('link', { name: 'Privacy policy' }))
   expect(await screen.findByRole('heading', { level: 1, name: 'Privacy policy' })).toBeInTheDocument()

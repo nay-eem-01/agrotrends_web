@@ -20,6 +20,7 @@ import { useAuthor } from '../../api/authors'
 import { useSession } from '../auth/session'
 import { FollowAuthorButton } from '../authors/FollowAuthorButton'
 import { ReportButton } from '../reports/ReportButton'
+import { ShareButton } from '../share/ShareButton'
 import { BookmarkButton } from '../reactions/BookmarkButton'
 import { ClapButton } from '../reactions/ClapButton'
 import { WrittenBy } from '../authors/AuthorPage'
@@ -188,6 +189,8 @@ function StoryActions({ story }: { story: BlogResponse }) {
     <div className="mt-6 flex items-center justify-between border-y border-border py-1">
       <ClapButton story={story} />
       <div className="flex items-center gap-1">
+        {/* Drafts have no public address to share. */}
+        {story.status === 'PUBLISHED' && story.slug && <ShareButton path={`/stories/${encodeURIComponent(story.slug)}`} title={story.title ?? ''} />}
         <ReportButton targetType="BLOG" targetId={story.id ?? 0} own={own} what={t('this story')} />
         <BookmarkButton story={story} />
       </div>

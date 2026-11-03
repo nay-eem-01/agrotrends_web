@@ -696,4 +696,6 @@ export const BN: Record<string, string> = {
   'By creating an account you agree to the {terms} and the {privacy}.': 'অ্যাকাউন্ট খুলে আপনি {terms} ও {privacy} মেনে নিচ্ছেন।',
   "{name}'s cover photo": '{name}-এর কভার ছবি',
   "{name}'s profile photo": '{name}-এর প্রোফাইল ছবি',
+  'Copy link': 'লিংক কপি করুন',
+  "Couldn't copy the link. Copy it from the address bar.": 'লিংক কপি করা গেল না। ঠিকানার ঘর থেকে কপি করুন।',
 }

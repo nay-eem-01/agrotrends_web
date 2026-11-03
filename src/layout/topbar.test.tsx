@@ -68,6 +68,26 @@ test('below 1024px the search icon and Ctrl+K open the search dialog', async () 
   expect(await screen.findByRole('dialog', { name: 'Search AgroTrends' })).toBeInTheDocument()
 })
 
+test('visitors get Ask in the top bar; members get Write beside their Ask', async () => {
+  mockApi({ 'GET /api/questions/all': () => envelope(200, page([])), 'GET /api/categories/all': () => envelope(200, page([])) })
+  const view = renderWithProviders(<App />, '/questions')
+  const bar = within((await screen.findAllByRole('banner'))[0])
+  expect(await bar.findByRole('link', { name: 'Ask' })).toHaveAttribute('href', '/questions/ask')
+  expect(bar.queryByRole('link', { name: 'Write' })).not.toBeInTheDocument()
+  view.unmount()
+
+  localStorage.setItem('agrotrends.refreshToken', 'r0')
+  mockApi({
+    'POST /api/auth/refresh-token': () => envelope(200, { accessToken: 'a1', refreshToken: 'r1', user: { id: 7, name: 'Rahim Uddin' } }),
+    'GET /api/questions/all': () => envelope(200, page([])),
+    'GET /api/categories/all': () => envelope(200, page([])),
+  })
+  renderWithProviders(<App />, '/questions')
+  const signedIn = within((await screen.findAllByRole('banner'))[0])
+  expect(await signedIn.findByRole('link', { name: 'Write' })).toHaveAttribute('href', '/write')
+  expect(signedIn.getByRole('link', { name: 'Ask' })).toHaveAttribute('href', '/questions/ask')
+})
+
 test('a signed-in reader reaches their profile from the sidebar and the account menu', async () => {
   localStorage.setItem('agrotrends.refreshToken', 'r0')
   mockApi({

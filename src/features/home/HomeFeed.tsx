@@ -13,7 +13,7 @@ import { storyDate } from '../../lib/dates'
 import { formatNumber, useT } from '../../lib/i18n'
 import { Avatar } from '../../ui/Avatar'
 import { CoverFallback } from '../../ui/Botanical'
-import { Button } from '../../ui/Button'
+import { Button, ButtonLink } from '../../ui/Button'
 import { Spinner } from '../../ui/Spinner'
 import { useSession } from '../auth/session'
 import { useRequireSignIn } from '../auth/useRequireSignIn'
@@ -73,9 +73,11 @@ export function HomeFeed() {
           ))}
         </nav>
         <div className="flex flex-wrap items-center gap-3 py-4">
-          <nav aria-label={t('Topics')} className="-mx-4 flex min-w-0 flex-1 basis-full gap-2 overflow-x-auto px-4 pb-1 sm:basis-0 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0">
+          {/* One row that scrolls at every width, so a long topic never sits alone on a second line. */}
+          <nav aria-label={t('Topics')} className="-mx-4 flex min-w-0 flex-1 basis-full gap-2 overflow-x-auto px-4 pb-1 sm:basis-0 [scrollbar-width:none] sm:mx-0 sm:px-0">
+            {/* "All" until the backend can show the topics you follow (BACKEND_REQUESTS_AUDIT.md B4). */}
             <TopicChip to={to({ topic: undefined })} current={!topic}>
-              {t('For you')}
+              {t('All')}
             </TopicChip>
             {(categories.data ?? []).slice(0, 6).map((category) => (
               <TopicChip key={category.id} to={to({ topic: category.id })} current={topic === category.id}>
@@ -119,7 +121,13 @@ function QuestionList({ topic, unanswered }: { topic?: number; unanswered: boole
   return (
     <FeedList
       loading={questions.isPending}
-      empty={t('No questions here yet. Ask the first one in this topic.')}
+      empty={topic ? t('No questions in this topic yet. Ask the first one.') : t('No questions yet. Ask the first one.')}
+      action={
+        <ButtonLink to="/questions/ask">
+          <ChatCircleText size={18} aria-hidden="true" />
+          {t('Ask a question')}
+        </ButtonLink>
+      }
       more={questions.hasNextPage}
       loadingMore={questions.isFetchingNextPage}
       onMore={() => void questions.fetchNextPage()}
@@ -139,7 +147,12 @@ function StoryList({ topic }: { topic?: number }) {
   return (
     <FeedList
       loading={stories.isPending}
-      empty={t('No stories in this topic yet.')}
+      empty={topic ? t('No stories in this topic yet.') : t('No stories yet.')}
+      action={
+        <ButtonLink to="/write" variant="secondary">
+          {t('Write a story')}
+        </ButtonLink>
+      }
       more={stories.hasNextPage}
       loadingMore={stories.isFetchingNextPage}
       onMore={() => void stories.fetchNextPage()}
@@ -151,7 +164,23 @@ function StoryList({ topic }: { topic?: number }) {
   )
 }
 
-function FeedList({ loading, empty, more, loadingMore, onMore, children }: { loading: boolean; empty: string; more: boolean; loadingMore: boolean; onMore: () => void; children: ReactNode[] }) {
+function FeedList({
+  loading,
+  empty,
+  action,
+  more,
+  loadingMore,
+  onMore,
+  children,
+}: {
+  loading: boolean
+  empty: string
+  action: ReactNode
+  more: boolean
+  loadingMore: boolean
+  onMore: () => void
+  children: ReactNode[]
+}) {
   const t = useT()
   if (loading)
     return (
@@ -159,7 +188,14 @@ function FeedList({ loading, empty, more, loadingMore, onMore, children }: { loa
         <Spinner label={t('Loading your feed')} />
       </div>
     )
-  if (children.length === 0) return <p className="py-12 text-muted-foreground">{empty}</p>
+  // An empty list says so and offers the one action that fills it.
+  if (children.length === 0)
+    return (
+      <div className="flex flex-col items-start gap-4 py-12">
+        <p className="text-muted-foreground">{empty}</p>
+        {action}
+      </div>
+    )
   return (
     <>
       <ul className="border-t border-border">{children}</ul>

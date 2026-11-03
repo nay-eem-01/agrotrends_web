@@ -714,4 +714,6 @@ export const BN: Record<string, string> = {
   'When should I transplant aman seedlings?': 'আমন চারা কখন রোপণ করব?',
   'How do I manage brown planthopper in aman?': 'আমন ধানের বাদামি গাছফড়িং কীভাবে দমন করব?',
   'What should I do after a flood in my rice field?': 'ধানখেতে বন্যার পর কী করব?',
+  'No questions in this topic yet. Ask the first one.': 'এই বিষয়ে এখনো কোনো প্রশ্ন নেই। প্রথম প্রশ্নটি করুন।',
+  'No questions yet. Ask the first one.': 'এখনো কোনো প্রশ্ন নেই। প্রথম প্রশ্নটি করুন।',
 }

@@ -79,10 +79,18 @@ export function TopBar({ focused = false }: { focused?: boolean }) {
           >
             <MagnifyingGlass size={22} aria-hidden="true" />
           </button>
-          <ButtonLink to="/write" variant="secondary" size="sm" className="mx-1 hidden lg:inline-flex">
-            <NotePencil size={16} aria-hidden="true" />
-            {t('Write')}
-          </ButtonLink>
+          {/* Asking is the core job: visitors get Ask here, members get Write beside their own Ask. */}
+          {status === 'anonymous' ? (
+            <ButtonLink to="/questions/ask" variant="secondary" size="sm" className="mx-1 hidden lg:inline-flex">
+              <Plus size={16} weight="bold" aria-hidden="true" />
+              {t('Ask')}
+            </ButtonLink>
+          ) : (
+            <ButtonLink to="/write" variant="secondary" size="sm" className="mx-1 hidden lg:inline-flex">
+              <NotePencil size={16} aria-hidden="true" />
+              {t('Write')}
+            </ButtonLink>
+          )}
           {status === 'signed-in' && (
             <>
               <ButtonLink to="/questions/ask" size="sm" className="mx-1 hidden lg:inline-flex">

@@ -49,7 +49,7 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 - Phase F21 on `feat/paddy-base` (stacked on F20's tip): F21.1 Paddy Field tokens (`feat/paddy-tokens`) F21.2 shell (`feat/paddy-shell`) F21.3 sign in and sign up (`feat/paddy-auth`) F21.4 expert application (`feat/paddy-expert-apply`) F21.5 profile (`feat/paddy-profile`) F21.6 story editor (`feat/paddy-editor`) F21.7 question page (`feat/paddy-question`) F21.8 AI advisor (`feat/paddy-advisor`) F21.9 feeds (`feat/paddy-feeds`) F21.10 story page (`feat/paddy-story`) done. Phase F21 is complete.
 - Phase F22 on `feat/mock-base` (stacked on F21's tip): F22.1 fields (`feat/mock-fields`) F22.2 home feed (`feat/mock-home`) F22.3 question page (`feat/mock-question`) F22.4 profile (`feat/mock-profile`) F22.5 AI advisor (`feat/mock-advisor`) F22.6 ask page (`feat/mock-ask`) F22.7 story editor (`feat/mock-editor`) F22.8 sign in and sign up (`feat/mock-auth`) F22.9 story page (`feat/mock-story`) F22.10 navigation in the sidebar (`feat/mock-sidebar`) F22.11 search in the bar (`feat/mock-topbar`) F22.12 quieter frame (`feat/mock-chrome`) done. Phase F22 is complete.
 - Phase F23 on `feat/api2-base` (stacked on F22's tip and `fix/google-test`): F23.1 API types (`feat/api2-types`) F23.2 home rail (`feat/api2-home`) F23.3 story subtitle (`feat/api2-stories`) F23.4 profile page and notification (`feat/api2-profile`) F23.5 home tabs (`feat/home-tabs`) F23.6 admin design (`feat/admin-design`) F23.7 about, privacy, terms and footer (`feat/site-pages`) F23.8 faster pages (`perf/faster-pages`) F23.9 profile pictures (`fix/profile-images`) F23.10 footer and home width (`fix/footer-home-width`) F23.11 reply to a reply (`feat/reply-to-reply`) F23.12 answer reply notification (`feat/answer-reply-notification`) done. Phase F23 is complete and merged into `development`.
-- Phase F24 on `feat/audit-base` (from `development`), the audit fixes: F24.1 Ask and Write on phones (`feat/phone-tasks`) F24.2 share (`feat/share`) F24.3 Discover (`feat/discover-hallmark`) done.
+- Phase F24 on `feat/audit-base` (from `development`), the audit fixes: F24.1 Ask and Write on phones (`feat/phone-tasks`) F24.2 share (`feat/share`) F24.3 Discover (`feat/discover-hallmark`) F24.4 About (`feat/about-hallmark`) done.
 
 ## Next up
 
@@ -74,6 +74,35 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-11-03 — F24.4 About, a Hallmark redesign (`feat/about-hallmark`)
+
+**Done**
+- Hallmark ran a full redesign of `/about` inside DESIGN.md, the same way as Discover (before record, sweep, a
+  fresh-context review). Sweep: before 3 Floor failures and 3 Reflex, now 0 and 0; 18 of 18 links kept.
+- Every word stays, in both languages, and one composition serves both (`COPY` in `AboutPage.tsx`), so English and
+  Bengali can't drift apart in layout. Typographic apostrophes throughout.
+- New, from the audit: "How an answer gets checked", four steps as a real ordered list (ask in public; the AI answers
+  first with sources, "Not yet checked by an expert"; a verified expert confirms or corrects it, with the product's
+  mustard "Confirmed" mark; people answer and you accept, "Accepted").
+- The steps come straight after the header, so they are on the first screen; each step carries the mark the product
+  uses, at its size (Unanswered, Not yet checked by an expert, Confirmed, Accepted; the product's own Bengali wording).
+- The header leads with See questions; the expert offer comes once, beside the text that explains it. "Why we
+  started" sets its first sentence beside the head; "What you can do here" is four rows; Verified experts (on the
+  leaf wash) sits beside Who we are and What's next; Talk to us sets the address large. Prose at 58 characters.
+- Reviewed in fresh context: 13 findings, 8 resolved, 1 partial, 3 for the team (below), 1 a capture artifact.
+- `MailLink` takes a class, since About's address now sits outside the story typography.
+
+**Decisions**
+- No names, photos or figures for the team: none were given, and Hallmark never invents them.
+
+**Known limitations**
+- For the team: a product-specific line instead of "About us", and less generic heads ("Who we are", "Talk to us");
+  names and photos of the three of you, if you want faces on the page.
+- "What's next" still lists numbered AI citations and following whole topics, which the backend decided not to build
+  (BACKEND_REQUESTS.md §5, §8). The words are the team's, so they stay until the team rewrites that list.
 
 ---
 

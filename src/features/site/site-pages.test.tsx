@@ -52,9 +52,34 @@ test('in Bengali the about page is translated and the legal pages say they are E
   renderWithProviders(<App />, '/about')
   expect(await screen.findByRole('heading', { level: 1, name: 'আমাদের কথা' })).toBeInTheDocument()
   expect(screen.getByRole('heading', { name: 'আমরা কারা' })).toBeInTheDocument()
+  expect(screen.getByRole('heading', { name: 'একটি উত্তর কীভাবে যাচাই হয়' })).toBeInTheDocument()
+  expect(screen.getByText('যাচাই করা বিশেষজ্ঞ নিশ্চিত করেছেন')).toBeInTheDocument()
 
   await userEvent.click(within(screen.getByRole('navigation', { name: 'নীতিমালা' })).getByRole('link', { name: 'গোপনীয়তা নীতি' }))
   expect(await screen.findByText('এই পাতাটি আপাতত ইংরেজিতে। বাংলা সংস্করণ শীঘ্রই আসছে।')).toBeInTheDocument()
+})
+
+test('the about page shows how an answer gets checked, with the marks the product uses, and leads to asking and applying', async () => {
+  renderWithProviders(<App />, '/about')
+  expect(await screen.findByRole('heading', { level: 1, name: 'About us' })).toBeInTheDocument()
+
+  const steps = within(screen.getByRole('heading', { name: 'How an answer gets checked' }).closest('section')!).getByRole('list')
+  const items = within(steps).getAllByRole('listitem')
+  expect(items.map((item) => within(item).getByRole('heading').textContent)).toEqual(['You ask in public', 'The AI answers first', 'An expert checks it', 'People answer, you choose'])
+  expect(within(items[0]).getByText('Unanswered')).toBeInTheDocument()
+  expect(within(items[1]).getByText('Not yet checked by an expert')).toBeInTheDocument()
+  expect(within(items[2]).getByText('Confirmed by a verified expert')).toBeInTheDocument()
+  expect(within(items[3]).getByText('Accepted')).toBeInTheDocument()
+
+  const header = screen.getByRole('heading', { level: 1 }).parentElement!
+  expect(within(header).getByRole('link', { name: 'See questions' })).toHaveAttribute('href', '/questions')
+  // The expert offer comes once, beside the text that explains it.
+  expect(within(header).queryByRole('link', { name: 'Become a verified expert' })).not.toBeInTheDocument()
+  expect(within(screen.getByRole('heading', { name: 'Verified experts' }).closest('section')!).getByRole('link', { name: 'Become a verified expert' })).toHaveAttribute('href', '/experts/apply')
+  for (const [name, href] of [['Browse stories', '/stories'], ['Open the advisor', '/advisor'], ['Write a story', '/write']]) {
+    expect(within(screen.getByRole('main')).getByRole('link', { name })).toHaveAttribute('href', href)
+  }
+  expect(within(screen.getByRole('main')).getByRole('link', { name: CONTACT_EMAIL })).toHaveAttribute('href', `mailto:${CONTACT_EMAIL}`)
 })
 
 test('sign-up says that creating an account accepts the terms and the privacy policy', async () => {

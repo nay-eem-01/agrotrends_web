@@ -3,6 +3,47 @@
   "mode": "redesign",
   "depth": "full",
   "scope": "page",
+  "prompt": "About page of a Bangladeshi farming Q&A site; job: trust for first-time askers and expert recruits",
+  "shape": "Long Document with a steps diagram",
+  "theme": "locked: docs/DESIGN.md (Paddy Field)",
+  "hero": "Banner",
+  "nav": "project top bar and sidebar (kept)",
+  "footer": "project footer (kept)",
+  "imagery": "none; the product trust marks",
+  "photos": [],
+  "entry": "/about",
+  "sections": [
+   "Banner header",
+   "How an answer gets checked (steps with marks)",
+   "Why we started (head beside statement and text)",
+   "What you can do here (rows)",
+   "Verified experts | Who we are (split)",
+   "Talk to us (address large)"
+  ],
+  "signature": "the answer-checking steps drawn with the product trust marks",
+  "waived": [
+   "44c",
+   "77",
+   "49b"
+  ],
+  "fingerprint": {
+   "shape": "long-document-steps",
+   "hero": "Banner",
+   "nav": "shell",
+   "footer": "shell",
+   "imagery": "none",
+   "lead": "steps"
+  },
+  "axes": {
+   "palette": "locked",
+   "type": "locked"
+  },
+  "date": "2026-11-03"
+ },
+ {
+  "mode": "redesign",
+  "depth": "full",
+  "scope": "page",
   "prompt": "Discover, the visitor home of a Bangladeshi farming Q&A site; job: ask a question",
   "shape": "Counter-led feed",
   "theme": "locked: docs/DESIGN.md (Paddy Field)",

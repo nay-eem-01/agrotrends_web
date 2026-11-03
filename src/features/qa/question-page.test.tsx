@@ -54,6 +54,19 @@ test('a question shows its text, context and answers in the backend order', asyn
   expect(api.mock.calls.some(([url]) => String(url).startsWith('/api/answers/replies'))).toBe(false)
 })
 
+test('the reply count names the toggle, and an answer without replies has none to show', async () => {
+  mockApi({
+    'GET /api/questions/id/5': () => envelope(200, question),
+    'GET /api/answers/question/5': () => envelope(200, [answer(1, { replyCount: 2 }), answer(2, { replyCount: 1 }), answer(6, { replyCount: 0 })]),
+  })
+  renderWithProviders(<App />, '/questions/5')
+
+  const [two, one, none] = await screen.findAllByRole('article', { name: 'Answer by Nasrin' })
+  expect(within(two).getByRole('button', { name: 'Show 2 replies' })).toBeInTheDocument()
+  expect(within(one).getByRole('button', { name: 'Show 1 reply' })).toBeInTheDocument()
+  expect(within(none).queryByRole('button', { name: /^Show/ })).not.toBeInTheDocument()
+})
+
 test('replies load when opened and stay under their answer', async () => {
   const api = mockApi({
     ...signedInAs({ id: 9, name: 'Karim' }),

@@ -46,8 +46,9 @@ export function Thread({ kind, parentId, whenEmpty }: ThreadProps) {
   const thread = useThread(kind, parentId)
   const requireSignIn = useRequireSignIn()
   const list = thread.data ?? []
-  const replies = useThreadReplies(kind, list.map((item) => item.id))
-  const replyCount = replies.reduce((sum, query) => sum + (query.data?.length ?? 0), 0)
+  const replies = useThreadReplies(kind, list)
+  // The backend's counts where it gives them, so the heading is right before any replies are read.
+  const replyCount = list.reduce((sum, item, index) => sum + (item.replyCount ?? replies[index]?.data?.length ?? 0), 0)
 
   return (
     <section aria-labelledby={headingId} className="mt-14">

@@ -2,13 +2,7 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tansta
 import { api } from './client'
 import type { Page, Schemas } from './types'
 
-type NotificationResponse = Schemas['NotificationResponse']
-
-/**
- * `ANSWER_REPLY` (backend 4.27) is newer than `schema.d.ts`; drop the addition once `npm run gen:api` has run against
- * a backend that has it.
- */
-export type Notification = Omit<NotificationResponse, 'type'> & { type?: NotificationResponse['type'] | 'ANSWER_REPLY' }
+export type Notification = Schemas['NotificationResponse']
 
 /** The unread count is polled (there is no push): every minute while the tab is visible, and on focus. */
 export const UNREAD_POLL_MS = 60_000

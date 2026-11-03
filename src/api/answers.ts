@@ -21,7 +21,7 @@ export function useAnswers(questionId: number, enabled = true) {
   return useQuery({ ...answersQuery(questionId), enabled })
 }
 
-/** Replies under one answer, oldest first; read when the reader opens them (there is no reply count). */
+/** Replies under one answer, oldest first; read when the reader opens them (`replyCount` says how many). */
 export function useAnswerReplies(answerId: number, enabled: boolean) {
   return useQuery({
     queryKey: answerKeys.replies(answerId),

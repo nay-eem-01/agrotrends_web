@@ -154,6 +154,29 @@ test('replying posts under the parent', async () => {
   await waitFor(() => expect(section.queryByLabelText('Reply to Rahim Uddin')).not.toBeInTheDocument())
 })
 
+test('a reply can be answered: the box starts with @name and is sent with that reply as the parent', async () => {
+  const api = mockApi({
+    ...signedIn(),
+    'GET /api/blogs/slug/rice-blast': () => envelope(200, story),
+    'GET /api/comments/blog/402': () => envelope(200, [comment(1)]),
+    'GET /api/comments/replies/1': () => envelope(200, [comment(3, { parentCommentId: 1, userId: 21, authorName: 'Salma', content: 'A reply' })]),
+    'POST /api/comments/reply': () => envelope(200, comment(6, { parentCommentId: 1 })),
+  })
+  renderWithProviders(<App />, '/stories/rice-blast')
+
+  const section = await responsesSection()
+  const salma = await section.findByRole('article', { name: 'Response by Salma' })
+  await userEvent.click(within(salma).getByRole('button', { name: 'Reply' }))
+  const field = section.getByLabelText('Reply to Salma')
+  expect(field).toHaveValue('@Salma ')
+  expect(field).toHaveFocus()
+  await userEvent.type(field, 'Thanks!')
+  await userEvent.click(within(field.closest('form')!).getByRole('button', { name: 'Reply' }))
+
+  await waitFor(() => expect(bodyOf(api, 'POST', '/api/comments/reply')).toEqual({ blogId: 402, parentCommentId: 3, content: '@Salma Thanks!' }))
+  await waitFor(() => expect(section.queryByLabelText('Reply to Salma')).not.toBeInTheDocument())
+})
+
 test('owners edit and delete their own responses', async () => {
   let content = 'Old text'
   let gone = false

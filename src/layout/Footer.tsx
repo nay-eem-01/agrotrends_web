@@ -5,6 +5,8 @@ import { Link } from 'react-router-dom'
 import { setLang, useLang, useT } from '../lib/i18n'
 import { CONTACT_EMAIL, SOCIAL } from '../lib/site'
 import { setTheme, useTheme } from '../lib/theme'
+import { useUpdateUserSettings } from '../api/settings'
+import { useSession } from '../features/auth/session'
 import { Logo } from './Logo'
 
 const YEAR = new Date().getFullYear()
@@ -114,6 +116,8 @@ export function Footer({ className }: { className?: string }) {
 export function LanguageSwitch({ className }: { className?: string }) {
   const lang = useLang()
   const queryClient = useQueryClient()
+  const { status } = useSession()
+  const save = useUpdateUserSettings()
   const next = lang === 'bn' ? 'en' : 'bn'
   return (
     <button
@@ -121,6 +125,8 @@ export function LanguageSwitch({ className }: { className?: string }) {
       lang={next}
       onClick={() => {
         setLang(next)
+        // Signed in, e-mails follow too (B5's preferredLang).
+        if (status === 'signed-in') save.mutate({ preferredLang: next })
         void queryClient.invalidateQueries()
       }}
       className={className ?? 'hover:text-ink'}

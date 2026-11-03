@@ -17,10 +17,10 @@ const user = { id: 1, name: 'Nasrin Akter', email: 'nasrin@farm.bd', mobileNumbe
 const fetchMock = vi.fn<typeof fetch>()
 
 beforeEach(() => {
-  // Background reads (profile, expert status, reputation, unread count) get one empty answer that fits them all; the
-  // account and password tests count only the calls they make (/api/auth, /api/user).
+  // Background reads (profile, expert status, reputation, unread count, e-mail settings) get one empty answer that fits
+  // them all; the account and password tests count only the calls they make (/api/auth, /api/user).
   vi.stubGlobal('fetch', (input: RequestInfo | URL, init?: RequestInit) =>
-    /^\/api\/(auth|user)\//.test(String(input))
+    /^\/api\/(auth|user)\/(?!settings)/.test(String(input))
       ? fetchMock(input, init)
       : Promise.resolve(envelope(200, { name: user.name, specialities: [], content: [], number: 0, last: true, total: 0, topics: [], count: 0 })),
   )

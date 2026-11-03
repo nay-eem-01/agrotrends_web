@@ -22,6 +22,10 @@ export function SitePage({ title, lead, updated, englishOnly, children }: { titl
   )
 }
 
-export function MailLink() {
-  return <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+export function MailLink({ className }: { className?: string }) {
+  return (
+    <a href={`mailto:${CONTACT_EMAIL}`} className={className}>
+      {CONTACT_EMAIL}
+    </a>
+  )
 }

@@ -118,6 +118,11 @@ Page width 1240px, gutters 16px (phones) / 32px; reading column 680px; feed colu
   720px feed measure; with no questions, "Ask the first one" with the Ask button), and "From the field". Section heads
   Lora 28px, 40px from 640px; no arrows after links. No drawn scene: the product is the picture. The Hallmark stamp
   and its records are the first lines of `src/index.css`; `.hallmark/log.json` keeps the build.
+- **About (`/about`, F24.4, a Hallmark redesign):** a Banner header (Lora 52px, the lead, See questions), then the
+  page's signature: "How an answer gets checked", four steps as an ordered list, each with the mark the product puts
+  on answers (Unanswered, Not yet checked by an expert, Confirmed, Accepted) at the product's size. Then "Why we
+  started" (head beside its first sentence and the text), "What you can do here" as rows, Verified experts on the leaf
+  wash beside Who we are, and Talk to us with the address set large. One composition for both languages (`COPY`).
 - **Questions (`/questions`):** header + Ask, topics as chips (first six; "More topics" picker past
   that), Newest | Unanswered, Filter popover, active-filter chips; rows with votes, answer state and the first
   photo; sidebar: advisor card and "Getting a good answer". Question page: back link, Inter title, body, a horizontal

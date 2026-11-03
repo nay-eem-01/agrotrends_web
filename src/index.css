@@ -1,4 +1,4 @@
-/* Hallmark · v2.0.0 · redesign: full · route: / (visitors) · system: docs/DESIGN.md (locked, Paddy Field) · genre: editorial · job: ask · hero: Counter · nav: the project's top bar and sidebar (kept) · footer: the project's footer (kept) · imagery: none, the product's own ask box · signature: the question box that carries what is typed into the ask form */
+/* Hallmark · v2.0.0 · redesign: full · routes: / (visitors), /about · system: docs/DESIGN.md (locked, Paddy Field) · genre: editorial · job: ask (/), trust (/about) · hero: Counter (/), Banner (/about) · nav: the project's top bar and sidebar (kept) · footer: the project's footer (kept) · imagery: none, the product's own ask box · signature: the question box that carries what is typed into the ask form */
 /* Hallmark · pre-emit critique: P4 H4 E4 S4 R5 V3 · weakest: V, the app shell and the list sections stay; the change is the first screen, where the ask box replaces the drawn field */
 /* Hallmark · answered F3 · text-wrap balance is set on the Discover heads in their class lists, so the two-line Lora head never ends on a stub at 375 */
 /* Hallmark · waive 49b · the advisor's seasonal questions, the footer's Become a verified expert and story titles wrap at two lines at most · whole farming questions and titles that cannot shorten */
@@ -8,6 +8,10 @@
 /* Hallmark · dismissed 77 · real data decides the sections: Help a farmer today and From the field step aside when there is nothing to show */
 /* Hallmark · hero-review: fix · 4 findings · 4 resolved (chips wrap as a quiet list, the lede no longer echoes the head, the box fills 61% at 1440, the private way a step quieter) */
 /* Hallmark · finish-review: subagent · 6 findings · 6 resolved (a padded hero so the questions show at the 1440 fold, gap 80px, the season label visible, the caution that AI can be wrong restored with a way to ask anything, the head at 40px from 1024 to 1280, the question rows at the 720px feed measure) · gap: the carry-over of typed text shows only in use, covered by discover.test.tsx */
+/* Hallmark · reworded "What's next" to "What’s next" · F1 typographic apostrophes across About */
+/* Hallmark · waive 44c · Banner posture on /about, its header ends near half the 1440 screen and Why we started shows above the fold · About is read, not acted on, so its first screen leads into the reasons instead of filling the screen */
+/* Hallmark · waive 77 · Verified experts and Who we are are the two halves of one split row across the full container on /about · two landmarks so each heading labels its own section, as the review asked */
+/* Hallmark · /about hero-review: fix · 5 findings · 2 resolved (the steps on the first screen, the header padding cut) 1 partial (heading ratio: the type scale is DESIGN.md's, so the statement dropped to 22px instead) 2 for the owner (a product-specific head, the empty column beside Why we started) · finish-review: subagent · 8 findings · 6 resolved (marks at the product's size with step 1's Unanswered, 58ch, the expert offer once, the product's Bengali mark, two landmarks, Talk to us unboxed) 1 for the owner (generic heads) 1 capture artifact */
 /* Hallmark · dismissed 54 · SectionHeading renders an h2; the linter reads the component name, not its output */
 @import 'tailwindcss';
 @import 'tw-animate-css';

@@ -367,9 +367,9 @@ function Impact({ userId }: { userId: number }) {
         <TrendUp size={18} weight="bold" aria-hidden="true" className="text-primary" />
         {t('Impact')}
       </h2>
-      <dl className="mt-3 grid gap-3 sm:grid-cols-3">
+      <dl className="mt-3 flex flex-col gap-3 sm:flex-row">
         {tiles.map(({ value, label, icon: TileIcon }) => (
-          <div key={label} className="flex items-center gap-3 rounded-lg bg-background p-3 ring-1 ring-border">
+          <div key={label} className="flex flex-1 items-center gap-3 rounded-lg bg-background p-3 ring-1 ring-border">
             <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
               <TileIcon size={20} weight="duotone" />
             </span>

@@ -716,4 +716,6 @@ export const BN: Record<string, string> = {
   'What should I do after a flood in my rice field?': 'ধানখেতে বন্যার পর কী করব?',
   'No questions in this topic yet. Ask the first one.': 'এই বিষয়ে এখনো কোনো প্রশ্ন নেই। প্রথম প্রশ্নটি করুন।',
   'No questions yet. Ask the first one.': 'এখনো কোনো প্রশ্ন নেই। প্রথম প্রশ্নটি করুন।',
+  'Show 1 reply': '১টি জবাব দেখুন',
+  'Show {n} replies': '{n}টি জবাব দেখুন',
 }

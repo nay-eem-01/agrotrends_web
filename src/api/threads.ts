@@ -14,6 +14,8 @@ export interface ThreadItem {
   content: string
   createdAt: string
   updatedAt: string
+  /** Replies under this item; undefined from a backend older than 4.28. */
+  replyCount?: number
 }
 
 interface Raw {
@@ -23,6 +25,7 @@ interface Raw {
   content: string
   createdAt: string
   updatedAt: string
+  replyCount?: number
 }
 
 const routes = {
@@ -54,10 +57,14 @@ export function useThread(kind: ThreadKind, parentId: number) {
   return useQuery({ queryKey: threadKeys.list(kind, parentId), queryFn: ({ signal }) => read(routes[kind].list(parentId), signal) })
 }
 
-/** Replies of each item. The API has no reply counts, so every thread is read (backend need in the roadmap). */
-export function useThreadReplies(kind: ThreadKind, ids: number[]) {
+/** Replies of each item, read only for items that have some (an unknown count is read, for older backends). */
+export function useThreadReplies(kind: ThreadKind, items: ThreadItem[]) {
   return useQueries({
-    queries: ids.map((id) => ({ queryKey: threadKeys.replies(kind, id), queryFn: ({ signal }: { signal: AbortSignal }) => read(routes[kind].replies(id), signal) })),
+    queries: items.map((item) => ({
+      queryKey: threadKeys.replies(kind, item.id),
+      queryFn: ({ signal }: { signal: AbortSignal }) => read(routes[kind].replies(item.id), signal),
+      enabled: item.replyCount !== 0,
+    })),
   })
 }
 

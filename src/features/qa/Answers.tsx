@@ -125,15 +125,18 @@ function AnswerCard({ questionId, answer, asker }: { questionId: number; answer:
           item={answer}
           actions={
             <>
-              <Button
-                variant="quiet"
-                size="sm"
-                aria-expanded={open}
-                aria-controls={repliesId}
-                onClick={() => setOpen((value) => !value)}
-              >
-                {open ? t('Hide replies') : t('Show replies')}
-              </Button>
+              {/* Nothing to open at 0 replies (Reply opens the thread instead); the count from 4.28 on. */}
+              {(answer.replyCount !== 0 || open) && (
+                <Button
+                  variant="quiet"
+                  size="sm"
+                  aria-expanded={open}
+                  aria-controls={repliesId}
+                  onClick={() => setOpen((value) => !value)}
+                >
+                  {open ? t('Hide replies') : repliesLabel(t, answer.replyCount)}
+                </Button>
+              )}
               {asker && <AcceptButton questionId={questionId} answerId={id} accepted={Boolean(answer.accepted)} />}
               {replyTo?.answerId !== id && (
                 <Button variant="quiet" size="sm" onClick={() => reply(answer)}>
@@ -296,4 +299,9 @@ function Post({ questionId, item, compact = false, actions }: { questionId: numb
       )}
     </>
   )
+}
+
+function repliesLabel(t: ReturnType<typeof useT>, count: number | undefined) {
+  if (count == null) return t('Show replies')
+  return count === 1 ? t('Show 1 reply') : t('Show {n} replies', { n: formatNumber(count) })
 }

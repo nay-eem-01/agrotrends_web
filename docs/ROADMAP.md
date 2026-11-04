@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend · ➡ moved to a later step
 
-**Progress:** 121 of 134 steps done
+**Progress:** 122 of 134 steps done
 
 ---
 
@@ -292,17 +292,17 @@ web can't do alone is in `docs/BACKEND_REQUESTS_AUDIT.md` (B1–B12); those step
 | F24.5 | Small honest fixes: Ask instead of Write for visitors, empty lists with their action, Google's button in the page's language, topic chips in one row, "All" until "For you" is real (`fix/audit-small`) | ✅ |
 | F24.6 | Where you are on Ask: an optional place, prefilled from your profile (`feat/ask-place`) | ⬜ |
 | F24.7 | One Ask: post publicly (AI now, experts check) or ask privately (AI only, not checked); the advisor says its answers aren't checked (`feat/one-ask`) | ⬜ |
-| F24.8 | Link-preview card: the default `og:image` and the `/share` links (B7) (`feat/share-card`) | ⏸ |
-| F24.9 | Reply counts: "3 replies", nothing at 0 (B1) (`feat/reply-counts`) | ⏸ |
-| F24.10 | "7 of 10 left today" in the advisor (B2) (`feat/ai-allowance`) | ⏸ |
+| F24.8 | Link-preview card: the default `og:image` and the `/share` links (B7) (`feat/share-card`) | ⬜ |
+| F24.9 | Reply counts: "3 replies", nothing at 0; story responses read replies only where there are some; the regenerated API types (B1) (`feat/api3-types`) | ✅ |
+| F24.10 | "7 of 10 left today" in the advisor (B2) (`feat/ai-allowance`) | ⬜ |
 | F24.11 | The relaxed password rule (B3) (`feat/password-rule`) | ⏸ |
-| F24.12 | "For you" from the topics you follow (B4) (`feat/for-you`) | ⏸ |
-| F24.13 | E-mail settings, your language and the unsubscribe page; "we'll e-mail you" after asking (B5, B8) (`feat/email-settings`) | ⏸ |
-| F24.14 | Launch-test panel in admin (B6) (`feat/launch-metrics`) | ⏸ |
-| F24.15 | "Cited in N AI answers" and an impact line on profiles (B9) (`feat/impact`) | ⏸ |
-| F24.16 | Digest preview for admins (B10) (`feat/digest-preview`) | ⏸ |
+| F24.12 | "For you" from the topics you follow (B4) (`feat/for-you`) | ⬜ |
+| F24.13 | E-mail settings, your language and the unsubscribe page; "we'll e-mail you" after asking (B5, B8) (`feat/email-settings`) | ⬜ |
+| F24.14 | Launch-test panel in admin (B6) (`feat/launch-metrics`) | ⬜ |
+| F24.15 | "Cited in N AI answers" and an impact line on profiles (B9) (`feat/impact`) | ⬜ |
+| F24.16 | Digest preview for admins (B10) (`feat/digest-preview`) | ⬜ |
 | F24.17 | Notify me on a question (B11) (`feat/follow-question`) | ⏸ |
-| F24.18 | Refresh token from the HttpOnly cookie (B12) (`feat/refresh-cookie`) | ⏸ |
+| F24.18 | Refresh token from the HttpOnly cookie (B12) (`feat/refresh-cookie`) | ⬜ |
 
 ## Needs from the backend
 
@@ -311,12 +311,12 @@ web can't do alone is in `docs/BACKEND_REQUESTS_AUDIT.md` (B1–B12); those step
 | "Followed by me" per tag (or a larger followed-tags read) | exact Follow state past the 100 most recent follows (F2.6) | ⏸ |
 | "Saved by me" per story (`bookmarkedByMe` on `BlogResponse`, or `GET /api/blogs/id/{id}/bookmark`) | exact saved state past the 100 most recent saves (F2.4) | ⏸ |
 | Category rename to take JSON (`PUT /api/categories/update/categoryId/{id}` reads a raw text body; create takes a query parameter) | consistent requests (F6.6) | ⏸ |
-| The advisor's remaining daily questions (e.g. on `AiAnswerResponse` or `GET /api/ai/quota`) | showing the quota before it runs out (F5.1) | ⏸ |
+| The advisor's remaining daily questions (e.g. on `AiAnswerResponse` or `GET /api/ai/quota`) | showing the quota before it runs out (F5.1) | ✅ `GET /api/ai/allowance` (backend 4.29, F24.10) |
 | Answers: `/api/answers/question/{id}` also returns replies | the client filters replies out of the answer list (F4.2) | ✅ backend Phase 6 (direct answers only; F8.3 drops the filter) |
-| Comments: `CommentResponse` in the OpenAPI document and a reply count per comment (or replies nested) | typed comments without a hand-written type; one request per story instead of one per thread (F2.5) | ⏸ |
+| Comments: `CommentResponse` in the OpenAPI document and a reply count per comment (or replies nested) | typed comments without a hand-written type; one request per story instead of one per thread (F2.5) | ✅ reply counts (backend 4.28, F24.9) |
 | `GET /api/authors/me` and `authorId` on `UserResponse` | F1.4 | ✅ (backend `feat/author-me`) |
 | Public GET access to published content | anonymous reading (F2) | ✅ backend 2.13 |
-| Refresh token as an `HttpOnly` cookie instead of in the JSON body | keeping the refresh token out of script reach | ⏸ |
+| Refresh token as an `HttpOnly` cookie instead of in the JSON body | keeping the refresh token out of script reach | ✅ backend 4.37 (F24.18) |
 | CORS origins from a property (backend 4.1) | a deployed split origin | ⏸ |
 | Notifications API | F12 | ✅ backend Phase 8 (`feat/notifications-moderation-base`, not merged yet) |
 | Machine-readable error codes in the error envelope | branching without matching message text (F7.2, F9.1) | ⏸ |

@@ -21,6 +21,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/user/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Your e-mail language and e-mail switches */
+        get: operations["settings"];
+        /** Change your settings; leave a field out to keep it */
+        put: operations["updateSettings"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/user/profile": {
         parameters: {
             query?: never;
@@ -262,6 +280,24 @@ export interface paths {
         put: operations["update_3"];
         /** Super-admin: create an ADMIN role */
         post: operations["create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/user/unsubscribe": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The unsubscribe link in our e-mails: switches that kind off and opens the web's /unsubscribed page */
+        get: operations["unsubscribeLink"];
+        put?: never;
+        /** One-click unsubscribe (RFC 8058): what mail apps call from the List-Unsubscribe header */
+        post: operations["unsubscribeOneClick"];
         delete?: never;
         options?: never;
         head?: never;
@@ -703,7 +739,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Exchange a refresh token for a new access token (the refresh token is single-use and rotated) */
+        /**
+         * Exchange a refresh token for a new access token (the refresh token is single-use and rotated)
+         * @description The token comes from the body, or else from the agrotrends_refresh cookie set at sign-in.
+         */
         post: operations["refreshToken"];
         delete?: never;
         options?: never;
@@ -988,6 +1027,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/digest/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Admin: your own weekly digest as HTML, not sent, to check the copy */
+        post: operations["digestPreview"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/share/stories/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Preview page for a story: Open Graph tags, then on to the web page */
+        get: operations["story"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/share/questions/{questionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Preview page for a question: Open Graph tags, then on to the web page */
+        get: operations["question"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/users/{userId}/reputation": {
         parameters: {
             query?: never;
@@ -1014,6 +1104,23 @@ export interface paths {
         };
         /** A user's public summary: authorId, location, cover, counts and checked credentials (public) */
         get: operations["get_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/users/{userId}/impact": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** What a member's work did: answers, accepted answers, readers reached and AI citations (public, hourly) */
+        get: operations["impact"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1737,6 +1844,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/ai/allowance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Today's advisor allowance: the daily limit, asks used since midnight (Asia/Dhaka) and when it resets */
+        get: operations["allowance"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/users": {
         parameters: {
             query?: never;
@@ -1814,6 +1938,26 @@ export interface paths {
         };
         /** Super-admin: privileges an admin role may hold */
         get: operations["privileges"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/launch-metrics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Admin: the launch test, one row per Monday-to-Sunday week (Asia/Dhaka), newest first
+         * @description The current week is partial. staffActivity counts only what admin and staff accounts did.
+         */
+        get: operations["launchMetrics"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1974,6 +2118,13 @@ export interface components {
             /** @example 1712345678 */
             mobileNumber?: string;
         };
+        HttpResponse: {
+            /** @enum {string} */
+            status?: "100 CONTINUE" | "101 SWITCHING_PROTOCOLS" | "102 PROCESSING" | "103 EARLY_HINTS" | "103 CHECKPOINT" | "200 OK" | "201 CREATED" | "202 ACCEPTED" | "203 NON_AUTHORITATIVE_INFORMATION" | "204 NO_CONTENT" | "205 RESET_CONTENT" | "206 PARTIAL_CONTENT" | "207 MULTI_STATUS" | "208 ALREADY_REPORTED" | "226 IM_USED" | "300 MULTIPLE_CHOICES" | "301 MOVED_PERMANENTLY" | "302 FOUND" | "302 MOVED_TEMPORARILY" | "303 SEE_OTHER" | "304 NOT_MODIFIED" | "305 USE_PROXY" | "307 TEMPORARY_REDIRECT" | "308 PERMANENT_REDIRECT" | "400 BAD_REQUEST" | "401 UNAUTHORIZED" | "402 PAYMENT_REQUIRED" | "403 FORBIDDEN" | "404 NOT_FOUND" | "405 METHOD_NOT_ALLOWED" | "406 NOT_ACCEPTABLE" | "407 PROXY_AUTHENTICATION_REQUIRED" | "408 REQUEST_TIMEOUT" | "409 CONFLICT" | "410 GONE" | "411 LENGTH_REQUIRED" | "412 PRECONDITION_FAILED" | "413 PAYLOAD_TOO_LARGE" | "413 REQUEST_ENTITY_TOO_LARGE" | "414 URI_TOO_LONG" | "414 REQUEST_URI_TOO_LONG" | "415 UNSUPPORTED_MEDIA_TYPE" | "416 REQUESTED_RANGE_NOT_SATISFIABLE" | "417 EXPECTATION_FAILED" | "418 I_AM_A_TEAPOT" | "419 INSUFFICIENT_SPACE_ON_RESOURCE" | "420 METHOD_FAILURE" | "421 DESTINATION_LOCKED" | "422 UNPROCESSABLE_ENTITY" | "423 LOCKED" | "424 FAILED_DEPENDENCY" | "425 TOO_EARLY" | "426 UPGRADE_REQUIRED" | "428 PRECONDITION_REQUIRED" | "429 TOO_MANY_REQUESTS" | "431 REQUEST_HEADER_FIELDS_TOO_LARGE" | "451 UNAVAILABLE_FOR_LEGAL_REASONS" | "500 INTERNAL_SERVER_ERROR" | "501 NOT_IMPLEMENTED" | "502 BAD_GATEWAY" | "503 SERVICE_UNAVAILABLE" | "504 GATEWAY_TIMEOUT" | "505 HTTP_VERSION_NOT_SUPPORTED" | "506 VARIANT_ALSO_NEGOTIATES" | "507 INSUFFICIENT_STORAGE" | "508 LOOP_DETECTED" | "509 BANDWIDTH_LIMIT_EXCEEDED" | "510 NOT_EXTENDED" | "511 NETWORK_AUTHENTICATION_REQUIRED";
+            message?: string;
+            payload?: Record<string, never>;
+            success?: boolean;
+        };
         DefaultErrorResponse: {
             /** Format: int32 */
             status?: number;
@@ -1983,12 +2134,15 @@ export interface components {
             trace?: string;
             path?: string;
         };
-        HttpResponse: {
-            /** @enum {string} */
-            status?: "100 CONTINUE" | "101 SWITCHING_PROTOCOLS" | "102 PROCESSING" | "103 EARLY_HINTS" | "103 CHECKPOINT" | "200 OK" | "201 CREATED" | "202 ACCEPTED" | "203 NON_AUTHORITATIVE_INFORMATION" | "204 NO_CONTENT" | "205 RESET_CONTENT" | "206 PARTIAL_CONTENT" | "207 MULTI_STATUS" | "208 ALREADY_REPORTED" | "226 IM_USED" | "300 MULTIPLE_CHOICES" | "301 MOVED_PERMANENTLY" | "302 FOUND" | "302 MOVED_TEMPORARILY" | "303 SEE_OTHER" | "304 NOT_MODIFIED" | "305 USE_PROXY" | "307 TEMPORARY_REDIRECT" | "308 PERMANENT_REDIRECT" | "400 BAD_REQUEST" | "401 UNAUTHORIZED" | "402 PAYMENT_REQUIRED" | "403 FORBIDDEN" | "404 NOT_FOUND" | "405 METHOD_NOT_ALLOWED" | "406 NOT_ACCEPTABLE" | "407 PROXY_AUTHENTICATION_REQUIRED" | "408 REQUEST_TIMEOUT" | "409 CONFLICT" | "410 GONE" | "411 LENGTH_REQUIRED" | "412 PRECONDITION_FAILED" | "413 PAYLOAD_TOO_LARGE" | "413 REQUEST_ENTITY_TOO_LARGE" | "414 URI_TOO_LONG" | "414 REQUEST_URI_TOO_LONG" | "415 UNSUPPORTED_MEDIA_TYPE" | "416 REQUESTED_RANGE_NOT_SATISFIABLE" | "417 EXPECTATION_FAILED" | "418 I_AM_A_TEAPOT" | "419 INSUFFICIENT_SPACE_ON_RESOURCE" | "420 METHOD_FAILURE" | "421 DESTINATION_LOCKED" | "422 UNPROCESSABLE_ENTITY" | "423 LOCKED" | "424 FAILED_DEPENDENCY" | "425 TOO_EARLY" | "426 UPGRADE_REQUIRED" | "428 PRECONDITION_REQUIRED" | "429 TOO_MANY_REQUESTS" | "431 REQUEST_HEADER_FIELDS_TOO_LARGE" | "451 UNAVAILABLE_FOR_LEGAL_REASONS" | "500 INTERNAL_SERVER_ERROR" | "501 NOT_IMPLEMENTED" | "502 BAD_GATEWAY" | "503 SERVICE_UNAVAILABLE" | "504 GATEWAY_TIMEOUT" | "505 HTTP_VERSION_NOT_SUPPORTED" | "506 VARIANT_ALSO_NEGOTIATES" | "507 INSUFFICIENT_STORAGE" | "508 LOOP_DETECTED" | "509 BANDWIDTH_LIMIT_EXCEEDED" | "510 NOT_EXTENDED" | "511 NETWORK_AUTHENTICATION_REQUIRED";
-            message?: string;
-            payload?: Record<string, never>;
-            success?: boolean;
+        UpdateUserSettingsRequest: {
+            preferredLang?: string;
+            emailOnAnswer?: boolean;
+            emailWeeklyDigest?: boolean;
+        };
+        UserSettingsResponse: {
+            preferredLang?: string;
+            emailOnAnswer?: boolean;
+            emailWeeklyDigest?: boolean;
         };
         UpdateUserProfileRequest: {
             location?: string;
@@ -2151,6 +2305,8 @@ export interface components {
             /** Format: date-time */
             updatedAt?: string;
             aiCitable?: boolean;
+            /** Format: int64 */
+            citedCount?: number;
         };
         UpdateAuthorProfileRequest: {
             designation: string;
@@ -2280,6 +2436,9 @@ export interface components {
             score?: number;
             /** Format: int64 */
             viewCount?: number;
+            answerMailPending?: boolean;
+            /** Format: date-time */
+            answerMailedAt?: string;
             agri?: components["schemas"]["AgriMetadata"];
             hidden?: boolean;
             /** Format: int64 */
@@ -2344,6 +2503,9 @@ export interface components {
             banReason?: string;
             location?: string;
             coverUrl?: string;
+            preferredLang?: string;
+            emailOnAnswer?: boolean;
+            emailWeeklyDigest?: boolean;
             contactVerified?: boolean;
             /** Format: int64 */
             lastModifiedDateTimeStamp?: number;
@@ -2369,6 +2531,8 @@ export interface components {
             /** Format: int64 */
             score?: number;
             accepted?: boolean;
+            /** Format: int64 */
+            replyCount?: number;
         };
         UpdateRoleRequest: {
             /** Format: int64 */
@@ -2467,7 +2631,7 @@ export interface components {
             /** Format: int64 */
             id?: number;
             /** @enum {string} */
-            type?: "ANSWER_ON_YOUR_QUESTION" | "ANSWER_ACCEPTED" | "AI_ANSWER_REVIEWED" | "NEW_REVIEW_ITEM" | "NEW_QUESTION_IN_TOPIC" | "APPLICATION_DECIDED" | "COMMENT_REPLY" | "CONTENT_REMOVED" | "CONTENT_HIDDEN" | "CONTENT_RESTORED";
+            type?: "ANSWER_ON_YOUR_QUESTION" | "ANSWER_ACCEPTED" | "AI_ANSWER_REVIEWED" | "NEW_REVIEW_ITEM" | "NEW_QUESTION_IN_TOPIC" | "APPLICATION_DECIDED" | "COMMENT_REPLY" | "ANSWER_REPLY" | "CONTENT_REMOVED" | "CONTENT_HIDDEN" | "CONTENT_RESTORED";
             /** @enum {string} */
             targetType?: "QUESTION" | "BLOG" | "EXPERT_APPLICATION";
             /** Format: int64 */
@@ -2627,7 +2791,7 @@ export interface components {
             mobileNumber: string;
         };
         RefreshTokenRequest: {
-            refreshToken: string;
+            refreshToken?: string;
         };
         GoogleSignInRequest: {
             /** @description The credential from Google Identity Services (a Google-signed ID token) */
@@ -2724,6 +2888,18 @@ export interface components {
             badges?: ("TOP_CONTRIBUTOR" | "VERIFIED_EXPERT")[];
             expertField?: string;
         };
+        UserImpactResponse: {
+            /** Format: int64 */
+            answers?: number;
+            /** Format: int64 */
+            acceptedAnswers?: number;
+            /** Format: int64 */
+            readersReached?: number;
+            /** Format: int64 */
+            citedInAiAnswers?: number;
+            /** Format: int64 */
+            storyCitations?: number;
+        };
         PublicUserResponse: {
             /** Format: int64 */
             id?: number;
@@ -2779,6 +2955,8 @@ export interface components {
             /** Format: date-time */
             updatedAt?: string;
             aiCitable?: boolean;
+            /** Format: int64 */
+            citedCount?: number;
         };
         ExpertSummaryResponse: {
             /** Format: int64 */
@@ -2826,6 +3004,14 @@ export interface components {
             /** Format: date-time */
             askedAt?: string;
         };
+        AiAllowanceResponse: {
+            /** Format: int32 */
+            limit?: number;
+            /** Format: int64 */
+            usedToday?: number;
+            /** Format: date-time */
+            resetsAt?: string;
+        };
         AdminUserDetailResponse: {
             user?: components["schemas"]["AdminUserResponse"];
             /** Format: int64 */
@@ -2865,6 +3051,30 @@ export interface components {
             /** Format: int64 */
             uncheckedAiAnswers?: number;
         };
+        LaunchWeekResponse: {
+            /** Format: date */
+            weekStart?: string;
+            partial?: boolean;
+            /** Format: int64 */
+            activeAskers?: number;
+            /** Format: int64 */
+            activeAnswerers?: number;
+            /** Format: int64 */
+            activeMembers?: number;
+            /** Format: int64 */
+            questions?: number;
+            /** Format: int64 */
+            humanAnsweredWithin24h?: number;
+            /** Format: int64 */
+            aiAnswers?: number;
+            /** Format: int64 */
+            aiReviewedWithin48h?: number;
+            /** Format: int64 */
+            verifiedExperts?: number;
+            /** Format: int64 */
+            newMembers?: number;
+            staffActivity?: components["schemas"]["LaunchWeekResponse"];
+        };
     };
     responses: never;
     parameters: never;
@@ -2896,6 +3106,162 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
+    settings: {
+        parameters: {
+            query?: {
+                lang?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["UserSettingsResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
+    updateSettings: {
+        parameters: {
+            query?: {
+                lang?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateUserSettingsRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["UserSettingsResponse"];
                 };
             };
             /** @description Bad Request */
@@ -4652,6 +5018,149 @@ export interface operations {
                     "*/*": components["schemas"]["RoleResponse"];
                 };
             };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
+    unsubscribeLink: {
+        parameters: {
+            query: {
+                token: string;
+                kind: "answer" | "digest";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description To {frontendUrl}/unsubscribed?kind=..., with &error=invalid for a bad link */
+            302: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
+    unsubscribeOneClick: {
+        parameters: {
+            query: {
+                token: string;
+                kind: "answer" | "digest";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
             /** @description Bad Request */
             400: {
                 headers: {
@@ -6857,9 +7366,11 @@ export interface operations {
             };
             header?: never;
             path?: never;
-            cookie?: never;
+            cookie?: {
+                agrotrends_refresh?: string;
+            };
         };
-        requestBody: {
+        requestBody?: {
             content: {
                 "application/json": components["schemas"]["RefreshTokenRequest"];
             };
@@ -8368,6 +8879,117 @@ export interface operations {
             };
         };
     };
+    digestPreview: {
+        parameters: {
+            query?: {
+                lang?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/html": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/html": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/html": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/html": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/html": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/html": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
+    story: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": string;
+                };
+            };
+        };
+    };
+    question: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                questionId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": string;
+                };
+            };
+        };
+    };
     reputation: {
         parameters: {
             query?: never;
@@ -8464,6 +9086,84 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["UserProfileResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
+    impact: {
+        parameters: {
+            query?: {
+                lang?: string;
+            };
+            header?: never;
+            path: {
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["UserImpactResponse"];
                 };
             };
             /** @description Bad Request */
@@ -9217,6 +9917,8 @@ export interface operations {
                 categoryId?: number;
                 tag?: string;
                 unanswered?: boolean;
+                /** @description Only questions with a tag the caller follows (signed in; empty when they follow none) */
+                following?: boolean;
                 crop?: string;
                 season?: "RABI" | "KHARIF_1" | "KHARIF_2" | "YEAR_ROUND";
                 region?: string;
@@ -11863,6 +12565,82 @@ export interface operations {
             };
         };
     };
+    allowance: {
+        parameters: {
+            query?: {
+                lang?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AiAllowanceResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
     users: {
         parameters: {
             query?: {
@@ -12188,6 +12966,82 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["PrivilegeResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Server Failure */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DefaultErrorResponse"];
+                };
+            };
+        };
+    };
+    launchMetrics: {
+        parameters: {
+            query?: {
+                weeks?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LaunchWeekResponse"][];
                 };
             };
             /** @description Bad Request */

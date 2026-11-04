@@ -18,6 +18,7 @@ interface CommentResponse {
   content: string
   createdAt: string
   updatedAt: string
+  replyCount?: number
 }
 
 function comment(commentId: number, overrides: Partial<CommentResponse> = {}): CommentResponse {
@@ -77,6 +78,20 @@ test('responses and their replies are listed oldest first, with a count', async 
   expect(items[0]).toHaveTextContent('First line')
   expect(section.getByRole('button', { name: 'Sign in to respond' })).toBeInTheDocument()
   expect(section.queryByRole('button', { name: 'Edit' })).not.toBeInTheDocument()
+})
+
+test('with reply counts, only responses that have replies are read, and the heading counts them all', async () => {
+  const api = mockApi({
+    'GET /api/blogs/slug/rice-blast': () => envelope(200, story),
+    'GET /api/comments/blog/402': () => envelope(200, [comment(1, { replyCount: 1 }), comment(2, { replyCount: 0 })]),
+    'GET /api/comments/replies/1': () => envelope(200, [comment(3, { parentCommentId: 1, authorName: 'Salma', content: 'A reply' })]),
+  })
+  renderWithProviders(<App />, '/stories/rice-blast')
+
+  const section = await responsesSection()
+  expect(await section.findByRole('heading', { name: 'Responses (3)' })).toBeInTheDocument()
+  expect(await section.findByRole('article', { name: 'Response by Salma' })).toBeInTheDocument()
+  expect(api.mock.calls.some(([url]) => String(url).startsWith('/api/comments/replies/2'))).toBe(false)
 })
 
 test('comment HTML is cleaned before it is shown', async () => {

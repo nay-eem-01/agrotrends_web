@@ -81,6 +81,16 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 
 ---
 
+## 2026-11-04 — Fix: the notification panel was cut off on phones (`fix/bell-mobile`)
+
+**Done**
+- The bell's panel hung from the bell's right edge; on a phone the avatar sits to the bell's right, so the panel ran
+  off the left of the screen. Below `sm` it now spans the screen under the top bar (`fixed inset-x-4 top-16`); from
+  `sm` up it hangs from the bell as before.
+
+**Known limitations**
+- Layout only; jsdom has no layout, so no new test. Checked by lint, the layout tests and the build.
+
 ## 2026-11-04 — F24.7 One Ask: public or private, chosen when asking (`feat/one-ask`)
 
 **Done**

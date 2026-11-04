@@ -1,4 +1,4 @@
-import { CalendarBlank, Certificate, MapPin, PencilSimple, SealCheck, Sparkle } from '@phosphor-icons/react'
+import { Article, CalendarBlank, Certificate, Eye, MapPin, PencilSimple, Quotes, SealCheck, TrendUp } from '@phosphor-icons/react'
 import type { ReactNode } from 'react'
 import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import { cn } from 'cn'
@@ -348,27 +348,39 @@ function Credentials({ credentials, expertIn }: { credentials?: { title?: string
 
 /** Others' profiles: their latest questions, answers and stories as one short list. */
 /**
- * What this person's work did, beyond the counts above: the readers their answers reached and the AI answers that cite
- * them. Only the parts that are above zero; nothing at all for someone just starting.
+ * What this person's work did, beyond the counts above: the readers their answers reached and the AI answers and
+ * stories that cite them, as a row of tiles. Only the parts that are above zero; nothing at all for someone just starting.
  */
 function Impact({ userId }: { userId: number }) {
   const t = useT()
   const impact = useUserImpact(userId).data
   if (!impact) return null
-  const parts = [
-    (impact.readersReached ?? 0) > 0 && t('Their answers reached {n} readers', { n: formatNumber(impact.readersReached ?? 0) }),
-    (impact.citedInAiAnswers ?? 0) > 0 && t('cited in {n} AI answers', { n: formatNumber(impact.citedInAiAnswers ?? 0) }),
-    (impact.storyCitations ?? 0) > 0 && t('their stories cited {n} times', { n: formatNumber(impact.storyCitations ?? 0) }),
-  ].filter((part): part is string => Boolean(part))
-  if (parts.length === 0) return null
-  const sentence = parts.join(t(', '))
+  const tiles = [
+    { value: impact.readersReached ?? 0, label: t('Readers reached by answers'), icon: Eye },
+    { value: impact.citedInAiAnswers ?? 0, label: t('Cited in AI answers'), icon: Quotes },
+    { value: impact.storyCitations ?? 0, label: t('Story citations'), icon: Article },
+  ].filter((tile) => tile.value > 0)
+  if (tiles.length === 0) return null
   return (
-    <p className="mt-4 flex items-start gap-2 text-sm text-muted-foreground">
-      <Sparkle size={16} weight="fill" aria-hidden="true" className="mt-0.5 shrink-0 text-primary" />
-      <span>
-        <span className="font-medium text-foreground">{t('Impact')}</span> {sentence.charAt(0).toUpperCase() + sentence.slice(1)}.
-      </span>
-    </p>
+    <section aria-labelledby="impact" className="mt-6 rounded-xl bg-surface p-4 sm:p-5">
+      <h2 id="impact" className="flex items-center gap-2 font-sans text-sm font-semibold">
+        <TrendUp size={18} weight="bold" aria-hidden="true" className="text-primary" />
+        {t('Impact')}
+      </h2>
+      <dl className="mt-3 flex flex-col gap-3 sm:flex-row">
+        {tiles.map(({ value, label, icon: TileIcon }) => (
+          <div key={label} className="flex flex-1 items-center gap-3 rounded-lg bg-background p-3 ring-1 ring-border">
+            <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <TileIcon size={20} weight="duotone" />
+            </span>
+            <div className="flex min-w-0 flex-col-reverse">
+              <dt className="text-sm text-muted-foreground">{label}</dt>
+              <dd className="text-xl font-semibold tabular-nums">{formatNumber(value)}</dd>
+            </div>
+          </div>
+        ))}
+      </dl>
+    </section>
   )
 }
 

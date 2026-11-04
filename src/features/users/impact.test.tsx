@@ -27,8 +27,10 @@ function profileApi(impact: object) {
 test('a profile says what the person’s work did, only the parts above zero', async () => {
   mockApi(profileApi({ answers: 42, acceptedAnswers: 12, readersReached: 3400, citedInAiAnswers: 7, storyCitations: 0 }))
   renderWithProviders(<App />, '/users/7')
-  expect(await screen.findByText('Their answers reached 3,400 readers, cited in 7 AI answers.')).toBeInTheDocument()
-  expect(screen.queryByText(/stories cited/)).not.toBeInTheDocument()
+  const impact = await screen.findByRole('region', { name: 'Impact' })
+  expect(within(impact).getByText('Readers reached by answers').nextSibling).toHaveTextContent('3,400')
+  expect(within(impact).getByText('Cited in AI answers').nextSibling).toHaveTextContent('7')
+  expect(within(impact).queryByText('Story citations')).not.toBeInTheDocument()
 })
 
 test('someone just starting gets no impact line', async () => {

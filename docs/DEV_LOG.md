@@ -81,6 +81,17 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 
 ---
 
+## 2026-11-04 — Fix: the profile's Impact line becomes tiles (`fix/profile-impact`)
+
+**Done**
+- "Impact Their answers reached 15 readers, their stories cited 4 times." read as one run-on line, said "Their" on
+  your own profile too, and used the advisor's Sparkle. It is now a small card: an "Impact" heading with a trend
+  icon, then a tile per number above zero (Readers reached by answers: eye; Cited in AI answers: quotes; Story
+  citations: article), each a big number under its own icon.
+
+**Decisions**
+- Labels are neutral ("Readers reached by answers", not "Their answers reached…") so they fit your own profile
+  and others'.
 ## 2026-11-04 — Fix: the notification panel was cut off on phones (`fix/bell-mobile`)
 
 **Done**

@@ -10,6 +10,7 @@ import { FormError } from '../auth/AuthPage'
 import { ResendLink } from '../auth/confirmEmail'
 import { useSession } from '../auth/session'
 import { AuthorProfileForm } from './AuthorProfileForm'
+import { EmailSettings } from './EmailSettings'
 import { ProfilePageForm } from './ProfilePageForm'
 import { useMyApplications } from '../../api/experts'
 import { ApplicationStatus } from '../experts/ExpertApplyPage'
@@ -34,6 +35,9 @@ export function SettingsPage() {
           <ProfilePageForm userId={user.id} />
         </Section>
       )}
+      <Section id="emails" title="E-mails" intro="What we send you. Every e-mail has a link to stop it.">
+        <EmailSettings />
+      </Section>
       <Section title="Verified expert" intro="Experts check AI answers in their topics and carry a badge on their answers.">
         <ExpertStatus />
       </Section>
@@ -61,9 +65,9 @@ function ExpertStatus() {
   )
 }
 
-function Section({ title, intro, children }: { title: string; intro: string; children: ReactNode }) {
+function Section({ id, title, intro, children }: { id?: string; title: string; intro: string; children: ReactNode }) {
   return (
-    <section className="mt-10 border-t border-rule pt-8">
+    <section id={id} className="mt-10 scroll-mt-24 border-t border-rule pt-8">
       <h2 className="text-xl">{title}</h2>
       <p className="mt-1 text-sm text-ink-muted">{intro}</p>
       <div className="mt-6">{children}</div>

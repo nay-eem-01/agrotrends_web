@@ -1,6 +1,6 @@
 import { formatNumber, useT } from '../../lib/i18n'
 import { useState } from 'react'
-import { ArrowLeft, ChatCircleText, Sparkle } from '@phosphor-icons/react'
+import { ArrowLeft, ChatCircleText, CheckCircle, Sparkle } from '@phosphor-icons/react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { ApiError, errorMessage } from '../../api/errors'
 import { useAiAnswer } from '../../api/aiAnswer'
@@ -16,6 +16,7 @@ import { Spinner } from '../../ui/Spinner'
 import { useSession } from '../auth/session'
 import { NotFoundPage } from '../errors/NotFoundPage'
 import { useMyVotes } from '../../api/votes'
+import { useUserSettings } from '../../api/settings'
 import { Answers } from './Answers'
 import { PostMenu } from '../threads/PostMenu'
 import { AiAnswerCard } from './AiAnswerCard'
@@ -165,6 +166,7 @@ function QuestionView({ question }: { question: Question }) {
               </div>
             </div>
           </section>
+          {own && askedAt != null && <PostedNote />}
           <AiAnswerCard questionId={id} topicId={question.category?.id} askedAt={askedAt} />
           <Answers questionId={id} askerId={question.userId} />
         </div>
@@ -202,6 +204,21 @@ function QuestionView({ question }: { question: Question }) {
 }
 
 /** Deleting the question asks first; the answers go with it. */
+/** Just after asking: how the asker will hear about answers (e-mail only to a confirmed address that wants it, B8). */
+function PostedNote() {
+  const t = useT()
+  const { user } = useSession()
+  const confirmed = Boolean(user?.email && user.emailVerified)
+  const settings = useUserSettings(confirmed)
+  const mailed = confirmed && settings.data != null && settings.data.emailOnAnswer !== false
+  return (
+    <output className="mt-6 flex items-start gap-2 rounded-xl bg-surface px-4 py-3 text-sm">
+      <CheckCircle size={18} weight="fill" aria-hidden="true" className="mt-px shrink-0 text-primary" />
+      {mailed ? t('Posted. We’ll e-mail {email} when someone answers.', { email: user?.email ?? '' }) : t('Posted. Answers will show up in your notifications.')}
+    </output>
+  )
+}
+
 function DeleteQuestion({ questionId, onCancel }: { questionId: number; onCancel: () => void }) {
   const t = useT()
   const remove = useQuestionWrite()

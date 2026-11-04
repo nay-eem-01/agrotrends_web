@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend · ➡ moved to a later step
 
-**Progress:** 123 of 134 steps done
+**Progress:** 124 of 134 steps done
 
 ---
 
@@ -296,7 +296,7 @@ web can't do alone is in `docs/BACKEND_REQUESTS_AUDIT.md` (B1–B12); those step
 | F24.9 | Reply counts: "3 replies", nothing at 0; story responses read replies only where there are some; the regenerated API types (B1) (`feat/api3-types`) | ✅ |
 | F24.10 | "7 of 10 left today" in the advisor (B2) (`feat/ai-allowance`) | ✅ |
 | F24.11 | The relaxed password rule (B3) (`feat/password-rule`) | ⏸ |
-| F24.12 | "For you" from the topics you follow (B4) (`feat/for-you`) | ⬜ |
+| F24.12 | "For you" from the topics you follow (B4) (`feat/for-you`) | ✅ |
 | F24.13 | E-mail settings, your language and the unsubscribe page; "we'll e-mail you" after asking (B5, B8) (`feat/email-settings`) | ⬜ |
 | F24.14 | Launch-test panel in admin (B6) (`feat/launch-metrics`) | ⬜ |
 | F24.15 | "Cited in N AI answers" and an impact line on profiles (B9) (`feat/impact`) | ⬜ |

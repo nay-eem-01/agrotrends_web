@@ -721,4 +721,5 @@ export const BN: Record<string, string> = {
   '{n} of {limit} questions left today': 'আজ {limit}টির মধ্যে {n}টি প্রশ্ন বাকি',
   'No questions left today. More at {time}.': 'আজ আর প্রশ্ন বাকি নেই। আবার পাবেন {time}-এ।',
   'No questions left today.': 'আজ আর প্রশ্ন বাকি নেই।',
+  'Nothing yet in the topics you follow. Follow more topics, or see all questions.': 'আপনার অনুসরণ করা বিষয়ে এখনো কিছু নেই। আরও বিষয় অনুসরণ করুন, অথবা সব প্রশ্ন দেখুন।',
 }

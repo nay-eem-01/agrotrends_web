@@ -112,7 +112,7 @@ export function AdvisorPage() {
                 <h1 className="relative mt-4 font-serif text-[2rem] leading-tight font-medium sm:text-[2.5rem]">{t('Ask the advisor')}</h1>
                 <p className="relative mt-2 max-w-xl text-muted-foreground">
                   {t(
-                    'Answers are written from stories farmers and agronomists published here, with links so you can check where the advice came from. A daily limit applies.',
+                    'Answers are written from stories farmers and agronomists published here, with links so you can check where the advice came from. Private: only you see them, and no expert checks them. A daily limit applies.',
                   )}
                 </p>
               </header>
@@ -391,7 +391,13 @@ function ExchangeView({ exchange, onFollowUp }: { exchange: Exchange; onFollowUp
         <SafeHtml html={withCitations(exchange.answer.answer, sources.length)} className="mt-2 text-base leading-relaxed whitespace-pre-line [&_sup]:ml-0.5 [&_sup]:rounded-md [&_sup]:bg-surface [&_sup]:px-1.5 [&_sup]:py-px [&_sup]:text-[0.6875rem] [&_sup]:font-bold [&_sup]:text-primary [&>p+p]:mt-4" />
         <p className="mt-4 flex items-start gap-2 text-sm text-muted-foreground">
           <Warning size={16} aria-hidden="true" className="mt-0.5 shrink-0" />
-          {t('Written by AI, not checked by an expert. Check the sources before you act on it.')}
+          <span>
+            {t('Written by AI, not checked by an expert. Check the sources before you act on it.')}{' '}
+            {/* Publishing works from the history, where each answer has its id. */}
+            <Link to="/advisor/history" className="font-medium text-primary underline-offset-4 hover:underline">
+              {t('Ask the experts to check it')}
+            </Link>
+          </span>
         </p>
         {followUps.length > 0 && (
           <section aria-labelledby={followId} className="mt-6">

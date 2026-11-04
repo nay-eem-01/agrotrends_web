@@ -44,7 +44,9 @@ test('signed in, home shows questions and stories as two tabs, never mixed', asy
   await within(feed).findByRole('link', { name: 'Why are my tilapia gasping?' })
   expect(within(feed).queryByRole('link', { name: 'Keeping oxygen up in summer ponds' })).not.toBeInTheDocument()
   expect(api.mock.calls.some(([url]) => String(url).startsWith('/api/blogs/all'))).toBe(false)
-  expect(within(feed).getByRole('link', { name: 'Ask the community, or ask the AI advisor…' })).toHaveAttribute('href', '/questions/ask')
+  // The two ways to ask, named by who sees them.
+  expect(within(feed).getByRole('link', { name: 'Ask a question in public…' })).toHaveAttribute('href', '/questions/ask')
+  expect(within(feed).getByRole('link', { name: 'Private AI' })).toHaveAttribute('href', '/advisor')
 
   // Your topics live in the app's sidebar, not in the feed.
   const navigation = screen.getByRole('complementary', { name: 'Navigation' })

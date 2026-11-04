@@ -50,14 +50,18 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 - Phase F22 on `feat/mock-base` (stacked on F21's tip): F22.1 fields (`feat/mock-fields`) F22.2 home feed (`feat/mock-home`) F22.3 question page (`feat/mock-question`) F22.4 profile (`feat/mock-profile`) F22.5 AI advisor (`feat/mock-advisor`) F22.6 ask page (`feat/mock-ask`) F22.7 story editor (`feat/mock-editor`) F22.8 sign in and sign up (`feat/mock-auth`) F22.9 story page (`feat/mock-story`) F22.10 navigation in the sidebar (`feat/mock-sidebar`) F22.11 search in the bar (`feat/mock-topbar`) F22.12 quieter frame (`feat/mock-chrome`) done. Phase F22 is complete.
 - Phase F23 on `feat/api2-base` (stacked on F22's tip and `fix/google-test`): F23.1 API types (`feat/api2-types`) F23.2 home rail (`feat/api2-home`) F23.3 story subtitle (`feat/api2-stories`) F23.4 profile page and notification (`feat/api2-profile`) F23.5 home tabs (`feat/home-tabs`) F23.6 admin design (`feat/admin-design`) F23.7 about, privacy, terms and footer (`feat/site-pages`) F23.8 faster pages (`perf/faster-pages`) F23.9 profile pictures (`fix/profile-images`) F23.10 footer and home width (`fix/footer-home-width`) F23.11 reply to a reply (`feat/reply-to-reply`) F23.12 answer reply notification (`feat/answer-reply-notification`) done. Phase F23 is complete and merged into `development`.
 - Phase F24 on `feat/audit-base` (from `development`), the audit fixes: F24.1 Ask and Write on phones (`feat/phone-tasks`) F24.2 share (`feat/share`) F24.3 Discover (`feat/discover-hallmark`) F24.4 About (`feat/about-hallmark`) F24.5 small fixes (`fix/audit-small`) done.
-- Phase F24, second half, on `feat/audit2-base` (from `development`, after the backend built B1–B12): F24.9 reply counts and API types (`feat/api3-types`) F24.10 advisor allowance (`feat/ai-allowance`) F24.12 For you (`feat/for-you`) F24.13 e-mail settings (`feat/email-settings`) F24.14 launch test (`feat/launch-metrics`) F24.15 impact and citations (`feat/impact`) F24.16 digest preview (`feat/digest-preview`) F24.18 refresh cookie (`feat/refresh-cookie`) F24.8 share card and preview links (`feat/share-card`) F24.6 where you are (`feat/ask-place`) done.
+- Phase F24, second half, on `feat/audit2-base` (from `development`, after the backend built B1–B12): F24.9 reply counts and API types (`feat/api3-types`) F24.10 advisor allowance (`feat/ai-allowance`) F24.12 For you (`feat/for-you`) F24.13 e-mail settings (`feat/email-settings`) F24.14 launch test (`feat/launch-metrics`) F24.15 impact and citations (`feat/impact`) F24.16 digest preview (`feat/digest-preview`) F24.18 refresh cookie (`feat/refresh-cookie`) F24.8 share card and preview links (`feat/share-card`) F24.6 where you are (`feat/ask-place`) F24.7 one Ask (`feat/one-ask`) done.
 
 ## Next up
 
-1. **Backend:** `docs/BACKEND_REQUESTS_AUDIT.md` (B1–B12, smallest first; B7 link previews is the one launch needs most).
-2. **Web:** F24.2 onwards in `docs/ROADMAP.md`, smallest first; the ⏸ steps start as their backend item lands.
-3. **Nayeem:** PR each F24 step into `feat/audit-base` in order, then the base into `development`.
-4. Pick an SMS provider (backend 10.5): until then codes only appear in the backend log as `[DEV SMS]`.
+1. **Nayeem:** PR the second half of F24 into `feat/audit2-base` in this order: `feat/api3-types`, `feat/ai-allowance`,
+   `feat/for-you`, `feat/email-settings`, `feat/launch-metrics`, `feat/impact`, `feat/digest-preview`,
+   `feat/refresh-cookie`, `feat/share-card`, `feat/ask-place`, `feat/one-ask`; then the base into `development`.
+2. **Nayeem decides:** B3 (relax the password rule; F24.11 waits) and when to do B11 (follow a question; F24.17).
+3. **Before launch:** restart the dev backend on the merged code (the one on 8080 is older); on the host, either
+   proxy `/share` to the API or set `VITE_SHARE_BASE_URL` to the API's address; check five shared links in
+   Facebook's Sharing Debugger once the site is public.
+4. Pick an SMS provider (backend 10.5): until then phone-only accounts get no codes and no answer e-mails.
 5. Run the admin smoke step (`E2E_ADMIN_EMAIL` / `E2E_ADMIN_PASSWORD`) once an admin login is at hand.
 
 ## Open items
@@ -74,6 +78,29 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-11-04 — F24.7 One Ask: public or private, chosen when asking (`feat/one-ask`)
+
+**Done**
+- The ask form opens with "Who should answer?": Everyone, in public (the AI answers in seconds, then farmers and
+  agronomists, and a verified expert checks the AI answer) or Only the AI, privately (only you see it; no expert
+  checks it). Two radio cards, the whole card picks.
+- Private needs only the question: topic, place, tags and photos step aside, the button reads "Ask the AI privately",
+  and it opens the advisor with the question in its box. Nothing is posted. An edit has no choice; it stays public.
+- The home composer names both ways by who sees them: "Ask a question in public…" and "Private AI"; the phone's
+  quick action reads "Private AI advice".
+- The advisor says so too: its intro adds "Private: only you see them, and no expert checks them.", and the "not
+  checked" line under each answer links to the history, where Ask the experts publishes it.
+
+**Decisions**
+- The advisor isn't asked straight away on choosing private: it opens with the question filled in, so the reader
+  presses Ask there and sees the daily allowance first.
+- Publishing a live answer needs its id, which only the history has, hence the link rather than a button.
+
+**Known limitations**
+- None.
 
 ---
 

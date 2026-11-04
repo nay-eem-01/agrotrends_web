@@ -1,5 +1,6 @@
-import { CheckCircle, PaperPlaneTilt } from '@phosphor-icons/react'
+import { CheckCircle, PaperPlaneTilt, Sparkle } from '@phosphor-icons/react'
 import { useT } from '../../lib/i18n'
+import { cn } from 'cn'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { ApiError, errorMessage } from '../../api/errors'
@@ -7,6 +8,7 @@ import { useCategories } from '../../api/categories'
 import { useQuestion, useQuestionWrite, type Question } from '../../api/questions'
 import { splitAskDraft } from '../../lib/askDraft'
 import { htmlToText, textToHtml } from '../../lib/html'
+import { MAX_ADVISOR_QUESTION } from '../../api/ai'
 import { useUserProfile } from '../../api/users'
 import { Button } from '../../ui/Button'
 import { TextField } from '../../ui/TextField'
@@ -70,6 +72,10 @@ function QuestionForm({ question }: { question?: Question }) {
   const profileLocation = useUserProfile(question ? 0 : (user?.id ?? 0)).data?.location ?? ''
   const [typedPlace, setPlace] = useState<string | null>(question ? (question.agri?.region ?? '') : null)
   const place = typedPlace ?? profileLocation
+  // One Ask, two answers: in public (the AI first, then people, and an expert checks the AI) or privately to the AI
+  // advisor (only the AI, not checked). An edit is always the public question it was.
+  const [audience, setAudience] = useState<'public' | 'private'>('public')
+  const isPrivate = !question && audience === 'private'
 
   const form = useRef<HTMLFormElement>(null)
   // Ctrl/⌘+Enter posts from anywhere in the form, as answers do; never while a Bangla input method composes.
@@ -86,13 +92,23 @@ function QuestionForm({ question }: { question?: Question }) {
     return () => element.removeEventListener('keydown', onKeyDown)
   }, [])
 
-  // What still stands between the asker and Post, in their words.
-  const missing = [!title.trim() && t('a title'), !htmlToText(details) && t('details'), categoryId == null && t('a topic')].filter(
+  // What still stands between the asker and Post, in their words. The advisor needs only the question.
+  const missing = (isPrivate ? [!title.trim() && !htmlToText(details) && t('your question')] : [!title.trim() && t('a title'), !htmlToText(details) && t('details'), categoryId == null && t('a topic')]).filter(
     (item): item is string => Boolean(item),
   )
 
   function submit(event: FormEvent) {
     event.preventDefault()
+    if (isPrivate) {
+      const text = [title.trim(), htmlToText(details).trim()].filter(Boolean).join('\n\n')
+      if (!text) {
+        setErrors({ title: t('Write your question in a line.') })
+        return
+      }
+      // The advisor opens with the question in its box; nothing is posted.
+      navigate(`/advisor?q=${encodeURIComponent(text.slice(0, MAX_ADVISOR_QUESTION))}`)
+      return
+    }
     const found = {
       title: title.trim() ? undefined : t('Write your question in a line.'),
       details: htmlToText(details) ? undefined : t('Add what you have seen and tried.'),
@@ -135,6 +151,7 @@ function QuestionForm({ question }: { question?: Question }) {
             noValidate
             className="mt-8 flex flex-col gap-5"
           >
+            {!question && <AudienceChoice value={audience} onChange={setAudience} />}
             <QuestionEditor
               title={title}
               html={details}
@@ -143,9 +160,9 @@ function QuestionForm({ question }: { question?: Question }) {
               onTitleChange={setTitle}
               onHtmlChange={setDetails}
             />
-            <PhotoPicker urls={imageUrls} onChange={setImageUrls} />
+            {!isPrivate && <PhotoPicker urls={imageUrls} onChange={setImageUrls} />}
             {!question && <SimilarQuestions title={title} />}
-            <div className="flex flex-col gap-7 border-t border-border pt-7">
+            <div hidden={isPrivate} className="flex flex-col gap-7 border-t border-border pt-7">
               <TopicPicker categories={categories.data ?? []} loading={categories.isPending} value={categoryId} error={errors.topic} onChange={setCategoryId} />
               <TextField
                 label={t('Where are you? (optional)')}
@@ -173,7 +190,7 @@ function QuestionForm({ question }: { question?: Question }) {
                 ) : (
                   <span className="inline-flex items-center gap-1.5 text-foreground">
                     <CheckCircle size={16} weight="fill" className="text-primary" aria-hidden="true" />
-                    {question ? t('Ready to save') : t('Ready to post')}
+                    {question ? t('Ready to save') : isPrivate ? t('Ready to ask') : t('Ready to post')}
                     <kbd className="ml-1 rounded-md border border-border-strong px-1.5 font-sans text-xs text-muted-foreground">{t('Ctrl + Enter')}</kbd>
                   </span>
                 )}
@@ -182,8 +199,8 @@ function QuestionForm({ question }: { question?: Question }) {
                 {t('Cancel')}
               </Button>
               <Button type="submit" loading={write.isPending} className="min-w-36 flex-1 sm:flex-none">
-                <PaperPlaneTilt size={18} weight="fill" aria-hidden="true" />
-                {question ? t('Save question') : t('Post question')}
+                {isPrivate ? <Sparkle size={18} weight="fill" aria-hidden="true" /> : <PaperPlaneTilt size={18} weight="fill" aria-hidden="true" />}
+                {question ? t('Save question') : isPrivate ? t('Ask the AI privately') : t('Post question')}
               </Button>
             </div>
           </form>
@@ -195,5 +212,50 @@ function QuestionForm({ question }: { question?: Question }) {
         </aside>
       </div>
     </section>
+  )
+}
+
+/** Who answers, chosen before writing: two radio cards saying what each way means, so nothing private goes public. */
+function AudienceChoice({ value, onChange }: { value: 'public' | 'private'; onChange: (value: 'public' | 'private') => void }) {
+  const t = useT()
+  const options = [
+    { value: 'public' as const, title: t('Everyone, in public'), text: t('The AI answers in seconds, then farmers and agronomists. A verified expert checks the AI answer.') },
+    { value: 'private' as const, title: t('Only the AI, privately'), text: t('Only you see it. An answer in seconds with sources; no expert checks it.') },
+  ]
+  return (
+    <fieldset className="min-w-0">
+      <legend className="mb-2 text-sm font-semibold">{t('Who should answer?')}</legend>
+      <div className="grid gap-2 sm:grid-cols-2">
+        {options.map((option) => (
+          <div
+            key={option.value}
+            className={cn(
+              'relative flex items-start gap-3 rounded-xl border p-4 transition-colors duration-150 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-primary',
+              value === option.value ? 'border-primary bg-secondary' : 'border-border hover:border-border-strong',
+            )}
+          >
+            <input
+              id={`audience-${option.value}`}
+              type="radio"
+              name="audience"
+              value={option.value}
+              checked={value === option.value}
+              onChange={() => onChange(option.value)}
+              aria-describedby={`audience-${option.value}-text`}
+              className="mt-1 size-4 shrink-0 accent-(--color-primary) focus-visible:outline-none"
+            />
+            <div>
+              {/* The label covers the card, so the whole card picks the option. */}
+              <label htmlFor={`audience-${option.value}`} className="block cursor-pointer text-sm font-semibold after:absolute after:inset-0 after:rounded-xl">
+                {option.title}
+              </label>
+              <p id={`audience-${option.value}-text`} className="mt-0.5 text-sm text-muted-foreground">
+                {option.text}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </fieldset>
   )
 }

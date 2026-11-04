@@ -250,7 +250,7 @@ function TopicChip({ to, current, children }: { to: string; current: boolean; ch
   )
 }
 
-/** "Ask the community, or ask the AI advisor": the two ways to start, as one pill. */
+/** The two ways to ask, named by who sees them: a public question, or the AI advisor in private. */
 function Composer() {
   const t = useT()
   const { user } = useSession()
@@ -258,11 +258,11 @@ function Composer() {
     <div className="mb-2 flex items-center gap-3 rounded-full bg-surface py-2 pr-2 pl-2">
       <Avatar name={user?.name ?? '?'} size={32} />
       <Link to="/questions/ask" className="min-w-0 flex-1 truncate text-sm text-muted-foreground hover:text-foreground">
-        {t('Ask the community, or ask the AI advisor…')}
+        {t('Ask a question in public…')}
       </Link>
       <Link to="/advisor" className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-border-strong bg-background px-3 text-sm font-semibold hover:border-subtle">
         <Sparkle size={16} aria-hidden="true" />
-        {t('AI')}
+        {t('Private AI')}
       </Link>
     </div>
   )
@@ -277,7 +277,7 @@ function QuickStart() {
   const greeting = hour < 12 ? t('Good morning, {name}', { name }) : hour < 17 ? t('Good afternoon, {name}', { name }) : t('Good evening, {name}', { name })
   const actions = [
     { to: '/questions/ask', label: t('Ask a question'), icon: ChatCircleText, main: true },
-    { to: '/advisor', label: t('AI advice'), icon: Sparkle },
+    { to: '/advisor', label: t('Private AI advice'), icon: Sparkle },
     { to: '/stories', label: t('Read stories'), icon: Newspaper },
     { to: '/questions?unanswered=true', label: t('Help answer'), icon: SealCheck },
   ]

@@ -33,8 +33,9 @@ shadcn/ui (`base-maia` style on Base UI), Phosphor icons, Sonner toasts, DOMPuri
 
 ## Auth
 
-Access token in memory; refresh token in `localStorage` until the backend offers an HttpOnly cookie (open item).
-Never log either.
+Access token in memory; the refresh token in the backend's HttpOnly cookie (`agrotrends_refresh`, path /api/auth;
+`/api/auth/*` calls go with `credentials: 'include'`). `localStorage` keeps only `agrotrends.session`, a marker that a
+session exists. Never log either token.
 
 ## Rendering user content
 

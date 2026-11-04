@@ -6,6 +6,7 @@ import { useAdminStats, type AdminStats } from '../../api/admin'
 import { errorMessage } from '../../api/errors'
 import { formatNumber } from '../../lib/i18n'
 import { AdminPage } from './AdminPage'
+import { LaunchTest } from './LaunchTest'
 
 /** Work waiting for staff: each count leads to the queue where it is handled. */
 const QUEUES: { key: keyof AdminStats; label: string; to?: string; icon: Icon; hint: string }[] = [
@@ -23,11 +24,12 @@ const TOTALS: { key: keyof AdminStats; label: string; to?: string; recent?: keyo
   { key: 'publishedStories', label: 'Published stories', to: '/stories' },
 ]
 
-/** `/admin`: what needs attention first, then the counts. */
+/** `/admin`: the launch test, then what needs attention, then the counts. */
 export function AdminOverviewPage() {
   const stats = useAdminStats()
   return (
     <AdminPage title="Overview">
+      <LaunchTest />
       {stats.isPending ? (
         <div aria-busy="true" className="mt-6 grid gap-3 sm:grid-cols-3">
           <output className="sr-only">Loading</output>
@@ -41,7 +43,7 @@ export function AdminOverviewPage() {
         </p>
       ) : (
         <>
-          <section aria-labelledby="admin-queues" className="mt-6">
+          <section aria-labelledby="admin-queues" className="mt-10">
             <h2 id="admin-queues" className="text-sm font-semibold text-muted-foreground">
               Needs attention
             </h2>

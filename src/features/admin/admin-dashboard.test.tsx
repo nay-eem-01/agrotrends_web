@@ -173,3 +173,31 @@ test('an account with an admin role is not offered a ban', async () => {
   expect(await screen.findByText('They hold an admin role. Remove it below before banning the account.')).toBeInTheDocument()
   expect(screen.queryByRole('button', { name: 'Ban the account' })).not.toBeInTheDocument()
 })
+
+test('the launch test leads the overview: this week against the plan’s targets, then eight weeks as a table', async () => {
+  const weeks = [
+    { weekStart: '2026-11-02', partial: true, activeAskers: 22, activeAnswerers: 14, activeMembers: 31, questions: 20, humanAnsweredWithin24h: 15, aiAnswers: 18, aiReviewedWithin48h: 9, verifiedExperts: 6, newMembers: 40, staffActivity: { activeMembers: 3, questions: 4, humanAnsweredWithin24h: 2 } },
+    { weekStart: '2026-10-26', partial: false, activeAskers: 5, activeAnswerers: 3, activeMembers: 7, questions: 0, humanAnsweredWithin24h: 0, aiAnswers: 0, aiReviewedWithin48h: 0, verifiedExperts: 4, newMembers: 12 },
+  ]
+  const api = mockApi({ ...signedInAdmin(), 'GET /api/admin/stats': () => envelope(200, stats), 'GET /api/admin/launch-metrics': () => envelope(200, weeks) })
+  renderWithProviders(<App />, '/admin')
+
+  const launch = within((await screen.findByRole('heading', { name: 'Launch test' })).closest('section')!)
+  expect(launch.getByText(/Week of 2 Nov, so far\./)).toBeInTheDocument()
+  const figure = (name: string) => launch.getByText(name).closest('li')!
+  expect(figure('Weekly active askers or answerers')).toHaveTextContent('31')
+  expect(figure('Weekly active askers or answerers')).toHaveTextContent('On target')
+  expect(figure('Questions with a human answer within 24 h')).toHaveTextContent('75%')
+  expect(figure('Questions with a human answer within 24 h')).toHaveTextContent('Target 80%')
+  expect(figure('AI answers checked by an expert within 48 h')).toHaveTextContent('50%')
+  expect(figure('Verified experts')).toHaveTextContent('Target 10')
+  expect(launch.getByText(/Staff among them: 3 active/)).toBeInTheDocument()
+
+  const rows = launch.getAllByRole('row').slice(1)
+  expect(rows).toHaveLength(2)
+  expect(within(rows[0]).getByRole('rowheader')).toHaveTextContent('2 Novso far')
+  // No questions that week: a share of nothing is a dash, not 0%.
+  expect(rows[1]).toHaveTextContent('–')
+  const call = api.mock.calls.find(([url]) => String(url).startsWith('/api/admin/launch-metrics'))!
+  expect(new URL(String(call[0]), 'http://x').searchParams.get('weeks')).toBe('8')
+})

@@ -7,6 +7,7 @@ export type AdminUser = Schemas['AdminUserResponse']
 export type AdminUserDetail = Schemas['AdminUserDetailResponse']
 export type Role = Schemas['RoleResponse']
 export type Privilege = Schemas['PrivilegeResponse']
+export type LaunchWeek = Schemas['LaunchWeekResponse']
 
 export const adminKeys = {
   stats: ['admin', 'stats'] as const,
@@ -14,11 +15,20 @@ export const adminKeys = {
   user: (userId: number) => ['admin', 'user', userId] as const,
   roles: ['admin', 'roles'] as const,
   privileges: ['admin', 'privileges'] as const,
+  launch: (weeks: number) => ['admin', 'launch', weeks] as const,
 }
 
 /** The overview counts (users, posts, open queues). Any staff privilege may read them. */
 export function useAdminStats() {
   return useQuery({ queryKey: adminKeys.stats, queryFn: ({ signal }) => api<AdminStats>('/api/admin/stats', { signal }) })
+}
+
+/** The launch test (PLAN.md's week-8 targets): one row per Monday-to-Sunday week in Dhaka, newest first. Staff. */
+export function useLaunchMetrics(weeks = 8) {
+  return useQuery({
+    queryKey: adminKeys.launch(weeks),
+    queryFn: ({ signal }) => api<LaunchWeek[]>('/api/admin/launch-metrics', { params: { weeks }, signal }),
+  })
 }
 
 /** Members, newest first: `q` inside the name or e-mail, `banned` true or false (left out for everyone). */

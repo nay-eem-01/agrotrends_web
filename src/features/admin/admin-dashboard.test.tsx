@@ -201,3 +201,21 @@ test('the launch test leads the overview: this week against the plan’s targets
   const call = api.mock.calls.find(([url]) => String(url).startsWith('/api/admin/launch-metrics'))!
   expect(new URL(String(call[0]), 'http://x').searchParams.get('weeks')).toBe('8')
 })
+
+test('an admin previews their own digest as the e-mail would be, in a sandboxed frame', async () => {
+  const api = mockApi({
+    ...signedInAdmin(),
+    'GET /api/admin/stats': () => envelope(200, stats),
+    'GET /api/admin/launch-metrics': () => envelope(200, []),
+    'POST /api/admin/digest/preview': () => new Response('<p>3 unanswered questions in Fisheries</p>', { status: 200, headers: { 'Content-Type': 'text/html' } }),
+  })
+  renderWithProviders(<App />, '/admin')
+
+  await userEvent.click(await screen.findByRole('button', { name: 'Preview your digest' }))
+  const dialog = await screen.findByRole('dialog', { name: 'Your digest this week' })
+  const frame = within(dialog).getByTitle('Digest preview')
+  expect(frame).toHaveAttribute('sandbox', '')
+  expect(frame.getAttribute('srcdoc')).toContain('<p>3 unanswered questions in Fisheries</p>')
+  const call = api.mock.calls.find(([url]) => url === '/api/admin/digest/preview')!
+  expect(new Headers(call[1]!.headers).get('Accept')).toBe('text/html')
+})

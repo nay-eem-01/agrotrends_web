@@ -6,6 +6,7 @@ import { useAdminStats, type AdminStats } from '../../api/admin'
 import { errorMessage } from '../../api/errors'
 import { formatNumber } from '../../lib/i18n'
 import { AdminPage } from './AdminPage'
+import { DigestPreview } from './DigestPreview'
 import { LaunchTest } from './LaunchTest'
 
 /** Work waiting for staff: each count leads to the queue where it is handled. */
@@ -96,6 +97,7 @@ export function AdminOverviewPage() {
           </section>
         </>
       )}
+      <DigestPreview />
     </AdminPage>
   )
 }

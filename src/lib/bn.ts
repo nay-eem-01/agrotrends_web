@@ -744,4 +744,7 @@ export const BN: Record<string, string> = {
   'Impact': 'প্রভাব',
   'Cited in {n} AI answers': '{n}টি এআই উত্তরে সূত্র',
   'Cited in 1 AI answer': '১টি এআই উত্তরে সূত্র',
+  'Where are you? (optional)': 'আপনি কোথায়? (ঐচ্ছিক)',
+  'A district or upazila. Answers that fit your soil and weather depend on it.': 'জেলা বা উপজেলা। আপনার মাটি আর আবহাওয়ার উপযোগী উত্তর এর ওপর নির্ভর করে।',
+  'Mymensingh': 'ময়মনসিংহ',
 }

@@ -7,7 +7,9 @@ import { useCategories } from '../../api/categories'
 import { useQuestion, useQuestionWrite, type Question } from '../../api/questions'
 import { splitAskDraft } from '../../lib/askDraft'
 import { htmlToText, textToHtml } from '../../lib/html'
+import { useUserProfile } from '../../api/users'
 import { Button } from '../../ui/Button'
+import { TextField } from '../../ui/TextField'
 import { Spinner } from '../../ui/Spinner'
 import { useSession } from '../auth/session'
 import { NotFoundPage } from '../errors/NotFoundPage'
@@ -62,6 +64,12 @@ function QuestionForm({ question }: { question?: Question }) {
   // Older questions were saved as plain text; they open as paragraphs.
   const [details, setDetails] = useState(() => textToHtml(question ? question.content : draft?.details))
   const [errors, setErrors] = useState<{ title?: string; details?: string; topic?: string }>({})
+  // Where the asker is: local answers depend on it. A new question starts from the profile's location; an edit from
+  // what the question had. `null` until the asker types, so a late profile still fills it.
+  const { user } = useSession()
+  const profileLocation = useUserProfile(question ? 0 : (user?.id ?? 0)).data?.location ?? ''
+  const [typedPlace, setPlace] = useState<string | null>(question ? (question.agri?.region ?? '') : null)
+  const place = typedPlace ?? profileLocation
 
   const form = useRef<HTMLFormElement>(null)
   // Ctrl/⌘+Enter posts from anywhere in the form, as answers do; never while a Bangla input method composes.
@@ -92,8 +100,16 @@ function QuestionForm({ question }: { question?: Question }) {
     }
     setErrors(found)
     if (found.title || found.details || categoryId == null) return
-    // No `agri`: the form no longer asks for it, and an update without it keeps an older question's farming details.
-    const fields = { title: title.trim(), content: details, categoryId }
+    // Only the place is asked; an edit keeps the question's other farming details by sending them back as they were.
+    const region = place.trim()
+    const agri = question
+      ? region !== (question.agri?.region ?? '')
+        ? { ...question.agri, region: region || undefined }
+        : undefined
+      : region
+        ? { region }
+        : undefined
+    const fields = { title: title.trim(), content: details, categoryId, ...(agri ? { agri } : {}) }
     // On an edit, tags and photos left as they were are omitted: the backend keeps the old ones.
     const same = (a: string[], b: string[] = []) => a.length === b.length && a.every((value, i) => value === b[i])
     const extras = question
@@ -131,6 +147,16 @@ function QuestionForm({ question }: { question?: Question }) {
             {!question && <SimilarQuestions title={title} />}
             <div className="flex flex-col gap-7 border-t border-border pt-7">
               <TopicPicker categories={categories.data ?? []} loading={categories.isPending} value={categoryId} error={errors.topic} onChange={setCategoryId} />
+              <TextField
+                label={t('Where are you? (optional)')}
+                hint={t('A district or upazila. Answers that fit your soil and weather depend on it.')}
+                placeholder={t('Mymensingh')}
+                autoComplete="address-level2"
+                maxLength={60}
+                value={place}
+                onChange={(event) => setPlace(event.target.value)}
+                className="max-w-sm"
+              />
               <TagInput popular tags={tags} onChange={setTags} />
             </div>
             {write.isError && (

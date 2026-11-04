@@ -50,7 +50,7 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 - Phase F22 on `feat/mock-base` (stacked on F21's tip): F22.1 fields (`feat/mock-fields`) F22.2 home feed (`feat/mock-home`) F22.3 question page (`feat/mock-question`) F22.4 profile (`feat/mock-profile`) F22.5 AI advisor (`feat/mock-advisor`) F22.6 ask page (`feat/mock-ask`) F22.7 story editor (`feat/mock-editor`) F22.8 sign in and sign up (`feat/mock-auth`) F22.9 story page (`feat/mock-story`) F22.10 navigation in the sidebar (`feat/mock-sidebar`) F22.11 search in the bar (`feat/mock-topbar`) F22.12 quieter frame (`feat/mock-chrome`) done. Phase F22 is complete.
 - Phase F23 on `feat/api2-base` (stacked on F22's tip and `fix/google-test`): F23.1 API types (`feat/api2-types`) F23.2 home rail (`feat/api2-home`) F23.3 story subtitle (`feat/api2-stories`) F23.4 profile page and notification (`feat/api2-profile`) F23.5 home tabs (`feat/home-tabs`) F23.6 admin design (`feat/admin-design`) F23.7 about, privacy, terms and footer (`feat/site-pages`) F23.8 faster pages (`perf/faster-pages`) F23.9 profile pictures (`fix/profile-images`) F23.10 footer and home width (`fix/footer-home-width`) F23.11 reply to a reply (`feat/reply-to-reply`) F23.12 answer reply notification (`feat/answer-reply-notification`) done. Phase F23 is complete and merged into `development`.
 - Phase F24 on `feat/audit-base` (from `development`), the audit fixes: F24.1 Ask and Write on phones (`feat/phone-tasks`) F24.2 share (`feat/share`) F24.3 Discover (`feat/discover-hallmark`) F24.4 About (`feat/about-hallmark`) F24.5 small fixes (`fix/audit-small`) done.
-- Phase F24, second half, on `feat/audit2-base` (from `development`, after the backend built B1–B12): F24.9 reply counts and API types (`feat/api3-types`) F24.10 advisor allowance (`feat/ai-allowance`) F24.12 For you (`feat/for-you`) F24.13 e-mail settings (`feat/email-settings`) F24.14 launch test (`feat/launch-metrics`) F24.15 impact and citations (`feat/impact`) F24.16 digest preview (`feat/digest-preview`) F24.18 refresh cookie (`feat/refresh-cookie`) F24.8 share card and preview links (`feat/share-card`) done.
+- Phase F24, second half, on `feat/audit2-base` (from `development`, after the backend built B1–B12): F24.9 reply counts and API types (`feat/api3-types`) F24.10 advisor allowance (`feat/ai-allowance`) F24.12 For you (`feat/for-you`) F24.13 e-mail settings (`feat/email-settings`) F24.14 launch test (`feat/launch-metrics`) F24.15 impact and citations (`feat/impact`) F24.16 digest preview (`feat/digest-preview`) F24.18 refresh cookie (`feat/refresh-cookie`) F24.8 share card and preview links (`feat/share-card`) F24.6 where you are (`feat/ask-place`) done.
 
 ## Next up
 
@@ -74,6 +74,24 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-11-04 — F24.6 Where you are, on Ask (`feat/ask-place`)
+
+**Done**
+- The ask form has an optional "Where are you?" (a district or upazila, at most 60 characters), sent as the
+  question's `agri.region`, which the questions list already filters on and the question page shows as a chip.
+- A new question starts from your profile's location (F23.4) until you type; an edit starts from the question's own.
+- Changing the place on an edit sends the question's other farming details (crop, season, soil) back as they were,
+  so an older question doesn't lose them; leaving it alone sends no `agri` at all.
+
+**Decisions**
+- One free-text place, not a district picker: the backend stores free text, and a picker of 64 districts and 495
+  upazilas is a later step if places come in too varied to filter on.
+
+**Known limitations**
+- Typing a place on Ask doesn't update your profile's location.
 
 ---
 

@@ -1,5 +1,5 @@
 import { useT, formatNumber } from '../../lib/i18n'
-import { ArrowLeft } from '@phosphor-icons/react'
+import { ArrowLeft, Sparkle } from '@phosphor-icons/react'
 import { useEffect, useMemo, useRef } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import { Badge } from '@/components/ui/badge'
@@ -89,6 +89,13 @@ function Story({ story }: { story: BlogResponse }) {
                 {author.name}
               </Link>
               <p className="text-muted-foreground">{meta.join(' · ')}</p>
+              {(story.citedCount ?? 0) > 0 && (
+                // The reason to write here that only AgroTrends has: the advisor answers from this story.
+                <p className="mt-0.5 inline-flex items-center gap-1 text-primary">
+                  <Sparkle size={14} weight="fill" aria-hidden="true" />
+                  {story.citedCount === 1 ? t('Cited in 1 AI answer') : t('Cited in {n} AI answers', { n: formatNumber(story.citedCount ?? 0) })}
+                </p>
+              )}
             </div>
             {own ? (
               <ButtonLink to={`/write/${story.id}`} variant="secondary" size="sm" className="ml-auto">

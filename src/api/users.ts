@@ -13,6 +13,7 @@ export const MAX_LOCATION = 80
 
 /** One of a user's answers, with its question's title. */
 export type UserAnswer = Schemas['UserAnswerResponse']
+export type UserImpact = Schemas['UserImpactResponse']
 
 /** The profile summary (public); if it fails the page falls back to what it has. */
 export function useUserProfile(userId: number) {
@@ -21,6 +22,17 @@ export function useUserProfile(userId: number) {
     queryFn: ({ signal }) => api<UserProfile>(`/api/users/${userId}/profile`, { signal }),
     enabled: Number.isInteger(userId) && userId > 0,
     retry: false,
+  })
+}
+
+/** What a user's answers and stories did: readers reached and AI answers citing them (public, cached hourly). */
+export function useUserImpact(userId: number) {
+  return useQuery({
+    queryKey: ['users', userId, 'impact'],
+    queryFn: ({ signal }) => api<UserImpact>(`/api/users/${userId}/impact`, { signal }),
+    enabled: Number.isInteger(userId) && userId > 0,
+    retry: false,
+    staleTime: 30 * 60_000,
   })
 }
 

@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend · ➡ moved to a later step
 
-**Progress:** 129 of 134 steps done
+**Progress:** 130 of 134 steps done
 
 ---
 
@@ -292,7 +292,7 @@ web can't do alone is in `docs/BACKEND_REQUESTS_AUDIT.md` (B1–B12); those step
 | F24.5 | Small honest fixes: Ask instead of Write for visitors, empty lists with their action, Google's button in the page's language, topic chips in one row, "All" until "For you" is real (`fix/audit-small`) | ✅ |
 | F24.6 | Where you are on Ask: an optional place, prefilled from your profile (`feat/ask-place`) | ⬜ |
 | F24.7 | One Ask: post publicly (AI now, experts check) or ask privately (AI only, not checked); the advisor says its answers aren't checked (`feat/one-ask`) | ⬜ |
-| F24.8 | Link-preview card: the default `og:image` and the `/share` links (B7) (`feat/share-card`) | ⬜ |
+| F24.8 | Link-preview card: the default `og:image` and the `/share` links (B7) (`feat/share-card`) | ✅ |
 | F24.9 | Reply counts: "3 replies", nothing at 0; story responses read replies only where there are some; the regenerated API types (B1) (`feat/api3-types`) | ✅ |
 | F24.10 | "7 of 10 left today" in the advisor (B2) (`feat/ai-allowance`) | ✅ |
 | F24.11 | The relaxed password rule (B3) (`feat/password-rule`) | ⏸ |

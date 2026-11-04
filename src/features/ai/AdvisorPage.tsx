@@ -1,11 +1,11 @@
-import { useT, formatNumber } from '../../lib/i18n'
+import { useLang, useT, formatNumber } from '../../lib/i18n'
 import { ArrowRight, ArrowUp, Bug, ClockCounterClockwise, Drop, Leaf, Plant, Plus, Sparkle, Warning, WarningCircle } from '@phosphor-icons/react'
 import { useId, useRef, useState, type FormEvent, type Ref } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { cn } from 'cn'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Label } from '@/components/ui/label'
-import { MAX_ADVISOR_QUESTION, useAdvisorHistory, useAskAdvisor, type AiAnswer } from '../../api/ai'
+import { MAX_ADVISOR_QUESTION, useAdvisorAllowance, useAdvisorHistory, useAskAdvisor, type AiAllowance, type AiAnswer } from '../../api/ai'
 import { ApiError, errorMessage } from '../../api/errors'
 import { seasonCalendar, SEASON_LABELS, type Season } from '../../lib/agri'
 import { storyDate } from '../../lib/dates'
@@ -46,6 +46,7 @@ export function AdvisorPage() {
   const [error, setError] = useState<string>()
   const field = useRef<HTMLTextAreaElement>(null)
   const signedIn = status === 'signed-in'
+  const allowance = useAdvisorAllowance(signedIn).data
 
   function submit(event: FormEvent) {
     event.preventDefault()
@@ -88,6 +89,7 @@ export function AdvisorPage() {
         error={error}
         pending={ask.isPending}
         signedIn={signedIn}
+        allowance={allowance}
         onChange={setQuestion}
       />
       {ask.isError && <AskError error={ask.error} />}
@@ -254,6 +256,7 @@ function Composer({
   error,
   pending,
   signedIn,
+  allowance,
   onChange,
 }: {
   ref: Ref<HTMLTextAreaElement>
@@ -262,6 +265,7 @@ function Composer({
   error?: string
   pending: boolean
   signedIn: boolean
+  allowance?: AiAllowance
   onChange: (value: string) => void
 }) {
   const t = useT()
@@ -314,7 +318,7 @@ function Composer({
         <p className="sr-only" aria-live="polite">
           {near ? t('{n} characters left', { n: formatNumber(left) }) : ''}
         </p>
-        <span className="hidden text-xs text-muted-foreground sm:inline">{t('Enter to send, Shift+Enter for a new line')}</span>
+        {allowance ? <AllowanceLine allowance={allowance} /> : <span className="hidden text-xs text-muted-foreground sm:inline">{t('Enter to send, Shift+Enter for a new line')}</span>}
       </div>
       {error && (
         <p id={`${id}-error`} className="mt-2 flex items-start gap-1.5 text-sm text-destructive">
@@ -323,6 +327,24 @@ function Composer({
         </p>
       )}
     </div>
+  )
+}
+
+/** "7 of 10 questions left today"; at none, when the limit resets (its time in the reader's language). */
+function AllowanceLine({ allowance }: { allowance: AiAllowance }) {
+  const t = useT()
+  const lang = useLang()
+  const limit = allowance.limit ?? 0
+  const left = Math.max(0, limit - (allowance.usedToday ?? 0))
+  if (left > 0) {
+    return <span className="text-xs text-muted-foreground tabular-nums">{t('{n} of {limit} questions left today', { n: formatNumber(left), limit: formatNumber(limit) })}</span>
+  }
+  const at = allowance.resetsAt ? new Date(allowance.resetsAt).toLocaleTimeString(lang === 'bn' ? 'bn-BD' : 'en-GB', { hour: 'numeric', minute: '2-digit' }) : null
+  return (
+    <span className="inline-flex items-center gap-1.5 text-xs font-medium text-foreground">
+      <Warning size={14} weight="fill" aria-hidden="true" className="text-warning" />
+      {at ? t('No questions left today. More at {time}.', { time: at }) : t('No questions left today.')}
+    </span>
   )
 }
 

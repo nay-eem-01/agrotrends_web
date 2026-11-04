@@ -152,3 +152,38 @@ test('citation markers point at the sources, and a suggested follow-up fills the
   await userEvent.click(within(next).getByRole('button', { name: 'How much lime per decimal?' }))
   expect(screen.getByLabelText('Ask another question')).toHaveValue('How much lime per decimal?')
 })
+
+test('signed in, the advisor shows how many questions are left today and counts again after asking', async () => {
+  let used = 3
+  const api = mockApi({
+    ...signedIn(() => {
+      used += 1
+      return envelope(200, { answer: 'Aerate at dawn.', sources: [] })
+    }),
+    'GET /api/ai/allowance': () => envelope(200, { limit: 10, usedToday: used, resetsAt: '2026-10-09T00:00:00+06:00' }),
+  })
+  renderWithProviders(<App />, '/advisor')
+
+  expect(await screen.findByText('7 of 10 questions left today')).toBeInTheDocument()
+  await userEvent.type(screen.getByLabelText('Your question'), 'Fish gasping at dawn?')
+  await userEvent.click(screen.getByRole('button', { name: 'Ask' }))
+  expect(await screen.findByText('6 of 10 questions left today')).toBeInTheDocument()
+  expect(api.mock.calls.filter(([url]) => url === '/api/ai/allowance').length).toBeGreaterThanOrEqual(2)
+})
+
+test('with none left, the advisor says when more come', async () => {
+  mockApi({
+    ...signedIn(() => envelope(429, null, "You have reached today's limit of AI questions. Please try again tomorrow.")),
+    'GET /api/ai/allowance': () => envelope(200, { limit: 10, usedToday: 10, resetsAt: '2026-10-08T18:00:00Z' }),
+  })
+  renderWithProviders(<App />, '/advisor')
+
+  expect(await screen.findByText(/^No questions left today\. More at .+\.$/)).toBeInTheDocument()
+})
+
+test('visitors are not asked for an allowance', async () => {
+  const api = mockApi({})
+  renderWithProviders(<App />, '/advisor')
+  await screen.findByRole('button', { name: 'Sign in to ask' })
+  expect(api.mock.calls.some(([url]) => url === '/api/ai/allowance')).toBe(false)
+})

@@ -718,4 +718,7 @@ export const BN: Record<string, string> = {
   'No questions yet. Ask the first one.': 'এখনো কোনো প্রশ্ন নেই। প্রথম প্রশ্নটি করুন।',
   'Show 1 reply': '১টি জবাব দেখুন',
   'Show {n} replies': '{n}টি জবাব দেখুন',
+  '{n} of {limit} questions left today': 'আজ {limit}টির মধ্যে {n}টি প্রশ্ন বাকি',
+  'No questions left today. More at {time}.': 'আজ আর প্রশ্ন বাকি নেই। আবার পাবেন {time}-এ।',
+  'No questions left today.': 'আজ আর প্রশ্ন বাকি নেই।',
 }

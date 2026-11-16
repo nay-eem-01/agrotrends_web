@@ -7,6 +7,7 @@ import { errorMessage } from '../../api/errors'
 import { compactPhone, isEmail, passwordProblem } from '../../lib/auth'
 import { Button } from '../../ui/Button'
 import { TextField } from '../../ui/TextField'
+import { PasswordField } from '../../ui/PasswordField'
 import { AuthPage, FormError } from './AuthPage'
 import { PASSWORD_RESET_NOTICE } from './ResetPasswordPage'
 
@@ -153,16 +154,15 @@ function ByPhone() {
           error={errors.code}
           className="max-w-48"
         />
-        <TextField
+        <PasswordField
           label={t('New password')}
-          type="password"
           autoComplete="new-password"
           hint="8 to 16 characters, with a capital letter, a number and a symbol."
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           error={errors.password}
         />
-        <TextField label={t('Repeat new password')} type="password" autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} error={errors.confirm} />
+        <PasswordField label={t('Repeat new password')} autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} error={errors.confirm} />
         <FormError message={reset.isError ? errorMessage(reset.error) : null} />
         <div className="flex flex-wrap items-center gap-3">
           <Button type="submit" loading={reset.isPending}>

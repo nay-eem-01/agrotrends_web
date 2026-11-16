@@ -39,6 +39,7 @@ function ProfileEditor({ profile, name, onSaved }: { profile: AuthorProfileRespo
 
   function set(key: keyof typeof form, value: string) {
     setForm((current) => ({ ...current, [key]: value }))
+    setErrors((current) => ({ ...current, [key]: undefined }))
     update.reset()
   }
 
@@ -65,7 +66,7 @@ function ProfileEditor({ profile, name, onSaved }: { profile: AuthorProfileRespo
       occupation: form.occupation.trim() || undefined,
       workPlaceOrInstitution: form.workPlaceOrInstitution.trim() || undefined,
       bio: form.bio.trim() || undefined,
-      profileImageUrl: form.profileImageUrl || undefined,
+      profileImageUrl: form.profileImageUrl,
     }, { onSuccess: () => onSaved?.() })
   }
 

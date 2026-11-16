@@ -6,6 +6,7 @@ import { fetchMe } from '../../api/auth'
 import { compactPhone, isEmail, joinPhone, passwordProblem, splitMobile } from '../../lib/auth'
 import { Button } from '../../ui/Button'
 import { TextField } from '../../ui/TextField'
+import { PasswordField } from '../../ui/PasswordField'
 import { FormError } from '../auth/AuthPage'
 import { ResendLink } from '../auth/confirmEmail'
 import { useSession } from '../auth/session'
@@ -99,6 +100,11 @@ function AccountForm() {
 
   function set(key: keyof typeof form, value: string) {
     setForm((current) => ({ ...current, [key]: value }))
+    setErrors((current) => ({
+      ...current,
+      [key]: undefined,
+      ...((key === 'email' || key === 'mobileNumber') ? { email: undefined, mobileNumber: undefined } : {}),
+    }))
     update.reset()
   }
 
@@ -230,26 +236,23 @@ function PasswordForm() {
 
   return (
     <form onSubmit={submit} noValidate className="flex flex-col gap-5">
-      <TextField
+      <PasswordField
         label="Current password"
-        type="password"
         autoComplete="current-password"
         value={current}
         onChange={(e) => setCurrent(e.target.value)}
         error={errors.current}
       />
-      <TextField
+      <PasswordField
         label="New password"
-        type="password"
         autoComplete="new-password"
         hint="8 to 16 characters, with a capital letter, a number and a symbol."
         value={next}
         onChange={(e) => setNext(e.target.value)}
         error={errors.next}
       />
-      <TextField
+      <PasswordField
         label="Repeat new password"
-        type="password"
         autoComplete="new-password"
         value={confirm}
         onChange={(e) => setConfirm(e.target.value)}

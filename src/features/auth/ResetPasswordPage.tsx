@@ -5,7 +5,7 @@ import { useResetPassword } from '../../api/auth'
 import { errorMessage } from '../../api/errors'
 import { passwordProblem } from '../../lib/auth'
 import { Button } from '../../ui/Button'
-import { TextField } from '../../ui/TextField'
+import { PasswordField } from '../../ui/PasswordField'
 import { AuthPage, FormError } from './AuthPage'
 
 export const PASSWORD_RESET_NOTICE = 'Password changed. Sign in with your new password.'
@@ -48,21 +48,32 @@ export function ResetPasswordPage() {
   return (
     <AuthPage title={t('Set a new password')} intro={t('Choose a password you don\'t use anywhere else.')}>
       <form onSubmit={submit} noValidate className="flex flex-col gap-5">
-        <TextField
+        <PasswordField
           label={t('New password')}
-          type="password"
           autoComplete="new-password"
           hint="8 to 16 characters, with a capital letter, a number and a symbol."
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(e) => {
+            const value = e.target.value
+            setPassword(value)
+            setErrors((current) => ({
+              password: current.password ? passwordProblem(value) ?? undefined : undefined,
+              confirm: current.confirm && confirm !== value ? "The passwords don't match." : undefined,
+            }))
+            reset.reset()
+          }}
           error={errors.password}
         />
-        <TextField
+        <PasswordField
           label={t('Repeat new password')}
-          type="password"
           autoComplete="new-password"
           value={confirm}
-          onChange={(e) => setConfirm(e.target.value)}
+          onChange={(e) => {
+            const value = e.target.value
+            setConfirm(value)
+            setErrors((current) => ({ ...current, confirm: current.confirm && value !== password ? "The passwords don't match." : undefined }))
+            reset.reset()
+          }}
           error={errors.confirm}
         />
         <FormError message={reset.isError ? errorMessage(reset.error) : null} />

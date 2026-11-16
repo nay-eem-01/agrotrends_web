@@ -161,3 +161,16 @@ test('the new password is checked before sending', async () => {
   expect(screen.getByLabelText('New password')).toHaveAccessibleDescription('Choose a password different from the current one.')
   expect(fetchMock).toHaveBeenCalledOnce()
 })
+
+test('the name field clears its stale required error as soon as it is edited', async () => {
+  await openSettings()
+  const name = screen.getByLabelText('Full name')
+  await userEvent.clear(name)
+  await userEvent.click(screen.getByRole('button', { name: 'Save changes' }))
+  expect(name).toHaveAttribute('aria-invalid', 'true')
+  await userEvent.type(name, 'Nasrin')
+  expect(name).not.toHaveAttribute('aria-invalid', 'true')
+  expect(screen.queryByText('Enter your name.')).not.toBeInTheDocument()
+  // Editing is not a save request.
+  expect(fetchMock.mock.calls.filter(([url]) => url === '/api/user/update')).toHaveLength(0)
+})

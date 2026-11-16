@@ -9,7 +9,7 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend · ➡ moved to a later step
 
-**Progress:** 132 of 134 steps done
+**Progress:** 135 of 137 steps done
 
 ---
 
@@ -303,6 +303,17 @@ web can't do alone is in `docs/BACKEND_REQUESTS_AUDIT.md` (B1–B12); those step
 | F24.16 | Digest preview for admins (B10) (`feat/digest-preview`) | ✅ |
 | F24.17 | Notify me on a question (B11) (`feat/follow-question`) | ⏸ |
 | F24.18 | Refresh token from the HttpOnly cookie (B12) (`feat/refresh-cookie`) | ✅ |
+
+## Phase F25 — Deployment feedback (`feat/deployment-fixes-base`)
+
+| # | Step | Status |
+|---|---|---|
+| F25.1 | Show/Hide on e-mail/SMS reset and settings password fields, reusing `PasswordField` | ✅ |
+| F25.2 | Clear stale field errors on edit in account, sign-up and author profile forms; revalidate reset errors while typing | ✅ |
+| F25.3 | Send an explicit empty profile-image URL when removing a photo, so the backend can clean it up after saving | ✅ |
+
+Deployment checkpoint (2026-11-16): frontend login against Docker confirmed. Docker R2/Brevo checks, WSL backup
+authentication, Azure VM, DNS/HTTPS and monitoring remain pending; backend `docs/DEPLOY.md` is the runbook.
 
 ## Needs from the backend
 

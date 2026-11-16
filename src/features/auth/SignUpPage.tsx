@@ -87,6 +87,7 @@ export function SignUpPage() {
 
   function set<K extends keyof Form>(key: K, value: Form[K]) {
     setForm((current) => ({ ...current, [key]: value }))
+    setErrors((current) => ({ ...current, [key]: undefined }))
   }
 
   function submit(event: FormEvent) {

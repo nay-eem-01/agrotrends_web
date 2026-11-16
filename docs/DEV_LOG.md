@@ -5,7 +5,33 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 
 ---
 
+## 2026-11-16 — Deployment checkpoint and readiness fixes
+
+**Done**
+- Deployment status supplied by Nayeem: Supabase/profile writes, R2 upload/display (`agrotrends-files`), Brevo domain
+  and delivery, Docker build/Supabase/health, and frontend login against Docker are verified.
+- Current host target is Azure; VM, production DNS/HTTPS and monitoring remain pending.
+
+- Added Show/Hide to both password-reset flows and settings password fields using the existing translated component.
+- Clear stale field errors when editing account, sign-up and author profile fields; reset errors revalidate as typed.
+- Photo removal sends an explicit empty URL, so saving it reaches the backend cleanup path.
+
+**Validation**
+- Full Vitest suite: 384/384 tests passed (72 files, two workers).
+- `npm run lint` and `npm run build` passed. The build still reports large chunks and the existing mixed static/dynamic import for AuthorPage.
+- Browser flows against a live Docker backend, R2 and Brevo remain pending; no credentials were used here.
+
+**Decisions**
+- Docker-specific R2 and mail checks remain pending. WSL backup authentication is deferred and unresolved.
+- No successful real backup/restore or production rollout is claimed.
+
+**Known limitations**
+- Cleanup retries are manual if R2 is unavailable; old or abandoned uploads are not swept. Cached image copies may outlive deletion.
+- Old deployment notes below are historical; this checkpoint supersedes their AWS plan and local service status.
+
 ## Where we are
+
+- F25 deployment feedback fixes are prepared on `fix/password-form-feedback` for PR into `feat/deployment-fixes-base`, then into `development`. They are not deployed.
 
 - Phases F0–F6 are in `development` (F6.7 notifications moved to F12).
 - 2026-10-14: the backend became Q&A-first (one account type, e-mail confirmation, votes and reputation, verified
@@ -53,6 +79,10 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 - Phase F24, second half, on `feat/audit2-base` (from `development`, after the backend built B1–B12): F24.9 reply counts and API types (`feat/api3-types`) F24.10 advisor allowance (`feat/ai-allowance`) F24.12 For you (`feat/for-you`) F24.13 e-mail settings (`feat/email-settings`) F24.14 launch test (`feat/launch-metrics`) F24.15 impact and citations (`feat/impact`) F24.16 digest preview (`feat/digest-preview`) F24.18 refresh cookie (`feat/refresh-cookie`) F24.8 share card and preview links (`feat/share-card`) F24.6 where you are (`feat/ask-place`) F24.7 one Ask (`feat/one-ask`) done.
 
 ## Next up
+
+- Review and land F25 through the deployment-fixes base, then verify reset, field feedback and saved-image removal against Docker.
+
+- Current deployment: Docker R2/mail checks, unresolved WSL backup authentication, then Azure/DNS/HTTPS/monitoring.
 
 1. **Nayeem:** PR the second half of F24 into `feat/audit2-base` in this order: `feat/api3-types`, `feat/ai-allowance`,
    `feat/for-you`, `feat/email-settings`, `feat/launch-metrics`, `feat/impact`, `feat/digest-preview`,

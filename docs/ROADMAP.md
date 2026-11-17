@@ -13,6 +13,18 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 ---
 
+## Staging hosting automation (2026-11-17)
+
+Deployment operations are tracked separately from feature counts.
+
+| Step | Status |
+|---|---|
+| Scripts, staging Actions workflows, rollback checks and Nginx/Vite documentation | ✅ prepared locally |
+| Configure dedicated SSH key, GitHub staging Environments and VM prerequisites | ⬜ |
+| Promote via development → staging and verify the first automated releases | ⬜ |
+| Resolve real backup/upload/isolated restore, monitor uptime/credits/disk | ⬜ |
+
+
 ## Phase F0 — Foundation (`feat/foundation-base`)
 
 | # | Step | Status |

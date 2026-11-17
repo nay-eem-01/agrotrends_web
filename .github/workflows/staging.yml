@@ -1,0 +1,92 @@
+name: Staging deployment
+on:
+  pull_request:
+    branches: [development, staging]
+  push:
+    branches: [staging]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test -- --maxWorkers=2
+      - run: npm run build
+      - run: python3 deploy/test_deploy.py
+
+  deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/staging'
+    needs: checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: staging
+    concurrency:
+      group: staging-frontend
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Generate public frontend .env and build
+        env:
+          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+          VITE_SHARE_BASE_URL: ${{ vars.VITE_SHARE_BASE_URL }}
+          VITE_GOOGLE_CLIENT_ID: ${{ vars.VITE_GOOGLE_CLIENT_ID }}
+        run: |
+          set -euo pipefail
+          : "${VITE_API_BASE_URL:?Set staging VITE_API_BASE_URL}"
+          : "${VITE_SHARE_BASE_URL:?Set staging VITE_SHARE_BASE_URL}"
+          : "${VITE_GOOGLE_CLIENT_ID:?Set staging VITE_GOOGLE_CLIENT_ID}"
+          python3 - <<'PYENV'
+          import os
+          from pathlib import Path
+          keys = ('VITE_API_BASE_URL', 'VITE_SHARE_BASE_URL', 'VITE_GOOGLE_CLIENT_ID')
+          values = {key: os.environ[key] for key in keys}
+          assert all('\n' not in value and '\r' not in value and '"' not in value and '$' not in value for value in values.values()), 'Invalid build setting'
+          assert values['VITE_API_BASE_URL'].startswith('https://') and values['VITE_SHARE_BASE_URL'].startswith('https://')
+          assert values['VITE_GOOGLE_CLIENT_ID'].endswith('.apps.googleusercontent.com'), 'Expected Google web client ID'
+          Path('.env').write_text(''.join(f'{key}="{value}"\n' for key, value in values.items()))
+          PYENV
+          npm run build
+          test -s dist/index.html
+          mkdir bundle
+          cp deploy/deploy.sh bundle/deploy.sh
+          mv dist bundle/site
+          tar -czf release.tar.gz -C bundle deploy.sh site
+      - name: Upload and deploy over verified SSH
+        env:
+          DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ vars.DEPLOY_USER }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ vars.DEPLOY_KNOWN_HOSTS }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          : "${DEPLOY_HOST:?Set staging DEPLOY_HOST}" "${DEPLOY_USER:?Set staging DEPLOY_USER}"
+          : "${DEPLOY_SSH_KEY:?Set staging DEPLOY_SSH_KEY}" "${DEPLOY_KNOWN_HOSTS:?Set staging DEPLOY_KNOWN_HOSTS}"
+          [[ "$DEPLOY_HOST" =~ ^[a-zA-Z0-9.-]+$ && "$DEPLOY_USER" =~ ^[a-z_][a-z0-9_-]*$ ]]
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          ssh-keygen -F "$DEPLOY_HOST" -f ~/.ssh/known_hosts > /dev/null
+          options=(-i ~/.ssh/deploy_key -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=20)
+          release="${GITHUB_SHA}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          target="$DEPLOY_USER@$DEPLOY_HOST"
+          ssh "${options[@]}" "$target" "mkdir -p agrotrends/frontend-releases/$release"
+          scp "${options[@]}" release.tar.gz "$target:agrotrends/frontend-releases/$release/release.tar.gz"
+          ssh "${options[@]}" "$target" "cd agrotrends/frontend-releases/$release && tar -xzf release.tar.gz && bash deploy.sh $release"

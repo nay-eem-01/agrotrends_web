@@ -1,8 +1,9 @@
 import { BookOpen, ChatCircleText, Compass, House, NotePencil, Newspaper, Plus, SealCheck, Sparkle, UserCircle, type Icon } from '@phosphor-icons/react'
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
-import { Link, NavLink } from 'react-router-dom'
+import { Link, NavLink, useLocation } from 'react-router-dom'
 import { cn } from 'cn'
 import { isAdmin } from '../api/auth'
+import { useFollowedCategories } from '../api/categories'
 import { useFollowedTags } from '../api/topics'
 import { ADMIN_SECTIONS } from '../features/admin/sections'
 import { useSession } from '../features/auth/session'
@@ -46,17 +47,19 @@ export function useSidebar() {
 }
 
 /**
- * The app's navigation from 1024px, on every page: the sections, then (signed in) your profile, reading list and
+ * The app's navigation from 768px, on every page: the sections, then (signed in) your profile, reading list and
  * stories, the review queue for Verified Experts, the Admin sections for staff (so admin pages need no rail of their
  * own) and your topics. Hidden, it keeps an icon strip, so the sections are one click away on reading and writing pages
- * too; the top bar's menu button opens and hides it. Below 1024px the menu sheet and the phone tab bar take over.
+ * too; the top bar's menu button opens and hides it. Below 768px the menu sheet and the phone tab bar take over.
  */
 export function AppSidebar() {
   const t = useT()
   const { open } = useSidebar()
+  const location = useLocation()
   const { status, user } = useSession()
   const signedIn = status === 'signed-in'
   const followed = useFollowedTags(signedIn)
+  const categories = useFollowedCategories(signedIn).data ?? []
   const { expertAnywhere } = useMyBadges()
   const staff = signedIn && isAdmin(user)
   const sections: { to: string; end?: boolean; label: string; icon: Icon }[] = [
@@ -73,15 +76,18 @@ export function AppSidebar() {
         ...(expertAnywhere ? [{ to: '/review', label: t('Review queue'), icon: SealCheck }] : []),
       ]
     : []
-  const tags = followed.data ?? []
+  const topics = [
+    ...categories.map((category) => ({ to: `/questions?categoryId=${category.id}`, label: category.categoryName })),
+    ...(followed.data ?? []).map((tag) => ({ to: `/tags/${encodeURIComponent(tag)}`, label: tag })),
+  ].slice(0, 8)
 
   return (
     <aside
       id="app-sidebar"
       aria-label={t('Navigation')}
       className={cn(
-        'sticky top-16 hidden h-[calc(100dvh-4rem)] shrink-0 overflow-y-auto border-r border-border py-5 transition-[width] duration-200 ease-(--ease-out) [scrollbar-width:thin] lg:block motion-reduce:transition-none',
-        open ? 'w-60 px-3' : 'w-[4.5rem] px-2',
+        'sticky top-16 hidden h-[calc(100dvh-4rem)] shrink-0 overflow-y-auto border-r border-border py-5 transition-[width] duration-200 ease-(--ease-out) [scrollbar-width:thin] md:block motion-reduce:transition-none',
+        open ? 'w-44 px-2 lg:w-60 lg:px-3' : 'w-[4.5rem] px-2',
       )}
     >
       <nav className="flex flex-col gap-0.5 text-sm">
@@ -104,15 +110,16 @@ export function AppSidebar() {
         {signedIn && open && (
           <>
             <h2 className="mt-5 mb-1 px-3 font-sans text-xs font-semibold text-muted-foreground">{t('Your topics')}</h2>
-            {tags.slice(0, 8).map((tag) => (
-              <NavLink
-                key={tag}
-                to={`/tags/${encodeURIComponent(tag)}`}
-                className={({ isActive }) => cn('flex h-9 items-center gap-3 rounded-full px-3 hover:bg-surface', isActive && 'bg-surface font-semibold text-primary')}
+            {topics.map(({ to, label }) => (
+              <Link
+                key={to}
+                to={to}
+                aria-current={location.pathname + location.search === to ? 'page' : undefined}
+                className="flex h-9 items-center gap-3 rounded-full px-3 hover:bg-surface aria-[current=page]:bg-surface aria-[current=page]:font-semibold aria-[current=page]:text-primary"
               >
                 <span aria-hidden="true" className="size-2 rounded-full bg-primary" />
-                <span className="truncate">{tag}</span>
-              </NavLink>
+                <span className="truncate">{label}</span>
+              </Link>
             ))}
             <Link to="/topics" className="flex h-9 items-center gap-3 rounded-full px-3 text-muted-foreground hover:bg-surface hover:text-foreground">
               <Plus size={14} aria-hidden="true" />

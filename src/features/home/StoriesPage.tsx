@@ -24,7 +24,7 @@ export function StoriesPage() {
         <div className="min-w-0">
           <Feed />
         </div>
-        <aside className="hidden pt-6 xl:block">
+        <aside className="hidden pt-6 sm:block">
           <TopicsRail />
         </aside>
       </div>

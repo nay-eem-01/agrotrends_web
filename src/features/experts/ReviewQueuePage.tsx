@@ -1,3 +1,4 @@
+import { AiAnswerText } from '../../ui/AiAnswerText'
 import { SealCheck } from '@phosphor-icons/react'
 import { Link } from 'react-router-dom'
 import { Badge } from '@/components/ui/badge'
@@ -56,7 +57,7 @@ export function ReviewQueuePage() {
                   <p className="mt-1 line-clamp-3 text-muted-foreground">{excerpt(htmlToText(item.questionContent), 280)}</p>
                   <div className="mt-4 rounded-xl border border-dashed border-input p-4">
                     <p className="text-xs font-semibold tracking-wide text-muted-foreground">{t('AI answer')}</p>
-                    <p className="mt-1 font-serif whitespace-pre-line">{item.aiAnswer?.answer}</p>
+                    <AiAnswerText text={item.aiAnswer?.answer} sources={item.aiAnswer?.sources?.length} className="mt-1 font-serif" />
                   </div>
                   <ReviewActions questionId={item.questionId ?? 0} canConfirm canFlag />
                 </article>

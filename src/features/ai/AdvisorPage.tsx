@@ -1,3 +1,4 @@
+import { AiAnswerText } from '../../ui/AiAnswerText'
 import { useLang, useT, formatNumber } from '../../lib/i18n'
 import { ArrowRight, ArrowUp, Bug, ClockCounterClockwise, Drop, Leaf, Plant, Plus, Sparkle, Warning, WarningCircle } from '@phosphor-icons/react'
 import { useId, useRef, useState, type FormEvent, type Ref } from 'react'
@@ -9,10 +10,8 @@ import { MAX_ADVISOR_QUESTION, useAdvisorAllowance, useAdvisorHistory, useAskAdv
 import { ApiError, errorMessage } from '../../api/errors'
 import { seasonCalendar, SEASON_LABELS, type Season } from '../../lib/agri'
 import { storyDate } from '../../lib/dates'
-import { withCitations } from '../../lib/html'
 import { Button } from '../../ui/Button'
 import { Sprig } from '../../ui/Botanical'
-import { SafeHtml } from '../../ui/SafeHtml'
 import { useSession } from '../auth/session'
 import { useRequireSignIn } from '../auth/useRequireSignIn'
 import { ADVISOR_EXAMPLES, COMMON_QUESTIONS } from './examples'
@@ -388,7 +387,7 @@ function ExchangeView({ exchange, onFollowUp }: { exchange: Exchange; onFollowUp
           <Sparkle size={16} weight="fill" aria-hidden="true" />
           {t('AI answer')}
         </p>
-        <SafeHtml html={withCitations(exchange.answer.answer, sources.length)} className="mt-2 text-base leading-relaxed whitespace-pre-line [&_sup]:ml-0.5 [&_sup]:rounded-md [&_sup]:bg-surface [&_sup]:px-1.5 [&_sup]:py-px [&_sup]:text-[0.6875rem] [&_sup]:font-bold [&_sup]:text-primary [&>p+p]:mt-4" />
+        <AiAnswerText text={exchange.answer.answer} sources={sources.length} className="mt-2 text-base leading-relaxed" />
         <p className="mt-4 flex items-start gap-2 text-sm text-muted-foreground">
           <Warning size={16} aria-hidden="true" className="mt-0.5 shrink-0" />
           <span>

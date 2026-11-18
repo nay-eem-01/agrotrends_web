@@ -20,6 +20,7 @@ const expertAnswer = {
   questionId: 5,
   userId: 7,
   authorName: 'Dr Nasrin',
+  authorPhotoUrl: 'https://images.example/nasrin.webp',
   content: 'Cold injury.',
   authorReputation: 1250,
   authorBadges: ['VERIFIED_EXPERT', 'TOP_CONTRIBUTOR'],
@@ -32,7 +33,7 @@ beforeEach(() => {
 
 afterEach(() => vi.unstubAllGlobals())
 
-test('author lines show reputation and the badges earned in this topic', async () => {
+test('author lines show the avatar and topic badges while reputation stays on the profile', async () => {
   mockApi({
     'GET /api/questions/id/5': () => envelope(200, question),
     'GET /api/answers/question/5': () => envelope(200, [expertAnswer, { ...expertAnswer, answerId: 2, userId: 8, authorName: 'Rahim', authorReputation: 3, authorBadges: [] }]),
@@ -42,7 +43,8 @@ test('author lines show reputation and the badges earned in this topic', async (
   const expert = await screen.findByRole('article', { name: 'Answer by Dr Nasrin' })
   expect(within(expert).getByText('Verified expert')).toBeInTheDocument()
   expect(within(expert).getByText('Top contributor')).toBeInTheDocument()
-  expect(within(expert).getByText('1,250')).toBeInTheDocument()
+  expect(within(expert).queryByText('1,250')).not.toBeInTheDocument()
+  expect(expert.querySelector('img')).toHaveAttribute('src', 'https://images.example/nasrin.webp')
   expect(within(expert).getByRole('link', { name: 'Dr Nasrin' })).toHaveAttribute('href', '/users/7')
   const plain = screen.getByRole('article', { name: 'Answer by Rahim' })
   expect(within(plain).queryByText('Verified expert')).not.toBeInTheDocument()

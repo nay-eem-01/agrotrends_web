@@ -11,15 +11,15 @@ export const AI_POLL_FOR_MS = 60_000
 export const aiAnswerKeys = { of: (questionId: number) => ['ai-answer', questionId] as const }
 
 /**
- * The AI answer on a question, or null when there is none to show (not generated yet, failed, flagged, or the question
- * is hidden: all 404). Right after asking (`askedAt`), it polls every 3 s for up to a minute, then stops quietly.
+ * The AI answer, or null when there is none to show. Older deployments use 404 for that state.
+ * Right after asking, poll every three seconds for up to one minute.
  */
 export const aiAnswerQuery = (questionId: number) =>
   queryOptions({
     queryKey: aiAnswerKeys.of(questionId),
     queryFn: async ({ signal }) => {
       try {
-        return await api<AiAnswer>(`/api/questions/id/${questionId}/ai-answer`, { signal })
+        return await api<AiAnswer | null>(`/api/questions/id/${questionId}/ai-answer`, { signal, anonymous: true })
       } catch (error) {
         if (error instanceof ApiError && error.isNotFound) return null
         throw error

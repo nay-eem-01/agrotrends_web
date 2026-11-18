@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './client'
+import { feedKeys } from './feed'
 import type { Page, Schemas } from './types'
 
 export type Category = Schemas['CategoryResponse']
@@ -7,8 +8,8 @@ export type Category = Schemas['CategoryResponse']
 /** Every category (there are few), for the publish sheet. Public. */
 export function useCategories() {
   return useQuery({
-    queryKey: ['categories'],
-    queryFn: async ({ signal }) => (await api<Page<Category>>('/api/categories/all', { params: { pageNo: 0, pageSize: 100 }, signal })).content,
+    queryKey: ['categories', 'catalog'],
+    queryFn: async ({ signal }) => (await api<Page<Category>>('/api/categories/all', { params: { pageNo: 0, pageSize: 100 }, signal, anonymous: true })).content,
     staleTime: 10 * 60_000,
   })
 }
@@ -25,6 +26,32 @@ export function useCategoryWrite() {
         : write.kind === 'rename'
           ? api(`/api/categories/update/categoryId/${write.id}`, { method: 'PUT', text: write.name })
           : api(`/api/categories/id/${write.id}/delete`, { method: 'DELETE' }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['categories'] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['categories', 'catalog'] }),
+  })
+}
+
+const followedCategoriesKey = ['categories', 'followed'] as const
+
+export function useFollowedCategories(enabled: boolean) {
+  return useQuery({
+    queryKey: followedCategoriesKey,
+    queryFn: ({ signal }) => api<Category[]>('/api/me/following/categories', { signal }),
+    staleTime: 5 * 60_000,
+    enabled,
+  })
+}
+
+export function useToggleCategoryFollow() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ categoryId, follow }: { categoryId: number; follow: boolean }) =>
+      api<null>(`/api/categories/${categoryId}/follow`, { method: follow ? 'PUT' : 'DELETE' }),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: followedCategoriesKey }),
+        queryClient.invalidateQueries({ queryKey: ['questions', 'list', { following: true }] }),
+        queryClient.invalidateQueries({ queryKey: feedKeys.feed('following') }),
+      ])
+    },
   })
 }

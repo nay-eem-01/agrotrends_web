@@ -79,6 +79,8 @@ interface RequestOptions {
   text?: string
   /** Asks for text/html and returns the body as a string (the digest preview); errors still come as the envelope. */
   html?: boolean
+  /** Only for public reads whose payload never depends on the caller. */
+  anonymous?: boolean
   signal?: AbortSignal
 }
 
@@ -88,6 +90,7 @@ interface RequestOptions {
  * A `FormData` body is sent as multipart; anything else as JSON.
  */
 export async function api<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  if (options.anonymous) return parse<T>(await send(path, options, false), options.html)
   if (!path.startsWith('/api/auth/') && isAccessTokenExpiring()) {
     // Best effort: if it fails the request still goes out and the 401 path (or an anonymous read) takes over.
     await refreshSession().catch(() => undefined)

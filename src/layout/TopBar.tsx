@@ -62,7 +62,7 @@ export function TopBar({ focused = false }: { focused?: boolean }) {
           aria-expanded={sidebar.open}
           aria-controls="app-sidebar"
           aria-label={sidebar.open ? t('Hide navigation') : t('Show navigation')}
-          className="hidden size-10 items-center justify-center rounded-full text-muted-foreground transition-colors duration-150 hover:bg-surface hover:text-foreground lg:flex"
+          className="hidden size-10 items-center justify-center rounded-full text-muted-foreground transition-colors duration-150 hover:bg-surface hover:text-foreground md:flex"
         >
           <List size={22} aria-hidden="true" />
         </button>
@@ -113,7 +113,7 @@ export function TopBar({ focused = false }: { focused?: boolean }) {
               </ButtonLink>
             </>
           )}
-          <Suspense fallback={placeholder('lg:hidden')}>
+          <Suspense fallback={placeholder('md:hidden')}>
             <MobileMenu signedIn={status === 'signed-in'} anonymous={status === 'anonymous'} />
           </Suspense>
         </nav>

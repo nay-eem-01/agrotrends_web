@@ -11,6 +11,7 @@ export interface ThreadItem {
   id: number
   userId: number
   authorName: string
+  authorPhotoUrl?: string | null
   content: string
   createdAt: string
   updatedAt: string
@@ -22,6 +23,7 @@ interface Raw {
   commentId: number
   userId: number
   authorName: string
+  authorPhotoUrl?: string | null
   content: string
   createdAt: string
   updatedAt: string

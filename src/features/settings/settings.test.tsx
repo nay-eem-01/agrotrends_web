@@ -19,11 +19,12 @@ const fetchMock = vi.fn<typeof fetch>()
 beforeEach(() => {
   // Background reads (profile, expert status, reputation, unread count, e-mail settings) get one empty answer that fits
   // them all; the account and password tests count only the calls they make (/api/auth, /api/user).
-  vi.stubGlobal('fetch', (input: RequestInfo | URL, init?: RequestInit) =>
-    /^\/api\/(auth|user)\/(?!settings)/.test(String(input))
-      ? fetchMock(input, init)
-      : Promise.resolve(envelope(200, { name: user.name, specialities: [], content: [], number: 0, last: true, total: 0, topics: [], count: 0 })),
-  )
+  vi.stubGlobal('fetch', (input: RequestInfo | URL, init?: RequestInit) => {
+    const path = String(input)
+    if (/^\/api\/(auth|user)\/(?!settings)/.test(path)) return fetchMock(input, init)
+    if (path === '/api/me/following/categories') return Promise.resolve(envelope(200, []))
+    return Promise.resolve(envelope(200, { name: user.name, specialities: [], content: [], number: 0, last: true, total: 0, topics: [], count: 0 }))
+  })
   localStorage.clear()
   clearSession()
   localStorage.setItem('agrotrends.refreshToken', 'r0')

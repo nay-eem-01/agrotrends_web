@@ -13,6 +13,15 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 ---
 
+## Live application follow-up (2026-11-18)
+
+| Step | Status |
+|---|---|
+| Responsive topic filters and panels, category follows, avatars, AI Markdown, image compression and profile-only reputation | Implemented on the feature step |
+| Verify authenticated flows and image caching after both repos are promoted to staging | Pending live acceptance |
+
+---
+
 ## Staging hosting automation (2026-11-17)
 
 Deployment operations are tracked separately from feature counts.

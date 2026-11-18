@@ -2,8 +2,9 @@ import { ChatCircleText, Newspaper, SealCheck, Sparkle } from '@phosphor-icons/r
 import { useState, type ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { cn } from 'cn'
+import { useMyAuthorProfile } from '../../api/authors'
 import { useTopicStories } from '../../api/blogs'
-import { useCategories } from '../../api/categories'
+import { useCategories, useFollowedCategories } from '../../api/categories'
 import { useExperts, type ExpertSummary } from '../../api/experts'
 import { useFeed, useTrendingQuestions } from '../../api/feed'
 import { useToggleAuthorFollow } from '../../api/follows'
@@ -19,11 +20,12 @@ import { Spinner } from '../../ui/Spinner'
 import { useSession } from '../auth/session'
 import { useRequireSignIn } from '../auth/useRequireSignIn'
 import { QuestionCard } from '../qa/QuestionRow'
+import { TopicChips } from '../topics/TopicChips'
 
 type Show = 'questions' | 'stories'
 
 /**
- * `/` for signed-in readers: a composer, then Questions | Stories as two tabs over one row of topic chips, with what's
+ * `/` for signed-in readers: a composer, then Questions | Stories as two tabs above topic filters, with what's
  * trending and experts to follow on the right (the sections and your topics are in the app's sidebar). One kind at a
  * time, never mixed. The tab, topic and sort live in the URL (`?show=stories&topic=2`, `?unanswered=true`), so a tab
  * can be linked and Back works. On phones the quick actions come first.
@@ -35,12 +37,14 @@ export function HomeFeed() {
   const topic = Number(params.get('topic')) || undefined
   const unanswered = show === 'questions' && params.get('unanswered') === 'true'
   const categories = useCategories()
-  // For you: questions in the tags you follow. It is the first view once you follow any; `?scope=all` asks for all.
+  // For you opens by default when the reader follows a category or tag.
   const followed = useFollowedTags(true)
+  const followedCategories = useFollowedCategories(true)
+  const hasFollows = Boolean(followed.data?.length || followedCategories.data?.length)
   const scope = params.get('scope')
-  const forYou = show === 'questions' && !topic && (scope === 'following' || (scope !== 'all' && (followed.data?.length ?? 0) > 0))
+  const forYou = show === 'questions' && !topic && (scope === 'following' || (scope !== 'all' && hasFollows))
   // Until the followed tags are known, the default view isn't either; nothing is read twice.
-  const deciding = show === 'questions' && !topic && scope == null && followed.isPending
+  const deciding = show === 'questions' && !topic && scope == null && !hasFollows && (followed.isPending || followedCategories.isPending)
   // The tab, topic and sort as one link; switching tabs keeps the topic and drops the questions-only sort.
   const to = (next: { show?: Show; topic?: number; unanswered?: boolean; scope?: 'following' | 'all' }) => {
     const query = new URLSearchParams()
@@ -60,7 +64,7 @@ export function HomeFeed() {
   ]
 
   return (
-    <div className="mx-auto grid max-w-[84rem] gap-8 px-4 pt-6 pb-4 sm:px-8 lg:grid-cols-[minmax(0,1fr)_17rem] lg:gap-10 xl:grid-cols-[minmax(0,1fr)_20rem] xl:gap-14">
+    <div className="mx-auto grid max-w-[84rem] gap-8 px-4 pt-6 pb-4 sm:px-8 xl:grid-cols-[minmax(0,1fr)_17rem] xl:gap-8 2xl:grid-cols-[minmax(0,1fr)_20rem] 2xl:gap-10">
       <title>{t('AgroTrends – farming questions, stories and advice')}</title>
       <h1 className="sr-only">{t('Home')}</h1>
       <section aria-label={t('Your feed')} className="min-w-0">
@@ -81,23 +85,15 @@ export function HomeFeed() {
             </Link>
           ))}
         </nav>
-        <div className="flex flex-wrap items-center gap-3 py-4">
-          {/* One row that scrolls at every width, so a long topic never sits alone on a second line. */}
-          <nav aria-label={t('Topics')} className="-mx-4 flex min-w-0 flex-1 basis-full gap-2 overflow-x-auto px-4 pb-1 sm:basis-0 [scrollbar-width:none] sm:mx-0 sm:px-0">
+        <div className="flex flex-col items-start gap-3 py-4">
+          <TopicChips categories={categories.data ?? []} selected={topic} renderTopic={(category) => (
+            <TopicChip to={to({ topic: category.id })} current={topic === category.id}>{category.categoryName}</TopicChip>
+          )}>
             {show === 'questions' && (
-              <TopicChip to={to({ topic: undefined, scope: 'following' })} current={forYou}>
-                {t('For you')}
-              </TopicChip>
+              <li><TopicChip to={to({ topic: undefined, scope: 'following' })} current={forYou}>{t('For you')}</TopicChip></li>
             )}
-            <TopicChip to={to({ topic: undefined, scope: 'all' })} current={!topic && !forYou}>
-              {t('All')}
-            </TopicChip>
-            {(categories.data ?? []).slice(0, 6).map((category) => (
-              <TopicChip key={category.id} to={to({ topic: category.id })} current={topic === category.id}>
-                {category.categoryName}
-              </TopicChip>
-            ))}
-          </nav>
+            <li><TopicChip to={to({ topic: undefined, scope: 'all' })} current={!topic && !forYou}>{t('All')}</TopicChip></li>
+          </TopicChips>
           {show === 'questions' && (
             <nav aria-label={t('Sort questions')} className="flex shrink-0 gap-1 rounded-full bg-muted p-1">
               {[
@@ -241,7 +237,7 @@ function TopicChip({ to, current, children }: { to: string; current: boolean; ch
       to={to}
       aria-current={current ? 'page' : undefined}
       className={cn(
-        'inline-flex h-9 shrink-0 items-center rounded-full px-4 text-sm font-medium whitespace-nowrap transition-colors duration-150',
+        'inline-flex min-h-9 max-w-full items-center rounded-full px-4 py-1 text-sm font-medium wrap-anywhere transition-colors duration-150',
         current ? 'bg-foreground text-background' : 'bg-surface text-foreground hover:bg-secondary',
       )}
     >
@@ -254,9 +250,10 @@ function TopicChip({ to, current, children }: { to: string; current: boolean; ch
 function Composer() {
   const t = useT()
   const { user } = useSession()
+  const photo = useMyAuthorProfile(user != null).data?.profileImageUrl
   return (
     <div className="mb-2 flex items-center gap-3 rounded-full bg-surface py-2 pr-2 pl-2">
-      <Avatar name={user?.name ?? '?'} size={32} />
+      <Avatar name={user?.name ?? '?'} src={photo} size={32} />
       <Link to="/questions/ask" className="min-w-0 flex-1 truncate text-sm text-muted-foreground hover:text-foreground">
         {t('Ask a question in public…')}
       </Link>
@@ -322,7 +319,7 @@ function StoryItem({ story }: { story: StorySummary }) {
         {(story.subtitle || story.excerpt) && <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{story.subtitle || story.excerpt}</p>}
         {story.author?.name && (
           <p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Avatar name={story.author.name} size={20} />
+            <Avatar name={story.author.name} src={story.author.profileImageUrl} size={20} />
             <span className="font-medium text-foreground">{story.author.name}</span>
             <span>· {storyDate(story.publishedAt)}</span>
           </p>
@@ -357,7 +354,7 @@ function Rail() {
   const open = (waiting.data?.pages[0]?.content ?? []).slice(0, 4)
   const fresh = (latest.data?.pages[0]?.content ?? []).slice(0, 4)
   return (
-    <aside aria-label={t('More to read')} className="hidden lg:block">
+    <aside aria-label={t('More to read')} className="hidden sm:block">
       <div className="sticky top-24 flex flex-col gap-8">
         <section aria-labelledby="ask-advisor" className="flex flex-col gap-2 rounded-xl bg-surface p-4">
           <h2 id="ask-advisor" className="flex items-center gap-1.5 font-sans text-sm font-semibold">

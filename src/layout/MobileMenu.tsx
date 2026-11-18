@@ -23,7 +23,7 @@ export function MobileMenu({ signedIn, anonymous }: { signedIn: boolean; anonymo
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger className="flex size-11 items-center justify-center rounded-full text-muted-foreground hover:text-foreground lg:hidden">
+      <SheetTrigger className="flex size-11 items-center justify-center rounded-full text-muted-foreground hover:text-foreground md:hidden">
         <List size={24} aria-hidden="true" />
         <span className="sr-only">{t('Menu')}</span>
       </SheetTrigger>

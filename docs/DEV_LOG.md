@@ -5,6 +5,17 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 
 ---
 
+## 2026-11-18 — Live application fixes
+
+- Paginated topic chips in groups of five and moved sort controls to their own row. Preserved navigation and supporting panels at narrower desktop widths.
+- Made the seeded category catalog visible and followable alongside existing tags. Included followed categories in the sidebar and the question feed.
+- Showed saved profile photos with questions, answers, story authors and comment threads, with initials as a fallback. Kept reputation totals on profiles.
+- Rendered Markdown in AI answers through the existing HTML sanitizer and converted new JPEG uploads to smaller WebP files when the browser supports the conversion.
+- Omitted session credentials on public feed, topic and AI answer reads whose payload does not depend on the caller.
+- Lint and build passed. Chromium passed at six viewport widths and verified JPEG-to-WebP conversion. The two editor tests that failed during the full run passed on the focused rerun.
+
+---
+
 ## 2026-11-17 — Staging deployment automation prepared
 
 **Done**

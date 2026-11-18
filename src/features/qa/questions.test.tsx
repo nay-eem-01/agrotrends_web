@@ -13,6 +13,8 @@ const question: Question = {
   title: 'Why are my boro seedlings yellow?',
   content: '<p>Leaves turned <b>yellow</b> after the cold week.</p>',
   authorName: 'Karim',
+  authorReputation: 713,
+  authorPhotoUrl: 'https://images.example/karim.webp',
   createdAt: '2026-10-08T06:00:00Z',
   agri: { crop: 'boro rice', season: 'RABI' },
 }
@@ -32,6 +34,8 @@ test('questions are listed newest first with their farming context', async () =>
   expect(link).toHaveAttribute('href', '/questions/5')
   const row = link.closest('li')!
   expect(within(row).getByText('Leaves turned yellow after the cold week.')).toBeInTheDocument()
+  expect(within(row).queryByText('Reputation')).not.toBeInTheDocument()
+  expect(row.querySelector('img')).toHaveAttribute('src', 'https://images.example/karim.webp')
   expect(within(row).getByRole('link', { name: 'Crop: boro rice' })).toHaveAttribute('href', '/questions?crop=boro+rice')
   expect(within(row).getByRole('link', { name: 'Season: Rabi' })).toHaveAttribute('href', '/questions?season=RABI')
   const sent = api.mock.calls.map(([url]) => new URL(String(url), 'http://x')).find((url) => url.pathname === '/api/questions/all')!
@@ -154,4 +158,25 @@ test('expanding a question’s extra tags does not open the question', async () 
   const popover = await screen.findByRole('dialog')
   expect(within(popover).getByRole('link', { name: 'Season: Rabi' })).toHaveAttribute('href', '/questions?season=RABI')
   expect(screen.getByTestId('path')).toHaveTextContent(/^\/questions$/)
+})
+
+test('the topic filter shows five categories at a time and keeps sorting available', async () => {
+  const categories = Array.from({ length: 12 }, (_, i) => ({ id: i + 1, categoryName: `Topic ${i + 1}` }))
+  mockApi({
+    'GET /api/categories/all': () => envelope(200, page(categories)),
+    'GET /api/questions/all': () => envelope(200, page([question])),
+  })
+  renderWithProviders(<App />, '/questions')
+
+  const topics = within(await screen.findByRole('navigation', { name: 'Topics' }))
+  const names = () => topics.getAllByRole('link').slice(1).map((link) => link.textContent)
+  expect(names()).toEqual(['Topic 1', 'Topic 2', 'Topic 3', 'Topic 4', 'Topic 5'])
+  await userEvent.click(topics.getByRole('button', { name: 'More topics' }))
+  expect(names()).toEqual(['Topic 6', 'Topic 7', 'Topic 8', 'Topic 9', 'Topic 10'])
+  await userEvent.click(topics.getByRole('button', { name: 'More topics' }))
+  expect(names()).toEqual(['Topic 11', 'Topic 12'])
+  await userEvent.click(topics.getByRole('button', { name: 'Previous topics' }))
+  await userEvent.click(topics.getByRole('link', { name: 'Topic 8' }))
+  expect(topics.getByRole('link', { name: 'Topic 8' })).toHaveAttribute('aria-current', 'true')
+  expect(screen.getByRole('link', { name: 'Unanswered' })).toHaveAttribute('href', '/questions?categoryId=8&unanswered=true')
 })

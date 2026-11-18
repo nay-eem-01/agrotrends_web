@@ -16,7 +16,7 @@ export function useFeed(kind: FeedKind, enabled = true) {
   return useInfiniteQuery({
     queryKey: feedKeys.feed(kind),
     queryFn: ({ pageParam, signal }) =>
-      api<Page<StorySummary>>(`/api/feed/${kind}`, { params: { pageNo: pageParam, pageSize: FEED_PAGE_SIZE }, signal }),
+      api<Page<StorySummary>>(`/api/feed/${kind}`, { params: { pageNo: pageParam, pageSize: FEED_PAGE_SIZE }, signal, anonymous: kind !== 'following' }),
     initialPageParam: 0,
     getNextPageParam: (page) => (page.last ? undefined : page.number + 1),
     enabled,
@@ -27,7 +27,7 @@ export function useFeed(kind: FeedKind, enabled = true) {
 export function useTrendingQuestions(size = 5) {
   return useQuery({
     queryKey: ['feed', 'trending-questions', size],
-    queryFn: ({ signal }) => api<Page<Question>>('/api/feed/trending/questions', { params: { pageNo: 0, pageSize: size }, signal }),
+    queryFn: ({ signal }) => api<Page<Question>>('/api/feed/trending/questions', { params: { pageNo: 0, pageSize: size }, signal, anonymous: true }),
     staleTime: 5 * 60_000,
   })
 }

@@ -79,13 +79,8 @@ export function QuestionCard({ question, compact = false }: { question: Question
             )
           )}
           <span className="inline-flex items-center gap-1.5">
-            <Avatar name={question.authorName ?? '?'} size={20} />
+            <Avatar name={question.authorName ?? '?'} src={question.authorPhotoUrl} size={20} />
             <span className="font-medium text-foreground">{question.authorName}</span>
-            {question.authorReputation != null && (
-              <span className="tabular-nums">
-                <span className="sr-only">{t('Reputation')} </span>· {formatNumber(question.authorReputation)}
-              </span>
-            )}
             {question.authorBadges?.includes('VERIFIED_EXPERT') && <SealCheck size={14} weight="fill" className="text-mustard-ink" aria-label={t('Verified expert')} />}
           </span>
         </div>

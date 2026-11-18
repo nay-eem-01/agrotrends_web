@@ -1,10 +1,9 @@
 import { Plus, Sparkle } from '@phosphor-icons/react'
-import { lazy, Suspense } from 'react'
-import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyTitle } from '@/components/ui/empty'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from 'cn'
-import { useCategories, type Category } from '../../api/categories'
+import { useCategories } from '../../api/categories'
 import { errorMessage } from '../../api/errors'
 import { useQuestions } from '../../api/questions'
 import { readQuestionFilters, type QuestionFilters } from '../../lib/agri'
@@ -12,13 +11,8 @@ import { useT } from '../../lib/i18n'
 import { Button, ButtonLink } from '../../ui/Button'
 import { Sprig } from '../../ui/Botanical'
 import { ActiveFilters, FilterButton, FilterChip } from '../feed/AgriFilterBar'
+import { TopicChips } from '../topics/TopicChips'
 import { QuestionCard } from './QuestionRow'
-
-// The searchable picker (and its positioning code) loads a moment after the page.
-const SearchSelect = lazy(() => import('../../ui/SearchSelect').then((m) => ({ default: m.SearchSelect })))
-
-/** How many topics show as chips; the rest are found with the "More topics" picker. */
-const TOPIC_CHIPS = 6
 
 /** The URL of this list with `changes` applied to its query; `undefined` removes a parameter. */
 export function useListPath() {
@@ -60,7 +54,7 @@ export function QuestionsPage() {
           {t('Ask a question')}
         </ButtonLink>
       </header>
-      <div className="mt-4 lg:grid lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-12">
+      <div className="mt-4 grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1fr)_16rem] xl:gap-8">
         <div className="min-w-0">
           <Toolbar filters={filters} />
           {questions.isPending ? (
@@ -88,7 +82,7 @@ export function QuestionsPage() {
             </>
           )}
         </div>
-        <aside className="hidden pt-5 lg:block">
+        <aside className="hidden pt-5 sm:block">
           <div className="sticky top-24 flex flex-col gap-6">
             <AdvisorCard />
             <AskingWell />
@@ -99,42 +93,35 @@ export function QuestionsPage() {
   )
 }
 
-/** Topics as chips (the first few; the rest through a searchable picker), Newest | Unanswered, and the farming filters. */
+/** Topics as chips (five at a time), Newest | Unanswered, and the farming filters. */
 function Toolbar({ filters }: { filters: QuestionFilters }) {
   const t = useT()
   const path = useListPath()
-  const navigate = useNavigate()
   const categories = useCategories().data ?? []
-  const shown = chipTopics(categories, filters.categoryId)
   const tabs = [
     { label: t('Newest'), to: path({ unanswered: undefined }), current: !filters.unanswered },
     { label: t('Unanswered'), to: path({ unanswered: 'true' }), current: Boolean(filters.unanswered) },
   ]
   const chip = (current: boolean) =>
     cn(
-      'inline-flex h-9 shrink-0 items-center rounded-full border px-3.5 text-sm whitespace-nowrap transition-colors duration-150',
+      'inline-flex min-h-9 max-w-full items-center rounded-full border px-3.5 py-1 text-sm wrap-anywhere transition-colors duration-150',
       current ? 'border-primary bg-secondary font-semibold text-primary' : 'border-border-strong text-foreground hover:border-primary/50 hover:bg-surface',
     )
 
   return (
     <div className="flex flex-col gap-3 py-4">
       {categories.length > 0 && (
-        <nav aria-label={t('Topics')} className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
-          <ul className="flex gap-2 pb-1 sm:flex-wrap">
-            <li>
-              <Link to={path({ categoryId: undefined })} aria-current={filters.categoryId == null ? 'true' : undefined} className={chip(filters.categoryId == null)}>
-                {t('All topics')}
-              </Link>
-            </li>
-            {shown.map((category) => (
-              <li key={category.id}>
-                <Link to={path({ categoryId: String(category.id) })} aria-current={category.id === filters.categoryId ? 'true' : undefined} className={chip(category.id === filters.categoryId)}>
-                  {category.categoryName}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
+        <TopicChips categories={categories} selected={filters.categoryId} renderTopic={(category) => (
+          <Link to={path({ categoryId: String(category.id) })} aria-current={category.id === filters.categoryId ? 'true' : undefined} className={chip(category.id === filters.categoryId)}>
+            {category.categoryName}
+          </Link>
+        )}>
+          <li>
+            <Link to={path({ categoryId: undefined })} aria-current={filters.categoryId == null ? 'true' : undefined} className={chip(filters.categoryId == null)}>
+              {t('All topics')}
+            </Link>
+          </li>
+        </TopicChips>
       )}
       <div className="flex flex-wrap items-center gap-3">
         <nav aria-label={t('Sort questions')} className="flex gap-1 rounded-full bg-muted p-1">
@@ -152,23 +139,7 @@ function Toolbar({ filters }: { filters: QuestionFilters }) {
             </Link>
           ))}
         </nav>
-        {/* Its own row on phones, so the topic picker keeps a usable width. */}
-        <div className="flex w-full min-w-0 items-center justify-end gap-3 sm:w-auto sm:flex-1">
-          {categories.length > TOPIC_CHIPS && (
-            <Suspense fallback={<span aria-hidden="true" className="h-11 min-w-0 flex-1 rounded-lg border border-input sm:max-w-56" />}>
-              <SearchSelect
-                label={t('Topic')}
-                hideLabel
-                placeholder={t('More topics')}
-                value={filters.categoryId == null ? '' : String(filters.categoryId)}
-                options={categories.map((category) => ({ value: String(category.id), label: category.categoryName ?? '' }))}
-                onChange={(value) => navigate(path({ categoryId: value || undefined }))}
-                className="min-w-0 flex-1 sm:max-w-56"
-              />
-            </Suspense>
-          )}
-          <FilterButton filters={filters} className="h-11 shrink-0" />
-        </div>
+        <FilterButton filters={filters} className="h-11 shrink-0" />
       </div>
       <ActiveFilters filters={filters}>
         {filters.tag && (
@@ -179,13 +150,6 @@ function Toolbar({ filters }: { filters: QuestionFilters }) {
       </ActiveFilters>
     </div>
   )
-}
-
-/** The first few topics as chips, always including the chosen one so the current filter stays visible. */
-export function chipTopics(categories: Category[], active?: number): Category[] {
-  const first = categories.slice(0, TOPIC_CHIPS)
-  const chosen = categories.find((category) => category.id === active)
-  return chosen && !first.includes(chosen) ? [...first.slice(0, TOPIC_CHIPS - 1), chosen] : first
 }
 
 function ListSkeleton() {

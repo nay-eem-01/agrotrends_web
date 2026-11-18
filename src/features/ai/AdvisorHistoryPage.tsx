@@ -1,10 +1,10 @@
+import { AiAnswerText } from '../../ui/AiAnswerText'
 import { CaretDown, Sparkle } from '@phosphor-icons/react'
 import { useT } from '../../lib/i18n'
 import { useAdvisorHistory } from '../../api/ai'
 import { errorMessage } from '../../api/errors'
 import { storyDate } from '../../lib/dates'
 import { Button, ButtonLink } from '../../ui/Button'
-import { SafeHtml } from '../../ui/SafeHtml'
 import { Spinner } from '../../ui/Spinner'
 import { AskExperts } from './AskExperts'
 import { Sources } from './Sources'
@@ -52,7 +52,7 @@ export function AdvisorHistoryPage() {
                       <Sparkle size={16} weight="fill" aria-hidden="true" />
                       {t('AI answer')}
                     </p>
-                    <SafeHtml html={item.answer} className="mt-2 font-serif text-[1.0625rem] leading-relaxed whitespace-pre-line [&>p+p]:mt-3" />
+                    <AiAnswerText text={item.answer} sources={item.sources?.length} className="mt-2 font-serif text-[1.0625rem] leading-relaxed" />
                     <Sources sources={item.sources} />
                     <AskExperts item={item} />
                   </div>

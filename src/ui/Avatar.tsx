@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { cx } from './cx'
 
 interface AvatarProps {
@@ -18,15 +19,16 @@ export function initials(name: string): string {
 
 /** Decorative: a name is always shown next to an avatar, so screen readers skip it. */
 export function Avatar({ name, src, size = 32, className }: AvatarProps) {
+  const [failedSource, setFailedSource] = useState<string>()
   const style = { width: size, height: size, fontSize: Math.round(size * 0.4) }
-  if (src) {
-    return <img src={src} alt="" loading="lazy" decoding="async" style={style} className={cx('rounded-full object-cover', className)} />
+  if (src && src !== failedSource) {
+    return <img src={src} alt="" loading="lazy" decoding="async" onError={() => setFailedSource(src)} style={style} className={cx('shrink-0 rounded-full object-cover', className)} />
   }
   return (
     <span
       aria-hidden="true"
       style={style}
-      className={cx('inline-flex items-center justify-center rounded-full bg-secondary font-sans font-semibold text-primary', className)}
+      className={cx('inline-flex shrink-0 items-center justify-center rounded-full bg-secondary font-sans font-semibold text-primary', className)}
     >
       {initials(name)}
     </span>

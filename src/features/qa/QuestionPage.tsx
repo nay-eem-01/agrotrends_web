@@ -83,7 +83,7 @@ function QuestionView({ question }: { question: Question }) {
         {t('Back to questions')}
       </Link>
       {/* After Stack Overflow: the question and its answers in the main column, its numbers and Answer in a side panel. */}
-      <div className="mt-2 lg:grid lg:grid-cols-[minmax(0,1fr)_15.5rem] lg:items-start lg:gap-x-10">
+      <div className="mt-2 grid gap-6 xl:grid-cols-[minmax(0,1fr)_15.5rem] xl:items-start xl:gap-x-10">
         <div className="min-w-0">
           <section aria-label={t('Question')}>
             <div className="flex items-start gap-3">
@@ -151,13 +151,13 @@ function QuestionView({ question }: { question: Question }) {
                   <AuthorLine
                     userId={question.userId}
                     name={question.authorName}
-                    reputation={question.authorReputation}
+                    photo={question.authorPhotoUrl}
                     badges={question.authorBadges}
                     meta={t('Asked {date}', { date: storyDate(question.createdAt) })}
                   />
                   <div className="flex items-center gap-2">
                     <ShareButton path={`/questions/${id}`} title={question.title ?? ''} />
-                    <a href="#your-answer" className={buttonClass('primary', 'sm', 'lg:hidden')}>
+                    <a href="#your-answer" className={buttonClass('primary', 'sm', 'xl:hidden')}>
                       <ChatCircleText size={16} aria-hidden="true" />
                       {t('Write an answer')}
                     </a>
@@ -170,7 +170,7 @@ function QuestionView({ question }: { question: Question }) {
           <AiAnswerCard questionId={id} topicId={question.category?.id} askedAt={askedAt} />
           <Answers questionId={id} askerId={question.userId} />
         </div>
-        <aside aria-label={t('About this question')} className="hidden lg:sticky lg:top-24 lg:flex lg:flex-col lg:gap-5 lg:pt-2 lg:text-sm">
+        <aside aria-label={t('About this question')} className="hidden flex-col gap-5 pt-2 text-sm sm:flex xl:sticky xl:top-24">
           <dl className="grid grid-cols-[1fr_auto] gap-x-3 gap-y-2">
             <dt className="text-muted-foreground">{t('Answers')}</dt>
             <dd className="font-semibold tabular-nums">{formatNumber(question.answerCount ?? 0)}</dd>
@@ -193,7 +193,7 @@ function QuestionView({ question }: { question: Question }) {
               {t('Read the AI answer')} →
             </a>
           </div>
-          <a href="#your-answer" className={buttonClass('primary', 'md', 'w-full')}>
+          <a href="#your-answer" className={buttonClass('primary', 'md', 'hidden w-full xl:inline-flex')}>
             <ChatCircleText size={18} aria-hidden="true" />
             {t('Write an answer')}
           </a>

@@ -7,7 +7,7 @@ import App from '../../App'
 import { envelope, mockApi, page } from '../../test/api'
 import { openMoreActions, renderWithProviders } from '../../test/render'
 
-const story: BlogResponse = { id: 402, slug: 'rice-blast', title: 'Rice blast', content: '<p>Body.</p>', author: { authorId: 1, name: 'Nasrin' }, status: 'PUBLISHED', agri: {} }
+const story: BlogResponse = { id: 402, slug: 'rice-blast', title: 'Rice blast', content: '<p>Body.</p>', author: { authorId: 1, name: 'Nasrin', profileImageUrl: 'https://images.example/nasrin.webp' }, status: 'PUBLISHED', agri: {} }
 
 interface CommentResponse {
   commentId: number
@@ -15,6 +15,7 @@ interface CommentResponse {
   parentCommentId: number | null
   userId: number
   authorName: string
+  authorPhotoUrl?: string
   content: string
   createdAt: string
   updatedAt: string
@@ -28,6 +29,7 @@ function comment(commentId: number, overrides: Partial<CommentResponse> = {}): C
     parentCommentId: null,
     userId: 20,
     authorName: 'Rahim Uddin',
+    authorPhotoUrl: 'https://images.example/rahim.webp',
     content: `Response ${commentId}`,
     createdAt: `2026-10-0${commentId}T06:00:00Z`,
     updatedAt: `2026-10-0${commentId}T06:00:00Z`,
@@ -76,6 +78,8 @@ test('responses and their replies are listed oldest first, with a count', async 
   const items = section.getAllByRole('article')
   expect(items.map((item) => item.getAttribute('aria-label'))).toEqual(['Response by Rahim Uddin', 'Response by Salma', 'Response by Rahim Uddin'])
   expect(items[0]).toHaveTextContent('First line')
+  expect(items[0].querySelector('img')).toHaveAttribute('src', 'https://images.example/rahim.webp')
+  expect(document.querySelector('img[src="https://images.example/nasrin.webp"]')).toBeInTheDocument()
   expect(section.getByRole('button', { name: 'Sign in to respond' })).toBeInTheDocument()
   expect(section.queryByRole('button', { name: 'Edit' })).not.toBeInTheDocument()
 })

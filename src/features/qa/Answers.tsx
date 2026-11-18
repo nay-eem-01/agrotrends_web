@@ -245,7 +245,7 @@ function Post({ questionId, item, compact = false, actions }: { questionId: numb
           <AuthorLine
             userId={item.userId}
             name={item.authorName}
-            reputation={compact ? undefined : item.authorReputation}
+            photo={item.authorPhotoUrl}
             badges={item.authorBadges}
             meta={`${storyDate(item.createdAt)}${edited ? ` · ${t('edited')}` : ''}`}
             size={compact ? 'sm' : 'md'}

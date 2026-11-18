@@ -1,4 +1,4 @@
-import { ArrowFatDown, ArrowFatUp } from '@phosphor-icons/react'
+import { CaretDown, CaretUp } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
 import { cn } from 'cn'
 import { ApiError } from '../../api/errors'
@@ -60,29 +60,29 @@ export function VoteControl({ target, id, score, myVote, own, orientation = 'ver
     })
   }
 
+  const horizontal = orientation === 'horizontal'
   const scoreText = (
-    <span className="text-lg font-semibold tabular-nums" aria-live="polite">
+    <span className={cn('min-w-6 text-center font-semibold tabular-nums', horizontal ? 'text-sm' : 'text-base')} aria-live="polite">
       <span className="sr-only">{t('Score')} </span>
       {formatNumber(state.score)}
     </span>
   )
 
-  const horizontal = orientation === 'horizontal'
   if (own && status === 'signed-in') {
     return horizontal ? (
-      <div className="flex h-11 items-center gap-1.5 rounded-lg border border-border px-3 text-sm text-muted-foreground">
+      <div className="flex h-10 items-center gap-1.5 rounded-full border border-border px-4 text-sm text-muted-foreground">
         {scoreText} {t('votes')}
       </div>
     ) : (
-      <div className="flex w-11 flex-col items-center pt-1">{scoreText}</div>
+      <div className="flex w-9 flex-col items-center pt-1">{scoreText}</div>
     )
   }
 
   return (
-    <div className={cn('relative flex items-center', horizontal ? 'gap-0.5 rounded-lg border border-border-strong pr-0.5' : 'w-11 flex-col')}>
-      <Arrow direction="UP" pressed={state.myVote === 'UP'} disabled={vote.isPending} label={target === 'questions' ? t('Upvote this question') : t('Upvote this answer')} onClick={() => cast('UP')} />
+    <div className={cn('relative flex items-center', horizontal ? 'h-10 gap-0.5 rounded-full border border-border p-0.5' : 'w-9 flex-col gap-1')}>
+      <Arrow direction="UP" pressed={state.myVote === 'UP'} disabled={vote.isPending} label={target === 'questions' ? t('Upvote this question') : t('Upvote this answer')} outlined={!horizontal} onClick={() => cast('UP')} />
       {scoreText}
-      <Arrow direction="DOWN" pressed={state.myVote === 'DOWN'} disabled={vote.isPending} label={target === 'questions' ? t('Downvote this question') : t('Downvote this answer')} onClick={() => cast('DOWN')} />
+      <Arrow direction="DOWN" pressed={state.myVote === 'DOWN'} disabled={vote.isPending} label={target === 'questions' ? t('Downvote this question') : t('Downvote this answer')} outlined={!horizontal} onClick={() => cast('DOWN')} />
       {refusal && (
         <p
           role="alert"
@@ -98,21 +98,44 @@ export function VoteControl({ target, id, score, myVote, own, orientation = 'ver
   )
 }
 
-function Arrow({ direction, pressed, disabled, label, onClick }: { direction: Direction; pressed: boolean; disabled: boolean; label: string; onClick: () => void }) {
-  const Icon = direction === 'UP' ? ArrowFatUp : ArrowFatDown
+/**
+ * One vote button: a caret at the same weight as the score beside it, in a 36px circle whose touch area reaches 44px;
+ * outlined when it stands alone beside a post. Pressed up is filled paddy, pressed down a soft red.
+ */
+function Arrow({
+  direction,
+  pressed,
+  disabled,
+  label,
+  outlined,
+  onClick,
+}: {
+  direction: Direction
+  pressed: boolean
+  disabled: boolean
+  label: string
+  outlined: boolean
+  onClick: () => void
+}) {
+  const Icon = direction === 'UP' ? CaretUp : CaretDown
   return (
     <button
       type="button"
       aria-label={label}
+      title={label}
       aria-pressed={pressed}
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        'flex size-11 items-center justify-center rounded-full transition-[color,background-color,transform] duration-150 ease-(--ease-out) active:scale-[0.92] disabled:cursor-wait',
-        pressed ? (direction === 'UP' ? 'text-primary' : 'text-destructive') : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+        'relative flex size-9 items-center justify-center rounded-full border transition-[color,background-color,border-color,transform] duration-150 ease-(--ease-out) after:absolute after:-inset-1 active:scale-[0.92] disabled:cursor-wait disabled:opacity-60',
+        pressed
+          ? direction === 'UP'
+            ? 'border-primary bg-primary text-primary-foreground'
+            : 'border-destructive/30 bg-destructive-soft text-destructive'
+          : cn('text-muted-foreground hover:bg-muted hover:text-foreground', outlined ? 'border-border' : 'border-transparent'),
       )}
     >
-      <Icon size={22} weight={pressed ? 'fill' : 'regular'} aria-hidden="true" />
+      <Icon size={18} weight="bold" aria-hidden="true" />
     </button>
   )
 }

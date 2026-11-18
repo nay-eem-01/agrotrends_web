@@ -121,7 +121,7 @@ export function ClapButton({ story }: { story: BlogResponse }) {
           'disabled:cursor-default',
         )}
       >
-        <HandsClapping size={22} weight={mine > 0 ? 'fill' : 'regular'} className={mine > 0 ? 'text-mustard' : undefined} aria-hidden="true" />
+        <HandsClapping size={22} weight={mine > 0 ? 'fill' : 'regular'} className={mine > 0 ? 'text-mustard-ink' : undefined} aria-hidden="true" />
         <span aria-live="polite">
           {/* The action first, then the count people see, so the name matches what's on screen. */}
           <span className="sr-only">{signedIn ? (full ? t('You gave this story 50 claps') : t('Clap for this story')) : t('Sign in to clap')},</span>{' '}

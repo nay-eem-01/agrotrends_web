@@ -75,7 +75,7 @@ export function useExpertDecision() {
             body: decision.action === 'approve' ? { categoryIds: decision.categoryIds, note: decision.note || undefined } : { note: decision.note },
           }),
     onSettled: () => {
-      void queryClient.invalidateQueries({ queryKey: ['admin', 'expert-applications'] })
+      void queryClient.invalidateQueries({ queryKey: ['admin'] })
       void queryClient.invalidateQueries({ queryKey: ['reputation'] })
     },
   })
@@ -83,3 +83,16 @@ export function useExpertDecision() {
 
 /** The backend's limit on a decision note. */
 export const MAX_DECISION_NOTE = 500
+
+/** A verified expert in the "Experts to follow" list; `authorId` equals `userId`. */
+export type ExpertSummary = Schemas['ExpertSummaryResponse']
+
+/** Verified experts to follow (public), most accepted answers first; the list stays hidden if this fails. */
+export function useExperts(categoryId?: number) {
+  return useQuery({
+    queryKey: ['experts', 'list', categoryId ?? null],
+    queryFn: ({ signal }) => api<Page<ExpertSummary>>('/api/experts', { params: { categoryId, pageNo: 0, pageSize: 3 }, signal }),
+    retry: false,
+    staleTime: 10 * 60_000,
+  })
+}

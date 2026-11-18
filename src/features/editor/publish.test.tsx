@@ -56,15 +56,21 @@ test('publishing a new story sends its details and opens it', async () => {
   await chooseOption(sheet.getByLabelText('Topic'), 'Crops')
   const topics = sheet.getByLabelText('Tags')
   await userEvent.type(topics, 'Ri')
-  await userEvent.click(await sheet.findByRole('button', { name: 'rice blast' }))
+  await userEvent.click(await sheet.findByRole('button', { name: 'Add tag rice blast' }))
   await userEvent.type(topics, 'Cold Stress{Enter}')
   await pickOption(sheet.getByLabelText('Season'), 'Rabi')
   await userEvent.type(sheet.getByLabelText('Crop'), ' boro rice ')
   await pickOption(sheet.getByLabelText('Soil'), 'Clay loam')
+  await userEvent.type(sheet.getByLabelText('Subtitle (optional)'), ' What to do when nights drop below 12 °C ')
+  const cite = sheet.getByRole('checkbox', { name: /Let the AI advisor cite this story/ })
+  expect(cite).toBeChecked()
+  await userEvent.click(cite)
   await userEvent.click(sheet.getByRole('button', { name: 'Publish now' }))
 
   await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/stories/boro-cold'))
   expect(bodies(api, 'POST', '/api/blogs/create')[0]).toEqual({
+    subtitle: 'What to do when nights drop below 12 °C',
+    aiCitable: false,
     categoryId: 1,
     tags: ['rice blast', 'cold stress'],
     agri: { crop: 'boro rice', season: 'RABI', soil: 'CLAY_LOAM' },
@@ -161,4 +167,18 @@ test('an author can open their own story in the editor', async () => {
   })
   renderWithProviders(<App />, '/stories/mine')
   expect(await screen.findByRole('link', { name: 'Edit story' })).toHaveAttribute('href', '/write/74')
+})
+
+test('the topic and tags chosen beside the story carry into the publish step', async () => {
+  saveLocalDraft({ title: 'Boro in cold spells', html: '<p>Cover the seedbed.</p>', cover: '' })
+  mockApi(signedInAuthor())
+  renderWithProviders(<App />, '/write')
+
+  const panel = within(await screen.findByRole('complementary', { name: 'Story settings' }))
+  await chooseOption(panel.getByLabelText('Topic'), 'Fisheries')
+  expect(panel.getByText('A topic').parentElement).toHaveTextContent('A topic, done')
+
+  await userEvent.click(screen.getByRole('button', { name: 'Publish' }))
+  const sheet = within(await screen.findByRole('dialog', { name: 'Ready to publish?' }))
+  expect(sheet.getByLabelText('Topic')).toHaveValue('Fisheries')
 })

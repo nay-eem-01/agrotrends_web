@@ -3,7 +3,12 @@ import DOMPurify from 'dompurify'
 const purify = DOMPurify()
 
 // Links in user content open safely; anything not http(s), mailto or a same-site path loses its href.
+// Images load when they near the screen, so a long story doesn't fetch every photo up front.
 purify.addHook('afterSanitizeAttributes', (node) => {
+  if (node.tagName === 'IMG') {
+    node.setAttribute('loading', 'lazy')
+    node.setAttribute('decoding', 'async')
+  }
   if (node.tagName === 'A') {
     const href = node.getAttribute('href') ?? ''
     if (href && !/^(https?:|mailto:|\/(?!\/)|#)/i.test(href)) node.removeAttribute('href')

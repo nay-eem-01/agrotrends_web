@@ -100,7 +100,7 @@ function CategoryRow({ category }: { category: Category }) {
               <Button variant="quiet" size="sm" aria-label={`Rename ${category.categoryName}`} onClick={() => setMode('rename')}>
                 Rename
               </Button>
-              <Button variant="quiet" size="sm" aria-label={`Delete ${category.categoryName}`} onClick={() => setMode('confirm')}>
+              <Button variant="quiet" size="sm" aria-label={`Delete ${category.categoryName}`} className="text-destructive" onClick={() => setMode('confirm')}>
                 Delete
               </Button>
             </>

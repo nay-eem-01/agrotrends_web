@@ -1,14 +1,15 @@
-import { useT, formatNumber } from '../../lib/i18n'
-import { Bug, ClockCounterClockwise, Drop, Leaf, Plant, Plus, Sparkle, Warning, WarningCircle } from '@phosphor-icons/react'
+import { useLang, useT, formatNumber } from '../../lib/i18n'
+import { ArrowRight, ArrowUp, Bug, ClockCounterClockwise, Drop, Leaf, Plant, Plus, Sparkle, Warning, WarningCircle } from '@phosphor-icons/react'
 import { useId, useRef, useState, type FormEvent, type Ref } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { cn } from 'cn'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Label } from '@/components/ui/label'
-import { MAX_ADVISOR_QUESTION, useAdvisorHistory, useAskAdvisor, type AiAnswer } from '../../api/ai'
+import { MAX_ADVISOR_QUESTION, useAdvisorAllowance, useAdvisorHistory, useAskAdvisor, type AiAllowance, type AiAnswer } from '../../api/ai'
 import { ApiError, errorMessage } from '../../api/errors'
 import { seasonCalendar, SEASON_LABELS, type Season } from '../../lib/agri'
 import { storyDate } from '../../lib/dates'
+import { withCitations } from '../../lib/html'
 import { Button } from '../../ui/Button'
 import { Sprig } from '../../ui/Botanical'
 import { SafeHtml } from '../../ui/SafeHtml'
@@ -45,6 +46,7 @@ export function AdvisorPage() {
   const [error, setError] = useState<string>()
   const field = useRef<HTMLTextAreaElement>(null)
   const signedIn = status === 'signed-in'
+  const allowance = useAdvisorAllowance(signedIn).data
 
   function submit(event: FormEvent) {
     event.preventDefault()
@@ -87,6 +89,7 @@ export function AdvisorPage() {
         error={error}
         pending={ask.isPending}
         signedIn={signedIn}
+        allowance={allowance}
         onChange={setQuestion}
       />
       {ask.isError && <AskError error={ask.error} />}
@@ -109,7 +112,7 @@ export function AdvisorPage() {
                 <h1 className="relative mt-4 font-serif text-[2rem] leading-tight font-medium sm:text-[2.5rem]">{t('Ask the advisor')}</h1>
                 <p className="relative mt-2 max-w-xl text-muted-foreground">
                   {t(
-                    'Answers are written from stories farmers and agronomists published here, with links so you can check where the advice came from. A daily limit applies.',
+                    'Answers are written from stories farmers and agronomists published here, with links so you can check where the advice came from. Private: only you see them, and no expert checks them. A daily limit applies.',
                   )}
                 </p>
               </header>
@@ -122,7 +125,7 @@ export function AdvisorPage() {
               <ol aria-label={t('This conversation')} className="flex flex-col gap-10">
                 {exchanges.map((exchange, index) => (
                   <li key={index}>
-                    <ExchangeView exchange={exchange} />
+                    <ExchangeView exchange={exchange} onFollowUp={fill} />
                   </li>
                 ))}
               </ol>
@@ -210,9 +213,9 @@ function Suggestions({ season, onPick }: { season: Exclude<Season, 'YEAR_ROUND'>
         <ul className="mt-3 grid gap-3 sm:grid-cols-3">
           {ADVISOR_EXAMPLES[season].map((example) => (
             <li key={example}>
-              <button type="button" onClick={() => onPick(example)} className={card}>
+              <button type="button" onClick={() => onPick(t(example))} className={card}>
                 <Plant size={18} aria-hidden="true" className="mt-px shrink-0 text-primary" />
-                {example}
+                {t(example)}
               </button>
             </li>
           ))}
@@ -244,7 +247,7 @@ function Suggestions({ season, onPick }: { season: Exclude<Season, 'YEAR_ROUND'>
 
 /**
  * The question box: one bordered surface holding the label, the text and a footer with the counter and the button.
- * Ctrl+Enter (⌘+Enter) sends; Enter is a new line. Near the limit the counter says what is left and is announced.
+ * Enter sends, Shift+Enter is a new line. Near the limit the counter says what is left and is announced.
  */
 function Composer({
   ref,
@@ -253,6 +256,7 @@ function Composer({
   error,
   pending,
   signedIn,
+  allowance,
   onChange,
 }: {
   ref: Ref<HTMLTextAreaElement>
@@ -261,6 +265,7 @@ function Composer({
   error?: string
   pending: boolean
   signedIn: boolean
+  allowance?: AiAllowance
   onChange: (value: string) => void
 }) {
   const t = useT()
@@ -270,50 +275,50 @@ function Composer({
 
   return (
     <div>
+      {/* A pill like the mock-up's ask bar; it grows with the text, and the label stays for screen readers. */}
       <div
         className={cn(
-          'rounded-2xl border bg-card shadow-xs transition-[border-color,box-shadow] duration-150 focus-within:border-primary focus-within:ring-[3px] focus-within:ring-ring/60',
-          error ? 'border-destructive' : 'border-input hover:border-foreground/60',
+          'flex items-end gap-2 rounded-[1.625rem] border bg-card py-1.5 pr-1.5 pl-5 transition-[border-color,box-shadow] duration-150 focus-within:border-primary focus-within:ring-[3px] focus-within:ring-ring/60',
+          error ? 'border-destructive' : 'border-input hover:border-subtle',
         )}
       >
-        <Label htmlFor={id} className="px-4 pt-3.5 text-sm font-semibold">
+        <Label htmlFor={id} className="sr-only">
           {label}
         </Label>
         <textarea
           ref={ref}
           id={id}
-          rows={3}
+          rows={1}
           maxLength={MAX_ADVISOR_QUESTION}
-          placeholder={t('Bangla or English: what you grow, where, and what you are seeing')}
+          placeholder={label === t('Your question') ? t('Bangla or English: what you grow, where, and what you are seeing') : t('Ask a follow-up…')}
           value={value}
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? `${id}-error` : `${id}-count`}
           onChange={(event) => onChange(event.target.value)}
           onKeyDown={(event) => {
-            if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+            // A chat: Enter sends, Shift+Enter is a new line. Never while an input method (Bangla) is composing.
+            if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
               event.preventDefault()
               event.currentTarget.form?.requestSubmit()
             }
           }}
-          className="block min-h-24 w-full resize-y bg-transparent px-4 pt-2 pb-3 text-base leading-relaxed outline-none placeholder:text-muted-foreground focus-visible:outline-none"
+          className="block max-h-48 min-h-10 flex-1 resize-none bg-transparent py-2 text-base leading-relaxed outline-none [field-sizing:content] placeholder:text-muted-foreground focus-visible:outline-none"
         />
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-3 py-2.5 sm:pl-4">
-          <p id={`${id}-count`} className={cn('inline-flex items-center gap-1.5 text-sm tabular-nums', near ? 'font-medium text-foreground' : 'text-muted-foreground')}>
-            {near && <Warning size={16} weight="fill" aria-hidden="true" className="text-warning" />}
-            {near ? t('{n} characters left', { n: formatNumber(left) }) : `${formatNumber(value.length)} / ${formatNumber(MAX_ADVISOR_QUESTION)}`}
-          </p>
-          {/* Announced only near the limit, so typing isn't read out on every key. */}
-          <p className="sr-only" aria-live="polite">
-            {near ? t('{n} characters left', { n: formatNumber(left) }) : ''}
-          </p>
-          <div className="flex items-center gap-3">
-            <span className="hidden text-xs text-muted-foreground sm:inline">{t('Ctrl+Enter to send')}</span>
-            <Button type="submit" size="sm" loading={pending}>
-              {!pending && <Sparkle size={18} aria-hidden="true" />}
-              {signedIn ? t('Ask') : t('Sign in to ask')}
-            </Button>
-          </div>
-        </div>
+        <Button type="submit" size="sm" loading={pending} className="shrink-0">
+          {!pending && <ArrowUp size={16} weight="bold" aria-hidden="true" />}
+          {signedIn ? t('Ask') : t('Sign in to ask')}
+        </Button>
+      </div>
+      <div className="mt-2 flex flex-wrap items-center justify-between gap-3 px-5">
+        <p id={`${id}-count`} className={cn('inline-flex items-center gap-1.5 text-xs tabular-nums', near ? 'font-medium text-foreground' : 'text-muted-foreground')}>
+          {near && <Warning size={14} weight="fill" aria-hidden="true" className="text-warning" />}
+          {near ? t('{n} characters left', { n: formatNumber(left) }) : `${formatNumber(value.length)} / ${formatNumber(MAX_ADVISOR_QUESTION)}`}
+        </p>
+        {/* Announced only near the limit, so typing isn't read out on every key. */}
+        <p className="sr-only" aria-live="polite">
+          {near ? t('{n} characters left', { n: formatNumber(left) }) : ''}
+        </p>
+        {allowance ? <AllowanceLine allowance={allowance} /> : <span className="hidden text-xs text-muted-foreground sm:inline">{t('Enter to send, Shift+Enter for a new line')}</span>}
       </div>
       {error && (
         <p id={`${id}-error`} className="mt-2 flex items-start gap-1.5 text-sm text-destructive">
@@ -322,6 +327,24 @@ function Composer({
         </p>
       )}
     </div>
+  )
+}
+
+/** "7 of 10 questions left today"; at none, when the limit resets (its time in the reader's language). */
+function AllowanceLine({ allowance }: { allowance: AiAllowance }) {
+  const t = useT()
+  const lang = useLang()
+  const limit = allowance.limit ?? 0
+  const left = Math.max(0, limit - (allowance.usedToday ?? 0))
+  if (left > 0) {
+    return <span className="text-xs text-muted-foreground tabular-nums">{t('{n} of {limit} questions left today', { n: formatNumber(left), limit: formatNumber(limit) })}</span>
+  }
+  const at = allowance.resetsAt ? new Date(allowance.resetsAt).toLocaleTimeString(lang === 'bn' ? 'bn-BD' : 'en-GB', { hour: 'numeric', minute: '2-digit' }) : null
+  return (
+    <span className="inline-flex items-center gap-1.5 text-xs font-medium text-foreground">
+      <Warning size={14} weight="fill" aria-hidden="true" className="text-warning" />
+      {at ? t('No questions left today. More at {time}.', { time: at }) : t('No questions left today.')}
+    </span>
   )
 }
 
@@ -337,36 +360,62 @@ function AskError({ error }: { error: unknown }) {
 }
 
 /**
- * One turn. The reader's question on the right in green; the advisor's answer on the left beside its mark, labelled
- * as AI, its sources apart so they read as evidence, and a plain note to check them before acting.
+ * One turn, after Perplexity: the reader's question as a Lora heading, then the sources as numbered cards so the
+ * evidence reads first, then the answer labelled as AI and a plain note to check the sources before acting.
  */
-function ExchangeView({ exchange }: { exchange: Exchange }) {
+function ExchangeView({ exchange, onFollowUp }: { exchange: Exchange; onFollowUp: (text: string) => void }) {
   const t = useT()
   const sources = exchange.answer.sources ?? []
+  // Suggested next questions, once the backend sends them (docs/BACKEND_REQUESTS.md §8).
+  const followUps = (exchange.answer as AiAnswer & { followUps?: string[] }).followUps ?? []
+  const followId = useId()
   return (
-    <article className="flex flex-col gap-5">
-      <p className="ml-auto max-w-[85%] rounded-2xl rounded-br-md bg-primary px-4 py-3 text-base leading-relaxed whitespace-pre-line text-primary-foreground">
-        {exchange.question}
-      </p>
-      <div className="flex gap-3 sm:gap-4">
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary">
-          <Sparkle size={18} weight="fill" aria-hidden="true" className="text-primary" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-primary">{t('AI answer')}</p>
-          <SafeHtml html={exchange.answer.answer} className="mt-1.5 text-base leading-relaxed whitespace-pre-line [&>p+p]:mt-4" />
-          {sources.length ? (
-            <div className="mt-5 rounded-xl border border-border bg-surface px-4 pt-0.5 pb-4">
-              <Sources sources={sources} />
-            </div>
-          ) : (
-            <p className="mt-4 text-sm text-muted-foreground">{t('No story on AgroTrends matched, so this answer is general advice.')}</p>
-          )}
-          <p className="mt-4 flex items-start gap-2 text-sm text-muted-foreground">
-            <Warning size={16} aria-hidden="true" className="mt-0.5 shrink-0" />
-            {t('Written by AI, not checked by an expert. Check the sources before you act on it.')}
-          </p>
-        </div>
+    <article className="flex flex-col gap-5 border-b border-border pb-8 last:border-b-0">
+      <div>
+        <p className="flex items-center gap-1.5 text-xs font-semibold text-primary">
+          <Sparkle size={14} weight="fill" aria-hidden="true" />
+          {t('AI advisor')}
+        </p>
+        <h2 className="mt-1.5 font-serif text-xl leading-snug font-semibold whitespace-pre-line sm:text-2xl">{exchange.question}</h2>
+      </div>
+      {sources.length ? (
+        <Sources sources={sources} layout="cards" />
+      ) : (
+        <p className="text-sm text-muted-foreground">{t('No story on AgroTrends matched, so this answer is general advice.')}</p>
+      )}
+      <div>
+        <p className="flex items-center gap-1.5 text-sm font-semibold text-primary">
+          <Sparkle size={16} weight="fill" aria-hidden="true" />
+          {t('AI answer')}
+        </p>
+        <SafeHtml html={withCitations(exchange.answer.answer, sources.length)} className="mt-2 text-base leading-relaxed whitespace-pre-line [&_sup]:ml-0.5 [&_sup]:rounded-md [&_sup]:bg-surface [&_sup]:px-1.5 [&_sup]:py-px [&_sup]:text-[0.6875rem] [&_sup]:font-bold [&_sup]:text-primary [&>p+p]:mt-4" />
+        <p className="mt-4 flex items-start gap-2 text-sm text-muted-foreground">
+          <Warning size={16} aria-hidden="true" className="mt-0.5 shrink-0" />
+          <span>
+            {t('Written by AI, not checked by an expert. Check the sources before you act on it.')}{' '}
+            {/* Publishing works from the history, where each answer has its id. */}
+            <Link to="/advisor/history" className="font-medium text-primary underline-offset-4 hover:underline">
+              {t('Ask the experts to check it')}
+            </Link>
+          </span>
+        </p>
+        {followUps.length > 0 && (
+          <section aria-labelledby={followId} className="mt-6">
+            <h3 id={followId} className="font-sans text-sm font-semibold">
+              {t('Ask next')}
+            </h3>
+            <ul className="mt-2 border-t border-border">
+              {followUps.map((text) => (
+                <li key={text}>
+                  <button type="button" onClick={() => onFollowUp(text)} className="flex w-full items-center justify-between gap-3 border-b border-border py-3 text-left text-sm hover:text-primary">
+                    {text}
+                    <ArrowRight size={16} aria-hidden="true" className="shrink-0 text-muted-foreground" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
       </div>
     </article>
   )

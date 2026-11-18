@@ -12,7 +12,7 @@ import { Spinner } from '../../ui/Spinner'
 import { useSession } from '../auth/session'
 import { useRequireSignIn } from '../auth/useRequireSignIn'
 import { Composer } from '../threads/Composer'
-import { ReportButton } from '../reports/ReportButton'
+import { PostMenu } from '../threads/PostMenu'
 import { AuthorLine } from './AuthorLine'
 import { VoteControl } from './VoteControl'
 
@@ -30,10 +30,13 @@ export function Answers({ questionId, askerId }: { questionId: number; askerId?:
   const list = answers.data ?? []
 
   return (
-    <section aria-labelledby={headingId} className="mt-12">
-      <h2 id={headingId} className="text-xl">
-        {answers.data ? t(list.length === 1 ? '{n} answer' : '{n} answers', { n: formatNumber(list.length) }) : t('Answers')}
-      </h2>
+    <section aria-labelledby={headingId} className="mt-10">
+      <div className="flex items-baseline justify-between gap-3 border-b border-border pb-3">
+        <h2 id={headingId} className="text-xl">
+          {answers.data ? t(list.length === 1 ? '{n} answer' : '{n} answers', { n: formatNumber(list.length) }) : t('Answers')}
+        </h2>
+        {list.length > 1 && <p className="text-sm text-muted-foreground">{t('Accepted first, then by votes')}</p>}
+      </div>
       {answers.isPending ? (
         <div className="py-8 text-muted-foreground">
           <Spinner label={t('Loading')} />
@@ -45,7 +48,7 @@ export function Answers({ questionId, askerId }: { questionId: number; askerId?:
       ) : list.length === 0 ? (
         <p className="py-6 text-muted-foreground">{t('No answers yet. If you have grown this, your answer helps.')}</p>
       ) : (
-        <ol className="mt-4 border-b border-border">
+        <ol className="flex flex-col">
           {list.map((answer) => (
             <li key={answer.answerId}>
               <AnswerCard questionId={questionId} answer={answer} asker={user?.id != null && user.id === askerId} />
@@ -54,7 +57,7 @@ export function Answers({ questionId, askerId }: { questionId: number; askerId?:
         </ol>
       )}
       <div id="your-answer" className="mt-10 scroll-mt-24">
-        <div className="rounded-xl bg-surface p-4 sm:p-5">
+        <div className="rounded-xl border border-border bg-card p-4 sm:p-6">
           {status === 'signed-in' ? (
             <Composer
               label={t('Your answer')}
@@ -84,7 +87,14 @@ function AnswerCard({ questionId, answer, asker }: { questionId: number; answer:
   const myVotes = useMyVotes(questionId, status === 'signed-in')
   const requireSignIn = useRequireSignIn()
   const [open, setOpen] = useState(false)
-  const [replying, setReplying] = useState(false)
+  // Who the open reply box answers: the answer itself, or one of its replies (two levels, like Facebook).
+  const [replyTo, setReplyTo] = useState<Answer | null>(null)
+  const replying = replyTo != null
+  const reply = (to: Answer) =>
+    requireSignIn(() => {
+      setOpen(true)
+      setReplyTo(to)
+    })
   const repliesId = useId()
   const replies = useAnswerReplies(id, open)
   const write = useAnswerWrite(questionId)
@@ -93,13 +103,20 @@ function AnswerCard({ questionId, answer, asker }: { questionId: number; answer:
     <article
       id={`answer-${id}`}
       aria-label={t('Answer by {name}', { name: answer.authorName ?? '' })}
-      className={cn('flex scroll-mt-24 gap-2 border-t border-border py-6 sm:gap-4', answer.accepted && 'border-l-[3px] border-l-mustard pl-2 sm:pl-3')}
+      className={cn(
+        'flex scroll-mt-24 gap-3 sm:gap-4',
+        // The accepted answer is the one to read first: a mustard card with a wash at its top, as well as the label;
+        // the others are plain rows divided by hairlines.
+        answer.accepted
+          ? 'my-4 rounded-xl border border-mustard bg-[linear-gradient(var(--color-mustard-soft),var(--color-card)_5rem)] p-4 sm:p-5'
+          : 'border-b border-border py-6',
+      )}
     >
       <VoteControl target="answers" id={id} score={answer.score ?? 0} myVote={myVotes.data?.answers?.[String(id)]} own={user?.id != null && user.id === answer.userId} />
       <div className="min-w-0 flex-1">
         {answer.accepted && (
           <p className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-mustard-soft px-3 py-1 text-sm font-medium">
-            <CheckCircle size={16} weight="fill" className="text-mustard" aria-hidden="true" />
+            <CheckCircle size={16} weight="fill" className="text-mustard-ink" aria-hidden="true" />
             {t('Accepted by the asker')}
           </p>
         )}
@@ -108,27 +125,21 @@ function AnswerCard({ questionId, answer, asker }: { questionId: number; answer:
           item={answer}
           actions={
             <>
-              <Button
-                variant="quiet"
-                size="sm"
-                aria-expanded={open}
-                aria-controls={repliesId}
-                onClick={() => setOpen((value) => !value)}
-              >
-                {open ? t('Hide replies') : t('Show replies')}
-              </Button>
-              {asker && <AcceptButton questionId={questionId} answerId={id} accepted={Boolean(answer.accepted)} />}
-              {!replying && (
+              {/* Nothing to open at 0 replies (Reply opens the thread instead); the count from 4.28 on. */}
+              {(answer.replyCount !== 0 || open) && (
                 <Button
                   variant="quiet"
                   size="sm"
-                  onClick={() =>
-                    requireSignIn(() => {
-                      setOpen(true)
-                      setReplying(true)
-                    })
-                  }
+                  aria-expanded={open}
+                  aria-controls={repliesId}
+                  onClick={() => setOpen((value) => !value)}
                 >
+                  {open ? t('Hide replies') : repliesLabel(t, answer.replyCount)}
+                </Button>
+              )}
+              {asker && <AcceptButton questionId={questionId} answerId={id} accepted={Boolean(answer.accepted)} />}
+              {replyTo?.answerId !== id && (
+                <Button variant="quiet" size="sm" onClick={() => reply(answer)}>
                   {t('Reply')}
                 </Button>
               )}
@@ -147,27 +158,40 @@ function AnswerCard({ questionId, answer, asker }: { questionId: number; answer:
               <p className="text-sm text-muted-foreground">{t('No replies yet.')}</p>
             ) : (
               <ol className="flex flex-col gap-5">
-                {replies.data.map((reply) => (
-                  <li key={reply.answerId}>
-                    <article aria-label={t('Reply by {name}', { name: reply.authorName ?? '' })}>
-                      <Post questionId={questionId} item={reply} compact />
+                {replies.data.map((each) => (
+                  <li key={each.answerId}>
+                    <article aria-label={t('Reply by {name}', { name: each.authorName ?? '' })}>
+                      <Post
+                        questionId={questionId}
+                        item={each}
+                        compact
+                        actions={
+                          replyTo?.answerId !== each.answerId && (
+                            <Button variant="quiet" size="sm" onClick={() => reply(each)}>
+                              {t('Reply')}
+                            </Button>
+                          )
+                        }
+                      />
                     </article>
                   </li>
                 ))}
               </ol>
             )}
-            {replying && status === 'signed-in' && (
+            {replyTo && status === 'signed-in' && (
               <div className="mt-4">
                 <Composer
-                  label={t('Reply to {name}', { name: answer.authorName ?? '' })}
+                  key={replyTo.answerId}
+                  label={t('Reply to {name}', { name: replyTo.authorName ?? '' })}
+                  initial={replyTo.answerId === id ? '' : `@${replyTo.authorName ?? ''} `}
                   submitLabel={t('Reply')}
                   doneLabel={t('Reply posted')}
                   focusOnOpen
                   pending={write.isPending}
                   error={write.isError ? write.error : null}
-                  onSubmit={(content, done) => write.mutate({ action: 'reply', answerId: id, content }, { onSuccess: done })}
-                  onCancel={() => setReplying(false)}
-                  onDone={() => setReplying(false)}
+                  onSubmit={(content, done) => write.mutate({ action: 'reply', answerId: replyTo.answerId ?? id, content }, { onSuccess: done })}
+                  onCancel={() => setReplyTo(null)}
+                  onDone={() => setReplyTo(null)}
                 />
               </div>
             )}
@@ -192,7 +216,7 @@ function AcceptButton({ questionId, answerId, accepted }: { questionId: number; 
         onClick={() => accept.mutate({ answerId, accept: !accepted })}
         className={accepted ? 'text-foreground' : undefined}
       >
-        <CheckCircle size={18} weight={accepted ? 'fill' : 'regular'} className={accepted ? 'text-mustard' : undefined} aria-hidden="true" />
+        <CheckCircle size={18} weight={accepted ? 'fill' : 'regular'} className={accepted ? 'text-mustard-ink' : undefined} aria-hidden="true" />
         {accepted ? t('Accepted') : t('Accept answer')}
       </Button>
       {accept.isError && (
@@ -216,15 +240,26 @@ function Post({ questionId, item, compact = false, actions }: { questionId: numb
 
   return (
     <>
-      <header>
-        <AuthorLine
-          userId={item.userId}
-          name={item.authorName}
-          reputation={compact ? undefined : item.authorReputation}
-          badges={item.authorBadges}
-          meta={`${storyDate(item.createdAt)}${edited ? ` · ${t('edited')}` : ''}`}
-          size={compact ? 'sm' : 'md'}
-        />
+      <header className="flex items-start gap-2">
+        <div className="min-w-0 flex-1">
+          <AuthorLine
+            userId={item.userId}
+            name={item.authorName}
+            reputation={compact ? undefined : item.authorReputation}
+            badges={item.authorBadges}
+            meta={`${storyDate(item.createdAt)}${edited ? ` · ${t('edited')}` : ''}`}
+            size={compact ? 'sm' : 'md'}
+          />
+        </div>
+        {mode === 'view' && (
+          <PostMenu
+            own={own}
+            what={compact ? t('this reply') : t('this answer')}
+            report={{ targetType: 'ANSWER', targetId: id }}
+            onEdit={() => setMode('edit')}
+            onDelete={() => setMode('confirm-delete')}
+          />
+        )}
       </header>
       {mode === 'edit' ? (
         <div className="mt-3">
@@ -242,26 +277,10 @@ function Post({ questionId, item, compact = false, actions }: { questionId: numb
           />
         </div>
       ) : (
-        <SafeHtml html={item.content} className={compact ? 'mt-1.5 text-base whitespace-pre-line' : 'mt-3 text-base leading-relaxed whitespace-pre-line [&>p+p]:mt-3'} />
+        <SafeHtml html={item.content} className={cn('post-body whitespace-pre-line sm:text-base', compact ? 'mt-1.5' : 'mt-3')} />
       )}
-      {mode === 'view' && (
-        // One row: the answer's own actions first, then report or the owner's edit and delete, kept quiet.
-        <div className="mt-2 -ml-3 flex flex-wrap items-center gap-1">
-          {actions}
-          {own ? (
-            <>
-              <Button variant="quiet" size="sm" onClick={() => setMode('edit')}>
-                {t('Edit')}
-              </Button>
-              <Button variant="quiet" size="sm" onClick={() => setMode('confirm-delete')}>
-                {t('Delete')}
-              </Button>
-            </>
-          ) : (
-            <ReportButton targetType="ANSWER" targetId={id} what={compact ? t('this reply') : t('this answer')} />
-          )}
-        </div>
-      )}
+      {/* The conversation's own actions stay in view; edit, delete and report wait in the menu above. */}
+      {mode === 'view' && actions && <div className="mt-2 -ml-3 flex flex-wrap items-center gap-1">{actions}</div>}
       {mode === 'confirm-delete' && (
         <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
           <span>{t('Delete this answer?')}</span>
@@ -280,4 +299,9 @@ function Post({ questionId, item, compact = false, actions }: { questionId: numb
       )}
     </>
   )
+}
+
+function repliesLabel(t: ReturnType<typeof useT>, count: number | undefined) {
+  if (count == null) return t('Show replies')
+  return count === 1 ? t('Show 1 reply') : t('Show {n} replies', { n: formatNumber(count) })
 }

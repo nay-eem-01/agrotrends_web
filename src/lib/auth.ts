@@ -13,6 +13,29 @@ export function isEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())
 }
 
+/** Spaces and dashes out: "+880 1712-345678" -> "+8801712345678". */
+export function compactPhone(value: string): string {
+  return value.trim().replace(/[\s-]/g, '')
+}
+
+/**
+ * A phone number the backend can read: "+8801712345678", or a Bangladeshi number without the code ("01712345678",
+ * which it reads as +880). Spaces and dashes are allowed.
+ */
+export function isPhone(value: string): boolean {
+  return /^(\+\d{1,4}\d{6,14}|0\d{9,11})$/.test(compactPhone(value))
+}
+
+/** What sign-in sends: the e-mail as typed (trimmed), or the phone number without spaces and dashes. */
+export function signInIdentifier(value: string): string {
+  return isEmail(value) ? value.trim() : compactPhone(value)
+}
+
+/** "+880" and "1712345678" -> "+8801712345678" (how the backend stores and shows it). */
+export function joinPhone(countryCode: string, mobileNumber: string): string {
+  return compactPhone(countryCode) + compactPhone(mobileNumber).replace(/^0/, '')
+}
+
 /** "rice, jute ,, soil health" -> ["rice", "jute", "soil health"] */
 export function splitList(value: string): string[] {
   return value
@@ -45,4 +68,14 @@ export function splitMobile(mobile: string | undefined): { countryCode: string; 
   const value = (mobile ?? '').trim()
   if (value.startsWith('+880')) return { countryCode: '+880', mobileNumber: value.slice(4) }
   return { countryCode: '', mobileNumber: value }
+}
+
+/**
+ * Writes need a confirmed e-mail or phone. True while the account has a contact and none of them is confirmed
+ * (false while the session has no confirmation state, so nothing nags before it loads).
+ */
+export function needsConfirmation(user: { email?: string; mobileNumber?: string; emailVerified?: boolean; phoneVerified?: boolean } | null): boolean {
+  if (!user || (!user.email && !user.mobileNumber)) return false
+  if (user.emailVerified === true || user.phoneVerified === true) return false
+  return (user.email ? user.emailVerified === false : true) && (user.mobileNumber ? user.phoneVerified === false : true)
 }

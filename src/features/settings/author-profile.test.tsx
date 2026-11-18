@@ -126,7 +126,7 @@ test('removing the photo saves without one', async () => {
   await userEvent.click(profileSection.getByRole('button', { name: 'Save profile' }))
 
   await profileSection.findByText('Profile saved')
-  expect(JSON.parse(call('PUT /api/authors/me')!.body as string)).not.toHaveProperty('profileImageUrl')
+  expect(JSON.parse(call('PUT /api/authors/me')!.body as string)).toHaveProperty('profileImageUrl', '')
 })
 
 test('designation and specialities are required', async () => {

@@ -1,4 +1,4 @@
-import { X } from '@phosphor-icons/react'
+import { Plus, X } from '@phosphor-icons/react'
 import { useId, useState, type KeyboardEvent } from 'react'
 import { useTags } from '../../api/topics'
 import { useT } from '../../lib/i18n'
@@ -7,8 +7,11 @@ import { useT } from '../../lib/i18n'
 export const MAX_TAGS = 5
 const MAX_TAG_LENGTH = 40
 
-/** Tags as chips: Enter or comma adds one; suggestions come from existing topics. */
-export function TagInput({ tags, onChange }: { tags: string[]; onChange: (tags: string[]) => void }) {
+/**
+ * Tags as chips: Enter or comma adds one; suggestions come from existing topics. With `popular`, the most used tags
+ * are offered before anything is typed, so a tag can be one tap.
+ */
+export function TagInput({ tags, onChange, popular = false }: { tags: string[]; onChange: (tags: string[]) => void; popular?: boolean }) {
   const t = useT()
   const [text, setText] = useState('')
   const q = text.trim().toLowerCase()
@@ -35,9 +38,9 @@ export function TagInput({ tags, onChange }: { tags: string[]; onChange: (tags: 
   return (
     <div className="flex flex-col gap-1.5">
       <label htmlFor={inputId} className="text-sm font-medium">
-        {t('Tags')}
+        {t('Tags')} {popular && <span className="font-normal text-muted-foreground">{t('(optional)')}</span>}
       </label>
-      <div className="flex min-h-11 flex-wrap items-center gap-2 rounded-lg border border-input bg-card px-2 py-1.5 transition-[border-color,box-shadow] duration-150 focus-within:border-primary focus-within:ring-[3px] focus-within:ring-ring/60 hover:border-foreground/60">
+      <div className="flex min-h-11 flex-wrap items-center gap-2 rounded-[1.375rem] border border-input bg-card px-2 py-1.5 transition-[border-color,box-shadow] duration-150 focus-within:border-primary focus-within:ring-[3px] focus-within:ring-ring/60 hover:border-subtle">
         {tags.map((tag) => (
           <span key={tag} className="inline-flex h-8 items-center gap-1 rounded-full bg-secondary pr-1 pl-3 text-sm text-secondary-foreground">
             {tag}
@@ -54,18 +57,25 @@ export function TagInput({ tags, onChange }: { tags: string[]; onChange: (tags: 
           onKeyDown={onKeyDown}
           onBlur={() => add(text)}
           aria-describedby={hintId}
-          placeholder={full ? '' : tags.length ? t('Add another') : t('rice, pest control…')}
+          placeholder={full ? '' : tags.length ? t('Add another') : popular ? t('tilapia, rice blast, cattle feed…') : t('rice, pest control…')}
           className="h-8 min-w-32 flex-1 bg-transparent px-1.5 text-base placeholder:text-muted-foreground/80 focus:outline-none"
         />
       </div>
       <p id={hintId} className="text-sm text-muted-foreground">
         {full ? t("That's the most you can add ({n}).", { n: MAX_TAGS }) : t('Up to {n}. Press Enter after each.', { n: MAX_TAGS })}
       </p>
-      {q && !full && suggestions.length > 0 && (
-        <ul aria-label={t('Suggested tags')} className="flex flex-wrap gap-2">
+      {(q || popular) && !full && suggestions.length > 0 && (
+        <ul aria-label={q ? t('Suggested tags') : t('Popular tags')} className="flex flex-wrap gap-2">
           {suggestions.map((tag) => (
             <li key={tag}>
-              <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => add(tag)} className="h-8 rounded-full border border-border-strong px-3 text-sm transition-colors duration-150 hover:bg-secondary">
+              <button
+                type="button"
+                aria-label={t('Add tag {tag}', { tag })}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => add(tag)}
+                className="inline-flex h-8 items-center gap-1 rounded-full border border-dashed border-border-strong pr-3 pl-2 text-sm text-muted-foreground transition-[color,background-color,border-color,transform] duration-150 ease-(--ease-out) hover:border-primary/50 hover:bg-surface hover:text-foreground active:scale-[0.97]"
+              >
+                <Plus size={14} aria-hidden="true" />
                 {tag}
               </button>
             </li>

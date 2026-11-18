@@ -4,7 +4,7 @@ import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { clearSession } from '../../api/client'
 import App from '../../App'
 import { envelope, mockApi, page } from '../../test/api'
-import { pickOption, renderWithProviders } from '../../test/render'
+import { renderWithProviders } from '../../test/render'
 
 function signedIn() {
   localStorage.setItem('agrotrends.refreshToken', 'r0')
@@ -52,7 +52,7 @@ test('an application is checked, then sent with topics, field, credential and pr
   await userEvent.click(screen.getByRole('checkbox', { name: 'Livestock' }))
   await userEvent.type(screen.getByLabelText('Your field'), 'Veterinarian')
   await userEvent.type(screen.getByLabelText('Institution or workplace'), 'DLS')
-  await pickOption(screen.getByLabelText('Your proof is a'), 'Professional licence')
+  await userEvent.click(screen.getByRole('radio', { name: 'Professional licence' }))
   await userEvent.upload(screen.getByLabelText('Add a photo', { selector: 'input' }), new File(['x'], 'licence.webp', { type: 'image/webp' }))
   await screen.findByRole('img', { name: 'Photo 1' })
   await userEvent.type(screen.getByLabelText('Link 1'), 'ftp://nope')
@@ -106,4 +106,20 @@ test('settings shows the status card, or the way to apply', async () => {
   renderWithProviders(<App />, '/settings')
   expect(await screen.findByRole('heading', { name: 'You are a verified expert' })).toBeInTheDocument()
   await waitFor(() => expect(screen.getByRole('link', { name: 'Apply again' })).toHaveAttribute('href', '/experts/apply'))
+})
+
+test('the page says why to apply and what happens next, and the proof type is one tap', async () => {
+  mockApi({ ...signedIn(), ...categories, 'GET /api/experts/applications/me': () => envelope(200, page([])) })
+  renderWithProviders(<App />, '/experts/apply')
+
+  expect(await screen.findByRole('heading', { level: 1, name: 'Become a verified expert' })).toBeInTheDocument()
+  const next = screen.getByRole('heading', { name: 'What happens next' }).nextElementSibling as HTMLElement
+  expect(within(next).getAllByRole('listitem').map((step) => step.textContent)).toEqual([
+    '1Send your applicationAbout three minutes',
+    '2An admin looks at your proofThey may approve some of your topics',
+    '3Your badge appearsWe send you a notification',
+  ])
+  const proof = within(await screen.findByRole('group', { name: 'Your proof is a' }))
+  await userEvent.click(proof.getByRole('radio', { name: 'Degree certificate' }))
+  expect(proof.getByRole('radio', { name: 'Degree certificate' })).toBeChecked()
 })

@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useGoogleSignIn } from '../../api/auth'
 import { errorMessage } from '../../api/errors'
-import { useT } from '../../lib/i18n'
+import { useLang, useT } from '../../lib/i18n'
 import { FormError } from './AuthPage'
 import { useSession } from './session'
 
@@ -32,7 +32,7 @@ function loadGoogle(): Promise<GoogleIdentity> {
   })
 }
 
-/** "Continue with Google" under the sign-in and sign-up forms; nothing at all without a client id. */
+/** "Continue with Google" above the sign-in and sign-up forms, then "or"; nothing at all without a client id. */
 export function GoogleSignIn({ next }: { next: string }) {
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined
   if (!clientId) return null
@@ -41,6 +41,7 @@ export function GoogleSignIn({ next }: { next: string }) {
 
 function GoogleButton({ clientId, next }: { clientId: string; next: string }) {
   const t = useT()
+  const lang = useLang()
   const slot = useRef<HTMLDivElement>(null)
   const session = useSession()
   const navigate = useNavigate()
@@ -67,7 +68,9 @@ function GoogleButton({ clientId, next }: { clientId: string; next: string }) {
             })
           },
         })
-        identity.renderButton(slot.current, { theme: 'outline', size: 'large', shape: 'pill', text: 'continue_with', width: 320 })
+        // In the page's language, not the browser's; redrawn when the reader switches.
+        slot.current.replaceChildren()
+        identity.renderButton(slot.current, { theme: 'outline', size: 'large', shape: 'pill', text: 'continue_with', width: 320, locale: lang })
       })
       .catch(() => {
         // No Google button (blocked or offline); e-mail sign-in still works.
@@ -75,13 +78,13 @@ function GoogleButton({ clientId, next }: { clientId: string; next: string }) {
     return () => {
       active = false
     }
-  }, [clientId])
+  }, [clientId, lang])
 
   return (
-    <div className="mt-6 flex flex-col gap-3">
-      <p className="text-center text-sm text-muted-foreground">{t('or')}</p>
+    <div className="mb-6 flex flex-col gap-4">
       <div ref={slot} className="flex min-h-11 justify-center" />
       <FormError message={google.isError ? errorMessage(google.error) : null} />
+      <p className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 text-sm text-muted-foreground before:h-px before:bg-border after:h-px after:bg-border">{t('or')}</p>
     </div>
   )
 }

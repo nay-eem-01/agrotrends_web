@@ -1,0 +1,81 @@
+[
+ {
+  "mode": "redesign",
+  "depth": "full",
+  "scope": "page",
+  "prompt": "About page of a Bangladeshi farming Q&A site; job: trust for first-time askers and expert recruits",
+  "shape": "Long Document with a steps diagram",
+  "theme": "locked: docs/DESIGN.md (Paddy Field)",
+  "hero": "Banner",
+  "nav": "project top bar and sidebar (kept)",
+  "footer": "project footer (kept)",
+  "imagery": "none; the product trust marks",
+  "photos": [],
+  "entry": "/about",
+  "sections": [
+   "Banner header",
+   "How an answer gets checked (steps with marks)",
+   "Why we started (head beside statement and text)",
+   "What you can do here (rows)",
+   "Verified experts | Who we are (split)",
+   "Talk to us (address large)"
+  ],
+  "signature": "the answer-checking steps drawn with the product trust marks",
+  "waived": [
+   "44c",
+   "77",
+   "49b"
+  ],
+  "fingerprint": {
+   "shape": "long-document-steps",
+   "hero": "Banner",
+   "nav": "shell",
+   "footer": "shell",
+   "imagery": "none",
+   "lead": "steps"
+  },
+  "axes": {
+   "palette": "locked",
+   "type": "locked"
+  },
+  "date": "2026-11-03"
+ },
+ {
+  "mode": "redesign",
+  "depth": "full",
+  "scope": "page",
+  "prompt": "Discover, the visitor home of a Bangladeshi farming Q&A site; job: ask a question",
+  "shape": "Counter-led feed",
+  "theme": "locked: docs/DESIGN.md (Paddy Field)",
+  "hero": "Counter",
+  "nav": "project top bar and sidebar (kept)",
+  "footer": "project footer (kept)",
+  "imagery": "none; the product ask box",
+  "photos": [],
+  "entry": "/",
+  "sections": [
+   "Hero (ask box + private advisor)",
+   "Help a farmer today (rows of unanswered, when any)",
+   "What farmers are asking (index at the feed measure)",
+   "From the field (feature + compact stories)",
+   "Footer"
+  ],
+  "signature": "the question box that carries what is typed into the ask form",
+  "waived": [
+   "49b"
+  ],
+  "fingerprint": {
+   "shape": "counter-feed",
+   "hero": "Counter",
+   "nav": "shell",
+   "footer": "shell",
+   "imagery": "none",
+   "lead": "form"
+  },
+  "axes": {
+   "palette": "locked",
+   "type": "locked"
+  },
+  "date": "2026-11-03"
+ }
+]

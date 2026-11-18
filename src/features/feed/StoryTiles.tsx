@@ -1,4 +1,4 @@
-import { HandsClapping } from '@phosphor-icons/react'
+import { HandsClapping, Sparkle } from '@phosphor-icons/react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { cn } from 'cn'
@@ -48,6 +48,12 @@ function Meta({ story, className }: { story: StorySummary; className?: string })
         <span className="inline-flex items-center gap-1" aria-label={`${claps} claps`}>
           <HandsClapping size={14} aria-hidden="true" />
           {formatNumber(claps)}
+        </span>
+      )}
+      {(story.citedCount ?? 0) > 0 && (
+        <span className="inline-flex items-center gap-1">
+          <Sparkle size={14} aria-hidden="true" />
+          {t('Cited in {n} AI answers', { n: formatNumber(story.citedCount ?? 0) })}
         </span>
       )}
       {crop && (
@@ -101,7 +107,7 @@ export function StoryFeature({ story }: { story: StorySummary }) {
             {story.title}
           </Link>
         </h2>
-        {story.excerpt && <p className="line-clamp-3 font-serif text-lg leading-relaxed text-muted-foreground">{story.excerpt}</p>}
+        {(story.subtitle || story.excerpt) && <p className="line-clamp-3 font-serif text-lg leading-relaxed text-muted-foreground">{story.subtitle || story.excerpt}</p>}
         <div className="mt-1 flex items-center gap-3">
           <Byline story={story} />
         </div>
@@ -128,7 +134,7 @@ export function StoryTile({ story }: { story: StorySummary }) {
           {story.title}
         </Link>
       </h3>
-      {story.excerpt && <p className="line-clamp-2 text-sm leading-relaxed text-muted-foreground">{story.excerpt}</p>}
+      {(story.subtitle || story.excerpt) && <p className="line-clamp-2 text-sm leading-relaxed text-muted-foreground">{story.subtitle || story.excerpt}</p>}
       <div className="mt-auto flex items-end justify-between gap-2 pt-1">
         <div className="flex min-w-0 flex-col gap-1.5">
           <Byline story={story} />

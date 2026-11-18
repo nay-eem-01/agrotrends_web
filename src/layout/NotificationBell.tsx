@@ -68,7 +68,8 @@ function Panel({ id, hasUnread, onClose }: { id: string; hasUnread: boolean; onC
       id={id}
       aria-label={t('Notifications')}
       // Grows out of the bell (top right) and fades in: an entrance answering the click, under 200ms.
-      className="absolute right-0 z-30 mt-1 w-[min(22rem,calc(100vw-2rem))] origin-top-right rounded-xl bg-popover text-popover-foreground shadow-lg ring-1 ring-border transition-[opacity,transform] duration-150 ease-(--ease-out) starting:scale-95 starting:opacity-0"
+      // Phones: the avatar sits right of the bell, so the panel spans the screen under the bar instead of hanging off it.
+      className="fixed inset-x-4 top-16 z-30 origin-top-right sm:absolute sm:inset-x-auto sm:top-auto sm:right-0 sm:mt-1 sm:w-88 rounded-xl bg-popover text-popover-foreground shadow-lg ring-1 ring-border transition-[opacity,transform] duration-150 ease-(--ease-out) starting:scale-95 starting:opacity-0"
     >
       <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-2">
         <h2 className="font-sans text-sm font-semibold">{t('Notifications')}</h2>

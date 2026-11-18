@@ -62,6 +62,8 @@ export function useToggleAuthorFollow() {
       // The author's public profile carries followedByMe and the follower count.
       void queryClient.invalidateQueries({ queryKey: ['authors', authorId], exact: true })
       void queryClient.invalidateQueries({ queryKey: followKeys.authors })
+      // "Experts to follow" carries followedByMe too.
+      void queryClient.invalidateQueries({ queryKey: ['experts', 'list'] })
     },
   })
 }

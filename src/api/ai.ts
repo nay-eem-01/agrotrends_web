@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './client'
 import type { Page, Schemas } from './types'
 
@@ -17,12 +17,26 @@ export type AiHistoryItem = Schemas['AiHistoryItemResponse']
 /** The backend's limit (AppConstants.AI_MAX_QUESTION_LENGTH). */
 export const MAX_ADVISOR_QUESTION = 1000
 
+export type AiAllowance = Schemas['AiAllowanceResponse']
+
 /** Ask the advisor; the answer cites the stories it drew on. 429 at the daily limit, 503 while the AI is down. */
 export function useAskAdvisor() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (question: string) => api<AiAnswer>('/api/ai/ask', { method: 'POST', body: { question } }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['ai', 'history'] }),
+    // Asked or refused at the limit, the count may have moved.
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['ai', 'allowance'] }),
+  })
+}
+
+/** Today's advisor questions: the limit, how many are used since midnight in Dhaka, and when it resets. Signed in. */
+export function useAdvisorAllowance(enabled: boolean) {
+  return useQuery({
+    queryKey: ['ai', 'allowance'],
+    queryFn: ({ signal }) => api<AiAllowance>('/api/ai/allowance', { signal }),
+    enabled,
+    retry: false,
   })
 }
 

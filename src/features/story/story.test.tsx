@@ -40,7 +40,13 @@ test('a story shows its title, author, details and cleaned body', async () => {
 
   expect(await screen.findByRole('heading', { level: 1, name: 'Rice blast and nitrogen' })).toBeInTheDocument()
   expect(screen.getByRole('link', { name: 'Nasrin Akter' })).toHaveAttribute('href', '/authors/1')
-  expect(screen.getByText(/4 min read/)).toHaveTextContent('Crop diseases4 min read · Oct 6')
+  expect(screen.getByText('4 min read · Oct 6')).toBeInTheDocument()
+  expect(screen.getByText('Crop diseases')).toBeInTheDocument()
+  // After Medium: headline, byline and actions come before the cover.
+  const title = screen.getByRole('heading', { level: 1 })
+  const cover = document.querySelector('figure img')
+  expect(cover).not.toBeNull()
+  expect(title.compareDocumentPosition(cover!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   expect(screen.getByRole('heading', { level: 2, name: 'Why it matters' })).toBeInTheDocument()
   expect(screen.getByText('nitrogen', { selector: 'strong' })).toBeInTheDocument()
 
@@ -63,7 +69,7 @@ test('farming context and tags link to filtered lists', async () => {
   expect(within(farming).getByRole('link', { name: /Crop\s*boro rice/ })).toHaveAttribute('href', '/stories?crop=boro+rice')
   expect(within(farming).getByRole('link', { name: /Season\s*Rabi/ })).toHaveAttribute('href', '/stories?season=RABI')
   expect(within(farming).getByRole('link', { name: /Soil\s*Clay loam/ })).toHaveAttribute('href', '/stories?soil=CLAY_LOAM')
-  const tags = screen.getByRole('region', { name: 'Tags' })
+  const tags = screen.getByRole('list', { name: 'Tags' })
   expect(within(tags).getByRole('link', { name: 'rice blast' })).toHaveAttribute('href', '/tags/rice%20blast')
 })
 
@@ -97,4 +103,31 @@ test('an author sees their own draft marked as one', async () => {
   expect(await screen.findByText('Draft — only you can see this')).toBeInTheDocument()
   const read = api.mock.calls.find(([url]) => String(url) === '/api/blogs/slug/draft')!
   expect((read[1]!.headers as Record<string, string>).Authorization).toBe('Bearer a1')
+})
+
+test('the byline offers Follow for the author, as on Medium', async () => {
+  mockApi({
+    'GET /api/blogs/slug/rice-blast-and-nitrogen': () => envelope(200, story),
+    'GET /api/comments/blog/402': () => envelope(200, []),
+    'GET /api/authors/1': () => envelope(200, { authorId: 1, name: 'Nasrin Akter', followerCount: 12, followedByMe: false }),
+  })
+  renderWithProviders(<App />, '/stories/rice-blast-and-nitrogen')
+
+  const title = await screen.findByRole('heading', { level: 1 })
+  const follow = (await screen.findAllByRole('button', { name: 'Follow Nasrin Akter' }))[0]
+  // The first Follow is the byline's, above the story text.
+  expect(title.compareDocumentPosition(follow) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  expect(follow.compareDocumentPosition(screen.getByText(/nitrogen/i, { selector: 'strong' })) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+})
+
+test('the subtitle sits under the title', async () => {
+  mockApi({
+    'GET /api/blogs/slug/rice-blast-and-nitrogen': () => envelope(200, { ...story, subtitle: 'Why split doses beat one big one' }),
+    'GET /api/comments/blog/402': () => envelope(200, []),
+  })
+  renderWithProviders(<App />, '/stories/rice-blast-and-nitrogen')
+
+  const title = await screen.findByRole('heading', { level: 1, name: 'Rice blast and nitrogen' })
+  const subtitle = screen.getByText('Why split doses beat one big one')
+  expect(title.nextElementSibling).toBe(subtitle)
 })

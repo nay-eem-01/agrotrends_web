@@ -1,4 +1,4 @@
-import { screen, within, waitFor } from '@testing-library/react'
+import { fireEvent, screen, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { clearSession } from '../../api/client'
@@ -38,7 +38,7 @@ test('an answer shows with the stories it came from, and the box clears for the 
   const conversation = await screen.findByRole('list', { name: 'This conversation' })
   expect(within(conversation).getByText('When should I transplant aman seedlings?')).toBeInTheDocument()
   expect(within(conversation).getByText('Transplant 25-30 day seedlings in July.')).toBeInTheDocument()
-  expect(within(conversation).getByRole('link', { name: 'Aman transplanting' })).toHaveAttribute('href', '/s/40')
+  expect(within(conversation).getByRole('link', { name: /^Aman transplanting,? ?Story$/ })).toHaveAttribute('href', '/s/40')
   expect(screen.getByLabelText('Ask another question')).toHaveValue('')
   const sent = api.mock.calls.find(([url]) => url === '/api/ai/ask')!
   expect(JSON.parse(sent[1]!.body as string)).toEqual({ question: 'When should I transplant aman seedlings?' })
@@ -114,4 +114,76 @@ test('the counter shows the length, then what is left near the limit', async () 
   await userEvent.click(field)
   await userEvent.paste('a'.repeat(950))
   expect(field).toHaveAccessibleDescription('50 characters left')
+})
+
+test('Enter asks, Shift+Enter adds a line, and nothing is sent while an input method is composing', async () => {
+  const api = mockApi(signedIn(() => envelope(200, { answer: 'Drain the field.', sources: [] })))
+  renderWithProviders(<App />, '/advisor')
+
+  const field = await screen.findByLabelText('Your question')
+  await userEvent.type(field, 'Flooded{Shift>}{Enter}{/Shift}field?')
+  expect(field).toHaveValue('Flooded\nfield?')
+  fireEvent.keyDown(field, { key: 'Enter', isComposing: true })
+  expect(api.mock.calls.some(([url]) => url === '/api/ai/ask')).toBe(false)
+  await userEvent.keyboard('{Enter}')
+  await waitFor(() => expect(api.mock.calls.filter(([url]) => url === '/api/ai/ask')).toHaveLength(1))
+})
+
+test('in the advisor the sources come first, as numbered cards above the answer', async () => {
+  mockApi(signedIn(() => envelope(200, { answer: 'Drain the field.', sources: [{ blogId: 41, title: 'After the flood' }, { type: 'answer', questionId: 7, title: 'Waterlogged aman' }] })))
+  renderWithProviders(<App />, '/advisor')
+
+  await userEvent.type(await screen.findByLabelText(/Your question/), 'Field flooded{Enter}')
+  const sources = await screen.findByRole('region', { name: 'Sources' })
+  const answer = screen.getByText('Drain the field.')
+  expect(sources.compareDocumentPosition(answer) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  expect(within(sources).getByRole('link', { name: /^After the flood,? ?Story$/ })).toHaveAttribute('href', '/s/41')
+  expect(within(sources).getByRole('link', { name: /^Waterlogged aman,? ?Community answer$/ })).toHaveAttribute('href', '/questions/7')
+  expect(screen.getByRole('heading', { name: 'Field flooded' })).toBeInTheDocument()
+})
+
+test('citation markers point at the sources, and a suggested follow-up fills the ask bar', async () => {
+  mockApi(signedIn(() => envelope(200, { answer: 'Low oxygen [1].', sources: [{ blogId: 41, title: 'Oxygen' }], followUps: ['How much lime per decimal?'] })))
+  renderWithProviders(<App />, '/advisor')
+
+  await userEvent.type(await screen.findByLabelText('Your question'), 'Fish gasping{Enter}')
+  expect(await screen.findByLabelText('source 1')).toHaveTextContent('1')
+  const next = screen.getByRole('region', { name: 'Ask next' })
+  await userEvent.click(within(next).getByRole('button', { name: 'How much lime per decimal?' }))
+  expect(screen.getByLabelText('Ask another question')).toHaveValue('How much lime per decimal?')
+})
+
+test('signed in, the advisor shows how many questions are left today and counts again after asking', async () => {
+  let used = 3
+  const api = mockApi({
+    ...signedIn(() => {
+      used += 1
+      return envelope(200, { answer: 'Aerate at dawn.', sources: [] })
+    }),
+    'GET /api/ai/allowance': () => envelope(200, { limit: 10, usedToday: used, resetsAt: '2026-10-09T00:00:00+06:00' }),
+  })
+  renderWithProviders(<App />, '/advisor')
+
+  expect(await screen.findByText('7 of 10 questions left today')).toBeInTheDocument()
+  await userEvent.type(screen.getByLabelText('Your question'), 'Fish gasping at dawn?')
+  await userEvent.click(screen.getByRole('button', { name: 'Ask' }))
+  expect(await screen.findByText('6 of 10 questions left today')).toBeInTheDocument()
+  expect(api.mock.calls.filter(([url]) => url === '/api/ai/allowance').length).toBeGreaterThanOrEqual(2)
+})
+
+test('with none left, the advisor says when more come', async () => {
+  mockApi({
+    ...signedIn(() => envelope(429, null, "You have reached today's limit of AI questions. Please try again tomorrow.")),
+    'GET /api/ai/allowance': () => envelope(200, { limit: 10, usedToday: 10, resetsAt: '2026-10-08T18:00:00Z' }),
+  })
+  renderWithProviders(<App />, '/advisor')
+
+  expect(await screen.findByText(/^No questions left today\. More at .+\.$/)).toBeInTheDocument()
+})
+
+test('visitors are not asked for an allowance', async () => {
+  const api = mockApi({})
+  renderWithProviders(<App />, '/advisor')
+  await screen.findByRole('button', { name: 'Sign in to ask' })
+  expect(api.mock.calls.some(([url]) => url === '/api/ai/allowance')).toBe(false)
 })

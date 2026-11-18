@@ -5,7 +5,61 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 
 ---
 
+## 2026-11-17 — Staging deployment automation prepared
+
+**Done**
+- Added staging-only GitHub Actions, versioned releases, verified SSH, health probes and deployment rollback scripts.
+- Backend builds on GitHub and deploys an immutable GHCR digest; frontend builds from all three public Vite
+  environment variables, including Google client ID. Backend .env remains on the VM.
+- Added isolated regression checks for successful deploys, bad inputs and failed health checks restoring the old app.
+- Updated deployment instructions for the actual Lightsail/Nginx setup; Azure/Caddy is historical.
+
+**Validation**
+- Four deployment-script regression tests per repo pass; both workflows pass Actionlint, shell syntax and Compose
+  validation pass. Frontend lint/build pass. Full local Java tests are blocked by a missing JDK 21 compiler; the
+  frontend full test run stalled and was stopped. Actions requires the full application checks before deployment.
+
+**Decisions**
+- Nayeem explicitly selected staging as the deploy branch for BOTH repos. Feature → development → staging
+  promotion flow remains; production is not a deployment trigger for now.
+
+**Known limitations**
+- Prepared for review on `chore/staging-deployment`; automation is not activated. Environment variables/secrets,
+  dedicated SSH key, GHCR access and the
+  frontend Nginx symlink need one-time configuration. Real workflow/VM acceptance remains pending.
+- Backup authentication/isolated restore remains unresolved. App rollback does not undo Hibernate schema updates.
+
+
+## 2026-11-16 — Deployment checkpoint and readiness fixes
+
+**Done**
+- Deployment status supplied by Nayeem: Supabase/profile writes, R2 upload/display (`agrotrends-files`), Brevo domain
+  and delivery, Docker build/Supabase/health, and frontend login against Docker are verified.
+- Current host target is Azure; VM, production DNS/HTTPS and monitoring remain pending.
+
+- Added Show/Hide to both password-reset flows and settings password fields using the existing translated component.
+- Clear stale field errors when editing account, sign-up and author profile fields; reset errors revalidate as typed.
+- Photo removal sends an explicit empty URL, so saving it reaches the backend cleanup path.
+
+**Validation**
+- Full Vitest suite: 384/384 tests passed (72 files, two workers).
+- `npm run lint` and `npm run build` passed. The build still reports large chunks and the existing mixed static/dynamic import for AuthorPage.
+- Browser flows against a live Docker backend, R2 and Brevo remain pending; no credentials were used here.
+
+**Decisions**
+- Docker-specific R2 and mail checks remain pending. WSL backup authentication is deferred and unresolved.
+- No successful real backup/restore or production rollout is claimed.
+
+**Known limitations**
+- Cleanup retries are manual if R2 is unavailable; old or abandoned uploads are not swept. Cached image copies may outlive deletion.
+- Old deployment notes below are historical; this checkpoint supersedes their AWS plan and local service status.
+
 ## Where we are
+
+- Lightsail/Nginx/HTTPS and live API health verified by Nayeem. Staging automation is prepared locally; see the
+  2026-11-17 entry and docs/DEPLOY.md. Older Azure/Caddy host instructions are superseded.
+
+- F25 deployment feedback fixes are prepared on `fix/password-form-feedback` for PR into `feat/deployment-fixes-base`, then into `development`. They are not deployed.
 
 - Phases F0–F6 are in `development` (F6.7 notifications moved to F12).
 - 2026-10-14: the backend became Q&A-first (one account type, e-mail confirmation, votes and reputation, verified
@@ -31,17 +85,49 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
   (`feat/smoke-community`) done. Phase F14 is complete: every step of F7–F14 is built.
 - Phase F15 on `feat/redesign-base` (stacked on F14's tip): F15.1 foundation (`feat/redesign-foundation`) F15.2 shell
   (`feat/redesign-shell`) F15.3 advisor (`feat/redesign-advisor`) F15.4 stories (`feat/redesign-stories`) and F15.5
-  questions, Discover and forms (`feat/redesign-discover`) done. Phase F15 is complete.
+  questions, Discover and forms (`feat/redesign-discover`) done. Phase F15 is complete; F7–F15 are merged into
+  `development`, and `staging` was cut from it on 2026-10-17.
+- Phase F16 on `feat/refine-base` (from `development`): F16.1 refinement (`feat/refine-ui`) done.
+- Phase F17 on `feat/admin-dashboard-base` (stacked on F16's tip): F17.0 API types (`feat/api-types-p10`) F17.1
+  overview (`feat/admin-overview`) F17.2 users (`feat/admin-users`) F17.3 member page (`feat/admin-user`) and F17.4
+  roles (`feat/admin-roles`) done. Phase F17 is complete.
+- Phase F18 on `feat/phone-auth-base` (stacked on F17's tip): F18.1 sign-in (`feat/phone-sign-in`) F18.2 sign-up and
+  confirmation (`feat/phone-sign-up`) F18.3 reset (`feat/phone-reset`) and F18.4 settings (`feat/phone-settings`)
+  done. Phase F18 is complete.
+- Phase F19 on `feat/simple-ask-base` (from `development`): F19.1 question vote label (`feat/question-vote-label`)
+  F19.2 one-place ask form (`feat/ask-editor`) and F19.3 composer restyle (`feat/ask-composer`) done. Phase F19 is
+  complete.
+- Phase F20 on `feat/harvest-base` (stacked on F19's tip): F20.1 Harvest tokens (`feat/harvest-tokens`) and F20.2
+  question page (`feat/harvest-question`) and F20.3 white page (`fix/harvest-white-page`) and F20.4 ask form
+  redesign (`feat/ask-redesign`) done. Phase F20 is complete.
+- Phase F21 on `feat/paddy-base` (stacked on F20's tip): F21.1 Paddy Field tokens (`feat/paddy-tokens`) F21.2 shell (`feat/paddy-shell`) F21.3 sign in and sign up (`feat/paddy-auth`) F21.4 expert application (`feat/paddy-expert-apply`) F21.5 profile (`feat/paddy-profile`) F21.6 story editor (`feat/paddy-editor`) F21.7 question page (`feat/paddy-question`) F21.8 AI advisor (`feat/paddy-advisor`) F21.9 feeds (`feat/paddy-feeds`) F21.10 story page (`feat/paddy-story`) done. Phase F21 is complete.
+- Phase F22 on `feat/mock-base` (stacked on F21's tip): F22.1 fields (`feat/mock-fields`) F22.2 home feed (`feat/mock-home`) F22.3 question page (`feat/mock-question`) F22.4 profile (`feat/mock-profile`) F22.5 AI advisor (`feat/mock-advisor`) F22.6 ask page (`feat/mock-ask`) F22.7 story editor (`feat/mock-editor`) F22.8 sign in and sign up (`feat/mock-auth`) F22.9 story page (`feat/mock-story`) F22.10 navigation in the sidebar (`feat/mock-sidebar`) F22.11 search in the bar (`feat/mock-topbar`) F22.12 quieter frame (`feat/mock-chrome`) done. Phase F22 is complete.
+- Phase F23 on `feat/api2-base` (stacked on F22's tip and `fix/google-test`): F23.1 API types (`feat/api2-types`) F23.2 home rail (`feat/api2-home`) F23.3 story subtitle (`feat/api2-stories`) F23.4 profile page and notification (`feat/api2-profile`) F23.5 home tabs (`feat/home-tabs`) F23.6 admin design (`feat/admin-design`) F23.7 about, privacy, terms and footer (`feat/site-pages`) F23.8 faster pages (`perf/faster-pages`) F23.9 profile pictures (`fix/profile-images`) F23.10 footer and home width (`fix/footer-home-width`) F23.11 reply to a reply (`feat/reply-to-reply`) F23.12 answer reply notification (`feat/answer-reply-notification`) done. Phase F23 is complete and merged into `development`.
+- Phase F24 on `feat/audit-base` (from `development`), the audit fixes: F24.1 Ask and Write on phones (`feat/phone-tasks`) F24.2 share (`feat/share`) F24.3 Discover (`feat/discover-hallmark`) F24.4 About (`feat/about-hallmark`) F24.5 small fixes (`fix/audit-small`) done.
+- Phase F24, second half, on `feat/audit2-base` (from `development`, after the backend built B1–B12): F24.9 reply counts and API types (`feat/api3-types`) F24.10 advisor allowance (`feat/ai-allowance`) F24.12 For you (`feat/for-you`) F24.13 e-mail settings (`feat/email-settings`) F24.14 launch test (`feat/launch-metrics`) F24.15 impact and citations (`feat/impact`) F24.16 digest preview (`feat/digest-preview`) F24.18 refresh cookie (`feat/refresh-cookie`) F24.8 share card and preview links (`feat/share-card`) F24.6 where you are (`feat/ask-place`) F24.7 one Ask (`feat/one-ask`) done.
 
 ## Next up
 
-1. **Nayeem:** open and merge the F15 step PRs in order into `feat/redesign-base`, then the base into `development`
-   (after F7–F14).
-2. **Nayeem:** open and merge the F7–F14 step PRs in order (each phase base into `development` after its steps).
-3. Run the admin smoke step (`E2E_ADMIN_EMAIL` / `E2E_ADMIN_PASSWORD`) and the admin screens live once an admin login is at hand.
-4. Merge the backend's Phase 8 so F12–F14 run against its `development`.
+- Configure staging Environments/deploy key/VM prerequisites, land the deployment step through its feature base
+  and development, then promote to staging and verify both automated releases.
+
+- Review and land F25 through the deployment-fixes base, then verify reset, field feedback and saved-image removal against Docker.
+
+- Current deployment: Docker R2/mail checks, unresolved WSL backup authentication, then Azure/DNS/HTTPS/monitoring.
+
+1. **Nayeem:** PR the second half of F24 into `feat/audit2-base` in this order: `feat/api3-types`, `feat/ai-allowance`,
+   `feat/for-you`, `feat/email-settings`, `feat/launch-metrics`, `feat/impact`, `feat/digest-preview`,
+   `feat/refresh-cookie`, `feat/share-card`, `feat/ask-place`, `feat/one-ask`; then the base into `development`.
+2. **Nayeem decides:** B3 (relax the password rule; F24.11 waits) and when to do B11 (follow a question; F24.17).
+3. **Before launch:** restart the dev backend on the merged code (the one on 8080 is older); on the host, either
+   proxy `/share` to the API or set `VITE_SHARE_BASE_URL` to the API's address; check five shared links in
+   Facebook's Sharing Debugger once the site is public.
+4. Pick an SMS provider (backend 10.5): until then phone-only accounts get no codes and no answer e-mails.
+5. Run the admin smoke step (`E2E_ADMIN_EMAIL` / `E2E_ADMIN_PASSWORD`) once an admin login is at hand.
 
 ## Open items
+
+- Automated deployment activation and real VM acceptance remain pending. Real backup/restore remains unresolved.
 
 | Item | Needs | Blocks |
 |---|---|---|
@@ -51,11 +137,1227 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 | Comment endpoints aren't typed in OpenAPI and have no reply counts | backend | — |
 | No per-story "saved by me": the app reads the 100 most recent saves to mark Save buttons | backend: `bookmarkedByMe` | exact saved state for heavy savers |
 | Make `development` the default branch on GitHub and protect it | Nayeem | — |
-| Refresh token comes back in the JSON body, so it has to live in `localStorage` | backend: HttpOnly cookie | — |
 | Gemini chat key rejected on the backend since 2026-10-06 | Nayeem | live checks of AI screens |
 | Profile pages have no public name read: a direct visit shows the name from the user's questions, else "Member" | backend: public user summary | — |
 | The seeded admin's password isn't known here, so admin flows (expert decisions, moderation) are tested with mocks only | Nayeem: an admin login for local checks | live checks of F11.3, F13.2, F13.3 |
 | Local dev: port 8080 is the habit tracker and Postgres 5432 is down; the backend runs on 8081 against the `agrotrends-db` container (5433) | — | — |
+
+---
+
+## 2026-11-04 — Fix: the profile's Impact line becomes tiles (`fix/profile-impact`)
+
+**Done**
+- "Impact Their answers reached 15 readers, their stories cited 4 times." read as one run-on line, said "Their" on
+  your own profile too, and used the advisor's Sparkle. It is now a small card: an "Impact" heading with a trend
+  icon, then a tile per number above zero (Readers reached by answers: eye; Cited in AI answers: quotes; Story
+  citations: article), each a big number under its own icon.
+
+**Decisions**
+- Labels are neutral ("Readers reached by answers", not "Their answers reached…") so they fit your own profile
+  and others'.
+## 2026-11-04 — Fix: the notification panel was cut off on phones (`fix/bell-mobile`)
+
+**Done**
+- The bell's panel hung from the bell's right edge; on a phone the avatar sits to the bell's right, so the panel ran
+  off the left of the screen. Below `sm` it now spans the screen under the top bar (`fixed inset-x-4 top-16`); from
+  `sm` up it hangs from the bell as before.
+
+**Known limitations**
+- Layout only; jsdom has no layout, so no new test. Checked by lint, the layout tests and the build.
+
+## 2026-11-04 — F24.7 One Ask: public or private, chosen when asking (`feat/one-ask`)
+
+**Done**
+- The ask form opens with "Who should answer?": Everyone, in public (the AI answers in seconds, then farmers and
+  agronomists, and a verified expert checks the AI answer) or Only the AI, privately (only you see it; no expert
+  checks it). Two radio cards, the whole card picks.
+- Private needs only the question: topic, place, tags and photos step aside, the button reads "Ask the AI privately",
+  and it opens the advisor with the question in its box. Nothing is posted. An edit has no choice; it stays public.
+- The home composer names both ways by who sees them: "Ask a question in public…" and "Private AI"; the phone's
+  quick action reads "Private AI advice".
+- The advisor says so too: its intro adds "Private: only you see them, and no expert checks them.", and the "not
+  checked" line under each answer links to the history, where Ask the experts publishes it.
+
+**Decisions**
+- The advisor isn't asked straight away on choosing private: it opens with the question filled in, so the reader
+  presses Ask there and sees the daily allowance first.
+- Publishing a live answer needs its id, which only the history has, hence the link rather than a button.
+
+**Known limitations**
+- None.
+
+---
+
+## 2026-11-04 — F24.6 Where you are, on Ask (`feat/ask-place`)
+
+**Done**
+- The ask form has an optional "Where are you?" (a district or upazila, at most 60 characters), sent as the
+  question's `agri.region`, which the questions list already filters on and the question page shows as a chip.
+- A new question starts from your profile's location (F23.4) until you type; an edit starts from the question's own.
+- Changing the place on an edit sends the question's other farming details (crop, season, soil) back as they were,
+  so an older question doesn't lose them; leaving it alone sends no `agri` at all.
+
+**Decisions**
+- One free-text place, not a district picker: the backend stores free text, and a picker of 64 districts and 495
+  upazilas is a later step if places come in too varied to filter on.
+
+**Known limitations**
+- Typing a place on Ask doesn't update your profile's location.
+
+---
+
+## 2026-11-04 — F24.8 Link previews: the share card and /share links (`feat/share-card`)
+
+**Done**
+- Share now shares a question's or story's link-preview page (`/share/questions/{id}`, `/share/stories/{slug}`,
+  backend 4.33), which carries its own title, text and picture for Facebook, WhatsApp and the rest and sends people
+  on to the app. Profiles still share their app address (they have no preview page).
+- `VITE_SHARE_BASE_URL` (in `.env.example`) says where those pages live: empty means this site's own `/share`, which
+  the host proxies to the API like `/api` (Vite does in development); or the API's address, which the backend says
+  works as it is (`https://api.<domain>/share/...`).
+- `public/og-default.png` (1200 x 630), the card a preview falls back to when a post has no picture of its own: the
+  mark and Lora wordmark, "Farming questions, answered by people who grow.", and the three steps an answer goes
+  through with the product's own marks (Unanswered, Not yet checked by an expert, Confirmed by a verified expert),
+  in the Paddy Field colours.
+- Checked against the merged backend: a question's preview page carries `og:title`, `og:description`,
+  `og:image` (this card) and `og:url`, with the app page as canonical.
+
+**Decisions**
+- One designed default card, not a card per question: the backend uses the post's photo or cover when there is
+  one, and a generated image per post (`/share/questions/{id}/image.png`) was left for later in B7.
+
+**Known limitations**
+- Not yet checked with Facebook's Sharing Debugger: that needs the site on a public address.
+
+---
+
+## 2026-11-04 — F24.18 The refresh token leaves localStorage (`feat/refresh-cookie`)
+
+**Done**
+- The refresh token now lives only in the backend's HttpOnly cookie (`agrotrends_refresh`, path `/api/auth`,
+  backend 4.37): the web no longer stores it, and refreshes send no body. `localStorage` keeps `agrotrends.session`,
+  a marker that a session exists, so a reload knows to refresh. Any XSS can no longer read a refresh token.
+- `/api/auth/*` calls go with `credentials: 'include'`, so the cookie also reaches an API on another origin; other
+  calls stay `same-origin`.
+- Moving over: a session from before keeps working. Its stored token is sent once in the body, the cookie is set by
+  that refresh, and the stored token is deleted. Sign-out (remote) clears the cookie; clearing the session here
+  removes the marker.
+- The conventions skill and the open items no longer say the token lives in `localStorage`.
+
+**Decisions**
+- The body's `refreshToken` (still sent by the backend for one release) is ignored, so the backend can drop it any
+  time after this ships.
+
+**Known limitations**
+- The cookie is `SameSite=Strict` (backend decision 12): the web and the API must share a site
+  (`agrotrends.com` and `api.agrotrends.com`) or the web must proxy `/api`.
+
+---
+
+## 2026-11-04 — F24.16 Digest preview for admins (`feat/digest-preview`)
+
+**Done**
+- The admin overview ends with "Weekly digest": when it goes out and to whom, and Preview your digest
+  (`POST /api/admin/digest/preview`, backend 4.36), which opens your own digest in a dialog as the e-mail would be.
+- `api()` takes `html: true` to ask for `text/html` and return the body as text; errors still come as the envelope.
+
+**Decisions**
+- The mail's HTML is shown in a sandboxed frame (no scripts, no same-origin), never inserted into the page, so
+  SafeHtml stays the one way user content reaches the DOM. The frame's document gets a white canvas, as in a mail app.
+
+**Known limitations**
+- The preview is the signed-in admin's own digest; there is no "preview as" another member.
+
+---
+
+## 2026-11-04 — F24.15 What your work did (`feat/impact`)
+
+**Done**
+- Stories the advisor cites say so: "Cited in 12 AI answers" under the byline on the story page and in story lists
+  (`citedCount`, backend 4.35); nothing when it's zero.
+- Profiles add one Impact line under the counts (`GET /api/users/{id}/impact`): the readers their answers reached, the
+  AI answers citing them, and how often their stories were cited, only the parts above zero; no line for someone
+  just starting.
+
+**Decisions**
+- A sentence, not more stat tiles: the four counts above already make a row, and impact reads as a result, not a
+  score.
+
+**Known limitations**
+- The backend caches impact for an hour per instance, so a new citation can take that long to show.
+
+---
+
+## 2026-11-03 — F24.14 The launch test in admin (`feat/launch-metrics`)
+
+**Done**
+- The admin overview opens with "Launch test" (`GET /api/admin/launch-metrics?weeks=8`, backend 4.32): this week's
+  four numbers against PLAN.md's week-8 targets (weekly active askers or answerers, 30; human answer within 24 h,
+  80%; AI answers checked within 48 h, 70%; verified experts, 10), each with its count behind the share and "On
+  target" in words with an icon once met; staff's own share of the activity in one line; then the last eight weeks
+  as a table (a share of no questions is a dash, not 0%).
+- Paying students are said to be counted outside the app, as the plan has it.
+
+**Decisions**
+- Figures and a table, no chart: eight points and four targets read faster as numbers (dataviz: not every job is a
+  chart). Met is told by words and an icon, never by colour; mustard stays for trust marks.
+
+**Known limitations**
+- Admin screens are English-only, as before.
+
+---
+
+## 2026-11-03 — F24.13 E-mail settings, your language, unsubscribe (`feat/email-settings`)
+
+**Done**
+- Settings has an E-mails section (`#emails`): "When someone answers my question" and "A weekly digest", each saved on
+  its own (`PUT /api/user/settings`, backend 4.31), shown at once and put back if refused. Without a confirmed
+  address it says what is missing first.
+- Switching language while signed in also saves `preferredLang`, so e-mails come in it.
+- `/unsubscribed?kind=answer|digest[&error=invalid]`, where an e-mail's unsubscribe link lands: which e-mails
+  stopped, or that the link was bad, and Open settings. Public.
+- Just after asking, the question page says "Posted. We'll e-mail {address} when someone answers." when that will
+  happen (confirmed address, answer e-mails on), otherwise "Answers will show up in your notifications." (B8).
+
+**Decisions**
+- Checkboxes, not switches: the project has no switch component, and a labelled checkbox says the same.
+- The language saved is the one switched to; signing in doesn't yet set the interface from `preferredLang` (the
+  browser's own choice wins on that device).
+
+**Known limitations**
+- The Settings page's other sections are still English-only; the new section is translated.
+
+---
+
+## 2026-11-03 — F24.12 For you, for real (`feat/for-you`)
+
+**Done**
+- The Questions tab's first chip is For you again, now meaning it: questions carrying a tag you follow
+  (`?following=true`, backend 4.30). It is the first view once you follow any tag; All (`?scope=all`) shows every
+  question, and a topic chip shows that topic. Stories keep All and the topics (B4 covers questions only).
+- The default isn't guessed: nothing is read until your followed tags are known, so the feed doesn't load twice.
+- An empty For you says so and offers Follow topics (`/topics`). Following or unfollowing a tag reloads it.
+- Home no longer renders Discover while the session is restoring, so a returning member's first load no longer
+  reads Discover's lists before their own feed.
+
+**Decisions**
+- `scope` stays in the URL only when chosen, so `/` keeps meaning "your default".
+
+**Known limitations**
+- None.
+
+---
+
+## 2026-11-03 — F24.10 The advisor's allowance (`feat/ai-allowance`)
+
+**Done**
+- Signed in, the advisor reads `GET /api/ai/allowance` (backend 4.29) and says "7 of 10 questions left today" under the
+  question box (where the Enter hint was); at none, "No questions left today. More at {time}." in the reader's
+  language. It reads again after every ask, refused or not.
+- Visitors are not asked for it.
+
+**Decisions**
+- Only the advisor's allowance is shown: public questions have their own AI limit, which the backend doesn't report
+  (its decision 6).
+
+**Known limitations**
+- None.
+
+---
+
+## 2026-11-03 — F24.9 Reply counts and the new API types (`feat/api3-types`)
+
+**Done**
+- The backend built `docs/BACKEND_REQUESTS_AUDIT.md` (its DEV_LOG, 2026-11-03: 4.28–4.37) except B3 (the password
+  rule, waiting for Nayeem) and B11 (follow a question, after week 8). `schema.d.ts` is regenerated from it; the
+  hand-written `ANSWER_REPLY` addition in `api/notifications.ts` is gone.
+- Answers say how many replies they have ("Show 2 replies", "Show 1 reply") and show no toggle at 0; Reply still
+  opens the thread to write the first one.
+- Story responses read the replies only of responses that have some, and the heading counts from `replyCount`
+  (one request per response with replies, instead of one per response).
+
+**Decisions**
+- An unknown count (an older backend) behaves as before: "Show replies", and the replies are read.
+
+**Known limitations**
+- The types were generated from the merged backend run on port 8083 from an export, since the dev server on 8080
+  was still the older build.
+
+---
+
+## 2026-11-03 — F24.5 Small honest fixes (`fix/audit-small`)
+
+**Done**
+- Visitors get Ask in the top bar where Write was; members keep Write beside their own Ask.
+- The home feed's empty lists offer what fills them: "No questions yet. Ask the first one." with Ask a question,
+  "No stories yet." with Write a story; "in this topic" only when a topic is chosen.
+- The first topic chip says "All", not "For you", until the feed can follow your topics (B4).
+- The topic chips are one scrolling row at every width, so a long name never sits alone on a second line.
+- Google's button is drawn in the page's language (`locale`) and redrawn when the reader switches.
+
+**Decisions**
+- "All" is the honest name for what the tab shows today; F24.12 brings "For you" back once it is real.
+
+**Known limitations**
+- None.
+
+---
+
+## 2026-11-03 — F24.4 About, a Hallmark redesign (`feat/about-hallmark`)
+
+**Done**
+- Hallmark ran a full redesign of `/about` inside DESIGN.md, the same way as Discover (before record, sweep, a
+  fresh-context review). Sweep: before 3 Floor failures and 3 Reflex, now 0 and 0; 18 of 18 links kept.
+- Every word stays, in both languages, and one composition serves both (`COPY` in `AboutPage.tsx`), so English and
+  Bengali can't drift apart in layout. Typographic apostrophes throughout.
+- New, from the audit: "How an answer gets checked", four steps as a real ordered list (ask in public; the AI answers
+  first with sources, "Not yet checked by an expert"; a verified expert confirms or corrects it, with the product's
+  mustard "Confirmed" mark; people answer and you accept, "Accepted").
+- The steps come straight after the header, so they are on the first screen; each step carries the mark the product
+  uses, at its size (Unanswered, Not yet checked by an expert, Confirmed, Accepted; the product's own Bengali wording).
+- The header leads with See questions; the expert offer comes once, beside the text that explains it. "Why we
+  started" sets its first sentence beside the head; "What you can do here" is four rows; Verified experts (on the
+  leaf wash) sits beside Who we are and What's next; Talk to us sets the address large. Prose at 58 characters.
+- Reviewed in fresh context: 13 findings, 8 resolved, 1 partial, 3 for the team (below), 1 a capture artifact.
+- `MailLink` takes a class, since About's address now sits outside the story typography.
+
+**Decisions**
+- No names, photos or figures for the team: none were given, and Hallmark never invents them.
+
+**Known limitations**
+- For the team: a product-specific line instead of "About us", and less generic heads ("Who we are", "Talk to us");
+  names and photos of the three of you, if you want faces on the page.
+- "What's next" still lists numbered AI citations and following whole topics, which the backend decided not to build
+  (BACKEND_REQUESTS.md §5, §8). The words are the team's, so they stay until the team rewrites that list.
+
+---
+
+## 2026-11-03 — F24.3 Discover, a Hallmark redesign (`feat/discover-hallmark`)
+
+**Done**
+- Hallmark (Nutlope/hallmark, pinned) ran a full redesign of `/` for visitors, inside the locked DESIGN.md system:
+  recorded before, built hero first, swept, and reviewed twice in fresh context (hero review: 4 findings, 4
+  resolved; finish review: 6 findings, 6 resolved). Sweep: before 2 Floor failures and 10 Reflex, now 0 and 0; 36 of
+  37 links kept, the one dropped on record. The stamp and its records are the first lines of `src/index.css`; the
+  build is logged in `.hallmark/log.json` (screenshots and records stay out of git).
+- The first screen is the job: the headline and "An AI answer in seconds, then farmers and agronomists weigh in."
+  beside the ask box ("What's happening on your farm?"). What is typed goes to `/questions/ask?q=…`, through
+  sign-in for visitors, and the ask form splits it into a title and details (`src/lib/askDraft.ts`: first line or
+  first sentence, nothing lost). On phones the box is on the first screen.
+- One advisor offer instead of two: "Or ask the AI advisor privately", a step quieter, with the caution that experts
+  don't check those answers and they can be wrong, this season's questions (now in Bengali too, here and in the
+  advisor) and "Ask the advisor something else". The drawn field scene and the side advisor panel are gone.
+- Claims only what is live: "{n} verified experts check the answers" shows only when the public count is above zero
+  (`usePublicStats({ everywhere: true })`). Today it is 0, so the line is hidden.
+- With no questions, "What farmers are asking" offers to ask the first one with the Ask button. Question rows sit at
+  the 720px feed measure; section heads are Lora 40px from 640px; no arrows glued to links.
+- Found by the sweep and fixed for every page: the top bar's search pill gets the field edge (`input`, 3:1) and the
+  paddy focus outline (its edge was 1.00:1 and the halo too faint); the footer's language and theme switches are 44px
+  tall; html and body clip sideways overflow; the dark dialog scrim is tinted, not pure black; scrollbars themed.
+
+**Decisions**
+- No photographs: the platform has none licensed, and Hallmark's library photos would be stand-ins for farms that
+  aren't ours. The product (the ask box) is the picture.
+- The headline is the owner's and stays; the reviewers' wording notes went into the sentence under it.
+- "Join AgroTrends" left the hero: the top bar's Get started is the same link.
+
+**Known limitations**
+- `npm run e2e` was not run for this step.
+
+---
+
+## 2026-11-03 — F24.2 Share to every social (`feat/share`)
+
+**Done**
+- One `ShareButton` (`src/features/share/`) on the question page (beside Write an answer), on published stories
+  (in both action rows) and on profiles (replacing the copy-only button there).
+- On a phone or tablet with a share sheet, Share opens it: every app the reader has, Instagram, IMO and Messenger
+  included, with the title and the address.
+- Everywhere else (computers, and in-app browsers without a share sheet) it opens a menu: Copy link (with a toast),
+  then Facebook, WhatsApp, X, LinkedIn, Telegram and E-mail, each service's own share page in a new tab; Messenger
+  too on touch devices, where its app opens the link.
+- The shared address is the page's own, without the query or hash the reader had open (`src/lib/share.ts`).
+- The footer shows the Facebook page (`facebook.com/AgroTrends`, resolved from the share link given) and Instagram
+  (`instagram.com/agrotrendsbd`, the tracking parameter dropped); their buttons are 44px.
+
+**Decisions**
+- Instagram has no web share address, so it's reached only through the phone's share sheet.
+- Messenger's web dialog needs a Facebook app id; until there is one it's offered only as its app link on phones.
+- Drafts have no Share: they have no public address.
+
+**Known limitations**
+- A shared link still shows the generic "AgroTrends" card on Facebook and WhatsApp until B7 (link previews) lands;
+  F24.8 then switches the shared address to `/share/...`.
+
+---
+
+## 2026-11-03 — F24.1 Ask and Write on phones (`feat/phone-tasks`)
+
+**Done**
+- The product audit (linked in ROADMAP F24) is the plan for this phase; what the backend has to add is in
+  `docs/BACKEND_REQUESTS_AUDIT.md` (B1–B12), checked against the backend code first.
+- Composing pages (`/questions/ask`, `/questions/:id/edit`, `/write`, `/write/:id`) drop the phone tab bar, so the
+  Post bar sits on the screen's edge (clear of the home indicator) instead of stacked on the tab bar over the Tags
+  field. Those pages and the advisor have no footer.
+- Photos on a question are a labelled field under the details (the `PhotoPicker` tiles the expert application
+  uses), not an icon at the end of the toolbar; the toolbar is formatting only.
+- The story toolbar is one row that scrolls sideways on phones instead of wrapping to two rows.
+
+**Decisions**
+- The sidebar stays on composing pages from 1024px: it's out of the way there, and leaving it keeps the frame steady.
+- The advisor keeps the tab bar: it's one of the four sections, not a form.
+
+**Known limitations**
+- On a 390px phone the story toolbar's last tool sits just past the edge until it's scrolled.
+- `publish.test.tsx` can hit Vitest's 5 s timeout when the whole suite runs in parallel (it did before this step
+  too); alone it passes.
+
+---
+
+## 2026-11-03 — F23.12 "Replied to your answer" notification (`feat/answer-reply-notification`)
+
+**Done**
+- Backend 4.27 (`feat/answer-reply-notification` there): a reply under an answer notifies the author of the answer or
+  reply that was answered, as `ANSWER_REPLY` with the question as its target.
+- The bell and `/notifications` show it as "{actor} replied to your answer" (Bengali too) and open the question.
+
+**Decisions**
+- `schema.d.ts` came from a backend without the new type, and it isn't hand-edited: `api/notifications.ts` adds
+  `ANSWER_REPLY` to the type until `npm run gen:api` runs against the new backend (then drop the addition).
+
+**Known limitations**
+- Opens the question at the top, not at the reply (the notification carries only the question's id).
+
+---
+
+## 2026-11-03 — F23.11 Reply to a reply (`feat/reply-to-reply`)
+
+**Done**
+- Backend 4.26 (`feat/reply-to-reply` there): `POST /api/answers/reply` and `POST /api/comments/reply` take a reply as
+  the parent and file the new reply under the same answer or response, so threads stay two levels deep.
+- Replies under answers and under story responses have Reply too. The box opens at the end of that thread, labelled
+  "Reply to {name}", starting with `@name ` and the caret after it; it is sent with the reply's own id as
+  `parentAnswerId` / `parentCommentId`. Replying to the answer or response itself starts empty, as before. The lists
+  reload after posting, so the new reply appears in the thread.
+- `Composer` puts the caret after prefilled text when it opens focused.
+
+**Decisions**
+- Two levels, not a tree (decided with the backend): a deep indent doesn't fit a phone. The `@name` is plain text
+  in the reply, not a link or a notification.
+
+**Known limitations**
+- Needs the backend's `feat/reply-to-reply` merged and deployed; against an older backend a reply to a reply is
+  nested under that reply and isn't shown (only one level of replies is read).
+- Deleting a reply leaves the replies to it in place (they're siblings now), like Facebook.
+
+---
+
+## 2026-11-03 — F23.10 Footer under the sidebar, and a wider home feed (`fix/footer-home-width`)
+
+**Done**
+- The footer moved out of the page column: it runs full width under the page and the sidebar, on a `bg-surface`
+  band with a top rule. The sidebar's edge used to stop at the bottom of the screen with the footer floating below
+  it (no top rule beside the sidebar); now it always ends on the footer's rule. The link groups sit together on the
+  right of the brand line instead of spreading across the width.
+- Below 768px the footer's band also runs under the fixed tab bar (the padding for it moved from the page to the
+  footer), so there's no white strip under the footer.
+- Signed-in home: the feed was capped at 64rem and centred, leaving a wide empty gutter beside the questions on
+  large screens. Now 84rem, with a 17rem rail (20rem from 1280px).
+
+**Decisions**
+- The gap between page and footer is padding inside `main`, not a margin, so the sidebar's edge runs through it.
+
+**Known limitations**
+- Above about 1700px the home feed is still centred with margins, to keep question lines readable.
+
+---
+
+## 2026-11-02 — F23.9 Profile pictures open, and your photo in the top bar (`fix/profile-images`)
+
+**Done**
+- `ui/ImageViewer`: wraps a picture in a button that opens it full size in a dialog (Esc, Close or a click outside
+  closes it). Used for the profile photo and cover on `/users/:id`, and the photo on `/authors/:id`. With no picture
+  there is nothing to open.
+- The account menu in the top bar shows your profile photo. The session's user has no photo, so it reads
+  `/api/authors/me` (already cached by Settings, which updates it in place after a change).
+
+**Decisions**
+- The opened picture is sized against the screen (85% of its height, the width less the gutters), not the dialog,
+  since the dialog takes its width from the picture.
+
+**Known limitations**
+- Question photos still open in a new tab; they could use the same viewer later.
+
+---
+
+## 2026-11-02 — F23.8 Faster pages (`perf/faster-pages`)
+
+**Done**
+- Checked the whole app for slow spots: bundle splitting (the editor's Tiptap already loads only on Write and Ask),
+  fonts (subset by `unicode-range`), images, polling, and request waterfalls on every page.
+- Question page: the answers, the AI answer and the reader's votes start beside the question instead of after it.
+  Measured on a 400 ms-latency connection: all data in by ~870 ms, where the answers used to start only at ~910 ms.
+- Link prefetch (`layout/useLinkPrefetch`): a pointer resting 80 ms on, a press on, or keyboard focus on a link to a
+  question or story starts that page's data (and the question page's code). Hover is skipped with Save-Data on, and
+  nothing runs while the session is restoring, so no anonymous copy is cached.
+- Shared query definitions (`questionQuery`, `answersQuery`, `aiAnswerQuery`, `storyQuery`) so the hooks and the
+  prefetch fill the same cache entries.
+- Images inside stories and comments load lazily (`sanitize.ts`).
+- My stories reads the author id from the session instead of waiting for `/api/authors/me`.
+- Test client keeps the app's query defaults (30 s staleTime) and only turns retries off, like production.
+
+**Decisions**
+- Left alone: the story page still waits for the story before comments and related stories (they need its id, and
+  there is no by-slug endpoint); the user page waits for the profile before the author (some users have no author row).
+- Hosting should serve `/assets/*` with a long `Cache-Control: immutable`; the file names are hashed.
+
+**Known limitations**
+- No prefetch for author, user or tag pages yet; they are visited less.
+
+---
+
+## 2026-11-01 — F23.7 About, privacy, terms and the footer (`feat/site-pages`)
+
+**Done**
+- `/about` (English and Bengali), `/privacy` and `/terms` (English, with a Bengali note that a translation is
+  coming), in `features/site/`. The body reuses the story typography; the title is the Lora page title.
+- The footer: brand line, Explore / AgroTrends / Legal groups (About us, Contact us by e-mail, Become a verified
+  expert, Privacy policy, Terms of use), and the copyright with the language and theme switches. Two columns of links
+  on phones.
+- Contact e-mail, social links and the legal date live in `lib/site.ts`. Facebook and Instagram show as icons once
+  their URLs are filled in.
+- Sign-up says that creating an account accepts the terms and the privacy policy, with links.
+
+**Decisions**
+- The legal pages describe only what the app and backend do today: Google sign-in and Gemini, e-mail and SMS
+  providers, browser storage for the sign-in token and preferences, no ads or trackers. Account deletion is by e-mail
+  to the team (the backend has `DELETE /api/user/delete`, but there is no button for it yet).
+- The team is three people and not registered; the pages say so, and the terms name the laws of Bangladesh.
+
+**Known limitations**
+- The About text is a first draft for the team to revise. The privacy and terms are plain-language drafts, not
+  reviewed by a lawyer.
+- No Facebook or Instagram URL yet, so the social links are hidden.
+
+---
+
+## 2026-11-01 — F23.6 Admin and review screens in the current design (`feat/admin-design`)
+
+**Done**
+- Checked every admin page and the review queue against `docs/DESIGN.md` in screenshots (desktop light and dark, phone).
+- One rail: the admin sections (`features/admin/sections.ts`) are an "Admin" group in the app sidebar for staff;
+  the in-page rail is gone, and below 1024px the sections scroll as tabs on the page. Verified Experts get "Review
+  queue" in the sidebar too (it was only in the account menu).
+- Page titles in Lora (admin pages, the admin sign-in and the review queue). The overview's waiting-work cards drop
+  mustard (it means trust): hairline cards, a filled icon and an ink count when work is waiting, a grey count when
+  not. The member search is a pill and takes the full width on phones. `AdminPage` takes `back`, so the "All users"
+  link sits above the member's name. Category Delete is red, like role Delete.
+- Tests: the sidebar's Admin group for staff (current section marked), none for members, Review queue for experts.
+
+**Decisions**
+- Admin labels stay English only, as before.
+
+**Known limitations**
+- None new.
+
+---
+
+## 2026-11-01 — F23.5 Home as Questions | Stories tabs (`feat/home-tabs`)
+
+**Done**
+- Nayeem picked option A of four home designs drawn on a design canvas (A two tabs, B a story shelf in the questions
+  feed, C side by side, D sections). Home stops merging stories and questions by date.
+- `HomeFeed`: the composer, then a "Show" tab bar (Questions | Stories, links with `aria-current`), then the topic
+  chips; on Questions a Newest | Unanswered switch beside them (its own row on phones). Only the open tab's list is
+  fetched. The URL holds the state: `?show=stories`, `?topic=2`, `?unanswered=true`; switching tabs keeps the topic
+  and drops the questions-only sort, so a tab can be linked and Back works.
+- Each tab has its own empty state. Story rows drop the "Story" kicker (the tab says it).
+- Tests: tabs, only one list fetched, topic and sort in the URL, empty states. Bengali strings.
+- The rail is never blank: an "Ask the AI advisor" card on top; with nothing trending yet, "Waiting for an answer"
+  (unanswered questions) and "New stories" (`/api/feed/latest`) stand in, fetched only once their trending list is
+  empty. Checked against the restarted backend on local data: nothing trending, no experts, every question answered,
+  so the rail shows the advisor and New stories. `useQuestions` takes an `enabled` flag.
+
+**Decisions**
+- Questions is the default tab: the product is Q&A-first (DESIGN.md).
+- The rail keeps trending questions and trending stories on both tabs.
+- `docs/BACKEND_REQUESTS.md` §6 (one mixed home feed) is no longer needed.
+
+**Known limitations**
+- None new.
+
+---
+
+## 2026-11-01 (F23.4 profile page settings, new-question notification)
+
+**Done**
+- Settings has a "Profile page" section (`settings/ProfilePageForm`): a cover photo (upload, change, remove) and a
+  location (≤ 80), saved with `PUT /api/user/profile` (new `useUpdateUserProfile`, which also updates the cached
+  profile). The profile page already shows both; the completion nudge now counts the location.
+- Notifications: `NEW_QUESTION_IN_TOPIC` ("New question in your topic, waiting for an expert") links to the question
+  (§12: experts hear of questions the AI could not answer).
+- Tests: `settings/profile-page.test.tsx` (filled from the summary; a save sends both fields, a removed cover as
+  blank), `lib/notifications.test.ts`. Checked the section at 1280px.
+
+**Decisions**
+- The backend replaces both fields on every save, so the form always sends the location and the cover together.
+
+---
+
+## 2026-11-01 (F23.3 story subtitle and AI opt-out)
+
+**Done**
+- The backend added `subtitle` (≤ 200) and `aiCitable` (default on) to stories (§9). The editor has both in the side
+  panel and the publish sheet: "Subtitle (optional)" and "Let the AI advisor cite this story". The AI summary can be
+  used as the subtitle in one click. Drafts autosave them; an update sends them back unchanged.
+- The story page shows the subtitle under the title; the home feed, story tiles and story rows show it instead of
+  the excerpt when there is one.
+- Tests: `publish.test.tsx` (subtitle trimmed, opt-out sent), `editor.test.tsx` (autosave keeps both),
+  `story.test.tsx` (subtitle under the title). Checked the panel at 1280px and the sheet at 390px.
+
+**Decisions**
+- A blank subtitle is sent as `""`, so clearing it in the editor clears it on the server (the backend keeps a field
+  that is left out).
+
+---
+
+## 2026-11-01 (F23.2 home rail: trending questions, follow experts)
+
+**Done**
+- The backend chose two trending lists over one mixed feed (§6), so the home rail now shows "Trending questions"
+  (`GET /api/feed/trending/questions`, new `useTrendingQuestions`) above "Trending stories", each numbered with a
+  quiet line under the title (answers, or the author).
+- "Experts to follow" gets a Follow button on each row: `authorId` now equals `userId` (§2), so every expert can be
+  followed. A follow refreshes the list's `followedByMe`.
+- Tests: `home-feed.test.tsx` (two trending lists, Follow sends `PUT /api/authors/7/follow`). Checked at 1280px,
+  light and dark.
+
+**Decisions**
+- The rail's Follow is a small text button, not the full pill: a pill squeezed the expert's name and field.
+
+---
+
+## 2026-11-01 (F23.1 regenerated API types)
+
+**Done**
+- The backend built most of `docs/BACKEND_REQUESTS.md`; its status, and what it declined (§5 category follows, §8 AI
+  follow-ups, §11 weekly tasks), is now a table at the top of that file.
+- `schema.d.ts` regenerated. `UserProfile`, `UserAnswer`, `ExpertSummary` and `PublicStats` are the generated types
+  instead of hand-written guesses; credentials have no `year`.
+- This week's tasks removed from the phone home with `api/tips.ts` (§11 not wanted), so phones no longer ask for a
+  missing endpoint.
+
+**Decisions**
+- The new backend fails its first start on an empty database (seeding the admin's author profile); the types were
+  generated from a second start of a throwaway copy on :8081 against a throwaway pgvector container, so the local
+  database on :8080 was not touched (its author ids are remapped on the new backend's first start). Reported in
+  `docs/BACKEND_REQUESTS.md`.
+
+**Known limitations**
+- The local backend on :8080 still runs the old code; restart it on the new code to see F23 live.
+
+---
+
+## 2026-11-01 (fix: Google test with a local client id)
+
+**Done**
+- `welcome.test.tsx` "no Google button without a client id" failed on any machine whose `.env` sets
+  `VITE_GOOGLE_CLIENT_ID`, because Vite loads `.env` in tests. The test now clears the variable itself.
+
+---
+
+## 2026-10-31 (F22.12 quieter frame, focused sign-in)
+
+**Done**
+- Nayeem found the sidebar and footer borders odd on short pages: the footer's rule began at the sidebar's edge and
+  met its line in a "T". Beside the sidebar (from 1024px) the footer now has no rule; below 1024px, with no sidebar,
+  it keeps it.
+- Sign in, sign up, forgot and reset password and verify e-mail are focused pages (`FOCUSED` in `layout/AppLayout`):
+  no sidebar, search, Write or Sign in in the bar, and no phone tab bar; only the logo and "Back to AgroTrends".
+- Tests: `layout/topbar.test.tsx` (sign-in shows only the logo and the way back). Checked at 1280px and 390px.
+
+**Decisions**
+- Navigation stays on every other page (F22.10). Signing in or up is one task; the logo and "Back to AgroTrends" are
+  enough to leave it, as on Medium and LinkedIn.
+
+---
+
+## 2026-10-31 (F22.11 search in the bar, your profile)
+
+**Done**
+- Nayeem asked for the search to stay in place instead of popping up, and for a way to reach their profile.
+- From 1024px the top bar's search is a real field (`InlineSearch` in `layout/TopBar`): type and press Enter to go to
+  `/search`; on the results page it keeps the words. Ctrl/⌘+K focuses it; Escape leaves it. Below 1024px the search
+  icon still opens the search dialog, since the bar has no room for a field.
+- "Your profile" (`/users/{your id}`) is now the first item under your pages in the sidebar and in the account menu.
+- Tests: `layout/topbar.test.tsx` (the field searches without a dialog and keeps the words; the icon and Ctrl+K open
+  the dialog when the field is hidden; Your profile in the sidebar and account menu). Checked at 1280px, light and
+  dark.
+
+**Decisions**
+- Ctrl/⌘+K checks whether the bar's field is laid out (`offsetParent`) rather than a breakpoint in JS, so it follows the
+  CSS exactly.
+
+---
+
+## 2026-10-31 (F22.10 navigation in the sidebar)
+
+**Done**
+- Nayeem pointed out that the home sidebar repeated the top bar's tabs and that other pages had no sidebar. Navigation
+  now lives in one place: `layout/AppSidebar` on every page from 1024px (Home or Discover, Questions, Stories, AI
+  advisor; signed in, Reading list, Your stories and your topics with "+ Follow topics").
+- The top bar's menu button hides the sidebar to an icon strip (each icon keeps its name as a tooltip and for screen
+  readers) and opens it again; the choice is kept in `localStorage` (`agrotrends.sidebar`). Reading and writing pages
+  keep it too, so the sections are always one click away.
+- The top bar drops its section tabs: menu button, logo, search, Write and Ask pills, bell, account. Phones keep the
+  menu sheet and the bottom tab bar.
+- The home feed drops its own sidebar (two columns: feed and the trending rail).
+- Tests: `layout/topbar.test.tsx` (sections only in the sidebar, hide and show, remembered); the home, library and
+  publish tests now name the region they mean. Checked at 1280px open and hidden, light and dark, and at 390px.
+
+---
+
+## 2026-10-31 (F22.9 story page as the mock-up)
+
+**Done**
+- Follow in the byline for other readers' stories (the author's profile, shared with "Written by" so it's read once;
+  `FollowAuthorButton`); your own stories keep Edit story there.
+- Test: `story/story.test.tsx` finds the byline's Follow above the story text. Checked at 1280px light and dark and at
+  390px.
+
+**Decisions**
+- No second Save in a top bar: the clap / report / save bar sits right under the byline already.
+- No subtitle until the backend has one (§9).
+
+---
+
+## 2026-10-31 (F22.8 sign in and sign up as the mock-up)
+
+**Done**
+- Google comes first on both forms, then an "or" rule, then the form (`auth/GoogleSignIn`).
+- `ui/PasswordField`: Show / Hide inside the field, something beside the label (sign-in: "Forgot your password?"), and
+  on sign-up a four-step strength bar with a word (`lib/password` `passwordStrength`: length, capital, number, symbol).
+- Sign-up: "How we reach you" is a Mobile number | E-mail pill switch (phone first), with "We'll text a code" or "We'll
+  e-mail a link" and "Add an e-mail too" / "Add a phone number too" to give both. "Give an e-mail or a phone" shows on
+  the field that's visible.
+- The sign-in panel shows members and verified experts from `GET /api/stats/public` (§10), asked for only from 1024px,
+  hidden until the backend serves it.
+- Tests: `lib/password.test.ts`, `auth/auth.test.tsx` (Show, Forgot, the switch, the strength word), `auth/phone.test.tsx`
+  (the error on the phone field). Checked at 1280px light and dark and at 390px.
+
+**Decisions**
+- Only the Google change in `GoogleSignIn.tsx` is committed; Nayeem's local `console.log` there stays uncommitted.
+
+---
+
+## 2026-10-31 (F22.7 story editor as the mock-up)
+
+**Done**
+- The side panel now holds the story's Topic (searchable select) and Tags (the tag box) above "Before you publish",
+  which gains "A topic". What's chosen there opens in the publish sheet and is saved with a draft's autosave; changes
+  made in the sheet come back to the panel.
+- Saved stories get Preview (the story page, which shows drafts to their author) beside Save and Publish.
+- Test: `editor/publish.test.tsx` picks a topic in the panel and finds it in the publish sheet. Checked at 1280px light
+  and dark and at 390px (the panel is hidden below 1024px; the sheet still has everything).
+
+**Known limitations**
+- No subtitle and no "Let the AI advisor cite this" switch until the backend has `subtitle` and `aiCitable` (§9).
+
+---
+
+## 2026-10-31 (F22.6 ask page as the mock-up)
+
+**Done**
+- "Already answered, might help" (`qa/SimilarQuestions`): half a second after the title stops changing (12 characters
+  or more), matching questions from `/api/questions/search`, answered ones only, accepted first, up to three, each
+  opening in a new tab. Nothing shows on a miss or when editing.
+- The question title is set in Lora, as in the mock-up.
+- Test: `qa/ask.test.tsx` checks the search and that unanswered matches are left out. Checked at 1280px light and dark
+  and at 390px.
+
+---
+
+## 2026-10-31 (F22.5 AI advisor as the mock-up)
+
+**Done**
+- Each turn starts with an "AI advisor" label over the question; citation markers in the answer (`[1]`, `[2]`) become
+  small numbered chips pointing at the source cards (`lib/html` `withCitations`, only for numbers that have a source;
+  styled from the container since SafeHtml drops classes).
+- "Ask next": the backend's suggested follow-ups as rows with an arrow; one tap fills the ask bar.
+- The question box is a pill ask bar that grows with the text (label kept for screen readers; placeholder "Ask a
+  follow-up…" after the first answer), with an Ask pill inside; the count and the Enter hint sit under it.
+- Tests: `lib/html.test.ts` (markers), `ai/advisor.test.tsx` (a marked source and a follow-up filling the bar).
+  Checked at 1280px light and dark and at 390px.
+
+**Known limitations**
+- Markers and follow-ups appear once the backend sends them (`docs/BACKEND_REQUESTS.md` §8).
+
+---
+
+## 2026-10-31 (F22.4 profile as the mock-up)
+
+**Done**
+- `/users/:userId` after LinkedIn: cover (the profile's, or the wash), photo, Lora name, headline (the author's
+  designation or occupation and workplace, else the expert field), location, the Verified expert chip, followers and
+  join date; Follow (author follow) or Report for others, Share and Edit profile on your own.
+- Numbers row: reputation, answers, accepted, stories once the backend summary exists; until then reputation, accepted
+  answers, questions, topics.
+- Tabs: Overview, Stories (when there's an author), Questions, Answers (once §3 answers), and on your own Drafts and
+  Saved. Overview: About, Credentials (from the summary, else the expert topics), "Answers questions on" with points,
+  badges and specialities; beside it Recent contributions (questions, answers and stories by date) or, on your own,
+  Drafts with Continue and Your questions marked Accepted, Answered or Waiting. Your own profile shows how complete it
+  is with a bar and Finish profile.
+- `api/users.ts`: `useUserProfile` (§1) and `useUserAnswers` (§3), no retries, guarded against empty answers.
+  `docs/BACKEND_REQUESTS.md` §1–§2 narrowed: the author profile already has headline, bio, photo, followers and follow;
+  what's missing is user → author, location, cover, counts and credentials.
+- Tests: `users/reputation.test.tsx` (fallback page, your own page, and the full page with summary, author and answers).
+  Checked at 1280px light and dark and at 390px.
+
+**Known limitations**
+- Others' profiles show no headline, Follow or Stories until the backend gives `authorId` for a user (§1).
+- No Message button: AgroTrends has no messaging.
+
+---
+
+## 2026-10-31 (F22.3 question page as the mock-up)
+
+**Done**
+- The question is no longer a card: topic and Unanswered on top, the Lora title, tags, then the vote column (round
+  buttons, outlined) beside the question text, photos, farming chips and the author line. The vote keeps its
+  "Rate this question" group name and "Useful question?" for screen readers.
+- Side panel from 1024px, sticky: Answers, Views (once the backend sends `viewCount`, §7) and Asked; the AI advisor with
+  "Read the AI answer →"; Write an answer. On phones Write an answer sits under the question.
+- Answers: a header with "Accepted first, then by votes"; the accepted answer is a mustard card with a wash at its top,
+  the others plain rows divided by hairlines.
+- Test: `qa/question-page.test.tsx` reads the panel's numbers (with views) and its two links. Checked at 1280px light
+  and dark and at 390px.
+
+**Decisions**
+- "Useful question?" is no longer shown as text (the mock-up has none); the vote column sits against the question
+  text, apart from the answers' votes, and its buttons say "Upvote this question" on hover.
+
+---
+
+## 2026-10-31 (F22.2 home feed)
+
+**Done**
+- Signed-in readers get a home feed at `/` (`home/HomeFeed`, lazy) as in the mock-up; visitors keep Discover.
+  - Left (from 768px): Home, Questions, Stories, AI advisor, Reading list as pills; "Your topics" (followed tags, or
+    the first topics when none) and "+ Follow topics".
+  - Middle: For you and topic chips (`?topic=`), a composer pill ("Ask the community, or ask the AI advisor…" and an AI
+    pill), then one feed of stories and questions, newest first, merged from `/api/blogs/all` (or
+    `/all/category/{id}`) and `/api/questions/all`; Show more loads the next page of both. Stories get a feed row
+    like questions, with the cover or the drawn fallback.
+  - Right (from 1024px): Trending now (`/api/feed/trending`) and Experts to follow.
+  - Phones: a greeting by the hour, This week's tasks and four quick actions (Ask, AI advice, Read stories, Help
+    answer) above the feed.
+- New hooks for missing endpoints: `useExperts` (`GET /api/experts`), `useWeekTips` (`GET /api/tips/this-week`),
+  both without retries; their sections stay hidden until the backend answers. `useTopicStories` for the category feed.
+- Tests: `home/home-feed.test.tsx` (merged order, topics, trending, the topic chip's requests, hidden sections, and the
+  sections once the endpoints answer). Checked at 1280px light and dark and at 390px.
+
+**Known limitations**
+- Experts have no Follow button and "Your topics" are tags until the backend adds person and topic follows
+  (`docs/BACKEND_REQUESTS.md` §2, §5); the feed is two lists merged until §6.
+
+---
+
+## 2026-10-31 (F22.1 pill fields and backend requests)
+
+**Done**
+- Nayeem asked for the screens exactly as in the mock-ups, fields included, and for a list of what the backend must
+  add. Phase F22 matches each screen in turn; `docs/BACKEND_REQUESTS.md` holds twelve endpoint contracts (public
+  profile, follow a person, a user's answers, experts list, topic follows, home feed, question views, AI follow-ups and
+  citations, story subtitle and AI opt-out, public numbers, this week's tasks, question routing to experts).
+- Fields after direction D: inputs, selects, native selects and input groups are pills (more side padding); the tag
+  box and combobox chips wrap inside a 22px-round box; text areas are 18px.
+
+**Decisions**
+- Sections that need a missing endpoint are built now and stay hidden until it answers, so nothing shows an error.
+
+---
+
+## 2026-10-31 (F21.10 Paddy story page)
+
+**Done**
+- The story page in Medium's order: back link, topic, the Lora headline (600), the byline (avatar, author, reading time
+  and date), the clap / report / save bar, then the cover (16:9, 18px corners, a little wider than the text) and the
+  reading column.
+- The header, the plain reading column and the footer share one text edge (the 680px column plus its gutters), so the
+  headline lines up with the first paragraph.
+- Test: `story/story.test.tsx` reads the byline's meta and checks the headline comes before the cover. Checked at 1280px
+  light and dark and at 390px.
+
+**Decisions**
+- No Follow in the byline: "Written by" at the end of the story keeps the author's follow.
+
+---
+
+## 2026-10-31 (F21.9 Paddy feeds)
+
+**Done**
+- Question rows (`qa/QuestionRow`, used on Questions, Discover, profiles and search) as feed rows: the topic (a link) and
+  date on top, the title in Lora, the excerpt, tags and farming context, then one stats line: votes, answers, a mustard
+  "Accepted" mark or "Unanswered", and the asker with reputation and badge. The first photo sits on the right at 18px
+  corners. The vote and answer boxes on the left are gone.
+- The Newest | Unanswered switch is a pill.
+- Test: `qa/questions.test.tsx` checks the row's order and stats line. Checked Questions and Discover at 1280px light
+  and dark and at 390px.
+
+**Decisions**
+- Story tiles keep their F15 layout: they already follow the shapes (18px covers, Lora titles).
+
+---
+
+## 2026-10-31 (F21.8 Paddy AI advisor)
+
+**Done**
+- Each advisor turn after Perplexity: the reader's question as a Lora heading (no green bubble), then "Sources" as
+  numbered cards on the leaf wash (title, and Story or Community answer), then the AI answer and the "not checked by an
+  expert" note. Turns are divided by a hairline. The composer loses its shadow.
+- `ai/Sources` takes `layout="cards"` for this; the AI answer card and the history keep the list.
+- Tests: `ai/advisor.test.tsx` checks the sources come before the answer, as numbered links to the story and the
+  question. Checked at 1280px light and dark and at 390px with a mocked answer.
+
+**Known limitations**
+- No numbered citations inside the answer text and no suggested follow-ups: the backend's answer has neither.
+
+---
+
+## 2026-10-31 (F21.7 Paddy question page)
+
+**Done**
+- Votes (`qa/VoteControl`): round 36px buttons (44px touch area); outlined when they stand beside an answer, inside a
+  pill on the question's "Useful question?" panel. Pressed up is filled paddy, pressed down a soft red; your own score is
+  a pill.
+- The question's tags moved under its title (before the author line and text), so what it's about reads first.
+- Test: `qa/question-page.test.tsx` checks the tags come between the title and the text. Checked at 1280px light and
+  dark and at 390px.
+
+---
+
+## 2026-10-31 (F21.6 Paddy story editor)
+
+**Done**
+- `/write`: the writing column with "Before you publish" beside it from 1024px: a title, some text and a cover (optional)
+  ticked off as the draft fills, the word count and reading time (200 words a minute), and a note that topic and tags
+  come in the publish step. Worked out from the draft; nothing new is sent.
+- The toolbar is a soft rounded bar on the leaf wash (pressed tools white with the paddy icon); an empty cover is a
+  dashed "Add a cover image" tile; the title is Lora 600.
+- Test: `editor/editor.test.tsx` checks the checklist and reading time as the draft changes. Checked at 1280px light and
+  dark and at 390px.
+
+**Decisions**
+- The publish sheet (topic, tags, farming details) stays a dialog: moving it into the side panel would change the
+  publish flow that `publish.test.tsx` covers, for little gain.
+- The mock-up's "Let the AI advisor cite this" switch is left out: the backend has no such setting.
+- F21.3's language switch moved from `role="group"` to a fieldset (a lint warning), committed on `feat/paddy-auth` and
+  merged forward into F21.4 and F21.5.
+
+---
+
+## 2026-10-31 (F21.5 Paddy profile)
+
+**Done**
+- `/users/:userId` after LinkedIn: a leaf-wash cover with a mustard sun, an 88px avatar over its edge, the name in Lora,
+  the expert headline (their expert field and a mustard "Verified expert in …" chip), and a row of numbers: reputation,
+  accepted answers, questions, topics. Below, "Answers questions on" (the topic list with points and badges) beside
+  "Questions asked" from 1024px.
+- Your own profile shows Edit profile (to settings) where others' show Report.
+- Tests: `users/reputation.test.tsx` reads the numbers row and the headline, and checks Edit profile on your own page.
+  Checked at 1280px light and dark and at 390px.
+
+**Known limitations**
+- No profile photo, cover, bio or credentials list yet: the backend has no public user read (open item); the cover is a
+  drawn wash until it does.
+
+---
+
+## 2026-10-31 (F21.4 Paddy expert application)
+
+**Done**
+- `/experts/apply` in two columns from 1024px: on the left a mustard "Verified expert" chip, a Lora title, why it's worth
+  it (a badge on everything you write; check the AI advisor in your topics) and "What happens next" as three numbered
+  steps (send, an admin looks at your proof, your badge appears with a notification). The form or the application's
+  status on the right; on phones the explainer comes first.
+- Form: field and institution side by side; topics and the proof type as pill chips with a tick (the proof type was a
+  select, now radios: one tap); the bottom bar has a note, Cancel and Send application.
+- Tests: `experts/apply.test.tsx` picks the proof type as a radio and checks the explainer's steps. Checked at 1280px
+  light and dark and at 390px.
+
+**Decisions**
+- No "usually within 3 days" or "questions come to you first": neither is promised by the backend.
+
+---
+
+## 2026-10-31 (F21.3 Paddy sign in and sign up)
+
+**Done**
+- `auth/AuthPage` (sign in, sign up, reset, verify): from 1024px a leaf-wash panel on the left (Lora "Grow better with
+  AgroTrends.", three things you get: ask anything, an AI advisor with sources, verified experts; "Free, in English and
+  Bengali."), with a mustard sun and the drawn sprig in the corner. The form sits on the right.
+- An English | বাংলা pill switch on the form, so a reader can change the language before typing; each name is written in
+  its own language.
+- Sign up: the "How we reach you" heading no longer overlaps its hint.
+- Test: `auth/auth.test.tsx` checks the panel and the language switch. Checked sign in and sign up at 1280px light and
+  dark and at 390px.
+
+**Decisions**
+- No member quote or member counts on the panel: the mock-up's were invented, and real numbers need an API.
+
+**Known limitations**
+- The Google button's text follows the browser's language (Google renders it), not the page's switch; Google stays under
+  the form, as `GoogleSignIn` has uncommitted local changes.
+
+---
+
+## 2026-10-31 (F21.2 Paddy shell)
+
+**Done**
+- Top bar: the search is a 288px pill on the leaf wash (no border) with a round Ctrl K hint; Ask is a pill with a plus;
+  the logo mark's corners match the softer shapes. The phone menu's rows are pills; the tab bar's Ask button loses its
+  shadow (no shadows on the page).
+- Test: `layout/topbar.test.tsx` checks the search pill and Ctrl+K open the same search dialog. Checked the question page
+  and Discover at 1280px light and dark and at 390px.
+
+---
+
+## 2026-10-31 (F21.1 Paddy Field tokens)
+
+**Done**
+- Nayeem compared five whole-app directions (an artifact with home, story, question, profile, AI advisor, phone, ask,
+  write, sign in, sign up and expert screens in each) and chose **A's colours and type with D's shapes**. Written into
+  `docs/DESIGN.md` as "Paddy Field": the direction, where each area takes its cue (Reddit, Stack Overflow, LinkedIn,
+  Medium, Perplexity, Khamari), five rules, and the colour, type and shape tables.
+- Tokens: paddy `#245C3A`, ink `#1C2B21`, stem `#59665D`, leaf wash `#F3F7F2`, hairline `#E4EAE3`; dark mode a deep
+  loam `#111712` with young-leaf green `#7CC495`. Field borders `#84958A` (3.2:1).
+- Mustard split in two: `mustard` `#D9A441` (the flower: borders, dots, fills) and the new `mustard-ink` `#8A5F0C` for
+  text and icons (5.9:1), since the flower itself is only 2.2:1 on white. `text-mustard` uses moved to `text-mustard-ink`.
+- Shape: `--radius` 12px (fields), cards 18px (`rounded-xl`), larger panels 21px; buttons are pills in Inter 600 with a
+  little more side padding. The question, answer and AI answer cards drop their shadow and move to 18px.
+
+**Decisions**
+- Lora and Inter stay (A's type); only the shapes come from D. D's yellow buttons are not used.
+
+**Known limitations**
+- Screens keep their F20 layouts until their F21 step; some page-level `rounded-2xl` panels are 21px instead of 18px
+  until then.
+
+---
+
+## 2026-10-31 (F20.4 ask form redesign)
+
+**Done**
+- Designed with the impeccable and taste skills (installed for the user, `~/.agents/skills`). impeccable's context
+  check found no PRODUCT.md and treated this as a refinement of the existing look; the screen is "Operate" (a task),
+  so restraint, labels above fields and one primary action. Taste's app-screen rules: show the choices instead of
+  hiding them, one click to the main job, say what is missing.
+- Topic: `qa/TopicPicker`, native radios styled as chips (arrow keys move, a tick marks the choice), the first eight
+  topics then "More topics" as a search; a topic chosen there joins the chips. Legend and hint above.
+- Tags: `TagInput popular` offers the most used tags as dashed "+ tag" chips before anything is typed, so a tag is one
+  tap; typed text still filters them. The F19.3 `compact` pill is gone; the label says "(optional)".
+- Post bar: "Still needed: a title, details, a topic" until the form is complete, then "Ready to post" with the
+  Ctrl + Enter hint; Cancel and Post question (with a send icon) on the right. Ctrl/⌘+Enter posts from anywhere in the
+  form, never while a Bangla input method composes.
+- Tests: `qa/ask.test.tsx` (topic radios, popular tag one tap, Ctrl+Enter); the publish, AI answer and confirm-e-mail
+  tests follow the new controls. Checked at 1280px light and dark and 390px, with ten mocked topics.
+
+**Known limitations**
+- On phones the "Still needed" line is hidden for room; the field errors still say it on Post.
+
+---
+
+## 2026-10-31 (F20.3 white page)
+
+**Done**
+- Nayeem: keep the page white, consistent with the app. `--background` is `#FFFFFF` again in light mode; the green,
+  gold, Lora and radius of Harvest stay. Cards keep their hairline so they still read on white. Dark mode unchanged.
+
+---
+
+## 2026-10-31 (F20.2 Harvest question page)
+
+**Done**
+- The question is a white card on the field-green page: topic and Unanswered (a dashed gold pill), More actions, a
+  Lora title, author, body, photos, tags and older questions' farming chips.
+- A side panel holds the question's vote ("Useful question?"), the answer count, the asked date and a full-width
+  Answer. It is one element placed by the grid: a sticky card beside the question from 1024px, a row under the
+  question below that, so the vote is never rendered twice.
+- The AI answer and every answer are white cards; the accepted answer and an expert-confirmed AI answer get a gold
+  edge as well as their labels (the skill's anti-patterns for Q&A: unclear votes, a hidden accepted answer).
+- Answers and replies use `.post-body`, so their numbered and bulleted lists show (they rendered as bare lines).
+- Checked at 1280px light and dark and at 390px with the API mocked; existing Q&A tests pass unchanged.
+
+**Decisions**
+- No related questions in the panel: it would add a request to every question page, which already waits on a
+  request chain (open item).
+
+---
+
+## 2026-10-31 (F20.1 Harvest tokens)
+
+**Done**
+- New visual direction from the ui-ux-pro-max skill. Its first design-system match for "community Q&A" was a
+  developer-forum look (blue, Fira Code), rejected; the agriculture query gave "Organic Biophilic" with the Farm Tech
+  palette, which Nayeem chose. Tokens in `src/index.css`, light and dark; table in `docs/DESIGN.md`.
+- Lora replaces Newsreader as the serif (`@fontsource-variable/lora`; Newsreader removed), so every `font-serif`
+  headline follows. Raleway, the skill's body face, was not taken: Inter reads better small and next to Hind Siliguri.
+- `--radius` 0.75rem to 1rem (the style's 16–24px corners).
+- Contrast checked: every text pair at 4.5:1 or more in both themes; field borders darkened to 3.0:1 / 3.7:1.
+- Looked at Discover, Questions and a question page at 1280px light and dark and at 390px with the API mocked.
+
+**Known limitations**
+- Every screen takes the new colours; only the question page gets a layout redesign in this phase.
+
+---
+
+## 2026-10-31 (F19.3 ask composer restyle)
+
+**Done**
+- Checked against the ui-ux-pro-max guidance (content-first minimal style; one primary action, kept in reach; Command-
+  style search for long lists). The boxed border is gone: the question line and details sit on the page as in the
+  story editor. The toolbar is a soft pill that sticks under the top bar and scrolls sideways on phones; the photo
+  label and an empty count hide on phones.
+- Topic and tags share one row under the details, both typed: the topic filters as you type and Enter picks it;
+  tags are `#` chips in a soft pill (`TagInput compact`, label read out but not shown).
+- Cancel and Post question sit in a sticky bar (with "An AI answer comes right after you post." on a new question).
+  On phones it rides above the bottom navigation (`bottom: 3.5rem + safe area`, measured 57px).
+- The page heading is smaller, so the question line is the largest text.
+- Checked in Chromium at 1280px light and dark and at 390px with the API mocked; tests unchanged (the labels and roles
+  stayed).
+
+**Decisions**
+- Topic and tags stay in the page, not in the sticky bar: tag suggestions and the topic list need room to open.
+
+---
+
+## 2026-10-30 (F19.2 one-place ask form)
+
+**Done**
+- Asking was five separate boxes (question, details, topic, tags, photos) plus a folded farming section. Now one
+  composer holds the question line, a toolbar and the details as rich text (bold, italic, bulleted and numbered
+  lists, quote, link); "Add a photo" in the toolbar uploads up to 4, shown as a strip under the text and sent as
+  `imageUrls` as before. Topic and tags sit side by side under it. Enter in the question line moves to the details.
+- `QuestionEditor` (Tiptap, no headings or code blocks); `.post-body` styles the details the same in the editor and on
+  the question page. Older plain-text questions open as paragraphs (`lib/html` `textToHtml`).
+- Copy is no longer about crops only: "Say what you are working with, where…"; the tips and the questions page
+  subtitle say the same.
+- Tests: `qa/ask.test.tsx` (rich text posted as HTML, no farming fields, an old text question edited as paragraphs
+  with `agri` left out), `lib/html.test.ts`. `test/setup.ts` stubs the layout calls ProseMirror makes while typing.
+
+**Decisions**
+- The crop / season / region / soil fields are gone from the ask form: they fit crops, not fisheries, livestock or a
+  student's question. Topic says the field and tags the specifics. The backend still takes `agri`; an edit leaves it
+  out, so an older question keeps its farming details and its chips still show.
+- Details are rich text again (reverses F4.1's plain text). The backend already cleans question HTML (jsoup) and
+  gives the AI and moderation its plain text, so no backend change.
+- Photos stay `imageUrls`, not inline images, so the question list keeps its thumbnail.
+
+**Known limitations**
+- The link tool is a native prompt, as in the story editor.
+- Older questions' farming chips still link to crop / season / region / soil filters on `/questions`; new questions
+  carry none.
+- `welcome.test.tsx` "no Google button without a client id" fails when `.env` sets `VITE_GOOGLE_CLIENT_ID`.
+
+---
+
+## 2026-10-30 (F19.1 question vote label)
+
+**Done**
+- The question page had two kinds of votes and nothing said which was which. The question's own vote now sits beside
+  the author line in a "Rate this question" group with a visible "Useful question?" (just the score on your own
+  question); the bar under the question keeps only Answer. Vote arrows get a `title` with their label on hover.
+- Tests: `qa/votes.test.tsx` (the group holds the question's arrows and none of the answers').
+
+**Decisions**
+- Question votes stay: they rank questions and earn the asker reputation. Only the labelling was the problem.
+
+---
+
+## 2026-10-17 (F18 phone sign-up, backend Phase 10)
+
+**Done**
+- Sign-in and admin sign-in take an e-mail or a phone number (`identifier`); phones go out without spaces or dashes,
+  and a Bangladeshi number may drop +880 (`lib/auth`: `isPhone`, `signInIdentifier`, `joinPhone`).
+- Sign-up: an e-mail, a phone number or both (blank ones stay out), then sign-in with whichever was given. A
+  phone-only account goes to `/verify-phone`: 6-digit code (one field, `one-time-code`), resend after 60 s.
+- The confirm banner and the write-refused dialog follow the account (`needsConfirmation`): the e-mail link, the SMS
+  code or both. The 403 is still told apart by "Confirm your e-mail", which the new message keeps.
+- Forgot password: E-mail | Phone; by phone, a code, then the code and a new password (every session signed out),
+  then sign-in with the usual notice.
+- Settings: e-mail and phone optional while one remains, each with Confirmed / Not confirmed yet and its action (new
+  link, enter the code); changing the e-mail no longer signs out. The account menu shows the phone when there's no
+  e-mail.
+- `openMoreActions` (tests) now waits for the lazily loaded menu: a timing flake since F16.
+- Tests: phone sign-in, phone-only sign-up to `/verify-phone`, code and resend, wrong code, phone banner, reset by
+  SMS, settings contacts. 291 tests.
+
+**Decisions**
+- After a phone-only sign-up the code comes before the optional profile step; with an e-mail too, the banner offers
+  both ways.
+- Resend waits 60 s on the page; the backend allows three codes an hour per number.
+
+**Known limitations**
+- No SMS provider yet (backend 10.5): codes are written to the backend log as `[DEV SMS]`.
+
+---
+
+## 2026-10-17 (F17 admin dashboard, backend Phase 9)
+
+**Done**
+- API types regenerated from the backend's `development` (Phases 9 and 10); sign-in sends `identifier`.
+- `/admin` overview: open reports, expert applications and unchecked AI answers first (each to its queue, amber when
+  something waits), then members, banned, questions, answers and stories with this week's new members and questions.
+- `/admin/users`: search (Enter, in the URL), All / Active / Banned, contact, join date, staff roles, ban badge, paging.
+- `/admin/users/:id`: contact with confirmation state, ban and reason, counts, expert topics with Revoke, give or
+  remove ADMIN roles (USER and SUPER ADMIN shown, not changeable). Ban controls offer only the action that applies.
+- `/admin/roles`: roles with their privileges; create and edit ADMIN roles with privilege checkboxes (shadcn
+  Checkbox), delete with a confirmation.
+- Admin sections in a rail on wide screens (tabs on phones): Overview, Users, Reports, Expert applications, Roles,
+  Categories. Tests: overview, users filters, member actions, roles create / edit / delete.
+
+**Decisions**
+- Admin copy stays English, like the existing admin screens.
+- Every admin mutation refreshes all admin queries (`['admin']`): a ban changes reports, users and the counts.
+- The backend's 403 is shown as written when a staff member lacks a privilege; every section stays visible.
+
+**Known limitations**
+- An account with an admin role can't be banned (backend rule); the page says so next to the roles.
+
+---
+
+## 2026-10-17 (F16 refinement: less clutter, better inputs)
+
+**Done**
+- Discover: the topic card grid is gone; "Help a farmer today" shows up to three unanswered questions with an Answer
+  link (`#your-answer`), and the topics are one row of filters above "What farmers are asking".
+- Search: one entry point. The top bar opens a search dialog (`layout/SearchDialog`, Ctrl/⌘+K, Enter goes to
+  `/search`); the Questions page's search field and the Discover hero's search and topic chips are gone (topics stay in
+  "Browse by topic" and as the Questions filter). No separate Search buttons.
+- Radius token 8px → 12px (inputs and buttons 12px, cards and menus ~17px, dialogs 17–22px); field border
+  `#C9D5C9`, hover `subtle`, focus green border + halo.
+- `threads/PostMenu`: Edit / Delete (red, still confirmed) for the author, Report for others, behind "More actions",
+  on questions, answers, replies and story responses. Report reuses the dialog through `useReportFlow`.
+- Votes: Phosphor carets in tinted 36px squares (44px touch area), sage/green up, soft red down.
+- `ui/TagList`: three chips then "+N" with a popover of all tags (rows, question page, story page); farming chips get
+  a hidden "Crop:" / "Season:" prefix.
+- Photo picker: thumbnails and a dashed "Add a photo" tile in one grid; spinner in the tile while uploading.
+- Advisor: Enter sends, Shift+Enter is a new line; answers keep Ctrl/⌘+Enter. Both ignore Enter during IME
+  composition (Bangla).
+- Tests: tag list (0, 1, 3, 4, 7 tags; popover; no navigation from a row), advisor keys and IME, menus in the
+  report, comment and question tests (`openMoreActions` helper), search dialog. 278 tests, lint, build pass; main JS
+  110 kB. Screens checked at 320–1440 with fixture data (the local backend was down).
+
+**Decisions**
+- Phosphor, not Lucide: Lucide isn't installed and the brief said not to add dependencies.
+- Field borders follow the softer brief (`#C9D5C9`, 1.5:1); every field keeps a visible label, so the border isn't
+  the only way to find it.
+- Post menus, the tag popover and the search dialog load lazily (same-size placeholders) to keep the main bundle in
+  budget.
+
+**Known limitations**
+- Answers and responses have no attachments (the backend takes images on questions only), so the composer has no
+  attach button.
 
 ---
 

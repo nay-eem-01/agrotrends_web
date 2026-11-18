@@ -9,9 +9,21 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 
 **Legend:** ✅ done · 🔄 in progress · ⬜ not started · ⏸ waiting on the backend · ➡ moved to a later step
 
-**Progress:** 65 of 65 steps done
+**Progress:** 135 of 137 steps done
 
 ---
+
+## Staging hosting automation (2026-11-17)
+
+Deployment operations are tracked separately from feature counts.
+
+| Step | Status |
+|---|---|
+| Scripts, staging Actions workflows, rollback checks and Nginx/Vite documentation | ✅ prepared locally |
+| Configure dedicated SSH key, GitHub staging Environments and VM prerequisites | ⬜ |
+| Promote via development → staging and verify the first automated releases | ⬜ |
+| Resolve real backup/upload/isolated restore, monitor uptime/credits/disk | ⬜ |
+
 
 ## Phase F0 — Foundation (`feat/foundation-base`)
 
@@ -177,6 +189,144 @@ Endpoints and rules: `docs/BACKEND_CATCHUP_PLAN.md` § Admin dashboard.
 | F15.3 | User page: counts, expert topics with revoke, Ban or Unban from the known state, grant and remove admin roles | ⬜ |
 | F15.4 | Roles page: create, edit and delete admin roles with privilege checkboxes; Bengali strings; smoke grants a moderator | ⬜ |
 
+## Phase F16 — Refinement: less clutter, better inputs (`feat/refine-base`)
+
+| # | Step | Status |
+|---|---|---|
+| F16.1 | One search (top-bar dialog, Ctrl/⌘+K; page and hero search fields removed), one topic area (Discover's topic cards replaced by "Help a farmer today" and a filter row); softer radius scale and field borders; More menu for post actions; caret vote control; +N tag overflow; photo tile grid; Enter/Shift+Enter in the advisor with an IME guard (`feat/refine-ui`) | ✅ |
+
+## Phase F17 — Admin dashboard (`feat/admin-dashboard-base`, backend Phase 9)
+
+| # | Step | Status |
+|---|---|---|
+| F17.0 | Regenerate API types for backend Phases 9 and 10; sign-in sends `identifier` (`feat/api-types-p10`) | ✅ |
+| F17.1 | Overview: waiting work (open reports, expert applications, unchecked AI answers) linking to queues, community counts; admin rail gains Overview, Users, Roles (`feat/admin-overview`) | ✅ |
+| F17.2 | Users: search name or e-mail, All / Active / Banned, rows with contact, roles and ban badge, paging (`feat/admin-users`) | ✅ |
+| F17.3 | Member page: contact and confirmation, ban state and reason, counts, expert topics with Revoke, give and remove admin roles (`feat/admin-user`) | ✅ |
+| F17.4 | Roles: create, edit (privilege checkboxes) and delete admin roles; member and super-admin roles fixed (`feat/admin-roles`) | ✅ |
+
+## Phase F18 — Phone sign-up (`feat/phone-auth-base`, backend Phase 10)
+
+| # | Step | Status |
+|---|---|---|
+| F18.1 | Sign in (and admin sign-in) with an e-mail or a phone number; phone helpers (`feat/phone-sign-in`) | ✅ |
+| F18.2 | Sign up with an e-mail, a phone or both; `/verify-phone` with the 6-digit code and a timed resend; banner and dialog follow the account's contacts (`feat/phone-sign-up`) | ✅ |
+| F18.3 | Forgot password: E-mail or Phone; by phone, a code then the code and a new password (`feat/phone-reset`) | ✅ |
+| F18.4 | Settings: e-mail and phone optional while one remains, confirmation state for each, no sign-out on an e-mail change (`feat/phone-settings`) | ✅ |
+
+## Phase F19 — Simpler asking (`feat/simple-ask-base`)
+
+| # | Step | Status |
+|---|---|---|
+| F19.1 | Question page: the question's own vote moves beside the author line as "Useful question?", apart from the answers' votes; vote arrows get a hover title (`feat/question-vote-label`) | ✅ |
+| F19.2 | Ask form in one place: title, rich-text details (bold, italic, lists, quote, link) with a photo button, topic and tags in one composer; no crop-specific farming fields (`feat/ask-editor`) | ✅ |
+| F19.3 | Ask form restyled: no boxed border, soft sticky toolbar, topic and tags typed in one row, Cancel and Post in a sticky bar above the phone's bottom navigation (`feat/ask-composer`) | ✅ |
+
+## Phase F20 — Harvest look (`feat/harvest-base`, stacked on F19)
+
+| # | Step | Status |
+|---|---|---|
+| F20.1 | Harvest tokens from the ui-ux-pro-max agriculture profile: pale field-green page, white cards, earth green `#15803D`, harvest gold `#A16207`, Lora for editorial type, 16px radius; field borders to 3:1 (`feat/harvest-tokens`) | ✅ |
+| F20.2 | Question page on Harvest: the question as a white card with a Lora title, a side panel (Useful question? vote, answer count, asked date, Answer) sticky from 1024px and a row under the question below it, answers as cards with a gold edge on the accepted one, list formatting in answers (`feat/harvest-question`) | ✅ |
+| F20.3 | The page stays white: the pale-green page background is dropped, the rest of Harvest stays (`fix/harvest-white-page`) | ✅ |
+| F20.4 | Ask form redesign: topics as one-tap chips (radios), tags with popular one-tap suggestions, a post bar that says what is still needed, Ctrl/⌘+Enter to post (`feat/ask-redesign`) | ✅ |
+
+## Phase F21 — Paddy Field look (`feat/paddy-base`, stacked on F20)
+
+Nayeem chose direction A's colours and type with D's shapes from five whole-app directions (2026-10-31). One screen
+per step, each checked in light, dark and at 390px.
+
+| # | Step | Status |
+|---|---|---|
+| F21.1 | Paddy Field tokens: paddy green `#245C3A`, mustard `#D9A441` with `mustard-ink` `#8A5F0C` for text, ink `#1C2B21`, leaf wash `#F3F7F2`; pill buttons, 18px cards, 12px fields; no shadows on cards; the direction written into DESIGN.md (`feat/paddy-tokens`) | ✅ |
+| F21.2 | Shell: pill search on the leaf wash, pill Write and Ask, avatar; bottom tab bar on phones (`feat/paddy-shell`) | ✅ |
+| F21.3 | Sign in and sign up: a leaf-wash side panel (headline, a member quote, what you get), Google first, one field for e-mail or phone, the language switch on the form (`feat/paddy-auth`) | ✅ |
+| F21.4 | Become a verified expert: why it's worth it and the three steps beside the form; topics and proof type as one-tap choices (`feat/paddy-expert-apply`) | ✅ |
+| F21.5 | Profile: cover wash, Lora name, headline, stats row, tabs; your own profile shows Edit profile (`feat/paddy-profile`) | ✅ |
+| F21.6 | Story editor: a quiet page (cover, Lora title and subtitle) with a publish panel beside it (`feat/paddy-editor`) | ✅ |
+| F21.7 | Question page: Lora title, tags under it, round votes beside the post, the accepted answer in a mustard card (`feat/paddy-question`) | ✅ |
+| F21.8 | AI advisor: sources as numbered cards above the answer, follow-up questions as rows, a pill ask bar (`feat/paddy-advisor`) | ✅ |
+| F21.9 | Questions and stories feeds: topic chips, rows with a thumbnail, stats line with the accepted mark (`feat/paddy-feeds`) | ✅ |
+| F21.10 | Story page: Medium-like reading column, byline with Follow, quiet save bar (`feat/paddy-story`) | ✅ |
+
+## Phase F22 — Match the mock-ups (`feat/mock-base`, stacked on F21)
+
+Nayeem asked for the screens exactly as in the direction mock-ups (A's colours, D's shapes, fields included). Parts
+that need new endpoints are built and stay hidden until the backend answers; the contracts are in
+`docs/BACKEND_REQUESTS.md`.
+
+| # | Step | Status |
+|---|---|---|
+| F22.1 | D's fields: single-line fields, selects and tag boxes as pills, text areas 18px; backend requests written (`feat/mock-fields`) | ✅ |
+| F22.2 | Home feed in three columns: navigation and your topics on the left, chips, a composer and a mixed feed in the middle, trending and experts to follow on the right; the phone home with quick actions and this week's tasks (`feat/mock-home`) | ✅ |
+| F22.3 | Question page: votes in a column beside the question and each answer, a side panel with answers, views, asked, the AI answer and Write an answer (`feat/mock-question`) | ✅ |
+| F22.4 | Profile after LinkedIn: Follow, location and followers, credentials, "answers questions on", recent contributions; your own profile with the completion nudge and Overview, Stories, Questions, Answers, Drafts, Saved tabs (`feat/mock-profile`) | ✅ |
+| F22.5 | AI advisor: follow-up questions as rows and a pill ask bar (`feat/mock-advisor`) | ✅ |
+| F22.6 | Ask a question: "Already answered, might help" while typing the title (`feat/mock-ask`) | ✅ |
+| F22.7 | Story editor: draft status bar with Preview, topic and tags in the side panel beside the checklist (`feat/mock-editor`) | ✅ |
+| F22.8 | Sign in and sign up: Google first, Forgot beside the password label, Show password, a Mobile / E-mail switch and a strength bar on sign-up (`feat/mock-auth`) | ✅ |
+| F22.9 | Story page: Follow in the byline and Save in the top bar (`feat/mock-story`) | ✅ |
+| F22.10 | Navigation in one place: the sidebar on every page from 1024px, hidden to icons or open from the top bar's menu button; no section tabs in the top bar; the home feed drops its own sidebar (`feat/mock-sidebar`) | ✅ |
+| F22.11 | Search as a field in the top bar (no pop-up from 1024px; Ctrl/⌘+K focuses it); Your profile in the sidebar and the account menu (`feat/mock-topbar`) | ✅ |
+| F22.12 | Quieter frame: the footer drops its rule beside the sidebar; sign in, sign up and the password and e-mail steps are focused pages with only the logo and a way back (`feat/mock-chrome`) | ✅ |
+
+## Phase F23 — The backend's second batch (`feat/api2-base`, stacked on F22)
+
+The backend built most of `docs/BACKEND_REQUESTS.md` (status table there). The web switches to the generated types
+and shows what the new endpoints allow.
+
+| # | Step | Status |
+|---|---|---|
+| F23.1 | Regenerated API types; profile, answers, experts and public numbers use them; this week's tasks removed (not wanted) (`feat/api2-types`) | ✅ |
+| F23.2 | Home rail: trending questions beside trending stories; Follow on experts to follow (`feat/api2-home`) | ✅ |
+| F23.3 | Story subtitle and "Let the AI advisor cite this story" in the editor; the subtitle on the story page and in lists (`feat/api2-stories`) | ✅ |
+| F23.4 | Location and cover photo on your profile; the "new question in your topic" notification (`feat/api2-profile`) | ✅ |
+| F23.5 | Home as two tabs, Questions / Stories, over the topic chips (option A of four on the design canvas); one kind at a time, never mixed (`feat/home-tabs`) | ✅ |
+| F23.6 | Admin and review screens in the current design: the admin sections join the app sidebar (one rail; tabs on phones), Lora titles, no mustard on the overview, a pill search, the back link above a member's name, red Delete; the review queue in the sidebar for Verified Experts (`feat/admin-design`) | ✅ |
+| F23.7 | About us, Privacy policy and Terms of use pages; a full footer (brand line, Explore / AgroTrends / Legal, contact e-mail, social links once their URLs are set); "you agree to the terms" on sign-up (`feat/site-pages`) | ✅ |
+| F23.8 | Faster pages: the question page loads its answers, AI answer and votes beside the question; hovering, pressing or focusing a question or story link starts its page; lazy images in stories; My stories skips a profile read (`perf/faster-pages`) | ✅ |
+| F23.9 | Profile photo and cover open full size (an image viewer); your photo on the account menu in the top bar (`fix/profile-images`) | ✅ |
+| F23.10 | Footer full width under the page and the sidebar on a tinted band, link groups together on the right; the signed-in home feed widened to 84rem with a wider rail (`fix/footer-home-width`) | ✅ |
+| F23.11 | Reply to a reply, two levels deep like Facebook: Reply on replies to answers and to story responses, the box starts with `@name`, sent with that reply's id (backend 4.26) (`feat/reply-to-reply`) | ✅ |
+| F23.12 | The "replied to your answer" notification (`ANSWER_REPLY`, backend 4.27), opening the question (`feat/answer-reply-notification`) | ✅ |
+
+## Phase F24 — Audit fixes (`feat/audit-base`, from `development`)
+
+The product and UX audit of 2026-11-03 (https://claude.ai/artifact/MPuLZ9XMhPQop8JEqwzCQz), smallest first. What the
+web can't do alone is in `docs/BACKEND_REQUESTS_AUDIT.md` (B1–B12); those steps wait for their item.
+
+| # | Step | Status |
+|---|---|---|
+| F24.1 | Ask and Write on phones: no tab bar on composing pages (the Post bar takes the bottom edge), no footer under Ask, Write or the advisor, photos as a labelled field under the details, the story toolbar in one scrolling row (`feat/phone-tasks`) | ✅ |
+| F24.2 | Share on questions and stories to every social (the phone's share sheet, Facebook, WhatsApp, Messenger, X, LinkedIn, Telegram, copy link); the Facebook and Instagram pages in the footer (`feat/share`) | ✅ |
+| F24.3 | Discover for visitors (Hallmark pass): one Ask, claims only what's live, one advisor promo, an honest day-one state (`feat/discover-hallmark`) | ✅ |
+| F24.4 | About page (Hallmark pass): who runs it and how an answer gets checked (`feat/about-hallmark`) | ✅ |
+| F24.5 | Small honest fixes: Ask instead of Write for visitors, empty lists with their action, Google's button in the page's language, topic chips in one row, "All" until "For you" is real (`fix/audit-small`) | ✅ |
+| F24.6 | Where you are on Ask: an optional place, prefilled from your profile (`feat/ask-place`) | ✅ |
+| F24.7 | One Ask: post publicly (AI now, experts check) or ask privately (AI only, not checked); the advisor says its answers aren't checked (`feat/one-ask`) | ✅ |
+| F24.8 | Link-preview card: the default `og:image` and the `/share` links (B7) (`feat/share-card`) | ✅ |
+| F24.9 | Reply counts: "3 replies", nothing at 0; story responses read replies only where there are some; the regenerated API types (B1) (`feat/api3-types`) | ✅ |
+| F24.10 | "7 of 10 left today" in the advisor (B2) (`feat/ai-allowance`) | ✅ |
+| F24.11 | The relaxed password rule (B3) (`feat/password-rule`) | ⏸ |
+| F24.12 | "For you" from the topics you follow (B4) (`feat/for-you`) | ✅ |
+| F24.13 | E-mail settings, your language and the unsubscribe page; "we'll e-mail you" after asking (B5, B8) (`feat/email-settings`) | ✅ |
+| F24.14 | Launch-test panel in admin (B6) (`feat/launch-metrics`) | ✅ |
+| F24.15 | "Cited in N AI answers" and an impact line on profiles (B9) (`feat/impact`) | ✅ |
+| F24.16 | Digest preview for admins (B10) (`feat/digest-preview`) | ✅ |
+| F24.17 | Notify me on a question (B11) (`feat/follow-question`) | ⏸ |
+| F24.18 | Refresh token from the HttpOnly cookie (B12) (`feat/refresh-cookie`) | ✅ |
+
+## Phase F25 — Deployment feedback (`feat/deployment-fixes-base`)
+
+| # | Step | Status |
+|---|---|---|
+| F25.1 | Show/Hide on e-mail/SMS reset and settings password fields, reusing `PasswordField` | ✅ |
+| F25.2 | Clear stale field errors on edit in account, sign-up and author profile forms; revalidate reset errors while typing | ✅ |
+| F25.3 | Send an explicit empty profile-image URL when removing a photo, so the backend can clean it up after saving | ✅ |
+
+Deployment checkpoint (2026-11-16): frontend login against Docker confirmed. Docker R2/Brevo checks, WSL backup
+authentication, Azure VM, DNS/HTTPS and monitoring remain pending; backend `docs/DEPLOY.md` is the runbook.
+
 ## Needs from the backend
 
 | Item | Needed for | Status |
@@ -184,12 +334,12 @@ Endpoints and rules: `docs/BACKEND_CATCHUP_PLAN.md` § Admin dashboard.
 | "Followed by me" per tag (or a larger followed-tags read) | exact Follow state past the 100 most recent follows (F2.6) | ⏸ |
 | "Saved by me" per story (`bookmarkedByMe` on `BlogResponse`, or `GET /api/blogs/id/{id}/bookmark`) | exact saved state past the 100 most recent saves (F2.4) | ⏸ |
 | Category rename to take JSON (`PUT /api/categories/update/categoryId/{id}` reads a raw text body; create takes a query parameter) | consistent requests (F6.6) | ⏸ |
-| The advisor's remaining daily questions (e.g. on `AiAnswerResponse` or `GET /api/ai/quota`) | showing the quota before it runs out (F5.1) | ⏸ |
+| The advisor's remaining daily questions (e.g. on `AiAnswerResponse` or `GET /api/ai/quota`) | showing the quota before it runs out (F5.1) | ✅ `GET /api/ai/allowance` (backend 4.29, F24.10) |
 | Answers: `/api/answers/question/{id}` also returns replies | the client filters replies out of the answer list (F4.2) | ✅ backend Phase 6 (direct answers only; F8.3 drops the filter) |
-| Comments: `CommentResponse` in the OpenAPI document and a reply count per comment (or replies nested) | typed comments without a hand-written type; one request per story instead of one per thread (F2.5) | ⏸ |
+| Comments: `CommentResponse` in the OpenAPI document and a reply count per comment (or replies nested) | typed comments without a hand-written type; one request per story instead of one per thread (F2.5) | ✅ reply counts (backend 4.28, F24.9) |
 | `GET /api/authors/me` and `authorId` on `UserResponse` | F1.4 | ✅ (backend `feat/author-me`) |
 | Public GET access to published content | anonymous reading (F2) | ✅ backend 2.13 |
-| Refresh token as an `HttpOnly` cookie instead of in the JSON body | keeping the refresh token out of script reach | ⏸ |
+| Refresh token as an `HttpOnly` cookie instead of in the JSON body | keeping the refresh token out of script reach | ✅ backend 4.37 (F24.18) |
 | CORS origins from a property (backend 4.1) | a deployed split origin | ⏸ |
 | Notifications API | F12 | ✅ backend Phase 8 (`feat/notifications-moderation-base`, not merged yet) |
 | Machine-readable error codes in the error envelope | branching without matching message text (F7.2, F9.1) | ⏸ |

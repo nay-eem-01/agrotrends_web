@@ -2,7 +2,7 @@ import { looksLikeHtml, sanitizeHtml } from './sanitize'
 
 test('scripts, handlers and styles are removed', () => {
   const clean = sanitizeHtml('<p onclick="x()" style="color:red">Hi<script>alert(1)</script><img src="/a.png" onerror="x()"></p>')
-  expect(clean).toBe('<p>Hi<img src="/a.png"></p>')
+  expect(clean).toBe('<p>Hi<img src="/a.png" loading="lazy" decoding="async"></p>')
 })
 
 test('frames and forms are removed', () => {

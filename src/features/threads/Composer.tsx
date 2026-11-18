@@ -30,7 +30,11 @@ export function Composer({ label, submitLabel, doneLabel, placeholder, initial =
   const [done, setDone] = useState(false)
 
   useEffect(() => {
-    if (focusOnOpen) document.getElementById(fieldId)?.focus()
+    if (!focusOnOpen) return
+    const field = document.getElementById(fieldId)
+    field?.focus()
+    // After any prefilled text (a reply's "@name "), so typing carries on from it.
+    if (field instanceof HTMLTextAreaElement) field.setSelectionRange(field.value.length, field.value.length)
   }, [focusOnOpen, fieldId])
 
   function submit(event: FormEvent) {
@@ -65,7 +69,7 @@ export function Composer({ label, submitLabel, doneLabel, placeholder, initial =
         error={problem}
         onKeyDown={(event) => {
           // Ctrl+Enter (⌘+Enter on a Mac) sends; Enter alone is a new line.
-          if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+          if (event.key === 'Enter' && (event.ctrlKey || event.metaKey) && !event.nativeEvent.isComposing) {
             event.preventDefault()
             event.currentTarget.form?.requestSubmit()
           }

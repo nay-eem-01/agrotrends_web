@@ -1,5 +1,5 @@
-import { MagnifyingGlass, Plus, Sparkle } from '@phosphor-icons/react'
-import { lazy, Suspense, useState, type FormEvent } from 'react'
+import { Plus, Sparkle } from '@phosphor-icons/react'
+import { lazy, Suspense } from 'react'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyTitle } from '@/components/ui/empty'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -36,8 +36,8 @@ export function useListPath() {
 }
 
 /**
- * `/questions`: the question feed. Search sits first (most people come looking for an answer), then the topics as
- * chips, Newest | Unanswered and the farming filters; a quiet sidebar points to the advisor and to asking well.
+ * `/questions`: the question feed: topics as chips, Newest | Unanswered and the farming filters (site-wide search is
+ * the top bar's); a quiet sidebar points to the advisor and to asking well.
  */
 export function QuestionsPage() {
   const t = useT()
@@ -53,15 +53,14 @@ export function QuestionsPage() {
       <header className="flex flex-wrap items-end justify-between gap-x-6 gap-y-4 pt-8 sm:pt-10">
         <div className="max-w-xl">
           <h1 className="text-2xl sm:text-[2rem]">{t('Questions')}</h1>
-          <p className="mt-1.5 text-muted-foreground">{t('Ask the community about your crop, your soil, your season.')}</p>
+          <p className="mt-1.5 text-muted-foreground">{t('Crops, fish, livestock or your studies: ask farmers, experts and students.')}</p>
         </div>
         <ButtonLink to="/questions/ask" className="shrink-0">
           <Plus size={18} weight="bold" aria-hidden="true" />
           {t('Ask a question')}
         </ButtonLink>
       </header>
-      <QuestionSearch className="mt-6" />
-      <div className="mt-2 lg:grid lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-12">
+      <div className="mt-4 lg:grid lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-12">
         <div className="min-w-0">
           <Toolbar filters={filters} />
           {questions.isPending ? (
@@ -97,46 +96,6 @@ export function QuestionsPage() {
         </aside>
       </div>
     </div>
-  )
-}
-
-/** Searches questions (and stories, on the next tab) through `/search`. */
-export function QuestionSearch({ className, size = 'md' }: { className?: string; size?: 'md' | 'lg' }) {
-  const t = useT()
-  const navigate = useNavigate()
-  const [query, setQuery] = useState('')
-
-  function submit(event: FormEvent) {
-    event.preventDefault()
-    const q = query.trim()
-    if (q) navigate(`/search?q=${encodeURIComponent(q)}`)
-  }
-
-  return (
-    <search className={className}>
-      <form onSubmit={submit}>
-        <label
-          className={cn(
-            'flex items-center gap-3 rounded-xl border border-input bg-card pr-1.5 pl-4 text-muted-foreground transition-[border-color,box-shadow] duration-150 focus-within:border-primary focus-within:ring-[3px] focus-within:ring-ring/60 hover:border-foreground/60',
-            size === 'lg' ? 'h-14' : 'h-12',
-          )}
-        >
-          <MagnifyingGlass size={20} aria-hidden="true" />
-          <span className="sr-only">{t('Search questions and stories')}</span>
-          <input
-            type="search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder={t('Search questions, crops, pests')}
-            enterKeyHint="search"
-            className="min-w-0 flex-1 bg-transparent text-base text-foreground placeholder:text-muted-foreground focus:outline-none"
-          />
-          <Button type="submit" size="sm" className={size === 'lg' ? 'h-11' : undefined}>
-            {t('Search')}
-          </Button>
-        </label>
-      </form>
-    </search>
   )
 }
 
@@ -178,14 +137,14 @@ function Toolbar({ filters }: { filters: QuestionFilters }) {
         </nav>
       )}
       <div className="flex flex-wrap items-center gap-3">
-        <nav aria-label={t('Sort questions')} className="flex gap-1 rounded-lg bg-muted p-1">
+        <nav aria-label={t('Sort questions')} className="flex gap-1 rounded-full bg-muted p-1">
           {tabs.map((tab) => (
             <Link
               key={tab.label}
               to={tab.to}
               aria-current={tab.current ? 'page' : undefined}
               className={cn(
-                'flex h-9 items-center rounded-md px-3.5 text-sm transition-colors duration-150',
+                'flex h-9 items-center rounded-full px-4 text-sm transition-colors duration-150',
                 tab.current ? 'bg-card font-semibold text-primary shadow-xs ring-1 ring-border' : 'text-muted-foreground hover:text-foreground',
               )}
             >
@@ -193,7 +152,8 @@ function Toolbar({ filters }: { filters: QuestionFilters }) {
             </Link>
           ))}
         </nav>
-        <div className="flex min-w-0 flex-1 items-center justify-end gap-3">
+        {/* Its own row on phones, so the topic picker keeps a usable width. */}
+        <div className="flex w-full min-w-0 items-center justify-end gap-3 sm:w-auto sm:flex-1">
           {categories.length > TOPIC_CHIPS && (
             <Suspense fallback={<span aria-hidden="true" className="h-11 min-w-0 flex-1 rounded-lg border border-input sm:max-w-56" />}>
               <SearchSelect
@@ -290,7 +250,7 @@ function AdvisorCard() {
 /** Plain guidance on asking, so a question gets useful answers (no data behind it, just advice). */
 export function AskingWell({ className = 'border-t border-border pt-5' }: { className?: string }) {
   const t = useT()
-  const tips = [t('Say what you grow and where.'), t('Describe what you see, and since when.'), t('Add what you have already tried.'), t('A clear photo of the leaves, roots or pests helps.')]
+  const tips = [t('Say what you are working with and where.'), t('Describe what you see, and since when.'), t('Add what you have already tried.'), t('A clear photo of the problem helps.')]
   return (
     <section className={className}>
       <h2 className="text-sm font-semibold">{t('Getting a good answer')}</h2>

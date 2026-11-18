@@ -54,7 +54,8 @@ export function useModerate() {
         : m.action === 'unban'
           ? api(`/api/admin/users/${m.userId}/ban`, { method: 'DELETE' })
           : api(`/api/admin/reports/${m.reportId}/${m.action}`, { method: 'POST' }),
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ['admin', 'reports'] }),
+    // Reports, users and stats all change with a ban or a removal.
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['admin'] }),
   })
 }
 

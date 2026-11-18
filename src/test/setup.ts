@@ -16,3 +16,10 @@ HTMLDialogElement.prototype.close ??= function (this: HTMLDialogElement) {
   this.open = false
   this.dispatchEvent(new Event('close'))
 }
+
+// jsdom has no layout; ProseMirror measures the cursor to scroll it into view while typing.
+const noRects = () => ({ length: 0, item: () => null, [Symbol.iterator]: [][Symbol.iterator] }) as unknown as DOMRectList
+const emptyRect = () => new DOMRect()
+Range.prototype.getClientRects ??= noRects
+Range.prototype.getBoundingClientRect ??= emptyRect
+document.elementFromPoint ??= () => null

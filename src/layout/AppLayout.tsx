@@ -1,35 +1,63 @@
 import { Suspense } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
+import { cn } from 'cn'
 import { Toaster } from '@/components/ui/sonner'
 import { ConfirmEmailHost, EmailBanner } from '../features/auth/confirmEmail'
 import { Spinner } from '../ui/Spinner'
+import { AppSidebar, SidebarProvider } from './AppSidebar'
 import { Footer } from './Footer'
 import { BottomNav } from './BottomNav'
 import { TopBar } from './TopBar'
+import { useLinkPrefetch } from './useLinkPrefetch'
+
+// Signing in, signing up and the password and e-mail steps are a single task: no navigation around them.
+const FOCUSED = ['/sign-in', '/sign-up', '/forgot-password', '/reset-password', '/verify-email']
+// Writing a question or a story: the sidebar stays on wide screens, but phones lose the tab bar (its bar of actions
+// takes the bottom edge instead) and no page has the footer under the form.
+const COMPOSING = [/^\/questions\/ask$/, /^\/questions\/\d+\/edit$/, /^\/write(\/\d+)?$/]
+// The advisor is a conversation with its composer at the bottom; a footer under it only gets in the way.
+const NO_FOOTER = [...COMPOSING, /^\/advisor$/]
+
+export const isComposing = (path: string) => COMPOSING.some((pattern) => pattern.test(path))
 
 export function AppLayout() {
+  const { pathname } = useLocation()
+  const focused = FOCUSED.includes(pathname)
+  const composing = isComposing(pathname)
+  const footer = !NO_FOOTER.some((pattern) => pattern.test(pathname))
+  useLinkPrefetch()
   return (
-    <div className="flex min-h-dvh flex-col pb-16 md:pb-0">
-      <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-30 focus:rounded-full focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground">
-        Skip to content
-      </a>
-      <TopBar />
-      <EmailBanner />
-      <main id="main" className="flex-1">
-        <Suspense
-          fallback={
-            <div className="flex justify-center py-24 text-ink-muted">
-              <Spinner label="Loading page" />
-            </div>
-          }
-        >
-          <Outlet />
-        </Suspense>
-      </main>
-      <Footer />
-      <BottomNav />
-      <ConfirmEmailHost />
-      <Toaster position="bottom-center" mobileOffset={{ bottom: 80 }} />
-    </div>
+    <SidebarProvider>
+      <div className="flex min-h-dvh flex-col">
+        <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-30 focus:rounded-full focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground">
+          Skip to content
+        </a>
+        <TopBar focused={focused} />
+        <EmailBanner />
+        {/* The navigation sits beside every other page from 1024px and the page takes the rest of the width; the footer
+            runs under both, so the sidebar's edge ends on its rule. */}
+        <div className="flex flex-1">
+          {!focused && <AppSidebar />}
+          <div className="flex min-w-0 flex-1 flex-col">
+            <main id="main" className={cn('flex-1', footer && 'pb-16')}>
+              <Suspense
+                fallback={
+                  <div className="flex justify-center py-24 text-ink-muted">
+                    <Spinner label="Loading page" />
+                  </div>
+                }
+              >
+                <Outlet />
+              </Suspense>
+            </main>
+          </div>
+        </div>
+        {/* Below 768px the footer's band also runs under the fixed tab bar. */}
+        {footer && <Footer className={focused ? undefined : 'pb-16 md:pb-0'} />}
+        {!focused && !composing && <BottomNav />}
+        <ConfirmEmailHost />
+        <Toaster position="bottom-center" mobileOffset={{ bottom: 80 }} />
+      </div>
+    </SidebarProvider>
   )
 }

@@ -10,6 +10,7 @@ import { isBlank, loadLocalDraft } from '../../lib/draft'
 import { Button, ButtonLink } from '../../ui/Button'
 import { cx } from '../../ui/cx'
 import { Spinner } from '../../ui/Spinner'
+import { useSession } from '../auth/session'
 
 type Tab = 'drafts' | 'published'
 
@@ -74,8 +75,10 @@ function Drafts() {
 
 /** Published stories are listed by author id, which the backend creates with the first story; read it from the profile. */
 function Published() {
-  const profile = useMyAuthorProfile(true)
-  const authorId = profile.data?.authorId
+  // The session already knows the author id; the profile is read only when it doesn't.
+  const known = useSession().user?.authorId
+  const profile = useMyAuthorProfile(known == null)
+  const authorId = known ?? profile.data?.authorId
   if (authorId == null) {
     return profile.isPending ? (
       <div className="flex justify-center py-16 text-ink-muted">

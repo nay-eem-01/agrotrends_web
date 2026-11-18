@@ -26,7 +26,7 @@ export function AiAnswerCard({ questionId, topicId, askedAt }: { questionId: num
 
   if (ai.data == null) {
     return waiting && !ai.isError ? (
-      <p className="mt-10 flex items-center gap-2 text-sm text-muted-foreground">
+      <p className="mt-6 flex items-center gap-2 text-sm text-muted-foreground">
         <Sparkle size={16} className="animate-pulse text-primary" aria-hidden="true" />
         <output>{t('An AI answer is being written. Experts in this topic will check it.')}</output>
       </p>
@@ -46,10 +46,10 @@ function Card({ answer, topicId }: { answer: AiAnswer; topicId?: number }) {
   return (
     <section
       aria-labelledby="ai-answer"
-      className={cn('mt-10 rounded-xl p-5 ring-1 sm:p-6', confirmed ? 'bg-card ring-2 ring-mustard' : 'border border-dashed border-input bg-card/60 ring-0')}
+      className={cn('mt-6 rounded-xl border p-5 sm:p-6', confirmed ? 'border-mustard bg-card ring-1 ring-mustard/40' : 'border-dashed border-input bg-card/70')}
     >
       <header className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <h2 id="ai-answer" className="flex items-center gap-2 font-sans text-base font-semibold">
+        <h2 id="ai-answer" className="flex scroll-mt-24 items-center gap-2 font-sans text-base font-semibold">
           <Sparkle size={18} weight="fill" className="text-primary" aria-hidden="true" />
           {t('AI answer')}
         </h2>
@@ -82,7 +82,7 @@ function StatusLabel({ answer }: { answer: AiAnswer }) {
     const text = answer.status === 'CONFIRMED' ? t('Confirmed by {name}', { name: answer.reviewerName ?? '' }) : t('Corrected by {name}', { name: answer.reviewerName ?? '' })
     return (
       <span className={cn('inline-flex h-7 items-center gap-1.5 rounded-full px-3 text-sm', answer.status === 'CONFIRMED' ? 'bg-mustard-soft' : 'bg-secondary')}>
-        <SealCheck size={16} weight="fill" className={answer.status === 'CONFIRMED' ? 'text-mustard' : 'text-primary'} aria-hidden="true" />
+        <SealCheck size={16} weight="fill" className={answer.status === 'CONFIRMED' ? 'text-mustard-ink' : 'text-primary'} aria-hidden="true" />
         {text}
         {answer.reviewedAt && <span className="text-muted-foreground">· {storyDate(answer.reviewedAt)}</span>}
       </span>

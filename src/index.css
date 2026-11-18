@@ -1,3 +1,18 @@
+/* Hallmark · v2.0.0 · redesign: full · routes: / (visitors), /about · system: docs/DESIGN.md (locked, Paddy Field) · genre: editorial · job: ask (/), trust (/about) · hero: Counter (/), Banner (/about) · nav: the project's top bar and sidebar (kept) · footer: the project's footer (kept) · imagery: none, the product's own ask box · signature: the question box that carries what is typed into the ask form */
+/* Hallmark · pre-emit critique: P4 H4 E4 S4 R5 V3 · weakest: V, the app shell and the list sections stay; the change is the first screen, where the ask box replaces the drawn field */
+/* Hallmark · answered F3 · text-wrap balance is set on the Discover heads in their class lists, so the two-line Lora head never ends on a stub at 375 */
+/* Hallmark · waive 49b · the advisor's seasonal questions, the footer's Become a verified expert and story titles wrap at two lines at most · whole farming questions and titles that cannot shorten */
+/* Hallmark · dropped /advisor, /sign-up · the hero's Open the advisor and Join AgroTrends repeated the sidebar's AI advisor and the top bar's Get started; the advisor is offered once, through this season's questions */
+/* Hallmark · dropped discover-advisor · the advisor panel's id went with the panel; nothing links to it */
+/* Hallmark · reworded "Ask the advisor" to "Or ask the AI advisor privately" · the second advisor panel merged into the ask box (audit: two advisor promos) */
+/* Hallmark · dismissed 77 · real data decides the sections: Help a farmer today and From the field step aside when there is nothing to show */
+/* Hallmark · hero-review: fix · 4 findings · 4 resolved (chips wrap as a quiet list, the lede no longer echoes the head, the box fills 61% at 1440, the private way a step quieter) */
+/* Hallmark · finish-review: subagent · 6 findings · 6 resolved (a padded hero so the questions show at the 1440 fold, gap 80px, the season label visible, the caution that AI can be wrong restored with a way to ask anything, the head at 40px from 1024 to 1280, the question rows at the 720px feed measure) · gap: the carry-over of typed text shows only in use, covered by discover.test.tsx */
+/* Hallmark · reworded "What's next" to "What’s next" · F1 typographic apostrophes across About */
+/* Hallmark · waive 44c · Banner posture on /about, its header ends near half the 1440 screen and Why we started shows above the fold · About is read, not acted on, so its first screen leads into the reasons instead of filling the screen */
+/* Hallmark · waive 77 · Verified experts and Who we are are the two halves of one split row across the full container on /about · two landmarks so each heading labels its own section, as the review asked */
+/* Hallmark · /about hero-review: fix · 5 findings · 2 resolved (the steps on the first screen, the header padding cut) 1 partial (heading ratio: the type scale is DESIGN.md's, so the statement dropped to 22px instead) 2 for the owner (a product-specific head, the empty column beside Why we started) · finish-review: subagent · 8 findings · 6 resolved (marks at the product's size with step 1's Unanswered, 58ch, the expert offer once, the product's Bengali mark, two landmarks, Talk to us unboxed) 1 for the owner (generic heads) 1 capture artifact */
+/* Hallmark · dismissed 54 · SectionHeading renders an h2; the linter reads the component name, not its output */
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
@@ -19,10 +34,10 @@
 
 /* Tokens from docs/DESIGN.md: shadcn's semantic roles, AgroTrends' colours. Components never use raw hex. */
 :root {
-  /* "The Living Field" (F15): a white page, forest green for action, sage for selection, a warm field accent. */
+  /* "Paddy Field" (F21): a white page, paddy green for action, mustard flower for trust; pill buttons, soft cards. */
   --background: #ffffff;
   --foreground: #1c2b21;
-  --surface: #f5f8f3;
+  --surface: #f3f7f2;
   --card: #ffffff;
   --card-foreground: #1c2b21;
   --popover: #ffffff;
@@ -32,24 +47,25 @@
   --primary-active: #19482d;
   --secondary: #eaf3e8;
   --secondary-foreground: #1c2b21;
-  --muted: #f5f8f3;
+  --muted: #f3f7f2;
   --muted-foreground: #59665d;
-  --subtle: #78847b;
+  --subtle: #6f7b72;
   --accent: #eaf3e8;
   --accent-foreground: #1c2b21;
   --destructive: #b42318;
   --destructive-soft: #fef3f2;
   --success: #216e45;
-  --warning: #d9a441;
+  --warning: #8a5f0c;
   --warning-soft: #fbf3e1;
-  --border: #e2e8e1;
+  --border: #e4eae3;
   --border-strong: #c9d5c9;
-  --input: #78847b;
+  --input: #84958a;
   --ring: #79a98a;
   --mustard: #d9a441;
+  --mustard-ink: #8a5f0c;
   --mustard-soft: #fbf3e1;
   --shade: #1c2b21;
-  --radius: 0.5rem;
+  --radius: 0.75rem;
   --chart-1: #245c3a;
   --chart-2: #d9a441;
   --chart-3: #59665d;
@@ -61,7 +77,7 @@
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #eaf3e8;
   --sidebar-accent-foreground: #1c2b21;
-  --sidebar-border: #e2e8e1;
+  --sidebar-border: #e4eae3;
   --sidebar-ring: #79a98a;
 
   /* Motion (Emil Kowalski's curves): enter and exit with ease-out, move on screen with ease-in-out. */
@@ -70,88 +86,90 @@
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-/* Dark, "the field at night": deep loam, warm off-white ink, forest green lifted for contrast. */
+/* Dark, "the field at night": deep loam, pale leaf ink, young-leaf green for action, mustard kept warm. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --background: #121713;
-    --foreground: #e9eee8;
-    --surface: #182019;
-    --card: #161d17;
-    --card-foreground: #e9eee8;
-    --popover: #1b231c;
-    --popover-foreground: #e9eee8;
-    --primary: #7cc794;
-    --primary-foreground: #0c1a10;
-    --primary-active: #9ad8ad;
-    --secondary: #1f2b21;
-    --secondary-foreground: #e9eee8;
-    --muted: #182019;
-    --muted-foreground: #a7b3a9;
-    --subtle: #7f8c81;
-    --accent: #1f2b21;
-    --accent-foreground: #e9eee8;
+    --background: #111712;
+    --foreground: #e7ede6;
+    --surface: #1a221c;
+    --card: #161e18;
+    --card-foreground: #e7ede6;
+    --popover: #1a221c;
+    --popover-foreground: #e7ede6;
+    --primary: #7cc495;
+    --primary-foreground: #0f1a13;
+    --primary-active: #9ad4ae;
+    --secondary: #1f2c22;
+    --secondary-foreground: #e7ede6;
+    --muted: #1a221c;
+    --muted-foreground: #9eaba1;
+    --subtle: #84918a;
+    --accent: #1f2c22;
+    --accent-foreground: #e7ede6;
     --destructive: #f2766d;
     --destructive-soft: #2c1714;
-    --success: #7cc794;
-    --warning: #e0b04a;
-    --warning-soft: #2b2412;
-    --border: #263027;
-    --border-strong: #354236;
-    --input: #6d7a6f;
-    --ring: #5f9a72;
-    --mustard: #e0b04a;
-    --mustard-soft: #2b2412;
-    --shade: #000000;
-    --sidebar: #161d17;
-    --sidebar-foreground: #e9eee8;
-    --sidebar-primary: #7cc794;
-    --sidebar-primary-foreground: #0c1a10;
-    --sidebar-accent: #1f2b21;
-    --sidebar-accent-foreground: #e9eee8;
-    --sidebar-border: #263027;
-    --sidebar-ring: #5f9a72;
+    --success: #7cc495;
+    --warning: #ecc677;
+    --warning-soft: #2a2517;
+    --border: #263028;
+    --border-strong: #354238;
+    --input: #5d6d61;
+    --ring: #4f8f66;
+    --mustard: #e3b458;
+    --mustard-ink: #ecc677;
+    --mustard-soft: #2a2517;
+    --shade: #070b08;
+    --sidebar: #161e18;
+    --sidebar-foreground: #e7ede6;
+    --sidebar-primary: #7cc495;
+    --sidebar-primary-foreground: #0f1a13;
+    --sidebar-accent: #1f2c22;
+    --sidebar-accent-foreground: #e7ede6;
+    --sidebar-border: #263028;
+    --sidebar-ring: #4f8f66;
     color-scheme: dark;
   }
 }
 
 :root[data-theme='dark'] {
-  --background: #121713;
-  --foreground: #e9eee8;
-  --surface: #182019;
-  --card: #161d17;
-  --card-foreground: #e9eee8;
-  --popover: #1b231c;
-  --popover-foreground: #e9eee8;
-  --primary: #7cc794;
-  --primary-foreground: #0c1a10;
-  --primary-active: #9ad8ad;
-  --secondary: #1f2b21;
-  --secondary-foreground: #e9eee8;
-  --muted: #182019;
-  --muted-foreground: #a7b3a9;
-  --subtle: #7f8c81;
-  --accent: #1f2b21;
-  --accent-foreground: #e9eee8;
+  --background: #111712;
+  --foreground: #e7ede6;
+  --surface: #1a221c;
+  --card: #161e18;
+  --card-foreground: #e7ede6;
+  --popover: #1a221c;
+  --popover-foreground: #e7ede6;
+  --primary: #7cc495;
+  --primary-foreground: #0f1a13;
+  --primary-active: #9ad4ae;
+  --secondary: #1f2c22;
+  --secondary-foreground: #e7ede6;
+  --muted: #1a221c;
+  --muted-foreground: #9eaba1;
+  --subtle: #84918a;
+  --accent: #1f2c22;
+  --accent-foreground: #e7ede6;
   --destructive: #f2766d;
   --destructive-soft: #2c1714;
-  --success: #7cc794;
-  --warning: #e0b04a;
-  --warning-soft: #2b2412;
-  --border: #263027;
-  --border-strong: #354236;
-  --input: #6d7a6f;
-  --ring: #5f9a72;
-  --mustard: #e0b04a;
-  --mustard-soft: #2b2412;
-  --shade: #000000;
-  --sidebar: #161d17;
-  --sidebar-foreground: #e9eee8;
-  --sidebar-primary: #7cc794;
-  --sidebar-primary-foreground: #0c1a10;
-  --sidebar-accent: #1f2b21;
-  --sidebar-accent-foreground: #e9eee8;
-  --sidebar-border: #263027;
-  --sidebar-ring: #5f9a72;
+  --success: #7cc495;
+  --warning: #ecc677;
+  --warning-soft: #2a2517;
+  --border: #263028;
+  --border-strong: #354238;
+  --input: #5d6d61;
+  --ring: #4f8f66;
+  --mustard: #e3b458;
+  --mustard-ink: #ecc677;
+  --mustard-soft: #2a2517;
+  --shade: #070b08;
+  --sidebar: #161e18;
+  --sidebar-foreground: #e7ede6;
+  --sidebar-primary: #7cc495;
+  --sidebar-primary-foreground: #0f1a13;
+  --sidebar-accent: #1f2c22;
+  --sidebar-accent-foreground: #e7ede6;
+  --sidebar-border: #263028;
+  --sidebar-ring: #4f8f66;
   color-scheme: dark;
 }
 
@@ -183,6 +201,7 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-mustard: var(--mustard);
+  --color-mustard-ink: var(--mustard-ink);
   --color-mustard-soft: var(--mustard-soft);
   --color-shade: var(--shade);
   --color-chart-1: var(--chart-1);
@@ -212,19 +231,19 @@
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  --radius-xl: calc(var(--radius) * 1.5);
+  --radius-2xl: calc(var(--radius) * 1.75);
+  --radius-3xl: calc(var(--radius) * 2.25);
+  --radius-4xl: calc(var(--radius) * 2.75);
 
-  /* Newsreader and Inter have no Bengali letters: the browser takes those glyphs from the next font in the stack. */
-  --font-serif: 'Newsreader Variable', 'Noto Serif Bengali Variable', Georgia, serif;
+  /* Lora and Inter have no Bengali letters: the browser takes those glyphs from the next font in the stack. */
+  --font-serif: 'Lora Variable', 'Noto Serif Bengali Variable', Georgia, serif;
   --font-sans: 'Inter Variable', 'Hind Siliguri', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-heading: var(--font-sans);
 }
 
 @theme {
-  /* Type scale: 13 · 14 · 16 · 18 · 22 · 28 · 40 · 52 (Inter for the interface, Newsreader for headlines) */
+  /* Type scale: 13 · 14 · 16 · 18 · 22 · 28 · 40 · 52 (Inter for the interface, Lora for headlines) */
   --text-xs: 0.8125rem;
   --text-xs--line-height: 1.4;
   --text-sm: 0.875rem;
@@ -251,24 +270,27 @@
   html {
     -webkit-text-size-adjust: 100%;
     text-rendering: optimizeLegibility;
+    overflow-x: clip;
+    scrollbar-color: var(--color-border-strong) transparent;
   }
 
   body {
     @apply bg-background font-sans text-base text-foreground antialiased;
+    overflow-x: clip;
   }
 
   * {
     @apply border-border outline-ring/50;
   }
 
-  /* Headings are interface type (Inter); editorial headlines opt into Newsreader with `font-serif`. */
+  /* Headings are interface type (Inter); editorial headlines and question titles opt into Lora with `font-serif`. */
   h1,
   h2,
   h3 {
     @apply font-sans font-semibold tracking-[-0.015em] text-foreground;
   }
 
-  /* The forest-green outline is the focus indicator (7.9:1); components add the #79A98A ring as a soft halo. */
+  /* The paddy-green outline is the focus indicator (7.9:1); components add the #79A98A ring as a soft halo. */
   :focus-visible {
     outline: 2px solid var(--color-primary);
     outline-offset: 2px;
@@ -355,7 +377,43 @@
   }
 }
 
-/* Tiptap's placeholder on an empty story. */
+/* Question bodies, in the ask form and on the question page: interface type, light rich text. */
+@layer components {
+  .post-body {
+    @apply text-base leading-relaxed text-foreground sm:text-lg;
+  }
+
+  .post-body > * + * {
+    margin-top: 0.9em;
+  }
+
+  .post-body a {
+    @apply text-primary underline underline-offset-4;
+  }
+
+  .post-body ul,
+  .post-body ol {
+    padding-left: 1.4em;
+  }
+
+  .post-body ul {
+    list-style: disc;
+  }
+
+  .post-body ol {
+    list-style: decimal;
+  }
+
+  .post-body li + li {
+    margin-top: 0.35em;
+  }
+
+  .post-body blockquote {
+    @apply border-l-2 border-primary/60 pl-4 text-muted-foreground;
+  }
+}
+
+/* Tiptap's placeholder on an empty story or question. */
 .tiptap p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   float: left;

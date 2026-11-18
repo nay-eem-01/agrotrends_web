@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Route, Routes } from 'react-router-dom'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
@@ -38,15 +38,17 @@ test('signing in stores the session and goes back where the reader was', async (
   fetchMock.mockResolvedValueOnce(envelope(200, tokens))
   renderWithProviders(<App />, '/sign-in?next=%2Fstories%2Fboro-rice')
 
-  await userEvent.type(await screen.findByLabelText('E-mail'), ' nasrin@farm.bd ')
+  await userEvent.type(await screen.findByLabelText('E-mail or phone number'), ' nasrin@farm.bd ')
   await userEvent.type(screen.getByLabelText('Password'), 'Paddy2026!')
   await userEvent.click(screen.getByRole('button', { name: 'Sign in' }))
 
   await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/stories/boro-rice'))
   expect(fetchMock.mock.calls[0][0]).toBe('/api/auth/sign-in')
-  expect(body(0)).toEqual({ email: 'nasrin@farm.bd', password: 'Paddy2026!' })
+  expect(body(0)).toEqual({ identifier: 'nasrin@farm.bd', password: 'Paddy2026!' })
   expect(getAccessToken()).toBe('a1')
-  expect(localStorage.getItem('agrotrends.refreshToken')).toBe('r1')
+  // The refresh token stays in its HttpOnly cookie; only the fact of a session is kept here.
+  expect(localStorage.getItem('agrotrends.refreshToken')).toBeNull()
+  expect(localStorage.getItem('agrotrends.session')).toBe('1')
   expect(await screen.findByRole('button', { name: 'Account' })).toBeInTheDocument()
 })
 
@@ -54,7 +56,7 @@ test('a rejected sign-in shows the server message', async () => {
   fetchMock.mockResolvedValueOnce(envelope(401, null, 'Invalid email or password.'))
   renderWithProviders(<App />, '/sign-in')
 
-  await userEvent.type(await screen.findByLabelText('E-mail'), 'nasrin@farm.bd')
+  await userEvent.type(await screen.findByLabelText('E-mail or phone number'), 'nasrin@farm.bd')
   await userEvent.type(screen.getByLabelText('Password'), 'wrong')
   await userEvent.click(screen.getByRole('button', { name: 'Sign in' }))
 
@@ -66,7 +68,7 @@ test('an empty sign-in form is checked before anything is sent', async () => {
   renderWithProviders(<App />, '/sign-in')
   await userEvent.click(await screen.findByRole('button', { name: 'Sign in' }))
 
-  expect(screen.getByLabelText('E-mail')).toHaveAccessibleDescription('Enter your e-mail address.')
+  expect(screen.getByLabelText('E-mail or phone number')).toHaveAccessibleDescription('Enter your e-mail address or phone number.')
   expect(screen.getByLabelText('Password')).toHaveAccessibleDescription('Enter your password.')
   expect(fetchMock).not.toHaveBeenCalled()
 })
@@ -76,6 +78,8 @@ test('signing up sends one kind of account, then signs in', async () => {
   renderWithProviders(<App />, '/sign-up')
 
   await userEvent.type(await screen.findByLabelText('Full name'), 'Nasrin Akter')
+  // Phone shows first; the e-mail is one tap away.
+  await userEvent.click(screen.getByRole('button', { name: 'Add an e-mail too' }))
   await userEvent.type(screen.getByLabelText('E-mail'), 'nasrin@farm.bd')
   await userEvent.type(screen.getByLabelText('Mobile number'), '1712345678')
   await userEvent.type(screen.getByLabelText('Password'), 'Paddy2026!')
@@ -92,13 +96,14 @@ test('signing up sends one kind of account, then signs in', async () => {
     mobileNumber: '1712345678',
     password: 'Paddy2026!',
   })
-  expect(body(1)).toEqual({ email: 'nasrin@farm.bd', password: 'Paddy2026!' })
+  expect(body(1)).toEqual({ identifier: 'nasrin@farm.bd', password: 'Paddy2026!' })
 })
 
 test('sign-up checks the password rule before sending', async () => {
   renderWithProviders(<App />, '/sign-up')
 
   await userEvent.type(await screen.findByLabelText('Password'), 'paddy2026')
+  expect(screen.getByText('Fair')).toBeInTheDocument()
   await userEvent.click(screen.getByRole('button', { name: 'Create account' }))
 
   expect(screen.getByLabelText('Password')).toHaveAccessibleDescription('Include a capital letter, a number and a symbol.')
@@ -110,6 +115,7 @@ test('an account that was created but not signed in says so', async () => {
   renderWithProviders(<App />, '/sign-up')
 
   await userEvent.type(await screen.findByLabelText('Full name'), 'Karim')
+  await userEvent.click(screen.getByRole('button', { name: 'Add an e-mail too' }))
   await userEvent.type(screen.getByLabelText('E-mail'), 'karim@farm.bd')
   await userEvent.type(screen.getByLabelText('Mobile number'), '1812345678')
   await userEvent.type(screen.getByLabelText('Password'), 'Jute2026#')
@@ -188,4 +194,52 @@ test('Escape closes the account menu and returns focus to it', async () => {
   await userEvent.keyboard('{Escape}')
   await waitFor(() => expect(screen.queryByRole('menuitem', { name: 'Sign out' })).not.toBeInTheDocument())
   expect(button).toHaveFocus()
+})
+
+test('a phone number signs in too, sent without spaces or dashes', async () => {
+  fetchMock.mockResolvedValueOnce(envelope(200, tokens))
+  renderWithProviders(<App />, '/sign-in')
+
+  await userEvent.type(await screen.findByLabelText('E-mail or phone number'), 'nasrin')
+  await userEvent.type(screen.getByLabelText('Password'), 'Paddy2026!')
+  await userEvent.click(screen.getByRole('button', { name: 'Sign in' }))
+  expect(screen.getByLabelText('E-mail or phone number')).toHaveAccessibleDescription('Enter your e-mail address or phone number.')
+
+  await userEvent.clear(screen.getByLabelText('E-mail or phone number'))
+  await userEvent.type(screen.getByLabelText('E-mail or phone number'), '01712-345 678')
+  await userEvent.click(screen.getByRole('button', { name: 'Sign in' }))
+  await waitFor(() => expect(fetchMock).toHaveBeenCalled())
+  expect(body(0)).toEqual({ identifier: '01712345678', password: 'Paddy2026!' })
+})
+
+test('the sign-in page says what you get and switches to Bengali before typing', async () => {
+  renderWithProviders(<App />, '/sign-in')
+
+  const panel = await screen.findByRole('complementary', { name: 'Why join AgroTrends' })
+  expect(panel).toHaveTextContent('Verified experts')
+  const language = within(screen.getByRole('group', { name: 'Language' }))
+  expect(language.getByRole('button', { name: 'English' })).toHaveAttribute('aria-pressed', 'true')
+
+  await userEvent.click(language.getByRole('button', { name: 'বাংলা' }))
+  expect(await screen.findByRole('complementary', { name: 'কেন AgroTrends-এ যোগ দেবেন' })).toBeInTheDocument()
+  const bengali = within(screen.getByRole('group', { name: 'ভাষা' }))
+  expect(bengali.getByRole('button', { name: 'বাংলা' })).toHaveAttribute('aria-pressed', 'true')
+  expect(document.documentElement.lang).toBe('bn')
+  await userEvent.click(bengali.getByRole('button', { name: 'English' }))
+})
+
+test('the password can be shown, Forgot sits by its label, and sign-up switches between phone and e-mail', async () => {
+  const { unmount } = renderWithProviders(<App />, '/sign-in')
+  const password = await screen.findByLabelText('Password')
+  expect(password).toHaveAttribute('type', 'password')
+  await userEvent.click(screen.getByRole('button', { name: 'Show password' }))
+  expect(password).toHaveAttribute('type', 'text')
+  expect(screen.getByRole('link', { name: 'Forgot your password?' })).toHaveAttribute('href', '/forgot-password')
+  unmount()
+
+  renderWithProviders(<App />, '/sign-up')
+  expect(await screen.findByLabelText('Mobile number')).toBeInTheDocument()
+  await userEvent.click(screen.getByRole('button', { name: 'E-mail' }))
+  expect(screen.getByLabelText('E-mail')).toBeInTheDocument()
+  expect(screen.queryByLabelText('Mobile number')).not.toBeInTheDocument()
 })

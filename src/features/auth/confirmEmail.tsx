@@ -1,14 +1,16 @@
-import { EnvelopeSimple } from '@phosphor-icons/react'
+import { DeviceMobile, EnvelopeSimple } from '@phosphor-icons/react'
 import { lazy, Suspense, useState, useSyncExternalStore } from 'react'
 import { useResendVerification } from '../../api/auth'
 import { ApiError, errorMessage } from '../../api/errors'
 import { useT } from '../../lib/i18n'
-import { Button } from '../../ui/Button'
+import { needsConfirmation } from '../../lib/auth'
+import { Button, ButtonLink } from '../../ui/Button'
 import { useSession } from './session'
 
 /**
- * Writes need a confirmed e-mail. The backend refuses with a 403 whose message starts "Confirm your e-mail"; it has
- * no error codes, so this is the one place the app matches message text (docs/BACKEND_CATCHUP_PLAN.md, Errors).
+ * Writes need a confirmed e-mail or phone. The backend refuses with a 403 whose message starts "Confirm your e-mail"
+ * (now "...address or phone number first"); it has no error codes, so this is the one place the app matches message
+ * text (docs/BACKEND_CATCHUP_PLAN.md, Errors).
  */
 export function isConfirmEmailError(error: unknown): boolean {
   return error instanceof ApiError && error.status === 403 && /^confirm your e-mail/i.test(error.message)
@@ -57,19 +59,30 @@ export function ResendLink({ email, variant = 'secondary' }: { email: string; va
   )
 }
 
-/** A strip under the top bar while the signed-in account's e-mail is unconfirmed. */
+/**
+ * A strip under the top bar while none of the account's contacts is confirmed: the e-mail link (with resend), the
+ * SMS code (a link to enter it), or both, whichever the account has.
+ */
 export function EmailBanner() {
   const t = useT()
   const { user } = useSession()
-  if (!user || user.emailVerified !== false) return null
+  if (!user || !needsConfirmation(user)) return null
+  const phoneOnly = !user.email
   return (
-    <section aria-label={t('Confirm your e-mail')} className="border-b border-border bg-mustard-soft">
-      <div className="mx-auto flex max-w-(--container-page) flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2 text-sm sm:px-6">
-        <EnvelopeSimple size={18} aria-hidden="true" className="shrink-0" />
+    <section aria-label={phoneOnly ? t('Confirm your phone number') : t('Confirm your e-mail')} className="border-b border-border bg-mustard-soft">
+      <div className="mx-auto flex max-w-(--container-page) flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2 text-sm sm:px-8">
+        {phoneOnly ? <DeviceMobile size={18} aria-hidden="true" className="shrink-0" /> : <EnvelopeSimple size={18} aria-hidden="true" className="shrink-0" />}
         <p className="min-w-0 flex-1">
-          {t('Confirm your e-mail to ask, answer, vote and publish. We sent a link to {email}.', { email: user.email ?? '' })}
+          {phoneOnly
+            ? t('Confirm your phone number to ask, answer, vote and publish. We texted a code to {phone}.', { phone: user.mobileNumber ?? '' })
+            : t('Confirm your e-mail to ask, answer, vote and publish. We sent a link to {email}.', { email: user.email ?? '' })}
         </p>
-        <ResendLink email={user.email ?? ''} variant="quiet" />
+        {user.email && <ResendLink email={user.email} variant="quiet" />}
+        {user.mobileNumber && (
+          <ButtonLink to="/verify-phone" variant="quiet" size="sm">
+            {t('Enter the SMS code')}
+          </ButtonLink>
+        )}
       </div>
     </section>
   )

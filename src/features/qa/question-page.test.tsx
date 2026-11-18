@@ -5,7 +5,7 @@ import { clearSession } from '../../api/client'
 import type { Question } from '../../api/questions'
 import App from '../../App'
 import { envelope, mockApi } from '../../test/api'
-import { renderWithProviders } from '../../test/render'
+import { openMoreActions, renderWithProviders } from '../../test/render'
 
 const question: Question = {
   questionId: 5,
@@ -54,6 +54,19 @@ test('a question shows its text, context and answers in the backend order', asyn
   expect(api.mock.calls.some(([url]) => String(url).startsWith('/api/answers/replies'))).toBe(false)
 })
 
+test('the reply count names the toggle, and an answer without replies has none to show', async () => {
+  mockApi({
+    'GET /api/questions/id/5': () => envelope(200, question),
+    'GET /api/answers/question/5': () => envelope(200, [answer(1, { replyCount: 2 }), answer(2, { replyCount: 1 }), answer(6, { replyCount: 0 })]),
+  })
+  renderWithProviders(<App />, '/questions/5')
+
+  const [two, one, none] = await screen.findAllByRole('article', { name: 'Answer by Nasrin' })
+  expect(within(two).getByRole('button', { name: 'Show 2 replies' })).toBeInTheDocument()
+  expect(within(one).getByRole('button', { name: 'Show 1 reply' })).toBeInTheDocument()
+  expect(within(none).queryByRole('button', { name: /^Show/ })).not.toBeInTheDocument()
+})
+
 test('replies load when opened and stay under their answer', async () => {
   const api = mockApi({
     ...signedInAs({ id: 9, name: 'Karim' }),
@@ -70,12 +83,42 @@ test('replies load when opened and stay under their answer', async () => {
   expect(within(second).queryByRole('article', { name: 'Reply by Salma' })).not.toBeInTheDocument()
   expect(api.mock.calls.some(([url]) => url === '/api/answers/replies/2')).toBe(false)
 
-  await userEvent.click(within(first).getByRole('button', { name: 'Reply' }))
-  await userEvent.type(within(first).getByLabelText('Reply to Nasrin'), 'Thanks, it worked.')
-  await userEvent.click(within(first).getByRole('button', { name: 'Reply' }))
+  // The answer's own Reply comes before its replies' ones.
+  await userEvent.click(within(first).getAllByRole('button', { name: 'Reply' })[0])
+  const field = within(first).getByLabelText('Reply to Nasrin')
+  expect(field).toHaveValue('')
+  await userEvent.type(field, 'Thanks, it worked.')
+  await userEvent.click(within(field.closest('form')!).getByRole('button', { name: 'Reply' }))
   await waitFor(() => expect(api.mock.calls.some(([url]) => url === '/api/answers/reply')).toBe(true))
   const sent = api.mock.calls.find(([url]) => url === '/api/answers/reply')!
   expect(JSON.parse(sent[1]!.body as string)).toEqual({ questionId: 5, parentAnswerId: 1, content: 'Thanks, it worked.' })
+})
+
+test('a reply can be answered: the box starts with @name and is sent with that reply as the parent', async () => {
+  const api = mockApi({
+    ...signedInAs({ id: 9, name: 'Karim' }),
+    'GET /api/questions/id/5': () => envelope(200, question),
+    'GET /api/answers/question/5': () => envelope(200, [answer(1)]),
+    'GET /api/answers/replies/1': () => envelope(200, [answer(3, { userId: 8, authorName: 'Salma', content: 'Same here' })]),
+    'POST /api/answers/reply': () => envelope(200, answer(4, { userId: 9, authorName: 'Karim' })),
+  })
+  renderWithProviders(<App />, '/questions/5')
+
+  const card = await screen.findByRole('article', { name: 'Answer by Nasrin' })
+  await userEvent.click(within(card).getByRole('button', { name: 'Show replies' }))
+  const salma = await within(card).findByRole('article', { name: 'Reply by Salma' })
+  await userEvent.click(within(salma).getByRole('button', { name: 'Reply' }))
+
+  const field = within(card).getByLabelText('Reply to Salma')
+  expect(field).toHaveValue('@Salma ')
+  expect(field).toHaveFocus()
+  expect(within(salma).queryByRole('button', { name: 'Reply' })).not.toBeInTheDocument()
+  await userEvent.type(field, 'which lime?')
+  await userEvent.click(within(field.closest('form')!).getByRole('button', { name: 'Reply' }))
+  await waitFor(() => expect(api.mock.calls.some(([url]) => url === '/api/answers/reply')).toBe(true))
+  const sent = api.mock.calls.find(([url]) => url === '/api/answers/reply')!
+  expect(JSON.parse(sent[1]!.body as string)).toEqual({ questionId: 5, parentAnswerId: 3, content: '@Salma which lime?' })
+  await waitFor(() => expect(within(card).queryByLabelText('Reply to Salma')).not.toBeInTheDocument())
 })
 
 test('answering posts to the question', async () => {
@@ -97,7 +140,8 @@ test('answering posts to the question', async () => {
   expect(await screen.findByText('Drain the cold water.')).toBeInTheDocument()
   const sent = api.mock.calls.find(([url]) => url === '/api/answers/create')!
   expect(JSON.parse(sent[1]!.body as string)).toEqual({ questionId: 5, content: 'Drain the cold water.' })
-  expect(screen.getByRole('button', { name: 'Edit' })).toBeInTheDocument()
+  const posted = screen.getByText('Drain the cold water.').closest('article')!
+  expect((await openMoreActions(posted)).getByRole('menuitem', { name: 'Edit' })).toBeInTheDocument()
 })
 
 test('editing an answer uses the answer endpoint', async () => {
@@ -110,8 +154,8 @@ test('editing an answer uses the answer endpoint', async () => {
   renderWithProviders(<App />, '/questions/5')
 
   const mine = await screen.findByRole('article', { name: 'Answer by Nasrin' })
-  await userEvent.click(within(mine).getByRole('button', { name: 'Edit' }))
-  await userEvent.clear(within(mine).getByLabelText('Edit your answer'))
+  await userEvent.click((await openMoreActions(mine)).getByRole('menuitem', { name: 'Edit' }))
+  await userEvent.clear(await within(mine).findByLabelText('Edit your answer'))
   await userEvent.type(within(mine).getByLabelText('Edit your answer'), 'Better')
   await userEvent.click(within(mine).getByRole('button', { name: 'Save' }))
   await waitFor(() => expect(api.mock.calls.some(([url]) => url === '/api/answers/update/')).toBe(true))
@@ -129,9 +173,12 @@ test('the asker can delete the question', async () => {
   })
   renderWithProviders(<App />, '/questions/5')
 
-  expect(await screen.findByRole('link', { name: 'Edit' })).toHaveAttribute('href', '/questions/5/edit')
-  await userEvent.click(screen.getByRole('button', { name: 'Delete' }))
-  await userEvent.click(screen.getByRole('button', { name: 'Delete' }))
+  await screen.findByRole('heading', { level: 1 })
+  const menu = await openMoreActions()
+  expect(menu.getByRole('menuitem', { name: 'Edit' })).toHaveAttribute('href', '/questions/5/edit')
+  await userEvent.click(menu.getByRole('menuitem', { name: 'Delete' }))
+  // Delete still asks first.
+  await userEvent.click(await screen.findByRole('button', { name: 'Delete' }))
   await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent(/^\/questions$/))
 })
 
@@ -169,4 +216,33 @@ test('Ctrl+Enter posts an answer once, Enter alone adds a line', async () => {
   expect(api.mock.calls.some(([url]) => url === '/api/answers/create')).toBe(false)
   await userEvent.keyboard('{Control>}{Enter}{Enter}{/Control}')
   await waitFor(() => expect(api.mock.calls.filter(([url]) => url === '/api/answers/create')).toHaveLength(1))
+})
+
+test('the tags sit under the title, before the question text', async () => {
+  mockApi({
+    'GET /api/questions/id/5': () => envelope(200, { ...question, tags: ['boro rice', 'cold injury'] }),
+    'GET /api/answers/question/5': () => envelope(200, []),
+  })
+  renderWithProviders(<App />, '/questions/5')
+
+  const title = await screen.findByRole('heading', { level: 1, name: 'Why are my boro seedlings yellow?' })
+  const tags = screen.getByRole('list', { name: 'Tags' })
+  const text = screen.getByText('After the cold week.')
+  expect(title.compareDocumentPosition(tags) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  expect(tags.compareDocumentPosition(text) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  expect(within(tags).getByRole('link', { name: 'cold injury' })).toHaveAttribute('href', '/questions?tag=cold%20injury')
+})
+
+test('the side panel gives the numbers, a way to the AI answer and Write an answer; views once counted', async () => {
+  mockApi({
+    'GET /api/questions/id/5': () => envelope(200, { ...question, answerCount: 2, viewCount: 1204 }),
+    'GET /api/answers/question/5': () => envelope(200, [answer(1)]),
+  })
+  renderWithProviders(<App />, '/questions/5')
+
+  const panel = await screen.findByRole('complementary', { name: 'About this question' })
+  const numbers = within(panel).getAllByRole('term').map((term) => `${term.textContent} ${term.nextElementSibling?.textContent}`)
+  expect(numbers).toEqual(['Answers 2', 'Views 1,204', 'Asked Oct 8'])
+  expect(within(panel).getByRole('link', { name: /Read the AI answer/ })).toHaveAttribute('href', '#ai-answer')
+  expect(within(panel).getByRole('link', { name: 'Write an answer' })).toHaveAttribute('href', '#your-answer')
 })

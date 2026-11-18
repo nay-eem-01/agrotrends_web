@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { useAuthor, useAuthorStories } from '../../api/authors'
 import { ApiError, errorMessage } from '../../api/errors'
 import { Avatar } from '../../ui/Avatar'
+import { ImageViewer } from '../../ui/ImageViewer'
 import { Chip } from '../../ui/Chip'
 import { Spinner } from '../../ui/Spinner'
 import { useSession } from '../auth/session'
@@ -45,7 +46,13 @@ export function AuthorPage() {
     <section className="mx-auto max-w-(--container-feed) px-4 pt-12 pb-20 sm:px-6">
       <title>{`${name} – AgroTrends`}</title>
       <header className="flex flex-col gap-5 sm:flex-row sm:items-start">
-        <Avatar name={name} src={profile.profileImageUrl} size={88} />
+        {profile.profileImageUrl ? (
+          <ImageViewer src={profile.profileImageUrl} label={t("{name}'s profile photo", { name })} className="shrink-0 self-start rounded-full">
+            <Avatar name={name} src={profile.profileImageUrl} size={88} className="block" />
+          </ImageViewer>
+        ) : (
+          <Avatar name={name} size={88} />
+        )}
         <div className="min-w-0 flex-1">
           <h1 className="text-2xl sm:text-3xl">{name}</h1>
           {work && <p className="mt-1 text-ink-muted">{work}</p>}

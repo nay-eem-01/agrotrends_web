@@ -1,5 +1,6 @@
 import { Sparkle, X } from '@phosphor-icons/react'
-import { useState, type FormEvent } from 'react'
+import { useId, useState, type FormEvent } from 'react'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { useBlogAssist } from '../../api/ai'
 import { useCategories } from '../../api/categories'
@@ -7,11 +8,19 @@ import { errorMessage } from '../../api/errors'
 import type { Season, Soil } from '../../lib/agri'
 import { Button } from '../../ui/Button'
 import { SearchSelect } from '../../ui/SearchSelect'
+import { TextField } from '../../ui/TextField'
 import { FarmingFields } from '../farming/FarmingFields'
 import { MAX_TAGS, TagInput } from '../topics/TagInput'
 
 
+/** The backend's limit on a subtitle. */
+export const MAX_SUBTITLE = 200
+
 export interface StoryDetails {
+  /** One line under the title, shown in lists; blank for none. */
+  subtitle: string
+  /** Whether the AI advisor may cite the story (and show it as related); on unless the author turns it off. */
+  aiCitable: boolean
   categoryId?: number
   tags: string[]
   crop: string
@@ -83,6 +92,8 @@ function DetailsForm({ mode, initial, draft, busy, error, onSubmit, onClose }: O
         </button>
       </header>
 
+      <SubtitleField value={details.subtitle} onChange={(subtitle) => set({ subtitle })} />
+
       <SearchSelect
         label="Topic"
         disabled={categories.isPending}
@@ -94,9 +105,16 @@ function DetailsForm({ mode, initial, draft, busy, error, onSubmit, onClose }: O
       />
 
       <TagInput tags={details.tags} onChange={(tags) => set({ tags })} />
-      <AiHelp draft={draft} tags={details.tags} onAddTag={(tag) => details.tags.length < MAX_TAGS && set({ tags: [...details.tags, tag] })} />
+      <AiHelp
+        draft={draft}
+        tags={details.tags}
+        onAddTag={(tag) => details.tags.length < MAX_TAGS && set({ tags: [...details.tags, tag] })}
+        onUseSubtitle={(subtitle) => set({ subtitle: subtitle.slice(0, MAX_SUBTITLE) })}
+      />
 
       <FarmingFields value={details} onChange={set} />
+
+      <AiCitableField checked={details.aiCitable} onChange={(aiCitable) => set({ aiCitable })} />
 
       {error && (
         <p role="alert" className="text-sm text-destructive">
@@ -121,8 +139,39 @@ function DetailsForm({ mode, initial, draft, busy, error, onSubmit, onClose }: O
   )
 }
 
+/** The subtitle: one line under the title, in the story's lists and its page. */
+export function SubtitleField({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+  return (
+    <TextField
+      label="Subtitle (optional)"
+      hint="One line under the title. Readers see it in lists."
+      value={value}
+      maxLength={MAX_SUBTITLE}
+      onChange={(event) => onChange(event.target.value)}
+    />
+  )
+}
+
+/** Whether the AI advisor may cite the story; on by default. */
+export function AiCitableField({ checked, onChange }: { checked: boolean; onChange: (checked: boolean) => void }) {
+  const id = useId()
+  return (
+    <div className="flex items-start gap-3">
+      <Checkbox id={id} aria-describedby={`${id}-hint`} className="mt-0.5" checked={checked} onCheckedChange={(next) => onChange(next === true)} />
+      <div className="min-w-0">
+        <label htmlFor={id} className="block cursor-pointer text-sm font-medium">
+          Let the AI advisor cite this story
+        </label>
+        <p id={`${id}-hint`} className="text-xs text-muted-foreground">
+          Its answers link to the stories they use. Off keeps this one out of answers and related stories.
+        </p>
+      </div>
+    </div>
+  )
+}
+
 /** Gemini's summary and topic ideas for the draft, clearly marked as suggestions. */
-function AiHelp({ draft, tags, onAddTag }: { draft: { title: string; content: string }; tags: string[]; onAddTag: (tag: string) => void }) {
+function AiHelp({ draft, tags, onAddTag, onUseSubtitle }: { draft: { title: string; content: string }; tags: string[]; onAddTag: (tag: string) => void; onUseSubtitle: (subtitle: string) => void }) {
   const assist = useBlogAssist()
   const [copied, setCopied] = useState(false)
   const ideas = assist.data?.suggestedTags?.filter((tag) => !tags.includes(tag)) ?? []
@@ -152,14 +201,14 @@ function AiHelp({ draft, tags, onAddTag }: { draft: { title: string; content: st
           {assist.data.summary && (
             <div>
               <p className="font-serif text-base">{assist.data.summary}</p>
-              <Button
-                variant="quiet"
-                size="sm"
-                className="-ml-4"
-                onClick={() => navigator.clipboard?.writeText(assist.data.summary ?? '').then(() => setCopied(true))}
-              >
-                {copied ? 'Summary copied' : 'Copy summary'}
-              </Button>
+              <div className="-ml-4 flex flex-wrap">
+                <Button variant="quiet" size="sm" onClick={() => onUseSubtitle(assist.data.summary ?? '')}>
+                  Use as subtitle
+                </Button>
+                <Button variant="quiet" size="sm" onClick={() => navigator.clipboard?.writeText(assist.data.summary ?? '').then(() => setCopied(true))}>
+                  {copied ? 'Summary copied' : 'Copy summary'}
+                </Button>
+              </div>
             </div>
           )}
           {ideas.length > 0 && (

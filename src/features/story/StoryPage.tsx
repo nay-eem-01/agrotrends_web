@@ -1,5 +1,5 @@
 import { useT, formatNumber } from '../../lib/i18n'
-import { ArrowLeft } from '@phosphor-icons/react'
+import { ArrowLeft, Sparkle } from '@phosphor-icons/react'
 import { useEffect, useMemo, useRef } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import { Badge } from '@/components/ui/badge'
@@ -13,10 +13,14 @@ import { storyDate } from '../../lib/dates'
 import { Avatar } from '../../ui/Avatar'
 import { ButtonLink } from '../../ui/Button'
 import { Chip } from '../../ui/Chip'
+import { TagList } from '../../ui/TagList'
 import { SafeHtml } from '../../ui/SafeHtml'
 import { Spinner } from '../../ui/Spinner'
+import { useAuthor } from '../../api/authors'
 import { useSession } from '../auth/session'
+import { FollowAuthorButton } from '../authors/FollowAuthorButton'
 import { ReportButton } from '../reports/ReportButton'
+import { ShareButton } from '../share/ShareButton'
 import { BookmarkButton } from '../reactions/BookmarkButton'
 import { ClapButton } from '../reactions/ClapButton'
 import { WrittenBy } from '../authors/AuthorPage'
@@ -60,49 +64,59 @@ function Story({ story }: { story: BlogResponse }) {
   return (
     <article className="pb-20">
       <title>{`${story.title} – AgroTrends`}</title>
-      <div className="mx-auto max-w-(--container-page) px-4 pt-6 sm:px-8 sm:pt-8">
-        <Link to="/stories" className="inline-flex h-11 items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground">
+      {/* After Medium: the headline, byline and actions first, then the cover, then the reading column. */}
+      <header className="mx-auto max-w-[calc(var(--container-read)+3rem)] px-4 pt-6 sm:px-6 sm:pt-8">
+        <Link to="/stories" className="-ml-1 inline-flex h-11 items-center gap-1.5 px-1 text-sm font-medium text-muted-foreground hover:text-foreground">
           <ArrowLeft size={16} aria-hidden="true" />
           {t('Back to stories')}
         </Link>
-        {story.imageUrl && (
-          <figure className="mt-3 overflow-hidden rounded-2xl bg-muted">
-            {/* A wide, deliberate crop from the centre; the photo is never stretched. */}
-            <img src={story.imageUrl} alt="" fetchPriority="high" decoding="async" className="aspect-[16/9] w-full object-cover sm:aspect-[21/9]" />
-          </figure>
-        )}
-      </div>
-      <header className="mx-auto max-w-(--container-read) px-4 pt-8 sm:px-6 sm:pt-10">
-        {notice && <output className="mb-4 block w-fit rounded-full bg-primary px-3 py-1 text-sm text-primary-foreground">{notice}</output>}
+        {notice && <output className="mt-4 block w-fit rounded-full bg-primary px-3 py-1 text-sm text-primary-foreground">{notice}</output>}
         {story.status === 'DRAFT' && (
-          <p className="mb-4 inline-block rounded-full bg-secondary px-3 py-1 text-sm text-secondary-foreground">{t('Draft — only you can see this')}</p>
+          <p className="mt-4 inline-block rounded-full bg-secondary px-3 py-1 text-sm text-secondary-foreground">{t('Draft — only you can see this')}</p>
         )}
-        <p className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-          {story.category?.categoryName && <Badge variant="secondary">{story.category.categoryName}</Badge>}
-          {meta.join(' · ')}
-        </p>
-        <h1 className="mt-4 font-serif text-[2.25rem] leading-[1.1] font-medium tracking-[-0.015em] text-balance sm:text-[3rem]">{story.title}</h1>
+        {story.category?.categoryName && (
+          <div className="mt-6">
+            <Badge variant="secondary">{story.category.categoryName}</Badge>
+          </div>
+        )}
+        <h1 className="mt-4 font-serif text-[2.25rem] leading-[1.1] font-semibold tracking-[-0.02em] text-balance sm:text-[3rem]">{story.title}</h1>
+        {story.subtitle && <p className="mt-3 font-serif text-xl leading-snug text-pretty text-muted-foreground sm:text-[1.375rem]">{story.subtitle}</p>}
         {author?.name && (
           <div className="mt-7 flex items-center gap-3">
             <Avatar name={author.name} size={44} />
             <div className="min-w-0 text-sm">
-              <Link to={`/authors/${author.authorId}`} className="font-medium text-foreground hover:underline">
+              <Link to={`/authors/${author.authorId}`} className="font-semibold text-foreground hover:underline">
                 {author.name}
               </Link>
-              <p className="text-muted-foreground">{storyDate(story.publishedAt)}</p>
+              <p className="text-muted-foreground">{meta.join(' · ')}</p>
+              {(story.citedCount ?? 0) > 0 && (
+                // The reason to write here that only AgroTrends has: the advisor answers from this story.
+                <p className="mt-0.5 inline-flex items-center gap-1 text-primary">
+                  <Sparkle size={14} weight="fill" aria-hidden="true" />
+                  {story.citedCount === 1 ? t('Cited in 1 AI answer') : t('Cited in {n} AI answers', { n: formatNumber(story.citedCount ?? 0) })}
+                </p>
+              )}
             </div>
-            {own && (
+            {own ? (
               <ButtonLink to={`/write/${story.id}`} variant="secondary" size="sm" className="ml-auto">
                 {t('Edit story')}
               </ButtonLink>
+            ) : (
+              author.authorId != null && <BylineFollow authorId={author.authorId} />
             )}
           </div>
         )}
         <StoryActions story={story} />
       </header>
+      {story.imageUrl && (
+        <figure className="mx-auto mt-8 max-w-[52rem] px-4 sm:px-6">
+          {/* A wide, deliberate crop from the centre; the photo is never stretched. */}
+          <img src={story.imageUrl} alt="" fetchPriority="high" decoding="async" className="aspect-[16/9] w-full rounded-xl bg-muted object-cover" />
+        </figure>
+      )}
 
       <Body story={story} />
-      <div className="mx-auto max-w-(--container-read) px-4 sm:px-6">
+      <div className="mx-auto max-w-[calc(var(--container-read)+3rem)] px-4 sm:px-6">
         <StoryFooter story={story} />
         <StoryActions story={story} />
         {author?.authorId != null && <WrittenBy authorId={author.authorId} fallbackName={author.name ?? ''} />}
@@ -110,6 +124,17 @@ function Story({ story }: { story: BlogResponse }) {
         {story.id != null && story.status === 'PUBLISHED' && <Thread kind="comments" parentId={story.id} />}
       </div>
     </article>
+  )
+}
+
+/** Follow in the byline, as on Medium; the author's profile is shared with "Written by" below, so it's read once. */
+function BylineFollow({ authorId }: { authorId: number }) {
+  const profile = useAuthor(authorId)
+  if (!profile.data) return null
+  return (
+    <div className="ml-auto">
+      <FollowAuthorButton author={profile.data} />
+    </div>
   )
 }
 
@@ -137,7 +162,7 @@ function Body({ story }: { story: BlogResponse }) {
   }, [story.content])
 
   return (
-    <div className={cn('mx-auto mt-10 px-4 sm:px-6', contents ? 'max-w-(--container-page) lg:grid lg:grid-cols-[13rem_minmax(0,var(--container-read))_13rem] lg:justify-center lg:gap-12' : 'max-w-(--container-read)')}>
+    <div className={cn('mx-auto mt-10 px-4 sm:px-6', contents ? 'max-w-(--container-page) lg:grid lg:grid-cols-[13rem_minmax(0,var(--container-read))_13rem] lg:justify-center lg:gap-12' : 'max-w-[calc(var(--container-read)+3rem)]')}>
       {contents && (
         <nav aria-labelledby="story-contents" className="hidden lg:block">
           <div className="sticky top-24">
@@ -168,9 +193,11 @@ function StoryActions({ story }: { story: BlogResponse }) {
   const { user } = useSession()
   const own = user?.authorId != null && user.authorId === story.author?.authorId
   return (
-    <div className="mt-8 flex items-center justify-between border-y border-border py-1">
+    <div className="mt-6 flex items-center justify-between border-y border-border py-1">
       <ClapButton story={story} />
       <div className="flex items-center gap-1">
+        {/* Drafts have no public address to share. */}
+        {story.status === 'PUBLISHED' && story.slug && <ShareButton path={`/stories/${encodeURIComponent(story.slug)}`} title={story.title ?? ''} />}
         <ReportButton targetType="BLOG" targetId={story.id ?? 0} own={own} what={t('this story')} />
         <BookmarkButton story={story} />
       </div>
@@ -207,15 +234,7 @@ function StoryFooter({ story }: { story: BlogResponse }) {
         </section>
       )}
       {tags.length > 0 && (
-        <section aria-label={t('Tags')}>
-          <ul className="flex flex-wrap gap-2">
-            {tags.map((tag) => (
-              <li key={tag}>
-                <Chip to={`/tags/${encodeURIComponent(tag)}`}>{tag}</Chip>
-              </li>
-            ))}
-          </ul>
-        </section>
+        <TagList size="md" label={t('Tags')} items={tags.map((tag) => ({ label: tag, to: `/tags/${encodeURIComponent(tag)}` }))} />
       )}
     </footer>
   )

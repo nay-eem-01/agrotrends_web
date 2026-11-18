@@ -4,7 +4,7 @@ import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { clearSession } from '../../api/client'
 import App from '../../App'
 import { envelope, mockApi, page } from '../../test/api'
-import { chooseOption, renderWithProviders } from '../../test/render'
+import { renderWithProviders } from '../../test/render'
 
 const question = { questionId: 5, userId: 2, title: 'Yellow seedlings', content: 'After the cold.', authorName: 'Karim' }
 const DISCLAIMER = 'AI answers can be wrong. Before using any pesticide, medicine or dose, check with your local agriculture officer or vet.'
@@ -92,7 +92,7 @@ test('after asking, the page waits for the AI answer and shows it when it arrive
 
   await user.type(await screen.findByLabelText('Your question'), 'Yellow seedlings')
   await user.type(screen.getByLabelText('Details'), 'After the cold.')
-  await chooseOption(await screen.findByLabelText('Topic'), 'Crops', user)
+  await user.click(await screen.findByRole('radio', { name: 'Crops' }))
   await user.click(screen.getByRole('button', { name: 'Post question' }))
 
   expect(await screen.findByText('An AI answer is being written. Experts in this topic will check it.')).toBeInTheDocument()

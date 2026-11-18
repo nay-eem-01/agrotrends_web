@@ -5,7 +5,7 @@ import { clearSession } from '../../api/client'
 import type { BlogResponse } from '../../api/types'
 import App from '../../App'
 import { envelope, mockApi, page } from '../../test/api'
-import { renderWithProviders } from '../../test/render'
+import { openMoreActions, renderWithProviders } from '../../test/render'
 
 const story: BlogResponse = { id: 402, slug: 'rice-blast', title: 'Rice blast', content: '<p>Body.</p>', author: { authorId: 1, name: 'Nasrin' }, status: 'PUBLISHED', agri: {} }
 
@@ -18,6 +18,7 @@ interface CommentResponse {
   content: string
   createdAt: string
   updatedAt: string
+  replyCount?: number
 }
 
 function comment(commentId: number, overrides: Partial<CommentResponse> = {}): CommentResponse {
@@ -77,6 +78,20 @@ test('responses and their replies are listed oldest first, with a count', async 
   expect(items[0]).toHaveTextContent('First line')
   expect(section.getByRole('button', { name: 'Sign in to respond' })).toBeInTheDocument()
   expect(section.queryByRole('button', { name: 'Edit' })).not.toBeInTheDocument()
+})
+
+test('with reply counts, only responses that have replies are read, and the heading counts them all', async () => {
+  const api = mockApi({
+    'GET /api/blogs/slug/rice-blast': () => envelope(200, story),
+    'GET /api/comments/blog/402': () => envelope(200, [comment(1, { replyCount: 1 }), comment(2, { replyCount: 0 })]),
+    'GET /api/comments/replies/1': () => envelope(200, [comment(3, { parentCommentId: 1, authorName: 'Salma', content: 'A reply' })]),
+  })
+  renderWithProviders(<App />, '/stories/rice-blast')
+
+  const section = await responsesSection()
+  expect(await section.findByRole('heading', { name: 'Responses (3)' })).toBeInTheDocument()
+  expect(await section.findByRole('article', { name: 'Response by Salma' })).toBeInTheDocument()
+  expect(api.mock.calls.some(([url]) => String(url).startsWith('/api/comments/replies/2'))).toBe(false)
 })
 
 test('comment HTML is cleaned before it is shown', async () => {
@@ -154,6 +169,29 @@ test('replying posts under the parent', async () => {
   await waitFor(() => expect(section.queryByLabelText('Reply to Rahim Uddin')).not.toBeInTheDocument())
 })
 
+test('a reply can be answered: the box starts with @name and is sent with that reply as the parent', async () => {
+  const api = mockApi({
+    ...signedIn(),
+    'GET /api/blogs/slug/rice-blast': () => envelope(200, story),
+    'GET /api/comments/blog/402': () => envelope(200, [comment(1)]),
+    'GET /api/comments/replies/1': () => envelope(200, [comment(3, { parentCommentId: 1, userId: 21, authorName: 'Salma', content: 'A reply' })]),
+    'POST /api/comments/reply': () => envelope(200, comment(6, { parentCommentId: 1 })),
+  })
+  renderWithProviders(<App />, '/stories/rice-blast')
+
+  const section = await responsesSection()
+  const salma = await section.findByRole('article', { name: 'Response by Salma' })
+  await userEvent.click(within(salma).getByRole('button', { name: 'Reply' }))
+  const field = section.getByLabelText('Reply to Salma')
+  expect(field).toHaveValue('@Salma ')
+  expect(field).toHaveFocus()
+  await userEvent.type(field, 'Thanks!')
+  await userEvent.click(within(field.closest('form')!).getByRole('button', { name: 'Reply' }))
+
+  await waitFor(() => expect(bodyOf(api, 'POST', '/api/comments/reply')).toEqual({ blogId: 402, parentCommentId: 3, content: '@Salma Thanks!' }))
+  await waitFor(() => expect(section.queryByLabelText('Reply to Salma')).not.toBeInTheDocument())
+})
+
 test('owners edit and delete their own responses', async () => {
   let content = 'Old text'
   let gone = false
@@ -179,8 +217,8 @@ test('owners edit and delete their own responses', async () => {
   const mine = await section.findByRole('article', { name: 'Response by Karim' })
   expect(within(section.getByRole('article', { name: 'Response by Rahim Uddin' })).queryByRole('button', { name: 'Edit' })).not.toBeInTheDocument()
 
-  await userEvent.click(within(mine).getByRole('button', { name: 'Edit' }))
-  const field = within(mine).getByLabelText('Edit your response')
+  await userEvent.click((await openMoreActions(mine)).getByRole('menuitem', { name: 'Edit' }))
+  const field = await within(mine).findByLabelText('Edit your response')
   expect(field).toHaveValue('Old text')
   await userEvent.clear(field)
   await userEvent.type(field, 'New text')
@@ -188,8 +226,8 @@ test('owners edit and delete their own responses', async () => {
   expect(await within(mine).findByText('New text')).toBeInTheDocument()
   expect(bodyOf(api, 'PUT', '/api/comments/update')).toEqual({ commentId: 1, blogId: 402, content: 'New text' })
 
-  await userEvent.click(within(mine).getByRole('button', { name: 'Delete' }))
-  expect(within(mine).getByText('Delete this response?')).toBeInTheDocument()
+  await userEvent.click((await openMoreActions(mine)).getByRole('menuitem', { name: 'Delete' }))
+  expect(await within(mine).findByText('Delete this response?')).toBeInTheDocument()
   await userEvent.click(within(mine).getByRole('button', { name: 'Delete' }))
   await waitFor(() => expect(section.queryByRole('article', { name: 'Response by Karim' })).not.toBeInTheDocument())
 })

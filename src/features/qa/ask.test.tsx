@@ -1,10 +1,10 @@
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { clearSession } from '../../api/client'
 import App from '../../App'
 import { envelope, mockApi, page } from '../../test/api'
-import { chooseOption, pickOption, renderWithProviders } from '../../test/render'
+import { renderWithProviders } from '../../test/render'
 
 function signedInAs(user: object) {
   localStorage.setItem('agrotrends.refreshToken', 'r0')
@@ -20,7 +20,11 @@ const question = {
   category: { id: 1, categoryName: 'Crops' },
   agri: { crop: 'boro rice', season: 'RABI' },
 }
-const categories = { 'GET /api/categories/all': () => envelope(200, page([{ id: 1, categoryName: 'Crops' }, { id: 2, categoryName: 'Fisheries' }])) }
+const categories = {
+  'GET /api/categories/all': () => envelope(200, page([{ id: 1, categoryName: 'Crops' }, { id: 2, categoryName: 'Fisheries' }])),
+  'GET /api/tags': () => envelope(200, ['tilapia', 'rice']),
+  'GET /api/questions/search': () => envelope(200, page([])),
+}
 
 function body(api: ReturnType<typeof mockApi>, path: string) {
   return JSON.parse(api.mock.calls.find(([url]) => url === path)![1]!.body as string)
@@ -39,7 +43,7 @@ test('asking needs sign-in', async () => {
   await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/sign-in?next=%2Fquestions%2Fask'))
 })
 
-test('a question is checked, posted with its farming details and opened', async () => {
+test('a question is checked, posted as rich text without farming fields, and opened', async () => {
   const api = mockApi({
     ...signedInAs({ id: 9, name: 'Karim' }),
     ...categories,
@@ -51,42 +55,45 @@ test('a question is checked, posted with its farming details and opened', async 
 
   await userEvent.click(await screen.findByRole('button', { name: 'Post question' }))
   expect(screen.getByLabelText('Your question')).toHaveAccessibleDescription('Write your question in a line.')
-  expect(screen.getByLabelText('Details')).toHaveAccessibleDescription('Add what you have seen and tried.')
-  expect(screen.getByLabelText('Topic')).toHaveAccessibleDescription('Choose a topic.')
+  expect(screen.getByRole('textbox', { name: 'Details' })).toHaveAccessibleDescription('Add what you have seen and tried.')
+  expect(screen.getByRole('group', { name: 'Topic' })).toHaveAccessibleDescription('Choose a topic.')
+  expect(screen.queryByLabelText('Crop')).not.toBeInTheDocument()
+  expect(screen.queryByText('Farming details')).not.toBeInTheDocument()
 
-  await userEvent.type(screen.getByLabelText('Your question'), ' Why are seedlings yellow? ')
-  await userEvent.type(screen.getByLabelText('Details'), 'BRRI dhan29, 30 days old.')
-  await chooseOption(await screen.findByLabelText('Topic'), 'Crops')
-  await pickOption(screen.getByLabelText('Season'), 'Rabi')
-  await userEvent.type(screen.getByLabelText('Crop'), 'boro rice')
+  await userEvent.type(screen.getByLabelText('Your question'), ' Why are my tilapia gasping? ')
+  await userEvent.click(screen.getByRole('textbox', { name: 'Details' }))
+  await userEvent.click(screen.getByRole('button', { name: 'Bold' }))
+  await userEvent.keyboard('Every morning')
+  await userEvent.click(await screen.findByRole('radio', { name: 'Fisheries' }))
   await userEvent.click(screen.getByRole('button', { name: 'Post question' }))
 
   await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/questions/12'))
   expect(body(api, '/api/questions/create')).toEqual({
-    title: 'Why are seedlings yellow?',
-    content: 'BRRI dhan29, 30 days old.',
-    categoryId: 1,
-    agri: { crop: 'boro rice', season: 'RABI' },
+    title: 'Why are my tilapia gasping?',
+    content: '<p><strong>Every morning</strong></p>',
+    categoryId: 2,
   })
 })
 
-test('the asker edits their question as plain text', async () => {
+test('the asker edits an older plain-text question as paragraphs, and its farming details are kept', async () => {
   const api = mockApi({
     ...signedInAs({ id: 9, name: 'Karim' }),
     ...categories,
-    'GET /api/questions/id/5': () => envelope(200, question),
+    'GET /api/questions/id/5': () => envelope(200, { ...question, content: 'After the cold.\nWeek two.' }),
     'PUT /api/questions/update': () => envelope(200, question),
     'GET /api/answers/question/5': () => envelope(200, []),
   })
   renderWithProviders(<App />, '/questions/5/edit')
 
   expect(await screen.findByLabelText('Your question')).toHaveValue('Yellow seedlings')
-  expect(screen.getByLabelText('Details')).toHaveValue('After the cold. Week two.')
-  expect(screen.getByLabelText('Crop')).toHaveValue('boro rice')
+  expect(screen.getByRole('textbox', { name: 'Details' }).querySelectorAll('p')).toHaveLength(2)
   await userEvent.click(screen.getByRole('button', { name: 'Save question' }))
 
   await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/questions/5'))
-  expect(body(api, '/api/questions/update')).toMatchObject({ questionId: 5, title: 'Yellow seedlings', categoryId: 1, agri: { crop: 'boro rice', season: 'RABI' } })
+  const sent = body(api, '/api/questions/update')
+  expect(sent).toMatchObject({ questionId: 5, title: 'Yellow seedlings', content: '<p>After the cold.</p><p>Week two.</p>', categoryId: 1 })
+  // Left out, so the backend keeps the crop and season the question was asked with.
+  expect(sent).not.toHaveProperty('agri')
 })
 
 test("someone else's question can't be edited", async () => {
@@ -99,7 +106,6 @@ test('a question carries tags and photos', async () => {
   const api = mockApi({
     ...signedInAs({ id: 9, name: 'Karim' }),
     ...categories,
-    'GET /api/tags': () => envelope(200, []),
     'POST /api/images': () => envelope(200, { url: '/uploads/leaf.webp' }),
     'POST /api/questions/create': () => envelope(200, { ...question, questionId: 12 }),
     'GET /api/questions/id/12': () => envelope(200, { ...question, questionId: 12 }),
@@ -108,9 +114,10 @@ test('a question carries tags and photos', async () => {
   renderWithProviders(<App />, '/questions/ask')
 
   await userEvent.type(await screen.findByLabelText('Your question'), 'Spots on leaves')
-  await userEvent.type(screen.getByLabelText('Details'), 'Brown spots after rain.')
-  await chooseOption(await screen.findByLabelText('Topic'), 'Crops')
-  await userEvent.type(screen.getByLabelText('Tags'), 'Rice Blast{Enter}')
+  await userEvent.click(screen.getByRole('textbox', { name: 'Details' }))
+  await userEvent.keyboard('Brown spots after rain.')
+  await userEvent.click(await screen.findByRole('radio', { name: 'Crops' }))
+  await userEvent.type(screen.getByLabelText(/^Tags/), 'Rice Blast{Enter}')
   await userEvent.upload(screen.getByLabelText('Add a photo', { selector: 'input' }), new File(['img'], 'leaf.webp', { type: 'image/webp' }))
   expect(await screen.findByRole('img', { name: 'Photo 1' })).toHaveAttribute('src', '/uploads/leaf.webp')
   await userEvent.click(screen.getByRole('button', { name: 'Post question' }))
@@ -124,7 +131,6 @@ test('editing keeps untouched tags and photos by leaving them out, and sends cha
   const api = mockApi({
     ...signedInAs({ id: 9, name: 'Karim' }),
     ...categories,
-    'GET /api/tags': () => envelope(200, []),
     'GET /api/questions/id/5': () => envelope(200, withExtras),
     'PUT /api/questions/update': () => envelope(200, withExtras),
     'GET /api/answers/question/5': () => envelope(200, []),
@@ -138,4 +144,130 @@ test('editing keeps untouched tags and photos by leaving them out, and sends cha
   const sent = body(api, '/api/questions/update')
   expect(sent).not.toHaveProperty('tags')
   expect(sent.imageUrls).toEqual(['/uploads/a.webp'])
+})
+
+test('a popular tag is one tap, and Ctrl+Enter posts', async () => {
+  const api = mockApi({
+    ...signedInAs({ id: 9, name: 'Karim' }),
+    ...categories,
+    'POST /api/questions/create': () => envelope(200, { ...question, questionId: 12 }),
+    'GET /api/questions/id/12': () => envelope(200, { ...question, questionId: 12 }),
+    'GET /api/answers/question/12': () => envelope(200, []),
+  })
+  renderWithProviders(<App />, '/questions/ask')
+
+  await userEvent.type(await screen.findByLabelText('Your question'), 'Fish gasping at dawn')
+  await userEvent.click(screen.getByRole('textbox', { name: 'Details' }))
+  await userEvent.keyboard('Since Monday.')
+  const fisheries = await screen.findByRole('radio', { name: 'Fisheries' })
+  await userEvent.click(fisheries)
+  expect(fisheries).toBeChecked()
+  await userEvent.click(await screen.findByRole('button', { name: 'Add tag tilapia' }))
+  expect(screen.getByRole('button', { name: 'Remove tag tilapia' })).toBeInTheDocument()
+  await userEvent.click(screen.getByLabelText('Your question'))
+  await userEvent.keyboard('{Control>}{Enter}{/Control}')
+
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/questions/12'))
+  expect(body(api, '/api/questions/create')).toMatchObject({ categoryId: 2, tags: ['tilapia'] })
+})
+
+test('while the title is typed, answered questions that match are offered first', async () => {
+  const api = mockApi({
+    ...signedInAs({ id: 9, name: 'Karim' }),
+    ...categories,
+    'GET /api/questions/search': () =>
+      envelope(200, page([
+        { questionId: 7, title: 'Tilapia gasping at dawn', answerCount: 2, acceptedAnswerId: 40 },
+        { questionId: 8, title: 'Tilapia not eating', answerCount: 0 },
+      ])),
+  })
+  renderWithProviders(<App />, '/questions/ask')
+
+  await userEvent.type(await screen.findByLabelText('Your question'), 'Why are my tilapia gasping?')
+  const similar = (await screen.findByRole('heading', { name: 'Already answered, might help' }, { timeout: 3000 })).closest('section')!
+  expect(within(similar).getByRole('link', { name: 'Tilapia gasping at dawn' })).toHaveAttribute('href', '/questions/7')
+  // Unanswered matches don't help yet, so they're left out.
+  expect(within(similar).queryByRole('link', { name: 'Tilapia not eating' })).not.toBeInTheDocument()
+  expect(new URL(String(api.mock.calls.find(([url]) => String(url).startsWith('/api/questions/search'))![0]), 'http://x').searchParams.get('q')).toBe('Why are my tilapia gasping?')
+})
+
+test('where you are starts from your profile and goes with the question', async () => {
+  const api = mockApi({
+    ...signedInAs({ id: 9, name: 'Karim' }),
+    ...categories,
+    'GET /api/users/9/profile': () => envelope(200, { userId: 9, name: 'Karim', location: 'Mymensingh' }),
+    'POST /api/questions/create': () => envelope(200, { ...question, questionId: 12 }),
+    'GET /api/questions/id/12': () => envelope(200, { ...question, questionId: 12 }),
+    'GET /api/answers/question/12': () => envelope(200, []),
+  })
+  renderWithProviders(<App />, '/questions/ask')
+
+  const place = await screen.findByLabelText('Where are you? (optional)')
+  await waitFor(() => expect(place).toHaveValue('Mymensingh'))
+  await userEvent.clear(place)
+  await userEvent.type(place, ' Trishal ')
+  await userEvent.type(screen.getByLabelText('Your question'), 'Fish gasping at dawn')
+  await userEvent.click(screen.getByRole('textbox', { name: 'Details' }))
+  await userEvent.keyboard('Every morning')
+  await userEvent.click(await screen.findByRole('radio', { name: 'Fisheries' }))
+  await userEvent.click(screen.getByRole('button', { name: 'Post question' }))
+
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/questions/12'))
+  expect(body(api, '/api/questions/create').agri).toEqual({ region: 'Trishal' })
+})
+
+test('changing the place on an edit keeps the question’s other farming details', async () => {
+  const api = mockApi({
+    ...signedInAs({ id: 9, name: 'Karim' }),
+    ...categories,
+    'GET /api/questions/id/5': () => envelope(200, { ...question, agri: { crop: 'boro rice', season: 'RABI', region: 'rangpur' } }),
+    'PUT /api/questions/update': () => envelope(200, question),
+    'GET /api/answers/question/5': () => envelope(200, []),
+  })
+  renderWithProviders(<App />, '/questions/5/edit')
+
+  const place = await screen.findByLabelText('Where are you? (optional)')
+  expect(place).toHaveValue('rangpur')
+  await userEvent.clear(place)
+  await userEvent.type(place, 'Dinajpur')
+  await userEvent.click(screen.getByRole('button', { name: 'Save question' }))
+
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/questions/5'))
+  expect(body(api, '/api/questions/update').agri).toEqual({ crop: 'boro rice', season: 'RABI', region: 'Dinajpur' })
+})
+
+test('asking can be private: only the question is needed, and it opens the advisor with it instead of posting', async () => {
+  const api = mockApi({ ...signedInAs({ id: 9, name: 'Karim' }), ...categories })
+  renderWithProviders(<App />, '/questions/ask')
+
+  const choice = within(await screen.findByRole('group', { name: 'Who should answer?' }))
+  expect(choice.getByRole('radio', { name: 'Everyone, in public' })).toBeChecked()
+  expect(screen.getByRole('group', { name: 'Topic' })).toBeVisible()
+
+  await userEvent.click(choice.getByRole('radio', { name: 'Only the AI, privately' }))
+  expect(choice.getByRole('radio', { name: 'Only the AI, privately' })).toHaveAccessibleDescription('Only you see it. An answer in seconds with sources; no expert checks it.')
+  // Topic, place, tags and photos are for public questions.
+  expect(screen.queryByRole('group', { name: 'Topic' })).not.toBeInTheDocument()
+  expect(screen.queryByRole('group', { name: 'Photos (optional)' })).not.toBeInTheDocument()
+
+  await userEvent.type(screen.getByLabelText('Your question'), 'Fish gasping at dawn')
+  await userEvent.click(screen.getByRole('textbox', { name: 'Details' }))
+  await userEvent.keyboard('Pond of 30 decimals')
+  await userEvent.click(screen.getByRole('button', { name: 'Ask the AI privately' }))
+
+  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent(/^\/advisor\?q=/))
+  expect(new URLSearchParams(screen.getByTestId('path').textContent!.split('?')[1]).get('q')).toBe('Fish gasping at dawn\n\nPond of 30 decimals')
+  expect(api.mock.calls.some(([url]) => url === '/api/questions/create')).toBe(false)
+})
+
+test('an edit has no choice: it stays the public question it is', async () => {
+  mockApi({
+    ...signedInAs({ id: 9, name: 'Karim' }),
+    ...categories,
+    'GET /api/questions/id/5': () => envelope(200, question),
+    'GET /api/answers/question/5': () => envelope(200, []),
+  })
+  renderWithProviders(<App />, '/questions/5/edit')
+  await screen.findByRole('button', { name: 'Save question' })
+  expect(screen.queryByRole('group', { name: 'Who should answer?' })).not.toBeInTheDocument()
 })

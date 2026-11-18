@@ -1,5 +1,5 @@
 import { setLang, useLang, useT } from '../lib/i18n'
-import { BookmarksSimple, GearSix, NotePencil, SealCheck, ShieldCheck, SignOut, Translate } from '@phosphor-icons/react'
+import { BookmarksSimple, GearSix, UserCircle, NotePencil, SealCheck, ShieldCheck, SignOut, Translate } from '@phosphor-icons/react'
 import { useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate } from 'react-router-dom'
 import {
@@ -14,6 +14,7 @@ import {
 import { isAdmin } from '../api/auth'
 import { useSession } from '../features/auth/session'
 import { useMyBadges } from '../features/experts/useMyBadges'
+import { useMyAuthorProfile } from '../api/authors'
 import { Avatar } from '../ui/Avatar'
 
 const item = 'min-h-11 text-muted-foreground'
@@ -29,6 +30,8 @@ export function AccountMenu() {
   const lang = useLang()
   const queryClient = useQueryClient()
   const name = user?.name || t('Your account')
+  // The session has no photo; the author profile does, and Settings updates it in place after a change.
+  const photo = useMyAuthorProfile(user != null).data?.profileImageUrl || undefined
   // The review queue is for Verified Experts; the entry stays hidden for everyone else.
   const { expertAnywhere } = useMyBadges()
   const nextLang = lang === 'bn' ? 'en' : 'bn'
@@ -42,17 +45,23 @@ export function AccountMenu() {
     <DropdownMenu>
       <DropdownMenuTrigger className="flex size-11 items-center justify-center rounded-full transition-transform duration-150 ease-(--ease-out) active:scale-[0.94]">
         <span className="sr-only">{t('Account')}</span>
-        <Avatar name={name} size={32} />
+        <Avatar name={name} src={photo} size={32} />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-64">
         <DropdownMenuGroup>
           <DropdownMenuLabel className="flex flex-col gap-0.5 pb-3 text-sm text-foreground">
             <span className="truncate font-medium">{name}</span>
-            {user?.email && <span className="truncate text-muted-foreground">{user.email}</span>}
+            {(user?.email || user?.mobileNumber) && <span className="truncate text-muted-foreground">{user.email || user.mobileNumber}</span>}
           </DropdownMenuLabel>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
+          {user?.id != null && (
+            <DropdownMenuItem className={item} render={<Link to={`/users/${user.id}`} state={{ name: user.name }} />}>
+              <UserCircle size={18} aria-hidden="true" />
+              {t('Your profile')}
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem className={item} render={<Link to="/me/stories" />}>
             <NotePencil size={18} aria-hidden="true" />
             {t('Your stories')}
@@ -64,7 +73,7 @@ export function AccountMenu() {
             </DropdownMenuItem>
           )}
           {isAdmin(user) && (
-            <DropdownMenuItem className={item} render={<Link to="/admin/experts" />}>
+            <DropdownMenuItem className={item} render={<Link to="/admin" />}>
               <ShieldCheck size={18} aria-hidden="true" />
               {t('Admin')}
             </DropdownMenuItem>

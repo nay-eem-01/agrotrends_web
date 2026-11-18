@@ -58,6 +58,9 @@ export function useToggleTagFollow() {
       return { before }
     },
     onError: (_error, _vars, context) => queryClient.setQueryData(topicKeys.followed, context?.before),
-    onSettled: () => queryClient.invalidateQueries({ queryKey: feedKeys.feed('following') }),
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey: feedKeys.feed('following') })
+      void queryClient.invalidateQueries({ queryKey: ['questions', 'list', { following: true }] })
+    },
   })
 }

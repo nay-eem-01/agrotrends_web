@@ -4,7 +4,7 @@ import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { clearSession, getAccessToken, hasStoredSession } from '../../api/client'
 import App from '../../App'
 import { renderWithProviders } from '../../test/render'
-import { EMAIL_CHANGED_NOTICE, PASSWORD_CHANGED_NOTICE } from './SettingsPage'
+import { PASSWORD_CHANGED_NOTICE } from './SettingsPage'
 
 function envelope(status: number, payload: unknown, message = 'OK') {
   return new Response(JSON.stringify({ status: String(status), message, payload, success: status < 400 }), {
@@ -17,10 +17,10 @@ const user = { id: 1, name: 'Nasrin Akter', email: 'nasrin@farm.bd', mobileNumbe
 const fetchMock = vi.fn<typeof fetch>()
 
 beforeEach(() => {
-  // Background reads (profile, expert status, reputation, unread count) get one empty answer that fits them all; the
-  // account and password tests count only the calls they make (/api/auth, /api/user).
+  // Background reads (profile, expert status, reputation, unread count, e-mail settings) get one empty answer that fits
+  // them all; the account and password tests count only the calls they make (/api/auth, /api/user).
   vi.stubGlobal('fetch', (input: RequestInfo | URL, init?: RequestInit) =>
-    /^\/api\/(auth|user)\//.test(String(input))
+    /^\/api\/(auth|user)\/(?!settings)/.test(String(input))
       ? fetchMock(input, init)
       : Promise.resolve(envelope(200, { name: user.name, specialities: [], content: [], number: 0, last: true, total: 0, topics: [], count: 0 })),
   )
@@ -61,7 +61,7 @@ test('saving a new name keeps the reader signed in and updates the menu', async 
   await userEvent.type(screen.getByLabelText('Full name'), 'Nasrin Sultana')
   await userEvent.click(screen.getByRole('button', { name: 'Save changes' }))
 
-  expect(await screen.findByText('Changes saved')).toBeInTheDocument()
+  expect(await screen.findByText(/Changes saved/)).toBeInTheDocument()
   expect(fetchMock.mock.calls[1][0]).toBe('/api/user/update')
   expect(body(1)).toEqual({ name: 'Nasrin Sultana', email: 'nasrin@farm.bd', countryCode: '+880', mobileNumber: '1712345678' })
   await userEvent.click(screen.getByRole('button', { name: 'Account' }))
@@ -69,19 +69,45 @@ test('saving a new name keeps the reader signed in and updates the menu', async 
   expect(getAccessToken()).toBe('a1')
 })
 
-test('changing the e-mail sends the reader to sign in again', async () => {
-  fetchMock.mockResolvedValueOnce(envelope(200, null))
+test('a new e-mail keeps the reader signed in and says a link was sent', async () => {
+  fetchMock
+    .mockResolvedValueOnce(envelope(200, null))
+    .mockResolvedValueOnce(envelope(200, { ...user, email: 'nasrin@agro.bd', emailVerified: false, phoneVerified: true }))
   await openSettings()
 
   await userEvent.clear(screen.getByLabelText('E-mail'))
   await userEvent.type(screen.getByLabelText('E-mail'), 'nasrin@agro.bd')
   await userEvent.click(screen.getByRole('button', { name: 'Save changes' }))
 
-  expect(await screen.findByText(EMAIL_CHANGED_NOTICE)).toBeInTheDocument()
-  await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/sign-in?next=%2Fsettings'))
-  expect(hasStoredSession()).toBe(false)
-  // Restore, update; no sign-out call for a session the backend already revoked.
-  expect(fetchMock).toHaveBeenCalledTimes(2)
+  expect(await screen.findByText(/We sent a confirmation link to nasrin@agro\.bd\./)).toBeInTheDocument()
+  expect(screen.getByTestId('path')).toHaveTextContent('/settings')
+  expect(hasStoredSession()).toBe(true)
+  // The reloaded account shows the new address as not confirmed, with a way to get a new link.
+  expect(await screen.findByText('Not confirmed yet')).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Send a new link' })).toBeInTheDocument()
+})
+
+test('the e-mail can be removed while a phone remains, but not both', async () => {
+  fetchMock.mockResolvedValueOnce(envelope(200, null))
+  await openSettings()
+
+  await userEvent.clear(screen.getByLabelText('E-mail'))
+  await userEvent.clear(screen.getByLabelText('Mobile number'))
+  await userEvent.click(screen.getByRole('button', { name: 'Save changes' }))
+  expect(screen.getByLabelText('E-mail')).toHaveAccessibleDescription('Keep an e-mail address, a phone number or both.')
+
+  await userEvent.type(screen.getByLabelText('Mobile number'), '1712345678')
+  await userEvent.click(screen.getByRole('button', { name: 'Save changes' }))
+  await waitFor(() => expect(fetchMock.mock.calls[1]?.[0]).toBe('/api/user/update'))
+  expect(body(1)).toEqual({ name: 'Nasrin Akter', countryCode: '+880', mobileNumber: '1712345678' })
+})
+
+test('an unconfirmed phone links to the SMS code', async () => {
+  fetchMock.mockReset()
+  fetchMock.mockResolvedValueOnce(envelope(200, { accessToken: 'a1', refreshToken: 'r1', user: { ...user, emailVerified: true, phoneVerified: false } }))
+  await openSettings()
+  expect(screen.getByText('Confirmed')).toBeInTheDocument()
+  expect(screen.getByRole('link', { name: 'Enter the SMS code' })).toHaveAttribute('href', '/verify-phone?next=%2Fsettings')
 })
 
 test('a taken e-mail shows the server message', async () => {
@@ -134,4 +160,17 @@ test('the new password is checked before sending', async () => {
 
   expect(screen.getByLabelText('New password')).toHaveAccessibleDescription('Choose a password different from the current one.')
   expect(fetchMock).toHaveBeenCalledOnce()
+})
+
+test('the name field clears its stale required error as soon as it is edited', async () => {
+  await openSettings()
+  const name = screen.getByLabelText('Full name')
+  await userEvent.clear(name)
+  await userEvent.click(screen.getByRole('button', { name: 'Save changes' }))
+  expect(name).toHaveAttribute('aria-invalid', 'true')
+  await userEvent.type(name, 'Nasrin')
+  expect(name).not.toHaveAttribute('aria-invalid', 'true')
+  expect(screen.queryByText('Enter your name.')).not.toBeInTheDocument()
+  // Editing is not a save request.
+  expect(fetchMock.mock.calls.filter(([url]) => url === '/api/user/update')).toHaveLength(0)
 })

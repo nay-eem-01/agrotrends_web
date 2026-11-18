@@ -53,6 +53,8 @@ test('saving the profile step goes on to where the reader was heading', async ()
 })
 
 test('no Google button without a client id', async () => {
+  // A local .env may set the id; this test is about running without one.
+  vi.stubEnv('VITE_GOOGLE_CLIENT_ID', '')
   mockApi({})
   renderWithProviders(<App />, '/sign-in')
   await screen.findByRole('button', { name: 'Sign in' })
@@ -88,4 +90,27 @@ test('Google sign-in sends the ID token and signs in', async () => {
   await waitFor(() => expect(getAccessToken()).toBe('g1'))
   const call = api.mock.calls.find(([url]) => url === '/api/auth/google')!
   expect(JSON.parse(call[1]!.body as string)).toEqual({ idToken: 'google-id-token' })
+})
+
+test("Google's button is drawn in the page's language and redrawn when it changes", async () => {
+  vi.stubEnv('VITE_GOOGLE_CLIENT_ID', 'client-1.apps.googleusercontent.com')
+  const locales: unknown[] = []
+  window.google = {
+    accounts: {
+      id: {
+        initialize: () => {},
+        renderButton: (parent, options) => {
+          locales.push(options.locale)
+          parent.textContent = `Google (${String(options.locale)})`
+        },
+      },
+    },
+  }
+  mockApi({ 'GET /api/tags': () => envelope(200, []) })
+  renderWithProviders(<App />, '/sign-in')
+
+  expect(await screen.findByText('Google (en)')).toBeInTheDocument()
+  await userEvent.click(screen.getAllByRole('button', { name: 'বাংলা' })[0])
+  expect(await screen.findByText('Google (bn)')).toBeInTheDocument()
+  expect(locales).toEqual(['en', 'bn'])
 })

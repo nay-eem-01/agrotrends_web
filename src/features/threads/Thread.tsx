@@ -151,7 +151,7 @@ function Item({ kind, parentId, copy, item, onReply }: ItemProps & { item: Threa
   return (
     <article aria-label={`${t(copy.item)} by ${item.authorName}`}>
       <header className="flex items-center gap-2 text-sm">
-        <Avatar name={item.authorName} size={28} />
+        <Avatar name={item.authorName} src={item.authorPhotoUrl} size={28} />
         <span className="font-medium">{item.authorName}</span>
         <span className="min-w-0 flex-1 text-muted-foreground">
           · {storyDate(item.createdAt)}

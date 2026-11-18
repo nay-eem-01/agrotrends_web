@@ -145,7 +145,7 @@ function AuthorRow({ author }: { author: AuthorSummary }) {
 
   return (
     <li className="flex items-center gap-3 border-b border-rule py-3">
-      <Avatar name={name} size={36} />
+      <Avatar name={name} src={author.profileImageUrl} size={36} />
       <Link to={`/authors/${author.authorId}`} className="min-w-0 flex-1 truncate font-medium hover:underline">
         {name}
       </Link>

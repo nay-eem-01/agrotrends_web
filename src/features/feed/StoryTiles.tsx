@@ -86,7 +86,7 @@ function Byline({ story }: { story: StorySummary }) {
   if (!author?.name) return null
   return (
     <Link to={`/authors/${author.authorId}`} className="relative z-10 inline-flex w-fit items-center gap-2 text-sm font-medium text-foreground hover:underline">
-      <Avatar name={author.name} size={24} />
+      <Avatar name={author.name} src={author.profileImageUrl} size={24} />
       {author.name}
     </Link>
   )

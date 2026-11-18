@@ -13,7 +13,7 @@ export const topicKeys = {
 export function useTags(q = '') {
   return useQuery({
     queryKey: topicKeys.search(q),
-    queryFn: ({ signal }) => api<string[]>('/api/tags', { params: { q }, signal }),
+    queryFn: ({ signal }) => api<string[]>('/api/tags', { params: { q }, signal, anonymous: true }),
   })
 }
 

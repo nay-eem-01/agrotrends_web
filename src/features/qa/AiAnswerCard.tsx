@@ -1,3 +1,4 @@
+import { AiAnswerText } from '../../ui/AiAnswerText'
 import { SealCheck, Sparkle, Warning } from '@phosphor-icons/react'
 import { cn } from 'cn'
 import { useEffect, useState } from 'react'
@@ -56,7 +57,7 @@ function Card({ answer, topicId }: { answer: AiAnswer; topicId?: number }) {
         <StatusLabel answer={answer} />
         {answer.questionId != null && <ReportButton targetType="AI_ANSWER" targetId={answer.questionId} what={t('this AI answer')} className="ml-auto" />}
       </header>
-      <p className="mt-3 text-base leading-relaxed whitespace-pre-line">{answer.answer}</p>
+      <AiAnswerText text={answer.answer} sources={answer.sources?.length} className="mt-3 text-base leading-relaxed" />
       {corrected && answer.correctionAnswerId != null && (
         <a href={`#answer-${answer.correctionAnswerId}`} className="mt-3 inline-block text-sm font-medium text-primary underline-offset-4 hover:underline">
           {t("Read the expert's corrected answer")}

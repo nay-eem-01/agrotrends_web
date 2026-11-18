@@ -1,3 +1,4 @@
+import { TopicChips } from '../topics/TopicChips'
 import { ChatCircleText, PaperPlaneTilt } from '@phosphor-icons/react'
 import { Link } from 'react-router-dom'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -76,26 +77,21 @@ function NeedsAnswer() {
   )
 }
 
-/** The topics as one compact row of quick filters into the question feed (the first eight, then all questions). */
+/** Topic filters into the question feed. */
 function TopicFilters() {
-  const t = useT()
   const categories = useCategories().data ?? []
   if (categories.length === 0) return null
   return (
-    <nav aria-label={t('Topics')} className="mt-4 -mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
-      <ul className="flex gap-2 pb-1 sm:flex-wrap">
-        {categories.slice(0, 8).map((topic) => (
-          <li key={topic.id}>
-            <Link
-              to={`/questions?categoryId=${topic.id}`}
-              className="inline-flex h-8 shrink-0 items-center rounded-full border border-border-strong px-3 text-sm whitespace-nowrap transition-colors duration-150 hover:border-primary/50 hover:bg-surface"
-            >
-              {topic.categoryName}
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </nav>
+    <div className="mt-4">
+      <TopicChips categories={categories} renderTopic={(topic) => (
+        <Link
+          to={`/questions?categoryId=${topic.id}`}
+          className="inline-flex h-8 items-center rounded-full border border-border-strong px-3 text-sm transition-colors duration-150 hover:border-primary/50 hover:bg-surface"
+        >
+          {topic.categoryName}
+        </Link>
+      )} />
+    </div>
   )
 }
 

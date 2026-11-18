@@ -83,7 +83,7 @@ function Story({ story }: { story: BlogResponse }) {
         {story.subtitle && <p className="mt-3 font-serif text-xl leading-snug text-pretty text-muted-foreground sm:text-[1.375rem]">{story.subtitle}</p>}
         {author?.name && (
           <div className="mt-7 flex items-center gap-3">
-            <Avatar name={author.name} size={44} />
+            <Avatar name={author.name} src={author.profileImageUrl} size={44} />
             <div className="min-w-0 text-sm">
               <Link to={`/authors/${author.authorId}`} className="font-semibold text-foreground hover:underline">
                 {author.name}

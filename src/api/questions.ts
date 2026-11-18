@@ -17,6 +17,7 @@ export function useQuestions(filters: QuestionFilters, enabled = true) {
       api<Page<Question>>('/api/questions/all', {
         params: { pageNo: pageParam, pageSize: FEED_PAGE_SIZE, sortBy: 'creationDate', ascOrDesc: 'desc', ...filters },
         signal,
+        anonymous: !filters.following,
       }),
     initialPageParam: 0,
     getNextPageParam: (page) => (page.last ? undefined : page.number + 1),

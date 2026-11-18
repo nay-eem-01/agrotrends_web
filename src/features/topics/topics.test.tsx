@@ -97,3 +97,33 @@ test('home shows topics to follow', async () => {
   expect(within(rail).getByRole('link', { name: 'rice' })).toHaveAttribute('href', '/tags/rice')
   expect(within(rail).getByRole('link', { name: 'See all tags' })).toHaveAttribute('href', '/topics')
 })
+
+test('the starter catalog can be followed and unfollowed even when there are no tags', async () => {
+  const rice = { id: 3, categoryName: 'Rice' }
+  let following = false
+  mockApi({
+    ...signedIn(),
+    'GET /api/categories/all': () => envelope(200, page([rice])),
+    'GET /api/tags': () => envelope(200, []),
+    'GET /api/me/following/tags': () => envelope(200, page([])),
+    'GET /api/me/following/categories': () => envelope(200, following ? [rice] : []),
+    'PUT /api/categories/3/follow': () => {
+      following = true
+      return envelope(200, null)
+    },
+    'DELETE /api/categories/3/follow': () => {
+      following = false
+      return envelope(200, null)
+    },
+  })
+  renderWithProviders(<App />, '/topics')
+  const follow = await screen.findByRole('button', { name: 'Follow Rice' })
+  await waitFor(() => expect(follow).toBeEnabled())
+  await userEvent.click(follow)
+
+  const unfollow = await screen.findByRole('button', { name: 'Unfollow Rice' })
+  const yours = screen.getByRole('region', { name: 'Topics you follow' })
+  expect(within(yours).getByRole('link', { name: 'Rice' })).toHaveAttribute('href', '/questions?categoryId=3')
+  await userEvent.click(unfollow)
+  expect(await screen.findByRole('button', { name: 'Follow Rice' })).toHaveAttribute('aria-pressed', 'false')
+})

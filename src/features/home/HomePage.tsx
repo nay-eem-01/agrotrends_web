@@ -1,7 +1,7 @@
 import { PaperPlaneTilt, Plant, SealCheck, Sparkle } from '@phosphor-icons/react'
 import { lazy, Suspense, useId, useRef, useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Skeleton } from '@/components/ui/skeleton'
+import { RowsSkeleton } from '../../ui/LoadingSkeleton'
 import { usePublicStats } from '../../api/stats'
 import { seasonCalendar, SEASON_LABELS, type Season } from '../../lib/agri'
 import { formatNumber, useT } from '../../lib/i18n'
@@ -23,10 +23,10 @@ export function HomePage() {
   const t = useT()
   const { status } = useSession()
   // Until the session is known, neither page: a returning member would otherwise read Discover's lists first.
-  if (status === 'restoring') return <Skeleton className="mx-auto mt-8 h-64 max-w-(--container-page) rounded-2xl" />
+  if (status === 'restoring') return <RowsSkeleton label={t('Loading page')} kind="question" className="mx-auto max-w-(--container-page) px-4 pt-8 sm:px-8" />
   if (status === 'signed-in') {
     return (
-      <Suspense fallback={<Skeleton className="mx-auto mt-8 h-64 max-w-(--container-page) rounded-2xl" />}>
+      <Suspense fallback={<RowsSkeleton label={t('Loading page')} kind="question" className="mx-auto max-w-(--container-page) px-4 pt-8 sm:px-8" />}>
         <HomeFeed />
       </Suspense>
     )
@@ -36,7 +36,7 @@ export function HomePage() {
       <title>{t('AgroTrends – farming questions, stories and advice')}</title>
       <Hero />
       <div className="mx-auto flex max-w-(--container-page) flex-col gap-16 px-4 sm:px-8 lg:gap-20">
-        <Suspense fallback={<Skeleton className="h-64 w-full rounded-2xl" />}>
+        <Suspense fallback={<RowsSkeleton label={t('Loading questions')} />}>
           <DiscoverSections />
         </Suspense>
       </div>

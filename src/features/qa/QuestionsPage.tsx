@@ -1,7 +1,7 @@
 import { Plus, Sparkle } from '@phosphor-icons/react'
 import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyTitle } from '@/components/ui/empty'
-import { Skeleton } from '@/components/ui/skeleton'
+import { RowsSkeleton } from '../../ui/LoadingSkeleton'
 import { cn } from 'cn'
 import { useCategories } from '../../api/categories'
 import { errorMessage } from '../../api/errors'
@@ -58,7 +58,7 @@ export function QuestionsPage() {
         <div className="min-w-0">
           <Toolbar filters={filters} />
           {questions.isPending ? (
-            <ListSkeleton />
+            <RowsSkeleton label={t('Loading questions')} kind="question" />
           ) : questions.isError ? (
             <p role="alert" className="py-16 text-muted-foreground">
               {errorMessage(questions.error)}
@@ -149,27 +149,6 @@ function Toolbar({ filters }: { filters: QuestionFilters }) {
         )}
       </ActiveFilters>
     </div>
-  )
-}
-
-function ListSkeleton() {
-  const t = useT()
-  return (
-    <ul className="border-t border-border" aria-busy="true">
-      <li className="sr-only">
-        <output>{t('Loading questions')}</output>
-      </li>
-      {[0, 1, 2].map((key) => (
-        <li key={key} className="flex gap-5 border-b border-border py-5">
-          <Skeleton className="h-20 w-16" />
-          <div className="flex flex-1 flex-col gap-2">
-            <Skeleton className="h-5 w-24 rounded-full" />
-            <Skeleton className="h-6 w-4/5" />
-            <Skeleton className="h-4 w-full" />
-          </div>
-        </li>
-      ))}
-    </ul>
   )
 }
 

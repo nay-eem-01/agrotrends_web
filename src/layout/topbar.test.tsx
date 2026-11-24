@@ -11,7 +11,10 @@ beforeEach(() => {
   clearSession()
 })
 
-afterEach(() => vi.unstubAllGlobals())
+afterEach(() => {
+  delete document.documentElement.dataset.theme
+  vi.unstubAllGlobals()
+})
 
 test('the phone menu reaches every destination, and closes on the way there', async () => {
   mockApi({ 'GET /api/questions/all': () => envelope(200, page([])), 'GET /api/categories/all': () => envelope(200, page([])) })
@@ -121,7 +124,7 @@ test('the sections live in the sidebar only, and the menu button hides it to ico
   expect(localStorage.getItem('agrotrends.sidebar')).toBe('closed')
 })
 
-test('signing in is a focused page: only the logo and a way back, no sidebar, search or tab bar', async () => {
+test('the sign-in header keeps preferences and a way back', async () => {
   mockApi({})
   renderWithProviders(<App />, '/sign-in')
 
@@ -131,4 +134,21 @@ test('signing in is a focused page: only the logo and a way back, no sidebar, se
   expect(screen.queryByRole('complementary', { name: 'Navigation' })).not.toBeInTheDocument()
   expect(screen.queryByRole('searchbox', { name: 'Search AgroTrends' })).not.toBeInTheDocument()
   expect(screen.queryByRole('navigation', { name: 'Sections' })).not.toBeInTheDocument()
+})
+
+test('the theme can be switched from the header and the choice is stored', async () => {
+  mockApi({})
+  renderWithProviders(<App />, '/about')
+
+  const header = within(screen.getByRole('navigation', { name: 'Main' }))
+  const footer = within(screen.getByRole('contentinfo'))
+  expect(footer.queryByRole('button', { name: 'বাংলা' })).not.toBeInTheDocument()
+  expect(footer.queryByRole('button', { name: 'Dark theme' })).not.toBeInTheDocument()
+
+  await userEvent.click(header.getByRole('button', { name: 'Dark theme' }))
+  expect(document.documentElement.dataset.theme).toBe('dark')
+  expect(localStorage.getItem('agrotrends.theme')).toBe('dark')
+
+  await userEvent.click(header.getByRole('button', { name: 'Light theme' }))
+  expect(document.documentElement.dataset.theme).toBeUndefined()
 })

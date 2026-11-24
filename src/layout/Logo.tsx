@@ -1,7 +1,8 @@
+import { cn } from 'cn'
 import { Link } from 'react-router-dom'
 
 /** The leaf mark plus the wordmark. The mark alone is the favicon. In the footer it's plain, so home has one link. */
-export function Logo({ link = true }: { link?: boolean }) {
+export function Logo({ link = true, wordmarkClassName }: { link?: boolean; wordmarkClassName?: string }) {
   const mark = (
     <>
       <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true">
@@ -12,11 +13,11 @@ export function Logo({ link = true }: { link?: boolean }) {
           fill="var(--color-mustard)"
         />
       </svg>
-      <span className="font-serif text-lg font-bold tracking-[-0.02em] text-ink sm:text-xl">AgroTrends</span>
+      <span className={cn('font-serif text-lg font-bold tracking-[-0.02em] text-ink sm:text-xl', wordmarkClassName)}>AgroTrends</span>
     </>
   )
   return link ? (
-    <Link to="/" className="flex items-center gap-2 rounded-md" aria-label="AgroTrends home">
+    <Link to="/" className="flex shrink-0 items-center gap-2 rounded-md" aria-label="AgroTrends home">
       {mark}
     </Link>
   ) : (

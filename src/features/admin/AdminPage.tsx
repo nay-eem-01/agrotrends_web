@@ -6,7 +6,7 @@ import { isAdmin, useAdminSignIn } from '../../api/auth'
 import { errorMessage } from '../../api/errors'
 import { isEmail, isPhone, signInIdentifier } from '../../lib/auth'
 import { Button } from '../../ui/Button'
-import { Spinner } from '../../ui/Spinner'
+import { RowsSkeleton } from '../../ui/LoadingSkeleton'
 import { TextField } from '../../ui/TextField'
 import { FormError } from '../auth/AuthPage'
 import { useSession } from '../auth/session'
@@ -22,7 +22,7 @@ export function AdminPage({ title, back, children }: { title: string; back?: { t
     <div className="mx-auto max-w-(--container-page) px-4 pt-6 pb-20 sm:px-8 sm:pt-10">
       <title>{`${title} – Admin – AgroTrends`}</title>
       {status === 'restoring' ? (
-        <Spinner />
+        <RowsSkeleton />
       ) : isAdmin(user) ? (
         <>
           <nav aria-label="Admin sections" className="-mx-4 mb-6 overflow-x-auto border-b border-border px-4 [scrollbar-width:none] sm:-mx-8 sm:px-8 lg:hidden">

@@ -1,6 +1,6 @@
 import { useT, formatNumber } from '../../lib/i18n'
 import { ArrowLeft, Sparkle } from '@phosphor-icons/react'
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import { Badge } from '@/components/ui/badge'
 import { cn } from 'cn'
@@ -15,7 +15,7 @@ import { ButtonLink } from '../../ui/Button'
 import { Chip } from '../../ui/Chip'
 import { TagList } from '../../ui/TagList'
 import { SafeHtml } from '../../ui/SafeHtml'
-import { Spinner } from '../../ui/Spinner'
+import { ReadingSkeleton } from '../../ui/LoadingSkeleton'
 import { useAuthor } from '../../api/authors'
 import { useSession } from '../auth/session'
 import { FollowAuthorButton } from '../authors/FollowAuthorButton'
@@ -28,6 +28,8 @@ import { NotFoundPage } from '../errors/NotFoundPage'
 import { Thread } from '../threads/Thread'
 import { RelatedStories } from './RelatedStories'
 
+const storyColumn = 'mx-auto max-w-[calc(var(--container-read)+3rem)] px-4 sm:px-6'
+
 export function StoryPage() {
   const t = useT()
   const { slug = '' } = useParams()
@@ -36,11 +38,7 @@ export function StoryPage() {
   const story = useStory(slug, status !== 'restoring')
 
   if (status === 'restoring' || story.isPending) {
-    return (
-      <div className="flex justify-center py-24 text-muted-foreground">
-        <Spinner label={t('Loading story')} />
-      </div>
-    )
+    return <ReadingSkeleton label={t('Loading story')} story />
   }
   if (story.isError) {
     if (story.error instanceof ApiError && story.error.isNotFound) return <NotFoundPage />
@@ -65,7 +63,7 @@ function Story({ story }: { story: BlogResponse }) {
     <article className="pb-20">
       <title>{`${story.title} – AgroTrends`}</title>
       {/* After Medium: the headline, byline and actions first, then the cover, then the reading column. */}
-      <header className="mx-auto max-w-[calc(var(--container-read)+3rem)] px-4 pt-6 sm:px-6 sm:pt-8">
+      <header className={cn(storyColumn, 'pt-6 sm:pt-8')}>
         <Link to="/stories" className="-ml-1 inline-flex h-11 items-center gap-1.5 px-1 text-sm font-medium text-muted-foreground hover:text-foreground">
           <ArrowLeft size={16} aria-hidden="true" />
           {t('Back to stories')}
@@ -109,14 +107,14 @@ function Story({ story }: { story: BlogResponse }) {
         <StoryActions story={story} />
       </header>
       {story.imageUrl && (
-        <figure className="mx-auto mt-8 max-w-[52rem] px-4 sm:px-6">
+        <figure className={cn(storyColumn, 'mt-8')}>
           {/* A wide, deliberate crop from the centre; the photo is never stretched. */}
           <img src={story.imageUrl} alt="" fetchPriority="high" decoding="async" className="aspect-[16/9] w-full rounded-xl bg-muted object-cover" />
         </figure>
       )}
 
       <Body story={story} />
-      <div className="mx-auto max-w-[calc(var(--container-read)+3rem)] px-4 sm:px-6">
+      <div className={storyColumn}>
         <StoryFooter story={story} />
         <StoryActions story={story} />
         {author?.authorId != null && <WrittenBy authorId={author.authorId} fallbackName={author.name ?? ''} />}
@@ -145,44 +143,96 @@ function storyHeadings(html: string | undefined): string[] {
   return Array.from(doc.querySelectorAll('h2')).map((heading) => heading.textContent?.trim() ?? '').filter(Boolean)
 }
 
-/**
- * The reading column; on wide screens, when the story has two or more sections, an "In this article" list beside it
- * that links to them. The headings get ids after render (the stored HTML is never changed).
- */
+/** The contents bar stays below the site header for the length of the story body. */
 function Body({ story }: { story: BlogResponse }) {
   const t = useT()
   const column = useRef<HTMLDivElement>(null)
+  const list = useRef<HTMLOListElement>(null)
   const headings = useMemo(() => storyHeadings(story.content), [story.content])
   const contents = headings.length >= 2
+  const [active, setActive] = useState<string>()
 
   useEffect(() => {
-    column.current?.querySelectorAll('h2').forEach((heading, index) => {
+    const body = column.current
+    if (!body) return
+    const sections = Array.from(body.querySelectorAll('h2')).filter((heading) => heading.textContent?.trim())
+    sections.forEach((heading, index) => {
       heading.id = `section-${index + 1}`
+      heading.tabIndex = -1
     })
-  }, [story.content])
+    const initialSection = sections.find((heading) => `#${heading.id}` === window.location.hash)
+    initialSection?.scrollIntoView?.()
+    if (!contents) return
+
+    let frame: number | undefined
+    function updateActive() {
+      frame = undefined
+      // Use the same offset as the section links so active state and anchor navigation agree.
+      const offset = Number.parseFloat(getComputedStyle(sections[0]).scrollMarginTop) || 0
+      let current: string | undefined
+      for (const heading of sections) {
+        if (heading.getBoundingClientRect().top > offset + 1) break
+        current = heading.id
+      }
+      setActive(current)
+    }
+    function scheduleUpdate() {
+      frame ??= requestAnimationFrame(updateActive)
+    }
+
+    updateActive()
+    window.addEventListener('scroll', scheduleUpdate, { passive: true })
+    window.addEventListener('resize', scheduleUpdate)
+    const observer = typeof ResizeObserver === 'undefined' ? undefined : new ResizeObserver(scheduleUpdate)
+    observer?.observe(body)
+
+    return () => {
+      window.removeEventListener('scroll', scheduleUpdate)
+      window.removeEventListener('resize', scheduleUpdate)
+      observer?.disconnect()
+      if (frame !== undefined) cancelAnimationFrame(frame)
+    }
+  }, [story.content, contents])
+
+  useEffect(() => {
+    const row = list.current
+    const link = row?.querySelector('[aria-current="location"]')
+    if (!row || !link) return
+    const viewport = row.getBoundingClientRect()
+    const item = link.getBoundingClientRect()
+    // Reveal the active item without moving the article vertically.
+    if (item.left < viewport.left) row.scrollLeft += item.left - viewport.left
+    else if (item.right > viewport.right) row.scrollLeft += item.right - viewport.right
+  }, [active])
 
   return (
-    <div className={cn('mx-auto mt-10 px-4 sm:px-6', contents ? 'max-w-(--container-page) lg:grid lg:grid-cols-[13rem_minmax(0,var(--container-read))_13rem] lg:justify-center lg:gap-12' : 'max-w-[calc(var(--container-read)+3rem)]')}>
+    <div className={cn(storyColumn, 'mt-10')}>
       {contents && (
-        <nav aria-labelledby="story-contents" className="hidden lg:block">
-          <div className="sticky top-24">
-            <h2 id="story-contents" className="text-xs font-semibold text-muted-foreground">
-              {t('In this article')}
-            </h2>
-            <ol className="mt-3 flex flex-col gap-1 border-l border-border">
-              {headings.map((heading, index) => (
-                <li key={index}>
-                  <a href={`#section-${index + 1}`} className="-ml-px block border-l-2 border-transparent py-1.5 pl-3 text-sm text-muted-foreground transition-colors duration-150 hover:border-primary hover:text-foreground">
-                    {heading}
+        <nav aria-label={t('In this article')} className="sticky top-16 z-10 -mx-4 mb-6 border-y border-border bg-background px-4 sm:mx-0 sm:px-0">
+          <ol ref={list} className="flex h-14 items-stretch gap-4 overflow-x-auto sm:gap-6">
+            {headings.map((heading, index) => {
+              const id = `section-${index + 1}`
+              const current = id === active
+              return (
+                <li key={id} className="flex shrink-0">
+                  <a
+                    href={`#${id}`}
+                    aria-current={current ? 'location' : undefined}
+                    className={cn(
+                      'flex max-w-[65vw] items-center border-b-2 text-sm font-medium transition-colors duration-150 focus-visible:-outline-offset-2 sm:max-w-72',
+                      current ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:border-primary/50 hover:text-foreground',
+                    )}
+                  >
+                    <span className="truncate">{heading}</span>
                   </a>
                 </li>
-              ))}
-            </ol>
-          </div>
+              )
+            })}
+          </ol>
         </nav>
       )}
       <div ref={column} className="min-w-0">
-        <SafeHtml html={story.content} className="story-body" />
+        <SafeHtml html={story.content} className={cn('story-body', contents && '[&_h2]:scroll-mt-[8.5rem]')} />
       </div>
     </div>
   )

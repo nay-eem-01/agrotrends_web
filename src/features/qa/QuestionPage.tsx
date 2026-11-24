@@ -10,9 +10,10 @@ import { filterPath, SEASON_LABELS, SOIL_LABELS } from '../../lib/agri'
 import { storyDate } from '../../lib/dates'
 import { Button, buttonClass } from '../../ui/Button'
 import { Chip } from '../../ui/Chip'
+import { ImageViewer } from '../../ui/ImageViewer'
 import { TagList } from '../../ui/TagList'
 import { SafeHtml } from '../../ui/SafeHtml'
-import { Spinner } from '../../ui/Spinner'
+import { ReadingSkeleton } from '../../ui/LoadingSkeleton'
 import { useSession } from '../auth/session'
 import { NotFoundPage } from '../errors/NotFoundPage'
 import { useMyVotes } from '../../api/votes'
@@ -37,12 +38,9 @@ export function QuestionPage() {
   useAiAnswer(questionId, askedAt, valid)
   useMyVotes(questionId, valid && status === 'signed-in')
 
+  if (!valid) return <NotFoundPage />
   if (question.isPending) {
-    return (
-      <div className="flex justify-center py-24 text-muted-foreground">
-        <Spinner label={t('Loading question')} />
-      </div>
-    )
+    return <ReadingSkeleton label={t('Loading question')} />
   }
   if (question.isError) {
     if (question.error instanceof ApiError && question.error.isNotFound) return <NotFoundPage />
@@ -126,13 +124,16 @@ function QuestionView({ question }: { question: Question }) {
                 <SafeHtml html={question.content} className="post-body whitespace-pre-line" />
                 {(question.imageUrls?.length ?? 0) > 0 && (
                   <ul aria-label={t('Photos')} className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                    {question.imageUrls!.map((url, index) => (
-                      <li key={url}>
-                        <a href={url} target="_blank" rel="noopener noreferrer" className="block overflow-hidden rounded-xl ring-1 ring-border">
-                          <img src={url} alt={t('Photo {n} of the question', { n: index + 1 })} loading="lazy" className="aspect-square w-full object-cover transition-transform duration-200 ease-(--ease-out) hover:scale-[1.02]" />
-                        </a>
-                      </li>
-                    ))}
+                    {question.imageUrls!.map((url, index) => {
+                      const label = t('Photo {n} of the question', { n: index + 1 })
+                      return (
+                        <li key={url}>
+                          <ImageViewer src={url} label={label} className="block w-full overflow-hidden rounded-xl ring-1 ring-border">
+                            <img src={url} alt={label} loading="lazy" className="aspect-square w-full object-cover transition-transform duration-200 ease-(--ease-out) hover:scale-[1.02]" />
+                          </ImageViewer>
+                        </li>
+                      )
+                    })}
                   </ul>
                 )}
                 {chips.length > 0 && (

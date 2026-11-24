@@ -3,7 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom'
 import { cn } from 'cn'
 import { Toaster } from '@/components/ui/sonner'
 import { ConfirmEmailHost, EmailBanner } from '../features/auth/confirmEmail'
-import { Spinner } from '../ui/Spinner'
+import { RouteSkeleton } from './RouteSkeleton'
 import { AppSidebar, SidebarProvider } from './AppSidebar'
 import { Footer } from './Footer'
 import { BottomNav } from './BottomNav'
@@ -40,13 +40,7 @@ export function AppLayout() {
           {!focused && <AppSidebar />}
           <div className="flex min-w-0 flex-1 flex-col">
             <main id="main" className={cn('flex-1', footer && 'pb-16')}>
-              <Suspense
-                fallback={
-                  <div className="flex justify-center py-24 text-ink-muted">
-                    <Spinner label="Loading page" />
-                  </div>
-                }
-              >
+              <Suspense fallback={<RouteSkeleton />}>
                 <Outlet />
               </Suspense>
             </main>

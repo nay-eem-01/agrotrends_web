@@ -8,7 +8,7 @@ import { storyDate } from '../../lib/dates'
 import { formatNumber, useT } from '../../lib/i18n'
 import { Button } from '../../ui/Button'
 import { SafeHtml } from '../../ui/SafeHtml'
-import { Spinner } from '../../ui/Spinner'
+import { RowsSkeleton } from '../../ui/LoadingSkeleton'
 import { useSession } from '../auth/session'
 import { useRequireSignIn } from '../auth/useRequireSignIn'
 import { Composer } from '../threads/Composer'
@@ -38,9 +38,7 @@ export function Answers({ questionId, askerId }: { questionId: number; askerId?:
         {list.length > 1 && <p className="text-sm text-muted-foreground">{t('Accepted first, then by votes')}</p>}
       </div>
       {answers.isPending ? (
-        <div className="py-8 text-muted-foreground">
-          <Spinner label={t('Loading')} />
-        </div>
+        <RowsSkeleton label={t('Loading')} kind="avatar" className="mt-4" />
       ) : answers.isError ? (
         <p role="alert" className="py-8 text-muted-foreground">
           {gone(answers.error) ? t('This conversation is no longer available.') : errorMessage(answers.error)}
@@ -149,7 +147,7 @@ function AnswerCard({ questionId, answer, asker }: { questionId: number; answer:
         {open && (
           <div id={repliesId} className="mt-3 ml-2 border-l-2 border-border pl-5">
             {replies.isPending ? (
-              <Spinner size={16} label={t('Loading replies')} />
+              <RowsSkeleton label={t('Loading replies')} kind="avatar" count={2} />
             ) : replies.isError ? (
               <p role="alert" className="text-sm text-muted-foreground">
                 {gone(replies.error) ? t('This conversation is no longer available.') : errorMessage(replies.error)}

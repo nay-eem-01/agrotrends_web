@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react'
+import { fireEvent, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { clearSession } from '../../api/client'
@@ -97,7 +97,9 @@ test('a new photo is uploaded and saved with the profile', async () => {
   const profileSection = await openProfile()
 
   const photo = new File(['img'], 'me.webp', { type: 'image/webp' })
-  await userEvent.upload(profileSection.getByLabelText('Profile photo'), photo)
+  fireEvent.drop(profileSection.getByRole('button', { name: 'Change photo' }), {
+    dataTransfer: { types: ['Files'], files: [photo], items: [] },
+  })
   await userEvent.click(profileSection.getByRole('button', { name: 'Save profile' }))
 
   await profileSection.findByText('Profile saved')

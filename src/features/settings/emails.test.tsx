@@ -61,9 +61,17 @@ test('switching language while signed in saves it, so e-mails come in it too', a
   const api = mockApi({ ...signedIn(confirmed), 'GET /api/categories/all': () => envelope(200, page([])), 'GET /api/tags': () => envelope(200, []) })
   renderWithProviders(<App />, '/about')
   await screen.findByRole('heading', { level: 1, name: 'About us' })
-  // Signed in once the account menu is there.
-  await screen.findByRole('button', { name: 'Account' })
-  await userEvent.click(within(screen.getByRole('contentinfo')).getByRole('button', { name: 'বাংলা' }))
+  const account = await screen.findByRole('button', { name: 'Account' })
+  const header = within(screen.getByRole('navigation', { name: 'Main' }))
+  expect(header.getByRole('button', { name: 'Dark theme' })).toBeInTheDocument()
+  expect(header.queryByRole('button', { name: 'বাংলা' })).not.toBeInTheDocument()
+
+  await userEvent.click(account)
+  const menu = within(await screen.findByRole('menu'))
+  const language = menu.getByRole('menuitem', { name: /^Language\s*বাংলা$/ })
+  expect(language.previousElementSibling).toBe(menu.getByRole('menuitem', { name: 'Your profile' }))
+  await userEvent.click(language)
+  expect(document.documentElement.lang).toBe('bn')
   await waitFor(() => expect(sent(api, 'PUT')).toEqual([{ preferredLang: 'bn' }]))
 })
 

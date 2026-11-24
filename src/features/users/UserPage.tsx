@@ -15,7 +15,7 @@ import { formatNumber, useT } from '../../lib/i18n'
 import { Avatar } from '../../ui/Avatar'
 import { ImageViewer } from '../../ui/ImageViewer'
 import { Button, ButtonLink } from '../../ui/Button'
-import { Spinner } from '../../ui/Spinner'
+import { ProfileSkeleton, RowsSkeleton, TopicsSkeleton } from '../../ui/LoadingSkeleton'
 import { BanControls } from '../admin/BanControls'
 import { useRequireSignIn } from '../auth/useRequireSignIn'
 import { useSession } from '../auth/session'
@@ -54,6 +54,7 @@ export function UserPage() {
   const name = profile.data?.name ?? author.data?.name ?? fromLink ?? (own ? user?.name : undefined) ?? list[0]?.authorName ?? t('Member')
 
   if (!Number.isInteger(userId) || userId <= 0) return <NotFoundPage />
+  if (profile.isPending) return <ProfileSkeleton cover />
 
   const topics = reputation.data?.topics ?? []
   const expertIn = topics.filter((topic) => topic.badges?.includes('VERIFIED_EXPERT'))
@@ -201,7 +202,7 @@ export function UserPage() {
                   {t('Answers questions on')}
                 </h2>
                 {reputation.isPending ? (
-                  <Spinner label={t('Loading')} />
+                  <TopicsSkeleton label={t('Loading')} className="mt-3" />
                 ) : reputation.isError ? (
                   <p role="alert" className="mt-3 text-muted-foreground">
                     {errorMessage(reputation.error)}
@@ -445,7 +446,7 @@ function YourWork({ questions, loading }: { questions: { questionId?: number; ti
           {t('Your questions')}
         </h2>
         {loading ? (
-          <Spinner label={t('Loading questions')} />
+          <RowsSkeleton label={t('Loading questions')} kind="question" className="mt-3" />
         ) : questions.length === 0 ? (
           <p className="mt-3 text-sm text-muted-foreground">{t('No questions yet.')}</p>
         ) : (
@@ -536,7 +537,7 @@ function Saved() {
 
 function Listing({ loading, error, empty, count, children }: { loading: boolean; error: unknown; empty: string; count: number; children: ReactNode }) {
   const t = useT()
-  if (loading) return <Spinner label={t('Loading')} />
+  if (loading) return <RowsSkeleton label={t('Loading')} />
   if (error)
     return (
       <p role="alert" className="text-muted-foreground">

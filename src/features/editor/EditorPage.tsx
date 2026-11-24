@@ -7,7 +7,7 @@ import { ApiError, errorMessage } from '../../api/errors'
 import type { BlogResponse } from '../../api/types'
 import { clearLocalDraft, isBlank, loadLocalDraft, saveLocalDraft } from '../../lib/draft'
 import { Button, ButtonLink } from '../../ui/Button'
-import { Spinner } from '../../ui/Spinner'
+import { EditorSkeleton } from '../../ui/LoadingSkeleton'
 import { useSession } from '../auth/session'
 import { NotFoundPage } from '../errors/NotFoundPage'
 import { toAgri } from '../farming/FarmingFields'
@@ -219,12 +219,9 @@ function EditStory({ blogId }: { blogId: number }) {
   const { status } = useSession()
   const story = useBlogById(blogId, status === 'signed-in')
 
+  if (!Number.isFinite(blogId)) return <NotFoundPage />
   if (story.isPending) {
-    return (
-      <div className="flex justify-center py-24 text-muted-foreground">
-        <Spinner label="Loading story" />
-      </div>
-    )
+    return <EditorSkeleton label="Loading story" />
   }
   if (story.isError) {
     if (story.error instanceof ApiError && story.error.isNotFound) return <NotFoundPage />

@@ -5,14 +5,16 @@ import { MAX_LOCATION, useUpdateUserProfile, useUserProfile, type UserProfile } 
 import { IMAGE_TYPES, imageProblem } from '../../lib/images'
 import { CoverFallback } from '../../ui/Botanical'
 import { Button } from '../../ui/Button'
-import { Spinner } from '../../ui/Spinner'
+import { FormSkeleton } from '../../ui/LoadingSkeleton'
+import { cx } from '../../ui/cx'
+import { useImageDrop } from '../../ui/useImageDrop'
 import { TextField } from '../../ui/TextField'
 import { FormError } from '../auth/AuthPage'
 
 /** Loads your public summary, then the location and cover editor filled with it. */
 export function ProfilePageForm({ userId }: { userId: number }) {
   const profile = useUserProfile(userId)
-  if (profile.isPending) return <Spinner />
+  if (profile.isPending) return <FormSkeleton cover fields={1} />
   if (profile.isError) return <FormError message={errorMessage(profile.error)} />
   return <Editor profile={profile.data} />
 }
@@ -28,7 +30,11 @@ function Editor({ profile }: { profile: UserProfile }) {
   function chooseCover(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
     event.target.value = ''
-    if (!file) return
+    if (file) uploadFile(file)
+  }
+
+  function uploadFile(file: File) {
+    if (upload.isPending) return
     const problem = imageProblem(file)
     setCoverError(problem)
     if (problem) return
@@ -42,11 +48,12 @@ function Editor({ profile }: { profile: UserProfile }) {
     update.mutate({ location: location.trim(), coverUrl: cover })
   }
 
+  const drop = useImageDrop(uploadFile, setCoverError, upload.isPending)
   const photoError = coverError ?? (upload.isError ? errorMessage(upload.error) : null)
 
   return (
     <form onSubmit={submit} noValidate className="flex flex-col gap-5">
-      <div className="flex flex-col gap-2">
+      <div {...drop.handlers} className={cx('flex flex-col gap-2 rounded-xl', drop.active && 'outline-2 outline-primary')}>
         <span className="text-sm font-medium">Cover photo</span>
         <div className="h-28 overflow-hidden rounded-xl bg-muted">
           {cover ? <img src={cover} alt="Your current cover" className="size-full object-cover" /> : <CoverFallback className="size-full" />}
@@ -56,7 +63,7 @@ function Editor({ profile }: { profile: UserProfile }) {
             {cover ? 'Change cover' : 'Add cover'}
           </Button>
           {cover && (
-            <Button variant="quiet" size="sm" onClick={() => setCover('')}>
+            <Button variant="quiet" size="sm" disabled={upload.isPending} onClick={() => setCover('')}>
               Remove cover
             </Button>
           )}
@@ -67,7 +74,7 @@ function Editor({ profile }: { profile: UserProfile }) {
             {photoError}
           </p>
         ) : (
-          <p className="text-xs text-muted-foreground">A wide photo across the top of your profile. JPEG, PNG or WebP, up to 5 MB.</p>
+          <p className="text-xs text-muted-foreground">Drop an image here or choose a cover. JPEG, PNG or WebP, up to 5 MB.</p>
         )}
       </div>
       <TextField

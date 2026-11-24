@@ -12,7 +12,7 @@ import { MAX_ADVISOR_QUESTION } from '../../api/ai'
 import { useUserProfile } from '../../api/users'
 import { Button } from '../../ui/Button'
 import { TextField } from '../../ui/TextField'
-import { Spinner } from '../../ui/Spinner'
+import { FormSkeleton } from '../../ui/LoadingSkeleton'
 import { useSession } from '../auth/session'
 import { NotFoundPage } from '../errors/NotFoundPage'
 import { TagInput } from '../topics/TagInput'
@@ -32,12 +32,9 @@ function EditQuestion({ questionId }: { questionId: number }) {
   const t = useT()
   const { user } = useSession()
   const question = useQuestion(questionId)
+  if (!Number.isFinite(questionId)) return <NotFoundPage />
   if (question.isPending) {
-    return (
-      <div className="flex justify-center py-24 text-muted-foreground">
-        <Spinner label={t('Loading question')} />
-      </div>
-    )
+    return <FormSkeleton label={t('Loading question')} className="mx-auto max-w-(--container-feed) px-4 py-8 sm:px-6" />
   }
   if (question.isError && !(question.error instanceof ApiError && question.error.isNotFound)) {
     return (

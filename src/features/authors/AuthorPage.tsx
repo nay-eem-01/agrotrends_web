@@ -5,7 +5,7 @@ import { ApiError, errorMessage } from '../../api/errors'
 import { Avatar } from '../../ui/Avatar'
 import { ImageViewer } from '../../ui/ImageViewer'
 import { Chip } from '../../ui/Chip'
-import { Spinner } from '../../ui/Spinner'
+import { ProfileSkeleton } from '../../ui/LoadingSkeleton'
 import { useSession } from '../auth/session'
 import { NotFoundPage } from '../errors/NotFoundPage'
 import { StoryList } from '../feed/Feed'
@@ -23,11 +23,7 @@ export function AuthorPage() {
 
   if (!Number.isFinite(authorId)) return <NotFoundPage />
   if (status === 'restoring' || author.isPending) {
-    return (
-      <div className="flex justify-center py-24 text-ink-muted">
-        <Spinner label={t('Loading author')} />
-      </div>
-    )
+    return <ProfileSkeleton label={t('Loading author')} />
   }
   if (author.isError) {
     if (author.error instanceof ApiError && author.error.isNotFound) return <NotFoundPage />

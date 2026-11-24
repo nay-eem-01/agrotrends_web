@@ -8,7 +8,7 @@ import { errorMessage } from '../../api/errors'
 import { useQuestionSearch } from '../../api/questions'
 import { useTags } from '../../api/topics'
 import { Button, ButtonLink } from '../../ui/Button'
-import { Spinner } from '../../ui/Spinner'
+import { RowsSkeleton } from '../../ui/LoadingSkeleton'
 import { Chip } from '../../ui/Chip'
 import { StoryList } from '../feed/Feed'
 import { QuestionCard } from '../qa/QuestionRow'
@@ -113,11 +113,7 @@ function QuestionResults({ q }: { q: string }) {
   const questions = useQuestionSearch(q)
   const list = questions.data?.pages.flatMap((page) => page.content) ?? []
   if (questions.isPending) {
-    return (
-      <div className="flex justify-center py-16 text-muted-foreground">
-        <Spinner label={t('Loading questions')} />
-      </div>
-    )
+    return <RowsSkeleton label={t('Loading questions')} kind="question" />
   }
   if (questions.isError) {
     return (

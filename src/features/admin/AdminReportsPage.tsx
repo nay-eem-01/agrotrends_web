@@ -17,7 +17,7 @@ import { groupReports, useModerate, useReportedPostLink, useReports, type Report
 import { REPORT_REASONS } from '../../api/reports'
 import { storyDate } from '../../lib/dates'
 import { Button } from '../../ui/Button'
-import { Spinner } from '../../ui/Spinner'
+import { RowsSkeleton } from '../../ui/LoadingSkeleton'
 import { AdminPage } from './AdminPage'
 import { BanControls } from './BanControls'
 
@@ -60,9 +60,7 @@ export function AdminReportsPage() {
         ))}
       </nav>
       {reports.isPending ? (
-        <div className="py-12">
-          <Spinner label="Loading reports" />
-        </div>
+        <RowsSkeleton label="Loading reports" className="mt-4" />
       ) : reports.isError ? (
         <p role="alert" className="py-12 text-muted-foreground">
           {errorMessage(reports.error)}

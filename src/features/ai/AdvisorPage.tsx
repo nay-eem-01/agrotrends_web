@@ -1,3 +1,4 @@
+import { RowsSkeleton } from '../../ui/LoadingSkeleton'
 import { AiAnswerText } from '../../ui/AiAnswerText'
 import { useLang, useT, formatNumber } from '../../lib/i18n'
 import { ArrowRight, ArrowUp, Bug, ClockCounterClockwise, Drop, Leaf, Plant, Plus, Sparkle, Warning, WarningCircle } from '@phosphor-icons/react'
@@ -169,7 +170,7 @@ function HistoryRail({ onOpen, onNew, canStartOver }: { onOpen: (exchange: Excha
             <h2 id="advisor-history" className="px-1 text-xs font-semibold text-muted-foreground">
               {t('Recent questions')}
             </h2>
-            {history.isPending ? null : items.length === 0 ? (
+            {history.isPending ? <RowsSkeleton label={t('Loading your questions')} count={2} className="mt-2" /> : items.length === 0 ? (
               <p className="mt-2 px-1 text-sm text-muted-foreground">{t('No questions yet. What you ask the advisor is kept here.')}</p>
             ) : (
               <ul className="mt-2 flex flex-col gap-0.5">

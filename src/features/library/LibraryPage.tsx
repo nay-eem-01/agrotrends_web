@@ -7,7 +7,7 @@ import { useFollowedTags } from '../../api/topics'
 import { Avatar } from '../../ui/Avatar'
 import { Button, ButtonLink } from '../../ui/Button'
 import { cx } from '../../ui/cx'
-import { Spinner } from '../../ui/Spinner'
+import { RowsSkeleton, TopicsSkeleton } from '../../ui/LoadingSkeleton'
 import { StoryList } from '../feed/Feed'
 import { FollowTagButton } from '../topics/FollowTagButton'
 
@@ -81,7 +81,7 @@ function Following() {
           {t('Authors')}
         </h2>
         {authors.isPending ? (
-          <Spinner label={t('Loading authors')} />
+          <RowsSkeleton label={t('Loading authors')} kind="avatar" count={2} className="mt-3" />
         ) : authors.isError ? (
           <p role="alert" className="mt-3 text-ink-muted">
             {errorMessage(authors.error)}
@@ -107,7 +107,7 @@ function Following() {
           {t('Topics')}
         </h2>
         {tags.isPending ? (
-          <Spinner label={t('Loading topics')} />
+          <TopicsSkeleton label={t('Loading topics')} className="mt-3" />
         ) : tags.isError ? (
           <p role="alert" className="mt-3 text-ink-muted">
             {errorMessage(tags.error)}

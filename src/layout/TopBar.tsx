@@ -7,6 +7,7 @@ import { useSession } from '../features/auth/session'
 import { ButtonLink } from '../ui/Button'
 import { NotificationBell } from './NotificationBell'
 import { Logo } from './Logo'
+import { HeaderPreferences } from './HeaderPreferences'
 import { useSidebar } from './AppSidebar'
 
 // The menus (dialog and menu code) load just after the page; a same-size space holds their place meanwhile.
@@ -38,16 +39,19 @@ export function TopBar({ focused = false }: { focused?: boolean }) {
     return () => document.removeEventListener('keydown', shortcut)
   }, [])
 
-  // Focused pages (signing in or up) keep only the logo and a way back.
+  // Focused pages keep the logo, preferences and a way back.
   if (focused)
     return (
       <header className="sticky top-0 z-20 bg-background">
         <div className="mx-auto flex h-16 max-w-(--container-page) items-center justify-between px-4 sm:px-6">
           <Logo />
-          <Link to="/" className="inline-flex h-11 items-center gap-1.5 rounded-full px-3 text-sm text-muted-foreground transition-colors duration-150 hover:bg-surface hover:text-foreground">
-            <ArrowLeft size={16} aria-hidden="true" />
-            {t('Back to AgroTrends')}
-          </Link>
+          <div className="flex shrink-0 items-center gap-0 sm:gap-2">
+            <HeaderPreferences />
+            <Link to="/" aria-label={t('Back to AgroTrends')} className="inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-full text-sm whitespace-nowrap text-muted-foreground transition-colors duration-150 hover:bg-surface hover:text-foreground sm:px-3">
+              <ArrowLeft size={16} aria-hidden="true" />
+              <span className="hidden sm:inline">{t('Back to AgroTrends')}</span>
+            </Link>
+          </div>
         </div>
       </header>
     )
@@ -66,7 +70,7 @@ export function TopBar({ focused = false }: { focused?: boolean }) {
         >
           <List size={22} aria-hidden="true" />
         </button>
-        <Logo />
+        <Logo wordmarkClassName={status === 'signed-in' ? 'hidden min-[480px]:inline' : 'hidden min-[380px]:inline'} />
         {/* Wide screens: the search is a field in the bar itself; it keeps the words on the results page. */}
         <InlineSearch key={current} initial={current} field={inline} />
         <nav aria-label={t('Main')} className="ml-auto flex items-center gap-0 md:gap-1">
@@ -75,7 +79,7 @@ export function TopBar({ focused = false }: { focused?: boolean }) {
             onClick={() => setSearching(true)}
             aria-label={t('Search')}
             aria-keyshortcuts="Control+K Meta+K"
-            className="flex size-11 items-center justify-center rounded-full text-muted-foreground hover:text-foreground max-[379px]:hidden lg:hidden"
+            className="hidden size-11 items-center justify-center rounded-full text-muted-foreground hover:text-foreground min-[380px]:flex lg:hidden"
           >
             <MagnifyingGlass size={22} aria-hidden="true" />
           </button>
@@ -92,11 +96,14 @@ export function TopBar({ focused = false }: { focused?: boolean }) {
             </ButtonLink>
           )}
           {status === 'signed-in' && (
+            <ButtonLink to="/questions/ask" size="sm" className="mx-1 hidden lg:inline-flex">
+              <Plus size={16} weight="bold" aria-hidden="true" />
+              {t('Ask')}
+            </ButtonLink>
+          )}
+          <HeaderPreferences showLanguage={status === 'anonymous'} />
+          {status === 'signed-in' && (
             <>
-              <ButtonLink to="/questions/ask" size="sm" className="mx-1 hidden lg:inline-flex">
-                <Plus size={16} weight="bold" aria-hidden="true" />
-                {t('Ask')}
-              </ButtonLink>
               <NotificationBell />
               <Suspense fallback={placeholder('')}>
                 <AccountMenu />

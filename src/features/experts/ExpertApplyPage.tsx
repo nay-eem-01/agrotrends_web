@@ -15,7 +15,7 @@ import {
 import { storyDate } from '../../lib/dates'
 import { useT } from '../../lib/i18n'
 import { Button, ButtonLink } from '../../ui/Button'
-import { Spinner } from '../../ui/Spinner'
+import { FormSkeleton } from '../../ui/LoadingSkeleton'
 import { TextField } from '../../ui/TextField'
 import { PhotoPicker } from '../qa/PhotoPicker'
 
@@ -32,9 +32,7 @@ export function ExpertApplyPage() {
       <WhyApply />
       <div className="min-w-0">
         {mine.isPending ? (
-          <div className="py-12 text-muted-foreground">
-            <Spinner label={t('Loading')} />
-          </div>
+          <FormSkeleton label={t('Loading')} className="mt-5" />
         ) : latest && (latest.status === 'PENDING' || !reapply) ? (
           <div>
             <ApplicationStatus application={latest} />

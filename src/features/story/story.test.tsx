@@ -31,6 +31,21 @@ beforeEach(() => {
 
 afterEach(() => vi.unstubAllGlobals())
 
+test('a skeleton fills the reading column until the story arrives', async () => {
+  let finishRequest!: (response: Response) => void
+  const response = new Promise<Response>((resolve) => { finishRequest = resolve })
+  mockApi({ 'GET /api/blogs/slug/rice-blast-and-nitrogen': () => response })
+  renderWithProviders(<App />, '/stories/rice-blast-and-nitrogen')
+
+  const loading = await screen.findByRole('status', { name: 'Loading story' })
+  expect(loading.parentElement?.querySelectorAll('[data-slot="skeleton"]').length).toBeGreaterThan(1)
+  expect(screen.queryByRole('heading', { name: story.title })).not.toBeInTheDocument()
+
+  finishRequest(envelope(200, story))
+  expect(await screen.findByRole('heading', { name: story.title })).toBeInTheDocument()
+  expect(screen.queryByRole('status', { name: 'Loading story' })).not.toBeInTheDocument()
+})
+
 test('a story shows its title, author, details and cleaned body', async () => {
   const api = mockApi({
     'GET /api/blogs/slug/rice-blast-and-nitrogen': () => envelope(200, story),
@@ -59,6 +74,23 @@ test('a story shows its title, author, details and cleaned body', async () => {
   expect((window as unknown as { __pwned?: number }).__pwned).toBeUndefined()
   expect(document.title).toBe('Rice blast and nitrogen – AgroTrends')
   expect(api.mock.calls.filter(([url]) => String(url).startsWith('/api/blogs/slug/'))).toHaveLength(1)
+})
+
+test('the contents links point to the story sections in reading order', async () => {
+  mockApi({
+    'GET /api/blogs/slug/rice-blast-and-nitrogen': () => envelope(200, {
+      ...story,
+      content: '<p>Overview</p><h2>Symptoms</h2><p>Look at the leaves.</p><h2></h2><h2>Prevention</h2><p>Choose resistant varieties.</p>',
+    }),
+  })
+  renderWithProviders(<App />, '/stories/rice-blast-and-nitrogen')
+
+  const contents = within(await screen.findByRole('navigation', { name: 'In this article' }))
+  expect(contents.getAllByRole('link')).toHaveLength(2)
+  expect(contents.getByRole('link', { name: 'Symptoms' })).toHaveAttribute('href', '#section-1')
+  expect(contents.getByRole('link', { name: 'Prevention' })).toHaveAttribute('href', '#section-2')
+  expect(screen.getByRole('heading', { name: 'Symptoms' })).toHaveAttribute('id', 'section-1')
+  expect(screen.getByRole('heading', { name: 'Prevention' })).toHaveAttribute('id', 'section-2')
 })
 
 test('farming context and tags link to filtered lists', async () => {

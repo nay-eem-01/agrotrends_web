@@ -9,7 +9,7 @@ import type { Page, StorySummary } from '../../api/types'
 import { hasAgriFilters, readAgriFilters } from '../../lib/agri'
 import { Button, ButtonLink } from '../../ui/Button'
 import { cx } from '../../ui/cx'
-import { Spinner } from '../../ui/Spinner'
+import { RowsSkeleton, StoryGridSkeleton } from '../../ui/LoadingSkeleton'
 import { useSession } from '../auth/session'
 import { AgriFilterBar } from './AgriFilterBar'
 import { StoryCard } from './StoryCard'
@@ -79,11 +79,8 @@ export function StoryList({ ready, query, empty, layout = 'rows' }: { ready: boo
   const t = useT()
   const stories = query.data?.pages.flatMap((page) => page.content) ?? []
   if (!ready || query.isPending) {
-    return (
-      <div className="flex justify-center py-16 text-muted-foreground">
-        <Spinner label={t('Loading stories')} />
-      </div>
-    )
+    const label = t('Loading stories')
+    return layout === 'grid' ? <StoryGridSkeleton label={label} /> : <RowsSkeleton label={label} kind="story" />
   }
   if (query.isError) {
     return (

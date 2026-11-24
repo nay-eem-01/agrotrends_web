@@ -7,7 +7,7 @@ import { useMarkRead, useNotifications, useUnreadCount, type Notification } from
 import { storyDate } from '../lib/dates'
 import { formatNumber, useT } from '../lib/i18n'
 import { describeNotification } from '../lib/notifications'
-import { Spinner } from '../ui/Spinner'
+import { RowsSkeleton } from '../ui/LoadingSkeleton'
 
 /** The bell in the top bar: the unread count (polled), and the latest ten in a panel. */
 export function NotificationBell() {
@@ -80,9 +80,7 @@ function Panel({ id, hasUnread, onClose }: { id: string; hasUnread: boolean; onC
         )}
       </div>
       {latest.isPending ? (
-        <div className="p-4">
-          <Spinner size={18} label={t('Loading')} />
-        </div>
+        <RowsSkeleton label={t('Loading')} count={3} className="px-4" />
       ) : latest.isError ? (
         <p role="alert" className="p-4 text-sm text-muted-foreground">
           {errorMessage(latest.error)}

@@ -9,7 +9,7 @@ import { storyDate } from '../../lib/dates'
 import { isBlank, loadLocalDraft } from '../../lib/draft'
 import { Button, ButtonLink } from '../../ui/Button'
 import { cx } from '../../ui/cx'
-import { Spinner } from '../../ui/Spinner'
+import { RowsSkeleton } from '../../ui/LoadingSkeleton'
 import { useSession } from '../auth/session'
 
 type Tab = 'drafts' | 'published'
@@ -81,9 +81,7 @@ function Published() {
   const authorId = known ?? profile.data?.authorId
   if (authorId == null) {
     return profile.isPending ? (
-      <div className="flex justify-center py-16 text-ink-muted">
-        <Spinner label="Loading stories" />
-      </div>
+      <RowsSkeleton label="Loading stories" kind="story" />
     ) : (
       <p className="py-16 text-center text-ink-muted">Nothing published yet. Your published stories appear here.</p>
     )
@@ -97,7 +95,7 @@ function PublishedList({ authorId }: { authorId: number }) {
 
 function StoryRows({ query, empty }: { query: UseInfiniteQueryResult<InfiniteData<Page<StorySummary>>>; empty: string | null }) {
   const stories = query.data?.pages.flatMap((page) => page.content) ?? []
-  if (query.isPending) return <Spinner label="Loading stories" />
+  if (query.isPending) return <RowsSkeleton label="Loading stories" kind="story" />
   if (query.isError) {
     return (
       <p role="alert" className="py-8 text-ink-muted">

@@ -178,7 +178,9 @@ test('a protected screen waits for the session to restore', async () => {
   fetchMock.mockResolvedValueOnce(envelope(200, tokens))
   renderWithProviders(<Guarded />, '/settings')
 
-  expect(screen.getByRole('status', { name: 'Loading' })).toBeInTheDocument()
+  const loading = screen.getByRole('status', { name: 'Loading page' })
+  expect(loading.parentElement?.querySelector('[data-slot="skeleton"]')).toBeInTheDocument()
+  expect(screen.queryByRole('heading', { name: 'Settings' })).not.toBeInTheDocument()
   expect(await screen.findByRole('heading', { name: 'Settings' })).toBeInTheDocument()
   await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/settings'))
 })
@@ -217,15 +219,11 @@ test('the sign-in page says what you get and switches to Bengali before typing',
 
   const panel = await screen.findByRole('complementary', { name: 'Why join AgroTrends' })
   expect(panel).toHaveTextContent('Verified experts')
-  const language = within(screen.getByRole('group', { name: 'Language' }))
-  expect(language.getByRole('button', { name: 'English' })).toHaveAttribute('aria-pressed', 'true')
-
-  await userEvent.click(language.getByRole('button', { name: 'বাংলা' }))
+  const header = within(screen.getByRole('banner'))
+  await userEvent.click(header.getByRole('button', { name: 'বাংলা' }))
   expect(await screen.findByRole('complementary', { name: 'কেন AgroTrends-এ যোগ দেবেন' })).toBeInTheDocument()
-  const bengali = within(screen.getByRole('group', { name: 'ভাষা' }))
-  expect(bengali.getByRole('button', { name: 'বাংলা' })).toHaveAttribute('aria-pressed', 'true')
   expect(document.documentElement.lang).toBe('bn')
-  await userEvent.click(bengali.getByRole('button', { name: 'English' }))
+  await userEvent.click(header.getByRole('button', { name: 'English' }))
 })
 
 test('the password can be shown, Forgot sits by its label, and sign-up switches between phone and e-mail', async () => {

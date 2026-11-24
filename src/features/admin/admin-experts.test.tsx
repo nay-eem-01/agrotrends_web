@@ -51,7 +51,10 @@ test('a waiting application shows its proof, and approving every topic sends no 
   renderWithProviders(<App />, '/admin/experts')
 
   const card = await screen.findByRole('article', { name: 'Application from Dr Nasrin' })
-  expect(within(card).getByRole('img', { name: 'Proof 1' }).closest('a')).toHaveAttribute('target', '_blank')
+  await userEvent.click(within(card).getByRole('button', { name: 'Proof 1' }))
+  const preview = await screen.findByRole('dialog', { name: 'Proof 1' })
+  expect(within(preview).getByRole('img')).toHaveAttribute('src', '/uploads/licence.webp')
+  await userEvent.click(within(preview).getByRole('button', { name: 'Close' }))
   expect(within(card).getByRole('link', { name: /dls\.gov\.bd/ })).toHaveAttribute('rel', 'noopener noreferrer')
   await userEvent.click(within(card).getByRole('button', { name: 'Approve' }))
   await waitFor(() => expect(api.mock.calls.some(([url]) => url === '/api/admin/expert-applications/4/approve')).toBe(true))

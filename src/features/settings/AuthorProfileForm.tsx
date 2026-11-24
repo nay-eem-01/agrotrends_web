@@ -7,7 +7,9 @@ import { splitList } from '../../lib/auth'
 import { IMAGE_TYPES, imageProblem } from '../../lib/images'
 import { Avatar } from '../../ui/Avatar'
 import { Button } from '../../ui/Button'
-import { Spinner } from '../../ui/Spinner'
+import { FormSkeleton } from '../../ui/LoadingSkeleton'
+import { cx } from '../../ui/cx'
+import { useImageDrop } from '../../ui/useImageDrop'
 import { TextArea } from '../../ui/TextArea'
 import { TextField } from '../../ui/TextField'
 import { FormError } from '../auth/AuthPage'
@@ -16,7 +18,7 @@ import { FormError } from '../auth/AuthPage'
 export function AuthorProfileForm({ name, onSaved }: { name: string; onSaved?: () => void }) {
   const profile = useMyAuthorProfile(true)
 
-  if (profile.isPending) return <Spinner />
+  if (profile.isPending) return <FormSkeleton avatar fields={4} />
   if (profile.isError) return <FormError message={errorMessage(profile.error)} />
   return <ProfileEditor profile={profile.data} name={name} onSaved={onSaved} />
 }
@@ -46,7 +48,11 @@ function ProfileEditor({ profile, name, onSaved }: { profile: AuthorProfileRespo
   function choosePhoto(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
     event.target.value = ''
-    if (!file) return
+    if (file) uploadFile(file)
+  }
+
+  function uploadFile(file: File) {
+    if (upload.isPending) return
     const problem = imageProblem(file)
     setErrors((current) => ({ ...current, photo: problem ?? undefined }))
     if (problem) return
@@ -70,11 +76,12 @@ function ProfileEditor({ profile, name, onSaved }: { profile: AuthorProfileRespo
     }, { onSuccess: () => onSaved?.() })
   }
 
+  const drop = useImageDrop(uploadFile, (message) => setErrors((current) => ({ ...current, photo: message })), upload.isPending)
   const photoError = errors.photo ?? (upload.isError ? errorMessage(upload.error) : undefined)
 
   return (
     <form onSubmit={submit} noValidate className="flex flex-col gap-5">
-      <div className="flex items-center gap-4">
+      <div {...drop.handlers} className={cx('flex items-center gap-4 rounded-xl', drop.active && 'outline-2 outline-primary')}>
         <Avatar name={name} src={form.profileImageUrl || null} size={72} />
         <div className="flex flex-col items-start gap-1">
           <div className="flex flex-wrap gap-2">
@@ -82,7 +89,7 @@ function ProfileEditor({ profile, name, onSaved }: { profile: AuthorProfileRespo
               {form.profileImageUrl ? 'Change photo' : 'Add photo'}
             </Button>
             {form.profileImageUrl && (
-              <Button variant="quiet" size="sm" onClick={() => set('profileImageUrl', '')}>
+              <Button variant="quiet" size="sm" disabled={upload.isPending} onClick={() => set('profileImageUrl', '')}>
                 Remove photo
               </Button>
             )}
@@ -101,7 +108,7 @@ function ProfileEditor({ profile, name, onSaved }: { profile: AuthorProfileRespo
               {photoError}
             </p>
           ) : (
-            <p className="text-xs text-ink-muted">JPEG, PNG or WebP, up to 5 MB.</p>
+            <p className="text-xs text-ink-muted">Drop an image here or choose a photo. JPEG, PNG or WebP, up to 5 MB.</p>
           )}
         </div>
       </div>

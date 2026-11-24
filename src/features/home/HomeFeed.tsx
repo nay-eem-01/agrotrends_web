@@ -16,7 +16,7 @@ import { formatNumber, useT } from '../../lib/i18n'
 import { Avatar } from '../../ui/Avatar'
 import { CoverFallback } from '../../ui/Botanical'
 import { Button, ButtonLink } from '../../ui/Button'
-import { Spinner } from '../../ui/Spinner'
+import { RowsSkeleton } from '../../ui/LoadingSkeleton'
 import { useSession } from '../auth/session'
 import { useRequireSignIn } from '../auth/useRequireSignIn'
 import { QuestionCard } from '../qa/QuestionRow'
@@ -129,6 +129,7 @@ function QuestionList({ topic, unanswered, following, waiting }: { topic?: numbe
   const items = questions.data?.pages.flatMap((page) => page.content) ?? []
   return (
     <FeedList
+      kind="question"
       loading={waiting || questions.isPending}
       empty={
         following
@@ -167,6 +168,7 @@ function StoryList({ topic }: { topic?: number }) {
   const items = stories.data?.pages.flatMap((page) => page.content) ?? []
   return (
     <FeedList
+      kind="story"
       loading={stories.isPending}
       empty={topic ? t('No stories in this topic yet.') : t('No stories yet.')}
       action={
@@ -186,6 +188,7 @@ function StoryList({ topic }: { topic?: number }) {
 }
 
 function FeedList({
+  kind,
   loading,
   empty,
   action,
@@ -194,6 +197,7 @@ function FeedList({
   onMore,
   children,
 }: {
+  kind: 'question' | 'story'
   loading: boolean
   empty: string
   action: ReactNode
@@ -204,11 +208,7 @@ function FeedList({
 }) {
   const t = useT()
   if (loading)
-    return (
-      <div className="py-12 text-muted-foreground">
-        <Spinner label={t('Loading your feed')} />
-      </div>
-    )
+    return <RowsSkeleton label={t('Loading your feed')} kind={kind} />
   // An empty list says so and offers the one action that fills it.
   if (children.length === 0)
     return (

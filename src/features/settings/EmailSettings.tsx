@@ -2,7 +2,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { errorMessage } from '../../api/errors'
 import { useUpdateUserSettings, useUserSettings, type UserSettingsChange } from '../../api/settings'
 import { useT } from '../../lib/i18n'
-import { Spinner } from '../../ui/Spinner'
+import { RowsSkeleton } from '../../ui/LoadingSkeleton'
 import { useSession } from '../auth/session'
 
 /** Which e-mails you get. They go only to a confirmed address, so without one the switches say what's missing. */
@@ -11,7 +11,7 @@ export function EmailSettings() {
   const { user } = useSession()
   const settings = useUserSettings(true)
   const update = useUpdateUserSettings()
-  if (settings.isPending) return <Spinner label={t('Loading')} />
+  if (settings.isPending) return <RowsSkeleton label={t('Loading')} count={2} />
   if (settings.isError) return <p className="text-sm text-muted-foreground">{errorMessage(settings.error)}</p>
   const confirmed = Boolean(user?.email && user.emailVerified)
   const options: { key: keyof Pick<UserSettingsChange, 'emailOnAnswer' | 'emailWeeklyDigest'>; label: string; hint: string }[] = [

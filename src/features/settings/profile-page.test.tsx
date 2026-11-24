@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { clearSession } from '../../api/client'
@@ -23,6 +23,7 @@ test('settings edit the location and cover shown on your profile', async () => {
     'GET /api/users/7/profile': () => envelope(200, summary),
     'GET /api/authors/me': () => envelope(200, { authorId: 7, name: 'Rahim Uddin', specialities: [] }),
     'GET /api/experts/applications/me': () => envelope(200, page([])),
+    'POST /api/images': () => envelope(200, { url: '/uploads/new.webp' }),
     'PUT /api/user/profile': (_url, init) => envelope(200, { ...summary, ...JSON.parse(init!.body as string) }),
   })
   renderWithProviders(<App />, '/settings')
@@ -31,6 +32,11 @@ test('settings edit the location and cover shown on your profile', async () => {
   const location = await section.findByLabelText('Location (optional)')
   expect(location).toHaveValue('Rangpur')
   expect(section.getByRole('img', { name: 'Your current cover' })).toHaveAttribute('src', '/uploads/field.jpg')
+
+  fireEvent.drop(section.getByRole('img', { name: 'Your current cover' }), {
+    dataTransfer: { types: ['Files'], files: [new File(['img'], 'new.webp', { type: 'image/webp' })], items: [] },
+  })
+  await waitFor(() => expect(section.getByRole('img', { name: 'Your current cover' })).toHaveAttribute('src', '/uploads/new.webp'))
 
   await userEvent.clear(location)
   await userEvent.type(location, ' Bogura ')

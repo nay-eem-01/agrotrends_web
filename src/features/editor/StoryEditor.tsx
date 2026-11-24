@@ -10,6 +10,7 @@ import { IMAGE_TYPES, imageProblem } from '../../lib/images'
 import { Button } from '../../ui/Button'
 import { Spinner } from '../../ui/Spinner'
 import { cx } from '../../ui/cx'
+import { useImageDrop } from '../../ui/useImageDrop'
 
 interface StoryEditorProps {
   title: string
@@ -36,9 +37,22 @@ export function StoryEditor({ title, html, cover, onTitleChange, onHtmlChange, o
     immediatelyRender: true,
   })
 
+  const picker = useImagePicker((src) => editor?.chain().focus().setImage({ src }).run())
+  const storyDrop = useImageDrop((file, event) => {
+    const position = editor?.view.posAtCoords({ left: event.clientX, top: event.clientY })?.pos
+    picker.uploadFile(file, (src) => {
+      if (!editor || editor.isDestroyed) return
+      if (position === undefined) {
+        editor.chain().focus().setImage({ src }).run()
+      } else {
+        editor.commands.insertContentAt(Math.min(position, editor.state.doc.content.size), { type: 'image', attrs: { src } })
+      }
+    })
+  }, picker.setProblem, picker.uploading || !editor)
+
   return (
     <div>
-      {editor && <Toolbar editor={editor} />}
+      {editor && <Toolbar editor={editor} picker={picker} />}
       <Cover cover={cover} onChange={onCoverChange} />
       <textarea
         aria-label="Title"
@@ -56,12 +70,12 @@ export function StoryEditor({ title, html, cover, onTitleChange, onHtmlChange, o
         }}
         className="mt-8 w-full resize-none bg-transparent font-serif text-[2rem] leading-[1.15] font-semibold tracking-[-0.015em] text-foreground [field-sizing:content] placeholder:text-muted-foreground/60 focus:outline-none sm:text-3xl"
       />
-      <EditorContent editor={editor} className="mt-6" />
+      <EditorContent {...storyDrop.handlers} editor={editor} className={cx('mt-6 rounded-xl', storyDrop.active && 'outline-2 outline-primary')} />
     </div>
   )
 }
 
-function Toolbar({ editor }: { editor: Editor }) {
+function Toolbar({ editor, picker }: { editor: Editor; picker: ReturnType<typeof useImagePicker> }) {
   // Re-render on selection changes so the pressed states follow the cursor.
   const state = useEditorState({
     editor,
@@ -77,7 +91,7 @@ function Toolbar({ editor }: { editor: Editor }) {
     }),
   })
   const chain = () => editor.chain().focus()
-  const picker = useImagePicker((src) => chain().setImage({ src }).run())
+  const drop = useImageDrop((file) => picker.uploadFile(file), picker.setProblem, picker.uploading)
 
   // shortcut: a native prompt for the URL; swap for an inline popover if authors find it clumsy.
   function toggleLink() {
@@ -106,9 +120,11 @@ function Toolbar({ editor }: { editor: Editor }) {
         <Tool label="Link" pressed={state.link} onClick={toggleLink}>
           <LinkSimple size={20} />
         </Tool>
-        <Tool label="Image" pressed={false} onClick={picker.open}>
-          {picker.uploading ? <Spinner size={18} label="Uploading image" /> : <ImageIcon size={20} />}
-        </Tool>
+        <div {...drop.handlers} className={cx('shrink-0 rounded-xl', drop.active && 'outline-2 outline-primary')}>
+          <Tool label="Image" pressed={false} onClick={picker.open}>
+            {picker.uploading ? <Spinner size={18} label="Uploading image" /> : <ImageIcon size={20} />}
+          </Tool>
+        </div>
         {picker.input}
         <Tool label="Quote" pressed={state.quote} onClick={() => chain().toggleBlockquote().run()}>
           <Quotes size={20} />
@@ -157,14 +173,20 @@ function useImagePicker(onUploaded: (url: string) => void) {
   function choose(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
     event.target.value = ''
-    if (!file) return
+    if (file) uploadFile(file)
+  }
+
+  function uploadFile(file: File, onSuccess = onUploaded) {
+    if (upload.isPending) return
     const found = imageProblem(file)
     setProblem(found)
-    if (!found) upload.mutate(file, { onSuccess: onUploaded })
+    if (!found) upload.mutate(file, { onSuccess })
   }
 
   return {
-    open: () => input.current?.click(),
+    open: () => { if (!upload.isPending) input.current?.click() },
+    uploadFile,
+    setProblem,
     uploading: upload.isPending,
     error: problem ?? (upload.isError ? errorMessage(upload.error) : null),
     input: <input ref={input} type="file" accept={IMAGE_TYPES.join(',')} className="sr-only" tabIndex={-1} aria-hidden="true" onChange={choose} />,
@@ -174,8 +196,9 @@ function useImagePicker(onUploaded: (url: string) => void) {
 /** The cover: a wide dashed tile until there is one, then shown as it will be on the story page, to change or remove. */
 function Cover({ cover, onChange }: { cover: string; onChange: (cover: string) => void }) {
   const picker = useImagePicker(onChange)
+  const drop = useImageDrop((file) => picker.uploadFile(file), picker.setProblem, picker.uploading)
   return (
-    <div className="mt-6">
+    <div {...drop.handlers} className={cx('mt-6 rounded-xl', drop.active && 'outline-2 outline-primary')}>
       {cover ? (
         <>
           <img src={cover} alt="" className="mb-3 aspect-[21/9] max-h-80 w-full rounded-xl bg-muted object-cover" />
@@ -183,7 +206,7 @@ function Cover({ cover, onChange }: { cover: string; onChange: (cover: string) =
             <Button variant="secondary" size="sm" loading={picker.uploading} onClick={picker.open}>
               Change cover
             </Button>
-            <Button variant="quiet" size="sm" onClick={() => onChange('')}>
+            <Button variant="quiet" size="sm" disabled={picker.uploading} onClick={() => onChange('')}>
               Remove cover
             </Button>
           </div>
@@ -209,7 +232,7 @@ function Cover({ cover, onChange }: { cover: string; onChange: (cover: string) =
       ) : (
         !cover && (
           <p id="cover-hint" className="mt-2 text-xs text-muted-foreground">
-            Optional. JPEG, PNG or WebP, up to 5 MB
+            Optional. Drop an image here or choose a file. JPEG, PNG or WebP, up to 5 MB.
           </p>
         )
       )}

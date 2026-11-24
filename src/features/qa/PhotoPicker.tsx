@@ -5,6 +5,8 @@ import { useUploadImage } from '../../api/images'
 import { useT } from '../../lib/i18n'
 import { IMAGE_TYPES, imageProblem } from '../../lib/images'
 import { Spinner } from '../../ui/Spinner'
+import { cx } from '../../ui/cx'
+import { useImageDrop } from '../../ui/useImageDrop'
 
 /** The backend's limit (AppConstants.MAX_IMAGES_PER_QUESTION). */
 export const MAX_PHOTOS = 4
@@ -29,16 +31,21 @@ export function PhotoPicker({ urls, onChange, label, hint, max = MAX_PHOTOS }: P
   function choose(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
     event.target.value = ''
-    if (!file) return
+    if (file) uploadFile(file)
+  }
+
+  function uploadFile(file: File) {
+    if (full || upload.isPending) return
     const found = imageProblem(file)
     setProblem(found)
     if (!found) upload.mutate(file, { onSuccess: (url) => onChange([...urls, url]) })
   }
 
+  const drop = useImageDrop(uploadFile, setProblem, full || upload.isPending)
   const error = problem ?? (upload.isError ? errorMessage(upload.error) : null)
 
   return (
-    <fieldset className="flex flex-col gap-2" aria-describedby={hintId}>
+    <fieldset {...drop.handlers} className={cx('flex flex-col gap-2 rounded-xl', drop.active && 'outline-2 outline-primary')} aria-describedby={hintId}>
       <legend className="mb-1.5 text-sm font-medium">{label ?? t('Photos (optional)')}</legend>
       {/* Thumbnails and the add tile share one grid, so an attached photo sits exactly where the tile was. */}
       <ul className="grid max-w-md grid-cols-4 gap-2.5">
@@ -47,6 +54,7 @@ export function PhotoPicker({ urls, onChange, label, hint, max = MAX_PHOTOS }: P
             <img src={url} alt={t('Photo {n}', { n: index + 1 })} className="aspect-square w-full rounded-xl bg-muted object-cover ring-1 ring-border" />
             <button
               type="button"
+              disabled={upload.isPending}
               aria-label={t('Remove photo {n}', { n: index + 1 })}
               onClick={() => onChange(urls.filter((u) => u !== url))}
               className="absolute top-1 right-1 flex size-7 items-center justify-center rounded-full bg-background/90 text-foreground shadow-sm ring-1 ring-border transition-[background-color,transform] duration-150 ease-(--ease-out) after:absolute after:-inset-2 hover:bg-background active:scale-[0.94]"
@@ -74,6 +82,7 @@ export function PhotoPicker({ urls, onChange, label, hint, max = MAX_PHOTOS }: P
       <p id={hintId} className="text-sm text-muted-foreground">
         {full ? t("That's the most you can add ({n}).", { n: max }) : (hint ?? t('A clear photo of the leaves, roots or pests helps. Up to {n}.', { n: max }))}
       </p>
+      {!full && <p className="text-xs text-muted-foreground">{t('Drop an image here or choose a photo.')}</p>}
       {error && (
         <p role="alert" className="text-sm text-destructive">
           {error}

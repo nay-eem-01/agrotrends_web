@@ -18,6 +18,11 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 | Step | Status |
 |---|---|
 | Responsive topic filters and panels, category follows, avatars, AI Markdown, image compression and profile-only reputation | Implemented on the feature step |
+| Drag and drop on story, profile, question and expert application image uploads | Implemented |
+| Layout-matched skeletons for route and page loading | Implemented |
+| Move theme to the header and member language to the account menu | Implemented |
+| In-page previews for question and expert proof photos | Implemented |
+| Aligned story title and cover with sticky section navigation | Implemented |
 | Verify authenticated flows and image caching after both repos are promoted to staging | Pending live acceptance |
 
 ---

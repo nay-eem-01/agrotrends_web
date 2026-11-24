@@ -1,6 +1,5 @@
-import { setLang, useLang, useT } from '../lib/i18n'
+import { useT } from '../lib/i18n'
 import { BookmarksSimple, GearSix, UserCircle, NotePencil, SealCheck, ShieldCheck, SignOut, Translate } from '@phosphor-icons/react'
-import { useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   DropdownMenu,
@@ -16,6 +15,7 @@ import { useSession } from '../features/auth/session'
 import { useMyBadges } from '../features/experts/useMyBadges'
 import { useMyAuthorProfile } from '../api/authors'
 import { Avatar } from '../ui/Avatar'
+import { useLanguageSwitch } from './useLanguageSwitch'
 
 const item = 'min-h-11 text-muted-foreground'
 
@@ -27,14 +27,12 @@ export function AccountMenu() {
   const t = useT()
   const { user, signOut } = useSession()
   const navigate = useNavigate()
-  const lang = useLang()
-  const queryClient = useQueryClient()
+  const { nextLang, nextLabel, changeLanguage } = useLanguageSwitch()
   const name = user?.name || t('Your account')
   // The session has no photo; the author profile does, and Settings updates it in place after a change.
   const photo = useMyAuthorProfile(user != null).data?.profileImageUrl || undefined
   // The review queue is for Verified Experts; the entry stays hidden for everyone else.
   const { expertAnywhere } = useMyBadges()
-  const nextLang = lang === 'bn' ? 'en' : 'bn'
 
   async function leave() {
     await signOut()
@@ -62,6 +60,11 @@ export function AccountMenu() {
               {t('Your profile')}
             </DropdownMenuItem>
           )}
+          <DropdownMenuItem className={item} onClick={changeLanguage}>
+            <Translate size={18} aria-hidden="true" />
+            {t('Language')}
+            <span lang={nextLang} className="ml-auto text-xs font-medium text-primary">{nextLabel}</span>
+          </DropdownMenuItem>
           <DropdownMenuItem className={item} render={<Link to="/me/stories" />}>
             <NotePencil size={18} aria-hidden="true" />
             {t('Your stories')}
@@ -89,17 +92,6 @@ export function AccountMenu() {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem
-            className={item}
-            lang={nextLang}
-            onClick={() => {
-              setLang(nextLang)
-              void queryClient.invalidateQueries()
-            }}
-          >
-            <Translate size={18} aria-hidden="true" />
-            {nextLang === 'bn' ? 'বাংলা' : 'English'}
-          </DropdownMenuItem>
           <DropdownMenuItem className={item} onClick={() => void leave()}>
             <SignOut size={18} aria-hidden="true" />
             {t('Sign out')}

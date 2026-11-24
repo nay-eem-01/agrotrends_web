@@ -5,7 +5,7 @@ import { useMarkRead, useNotifications, useUnreadCount } from '../../api/notific
 import { useT } from '../../lib/i18n'
 import { NotificationRow } from '../../layout/NotificationBell'
 import { Button } from '../../ui/Button'
-import { Spinner } from '../../ui/Spinner'
+import { RowsSkeleton } from '../../ui/LoadingSkeleton'
 
 /** `/notifications`: everything, or only the unread (`?unread=true`), newest first, page by page. */
 export function NotificationsPage() {
@@ -45,9 +45,7 @@ export function NotificationsPage() {
         ))}
       </nav>
       {notifications.isPending ? (
-        <div className="py-12">
-          <Spinner label={t('Loading')} />
-        </div>
+        <RowsSkeleton label={t('Loading')} kind="avatar" className="mt-4" />
       ) : notifications.isError ? (
         <p role="alert" className="py-12 text-muted-foreground">
           {errorMessage(notifications.error)}

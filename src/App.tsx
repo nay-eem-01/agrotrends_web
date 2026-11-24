@@ -7,7 +7,7 @@ import { StoryPage } from './features/story/StoryPage'
 import { AppLayout } from './layout/AppLayout'
 
 // Home (the questions) and the story page load with the app (most visits start there); every other page is fetched when first
-// opened. The editor (Tiptap) is the largest of them. AppLayout's Suspense shows a spinner meanwhile.
+// opened. The editor (Tiptap) is the largest of them. AppLayout's Suspense shows a skeleton meanwhile.
 const page = <K extends string>(load: () => Promise<Record<K, ComponentType>>, name: K) =>
   lazy(() => load().then((m) => ({ default: m[name] })))
 

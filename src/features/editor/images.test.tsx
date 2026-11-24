@@ -1,5 +1,6 @@
-import { screen, waitFor } from '@testing-library/react'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { EditorView } from '@tiptap/pm/view'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { clearSession } from '../../api/client'
 import App from '../../App'
@@ -22,7 +23,10 @@ beforeEach(() => {
   clearSession()
 })
 
-afterEach(() => vi.unstubAllGlobals())
+afterEach(() => {
+  vi.unstubAllGlobals()
+  vi.restoreAllMocks()
+})
 
 test('a cover is uploaded, shown and kept with the device draft', async () => {
   const api = mockApi({ ...signedInAuthor(), 'POST /api/images': () => envelope(200, { url: '/uploads/cover.webp' }) })
@@ -75,4 +79,54 @@ test("removing a server draft's cover saves without it", async () => {
   await waitFor(() => expect(api.mock.calls.some(([, init]) => init?.method === 'PUT')).toBe(true), { timeout: 3000 })
   const sent = JSON.parse(api.mock.calls.find(([, init]) => init?.method === 'PUT')![1]!.body as string)
   expect(sent).not.toHaveProperty('imageUrl')
+})
+
+test('dropping a file onto an existing story cover replaces it', async () => {
+  mockApi({
+    ...signedInAuthor(),
+    'GET /api/blogs/id/50': () =>
+      envelope(200, { id: 50, title: 'Jute', content: '<p>Steep.</p>', status: 'DRAFT', imageUrl: '/uploads/old.jpg' }),
+    'POST /api/images': () => envelope(200, { url: '/uploads/new.webp' }),
+  })
+  renderWithProviders(<App />, '/write/50')
+
+  const changeCover = await screen.findByRole('button', { name: 'Change cover' })
+  const dataTransfer = { types: ['Files'], files: [photo()], items: [] }
+  expect(fireEvent.dragOver(changeCover, { dataTransfer })).toBe(false)
+  expect(fireEvent.drop(changeCover, { dataTransfer })).toBe(false)
+  await waitFor(() => expect(document.querySelector('img[src="/uploads/new.webp"]')).not.toBeNull())
+})
+
+test('dropping an image into the story inserts it at the drop position', async () => {
+  mockApi({
+    ...signedInAuthor(),
+    'GET /api/blogs/id/50': () =>
+      envelope(200, { id: 50, title: 'Jute', content: '<p>First</p><p>Second</p>', status: 'DRAFT' }),
+    'POST /api/images': () => envelope(200, { url: '/uploads/inline.webp' }),
+  })
+  // jsdom cannot resolve a screen coordinate to an editor position.
+  vi.spyOn(EditorView.prototype, 'posAtCoords').mockReturnValue({ pos: 7, inside: -1 })
+  renderWithProviders(<App />, '/write/50')
+
+  const body = await screen.findByRole('textbox', { name: 'Story' })
+  fireEvent.drop(body, { dataTransfer: { types: ['Files'], files: [photo()], items: [] } })
+
+  await waitFor(() => {
+    const image = body.querySelector('img[src="/uploads/inline.webp"]')
+    expect(image?.previousElementSibling).toHaveTextContent('First')
+    expect(image?.nextElementSibling).toHaveTextContent('Second')
+  })
+})
+
+test('dropping a folder on an image control explains what to upload', async () => {
+  const api = mockApi(signedInAuthor())
+  renderWithProviders(<App />, '/write')
+
+  const cover = await screen.findByRole('button', { name: 'Add a cover image' })
+  fireEvent.drop(cover, {
+    dataTransfer: { types: ['Files'], files: [], items: [{ webkitGetAsEntry: () => ({ isDirectory: true }) }] },
+  })
+
+  expect(screen.getByRole('alert')).toHaveTextContent('Drop an image file instead of a folder.')
+  expect(api.mock.calls.some(([url]) => url === '/api/images')).toBe(false)
 })

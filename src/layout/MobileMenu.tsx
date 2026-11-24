@@ -5,11 +5,10 @@ import { Link, NavLink } from 'react-router-dom'
 import { cn } from 'cn'
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { buttonClass } from '../ui/Button'
-import { LanguageSwitch, ThemeSwitch } from './Footer'
 
 /**
  * Below 1024px the bar has no room for the destinations, so a menu button opens them in a sheet: every page the
- * desktop bar links to, plus asking, signing in, language and theme.
+ * desktop bar links to, plus asking and signing in.
  */
 export function MobileMenu({ signedIn, anonymous }: { signedIn: boolean; anonymous: boolean }) {
   const t = useT()
@@ -72,10 +71,6 @@ export function MobileMenu({ signedIn, anonymous }: { signedIn: boolean; anonymo
               </Link>
             </>
           )}
-        </div>
-        <div className="mt-auto flex flex-col border-t border-border pt-2">
-          <LanguageSwitch className="flex h-11 items-center px-3 text-left text-sm text-muted-foreground hover:text-foreground" />
-          <ThemeSwitch className="flex h-11 items-center px-3 text-left text-sm text-muted-foreground hover:text-foreground" />
         </div>
       </SheetContent>
     </Sheet>

@@ -5,7 +5,7 @@ import { useAdvisorHistory } from '../../api/ai'
 import { errorMessage } from '../../api/errors'
 import { storyDate } from '../../lib/dates'
 import { Button, ButtonLink } from '../../ui/Button'
-import { Spinner } from '../../ui/Spinner'
+import { RowsSkeleton } from '../../ui/LoadingSkeleton'
 import { AskExperts } from './AskExperts'
 import { Sources } from './Sources'
 
@@ -25,9 +25,7 @@ export function AdvisorHistoryPage() {
         </ButtonLink>
       </div>
       {history.isPending ? (
-        <div className="py-16 text-muted-foreground">
-          <Spinner label={t('Loading your questions')} />
-        </div>
+        <RowsSkeleton label={t('Loading your questions')} className="mt-4" />
       ) : history.isError ? (
         <p role="alert" className="py-16 text-muted-foreground">
           {errorMessage(history.error)}

@@ -5,6 +5,39 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 
 ---
 
+## 2026-11-24 — Story reading layout
+
+- Aligned the story cover with its title and placed the contents links in a sticky bar that highlights the current section on phones and desktops.
+
+---
+
+## 2026-11-24 — Image previews
+
+- Open question photos and expert application proof images in the shared image viewer on the current page.
+
+---
+
+## 2026-11-24 — Header preferences
+
+- Moved the light and dark theme switch to the header. The English and Bengali switch sits below “Your profile” in the account menu for signed-in readers and stays in the header for visitors and on focused account pages. Signed-in readers still save their language for e-mails.
+- The header uses the leaf mark where space is tight so search, preferences and account actions fit.
+
+---
+
+## 2026-11-24 — Page loading skeletons
+
+- Replaced page and section loading spinners with skeletons that match reading pages, profiles, forms, feeds and lists. Route and session transitions use the same layouts.
+- Skeletons respect reduced motion. Action buttons and file uploads still show progress while they run.
+
+---
+
+## 2026-11-24 — Image upload drag and drop
+
+- Enabled dropping an image onto story covers, inline story content, profile covers, author photos, question photos and expert application proofs. Each target uses the existing image validation and upload endpoint.
+- Upload controls accept one image per drop, and the app has no folder upload field.
+
+---
+
 ## 2026-11-18 — Live application fixes
 
 - Paginated topic chips in groups of five and moved sort controls to their own row. Preserved navigation and supporting panels at narrower desktop widths.

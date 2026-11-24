@@ -16,7 +16,7 @@ import { ProfilePageForm } from './ProfilePageForm'
 import { useMyApplications } from '../../api/experts'
 import { ApplicationStatus } from '../experts/ExpertApplyPage'
 import { ButtonLink } from '../../ui/Button'
-import { Spinner } from '../../ui/Spinner'
+import { FormSkeleton } from '../../ui/LoadingSkeleton'
 
 export const PASSWORD_CHANGED_NOTICE = 'Password changed. Sign in with your new password.'
 
@@ -52,7 +52,7 @@ export function SettingsPage() {
 /** The latest expert application's status, or the way to apply. */
 function ExpertStatus() {
   const mine = useMyApplications()
-  if (mine.isPending) return <Spinner />
+  if (mine.isPending) return <FormSkeleton fields={0} />
   const latest = mine.data?.content[0]
   return (
     <div className="flex flex-col items-start gap-4">

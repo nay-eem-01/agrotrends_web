@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { useCategories, useCategoryWrite, type Category } from '../../api/categories'
 import { errorMessage } from '../../api/errors'
 import { Button } from '../../ui/Button'
-import { Spinner } from '../../ui/Spinner'
+import { RowsSkeleton } from '../../ui/LoadingSkeleton'
 import { TextField } from '../../ui/TextField'
 import { FormError } from '../auth/AuthPage'
 import { AdminPage } from './AdminPage'
@@ -41,7 +41,7 @@ function Categories() {
       </form>
       <FormError message={create.isError ? errorMessage(create.error) : null} />
       {categories.isPending ? (
-        <Spinner label="Loading categories" />
+        <RowsSkeleton label="Loading categories" className="mt-4" />
       ) : categories.isError ? (
         <p role="alert" className="py-8 text-ink-muted">
           {errorMessage(categories.error)}

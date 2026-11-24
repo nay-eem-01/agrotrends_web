@@ -1,12 +1,8 @@
-import { useQueryClient } from '@tanstack/react-query'
 import { FacebookLogo, InstagramLogo, type Icon } from '@phosphor-icons/react'
 import { cn } from 'cn'
 import { Link } from 'react-router-dom'
-import { setLang, useLang, useT } from '../lib/i18n'
+import { useT } from '../lib/i18n'
 import { CONTACT_EMAIL, SOCIAL } from '../lib/site'
-import { setTheme, useTheme } from '../lib/theme'
-import { useUpdateUserSettings } from '../api/settings'
-import { useSession } from '../features/auth/session'
 import { Logo } from './Logo'
 
 const YEAR = new Date().getFullYear()
@@ -14,7 +10,7 @@ const ICONS: Record<string, Icon> = { Facebook: FacebookLogo, Instagram: Instagr
 
 /**
  * Full width under the page and the sidebar, on a tinted band: the sidebar's edge runs down to its top rule. The brand
- * line sits on the left and the three link groups together on the right; the copyright and the switches below.
+ * line sits on the left and the three link groups together on the right; the copyright below.
  */
 export function Footer({ className }: { className?: string }) {
   const t = useT()
@@ -101,48 +97,8 @@ export function Footer({ className }: { className?: string }) {
         </div>
         <div className="mt-12 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-border pt-6 text-muted-foreground">
           <span>© {YEAR} AgroTrends</span>
-          <div className="flex gap-x-5 sm:ml-auto">
-            {/* 44px tall, so a thumb can hit them on a phone. */}
-            <LanguageSwitch className={`${link} inline-flex min-h-11 items-center`} />
-            <ThemeSwitch className={`${link} inline-flex min-h-11 items-center`} />
-          </div>
         </div>
       </div>
     </footer>
-  )
-}
-
-/** Switches the interface between English and Bengali; data reloads so the backend's messages follow. */
-export function LanguageSwitch({ className }: { className?: string }) {
-  const lang = useLang()
-  const queryClient = useQueryClient()
-  const { status } = useSession()
-  const save = useUpdateUserSettings()
-  const next = lang === 'bn' ? 'en' : 'bn'
-  return (
-    <button
-      type="button"
-      lang={next}
-      onClick={() => {
-        setLang(next)
-        // Signed in, e-mails follow too (B5's preferredLang).
-        if (status === 'signed-in') save.mutate({ preferredLang: next })
-        void queryClient.invalidateQueries()
-      }}
-      className={className ?? 'hover:text-ink'}
-    >
-      {next === 'bn' ? 'বাংলা' : 'English'}
-    </button>
-  )
-}
-
-/** Light or dark, whichever isn't showing; the choice is remembered on this device. */
-export function ThemeSwitch({ className }: { className?: string }) {
-  const t = useT()
-  const theme = useTheme()
-  return (
-    <button type="button" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className={className ?? 'hover:text-ink'}>
-      {theme === 'dark' ? t('Light theme') : t('Dark theme')}
-    </button>
   )
 }

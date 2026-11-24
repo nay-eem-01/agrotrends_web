@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { clearSession } from '../../api/client'
@@ -118,7 +118,9 @@ test('a question carries tags and photos', async () => {
   await userEvent.keyboard('Brown spots after rain.')
   await userEvent.click(await screen.findByRole('radio', { name: 'Crops' }))
   await userEvent.type(screen.getByLabelText(/^Tags/), 'Rice Blast{Enter}')
-  await userEvent.upload(screen.getByLabelText('Add a photo', { selector: 'input' }), new File(['img'], 'leaf.webp', { type: 'image/webp' }))
+  fireEvent.drop(screen.getByRole('button', { name: 'Add a photo' }), {
+    dataTransfer: { types: ['Files'], files: [new File(['img'], 'leaf.webp', { type: 'image/webp' })], items: [] },
+  })
   expect(await screen.findByRole('img', { name: 'Photo 1' })).toHaveAttribute('src', '/uploads/leaf.webp')
   await userEvent.click(screen.getByRole('button', { name: 'Post question' }))
 

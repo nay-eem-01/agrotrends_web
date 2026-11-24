@@ -23,7 +23,8 @@ import {
 } from '../../api/experts'
 import { storyDate } from '../../lib/dates'
 import { Button } from '../../ui/Button'
-import { Spinner } from '../../ui/Spinner'
+import { ImageViewer } from '../../ui/ImageViewer'
+import { RowsSkeleton } from '../../ui/LoadingSkeleton'
 import { TextArea } from '../../ui/TextArea'
 import { AdminPage } from './AdminPage'
 
@@ -55,9 +56,7 @@ export function AdminExpertsPage() {
         ))}
       </nav>
       {applications.isPending ? (
-        <div className="py-12">
-          <Spinner label="Loading applications" />
-        </div>
+        <RowsSkeleton label="Loading applications" kind="avatar" className="mt-4" />
       ) : applications.isError ? (
         <p role="alert" className="py-12 text-muted-foreground">
           {errorMessage(applications.error)}
@@ -104,13 +103,16 @@ function ApplicationCard({ application }: { application: ExpertApplication }) {
       </dl>
       {(application.proofImageUrls?.length ?? 0) > 0 && (
         <ul aria-label="Proof photos" className="mt-4 grid grid-cols-4 gap-2">
-          {application.proofImageUrls!.map((url, index) => (
-            <li key={url}>
-              <a href={url} target="_blank" rel="noopener noreferrer" className="block overflow-hidden rounded-lg ring-1 ring-border">
-                <img src={url} alt={`Proof ${index + 1}`} className="aspect-square w-full object-cover" />
-              </a>
-            </li>
-          ))}
+          {application.proofImageUrls!.map((url, index) => {
+            const label = `Proof ${index + 1}`
+            return (
+              <li key={url}>
+                <ImageViewer src={url} label={label} className="block w-full overflow-hidden rounded-lg ring-1 ring-border">
+                  <img src={url} alt={label} className="aspect-square w-full object-cover" />
+                </ImageViewer>
+              </li>
+            )
+          })}
         </ul>
       )}
       {(application.links?.length ?? 0) > 0 && (

@@ -1,17 +1,15 @@
 import { Navigate, useParams } from 'react-router-dom'
 import { useBlogById } from '../../api/blogs'
-import { Spinner } from '../../ui/Spinner'
+import { ReadingSkeleton } from '../../ui/LoadingSkeleton'
 import { NotFoundPage } from '../errors/NotFoundPage'
 
 /** `/s/:blogId`: AI answers cite stories by id; this sends the reader to the story's own address. */
 export function StoryById() {
-  const story = useBlogById(Number(useParams().blogId))
+  const blogId = Number(useParams().blogId)
+  const story = useBlogById(blogId)
+  if (!Number.isFinite(blogId)) return <NotFoundPage />
   if (story.isPending) {
-    return (
-      <div className="flex justify-center py-24 text-ink-muted">
-        <Spinner label="Opening story" />
-      </div>
-    )
+    return <ReadingSkeleton label="Opening story" story />
   }
   if (story.isError || !story.data.slug) return <NotFoundPage />
   return <Navigate to={`/stories/${story.data.slug}`} replace />

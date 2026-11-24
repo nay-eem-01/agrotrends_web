@@ -7,7 +7,7 @@ import { ApiError, errorMessage } from '../../api/errors'
 import { isEmail } from '../../lib/auth'
 import { useT } from '../../lib/i18n'
 import { Button, ButtonLink } from '../../ui/Button'
-import { Spinner } from '../../ui/Spinner'
+import { AuthSkeleton } from '../../ui/LoadingSkeleton'
 import { TextField } from '../../ui/TextField'
 import { AuthPage, FormError } from './AuthPage'
 import { ResendLink } from './confirmEmail'
@@ -52,11 +52,7 @@ export function VerifyEmailPage() {
   }
 
   if (!verify.isSuccess) {
-    return (
-      <div className="flex justify-center py-24 text-muted-foreground">
-        <Spinner label={t('Confirming your e-mail')} />
-      </div>
-    )
+    return <AuthSkeleton label={t('Confirming your e-mail')} fields={0} />
   }
 
   return (

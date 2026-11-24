@@ -7,7 +7,7 @@ import { useReviewQueue } from '../../api/review'
 import { excerpt, htmlToText } from '../../lib/html'
 import { useT } from '../../lib/i18n'
 import { Button, ButtonLink } from '../../ui/Button'
-import { Spinner } from '../../ui/Spinner'
+import { RowsSkeleton } from '../../ui/LoadingSkeleton'
 import { ReviewActions } from './ReviewActions'
 
 /** `/review`: unchecked AI answers in the expert's topics, oldest first, to confirm, correct or flag. */
@@ -26,9 +26,7 @@ export function ReviewQueuePage() {
       </h1>
       <p className="mt-2 text-muted-foreground">{t('AI answers in your topics that no expert has checked yet, oldest first.')}</p>
       {queue.isPending ? (
-        <div className="py-12 text-muted-foreground">
-          <Spinner label={t('Loading')} />
-        </div>
+        <RowsSkeleton label={t('Loading')} kind="question" className="mt-4" />
       ) : notExpert ? (
         <div className="mt-8 rounded-xl bg-card p-6 ring-1 ring-border">
           <p>{t('The review queue is for verified experts.')}</p>

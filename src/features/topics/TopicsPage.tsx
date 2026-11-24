@@ -7,7 +7,7 @@ import { Button } from '../../ui/Button'
 import { useRequireSignIn } from '../auth/useRequireSignIn'
 import { useFollowedTags, useTags } from '../../api/topics'
 import { Chip } from '../../ui/Chip'
-import { Spinner } from '../../ui/Spinner'
+import { TopicsSkeleton } from '../../ui/LoadingSkeleton'
 import { TextField } from '../../ui/TextField'
 import { useSession } from '../auth/session'
 
@@ -89,9 +89,7 @@ export function TopicsPage() {
         </div>
       )}
       {tags.isPending || catalog.isPending ? (
-        <div className="py-8 text-ink-muted">
-          <Spinner label={t('Loading topics')} />
-        </div>
+        <TopicsSkeleton label={t('Loading topics')} className="py-8" />
       ) : (tags.isError && catalog.isError) || (catalog.isError && !tags.data?.length) || (tags.isError && categories.length === 0) ? (
         <p role="alert" className="py-8 text-ink-muted">
           {t('Couldn\'t load topics. Try again in a moment.')}

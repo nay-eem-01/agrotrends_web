@@ -1,14 +1,13 @@
 import { ChatCircleText, SealCheck, Sparkle, WarningCircle } from '@phosphor-icons/react'
 import type { ReactNode } from 'react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { cn } from 'cn'
 import { usePublicStats } from '../../api/stats'
-import { formatNumber, setLang, useLang, useT } from '../../lib/i18n'
+import { formatNumber, useT } from '../../lib/i18n'
 import { Sprig } from '../../ui/Botanical'
 
 /**
  * The sign-in and sign-up screens: from 1024px a leaf-wash panel saying what AgroTrends gives you, beside the form;
- * on phones the form alone. The language switch sits on the form, so a Bengali reader can change it before typing.
+ * on phones the form alone. Readers can change the language in the header before typing.
  */
 export function AuthPage({ title, intro, children }: { title: string; intro: string; children: ReactNode }) {
   const t = useT()
@@ -60,39 +59,11 @@ export function AuthPage({ title, intro, children }: { title: string; intro: str
         </div>
       </aside>
       <section className="mx-auto flex w-full max-w-md flex-col lg:justify-center">
-        <LanguageSwitch />
-        <h1 className="mt-6 font-serif text-[2rem] leading-tight font-medium sm:text-[2.5rem]">{title}</h1>
+        <h1 className="font-serif text-[2rem] leading-tight font-medium sm:text-[2.5rem]">{title}</h1>
         <p className="mt-2 text-muted-foreground">{intro}</p>
         <div className="mt-8">{children}</div>
       </section>
     </div>
-  )
-}
-
-/** English | বাংলা as a pill switch; each name is written in its own language. */
-function LanguageSwitch() {
-  const t = useT()
-  const lang = useLang()
-  const option = (value: 'en' | 'bn', label: string) => (
-    <button
-      type="button"
-      lang={value}
-      aria-pressed={lang === value}
-      onClick={() => setLang(value)}
-      className={cn(
-        'h-8 rounded-full px-3 text-sm font-semibold transition-[background-color,color] duration-150',
-        lang === value ? 'bg-background text-foreground shadow-xs' : 'text-muted-foreground hover:text-foreground',
-      )}
-    >
-      {label}
-    </button>
-  )
-  return (
-    <fieldset className="flex self-end rounded-full bg-surface p-0.5">
-      <legend className="sr-only">{t('Language')}</legend>
-      {option('en', 'English')}
-      {option('bn', 'বাংলা')}
-    </fieldset>
   )
 }
 

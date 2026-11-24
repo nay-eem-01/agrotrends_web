@@ -199,6 +199,16 @@ test('the question shows its topic, photos and tags', async () => {
   expect(await screen.findByText('Crops')).toBeInTheDocument()
   expect(screen.getByRole('img', { name: 'Photo 1 of the question' })).toHaveAttribute('src', '/uploads/leaf.webp')
   expect(screen.getByRole('link', { name: 'rice blast' })).toHaveAttribute('href', '/questions?tag=rice%20blast')
+
+  const photo = screen.getByRole('button', { name: 'Photo 1 of the question' })
+  await userEvent.click(photo)
+  const preview = await screen.findByRole('dialog', { name: 'Photo 1 of the question' })
+  expect(within(preview).getByRole('img')).toHaveAttribute('src', '/uploads/leaf.webp')
+  expect(screen.getByTestId('path')).toHaveTextContent('/questions/5')
+
+  await userEvent.keyboard('{Escape}')
+  await waitFor(() => expect(preview).not.toBeInTheDocument())
+  expect(photo).toHaveFocus()
 })
 
 test('Ctrl+Enter posts an answer once, Enter alone adds a line', async () => {

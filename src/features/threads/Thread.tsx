@@ -6,7 +6,7 @@ import { storyDate } from '../../lib/dates'
 import { Avatar } from '../../ui/Avatar'
 import { Button } from '../../ui/Button'
 import { SafeHtml } from '../../ui/SafeHtml'
-import { Spinner } from '../../ui/Spinner'
+import { RowsSkeleton } from '../../ui/LoadingSkeleton'
 import { useSession } from '../auth/session'
 import { useRequireSignIn } from '../auth/useRequireSignIn'
 import { PostMenu } from './PostMenu'
@@ -66,9 +66,7 @@ export function Thread({ kind, parentId, whenEmpty }: ThreadProps) {
         )}
       </div>
       {thread.isPending ? (
-        <div className="py-8 text-ink-muted">
-          <Spinner label={t('Loading')} />
-        </div>
+        <RowsSkeleton label={t('Loading')} kind="avatar" className="mt-4" />
       ) : thread.isError ? (
         <p role="alert" className="py-8 text-ink-muted">
           {thread.error instanceof ApiError && thread.error.isNotFound ? t('This conversation is no longer available.') : errorMessage(thread.error)}

@@ -10,6 +10,7 @@ import { splitAskDraft } from '../../lib/askDraft'
 import { htmlToText, textToHtml } from '../../lib/html'
 import { MAX_ADVISOR_QUESTION } from '../../api/ai'
 import { useUserProfile } from '../../api/users'
+import { FormError, useFormValidation } from '../../ui/FormValidation'
 import { Button } from '../../ui/Button'
 import { TextField } from '../../ui/TextField'
 import { FormSkeleton } from '../../ui/LoadingSkeleton'
@@ -62,7 +63,7 @@ function QuestionForm({ question }: { question?: Question }) {
   const [title, setTitle] = useState(question?.title ?? draft?.title ?? '')
   // Older questions were saved as plain text; they open as paragraphs.
   const [details, setDetails] = useState(() => textToHtml(question ? question.content : draft?.details))
-  const [errors, setErrors] = useState<{ title?: string; details?: string; topic?: string }>({})
+  const { errors, setErrors, reportErrors, fieldId, summary } = useFormValidation<'title' | 'details' | 'topic'>()
   // Where the asker is: local answers depend on it. A new question starts from the profile's location; an edit from
   // what the question had. `null` until the asker types, so a late profile still fills it.
   const { user } = useSession()
@@ -100,7 +101,7 @@ function QuestionForm({ question }: { question?: Question }) {
     if (isPrivate) {
       const text = [title.trim(), htmlToText(details).trim()].filter(Boolean).join('\n\n')
       if (!text) {
-        setErrors({ title: t('Write your question in a line.') })
+        reportErrors({ title: t('Write your question in a line.') })
         return
       }
       // The advisor opens with the question in its box; nothing is posted.
@@ -112,8 +113,7 @@ function QuestionForm({ question }: { question?: Question }) {
       details: htmlToText(details) ? undefined : t('Add what you have seen and tried.'),
       topic: categoryId == null ? t('Choose a topic.') : undefined,
     }
-    setErrors(found)
-    if (found.title || found.details || categoryId == null) return
+    if (reportErrors(found) || categoryId == null) return
     // Only the place is asked; an edit keeps the question's other farming details by sending them back as they were.
     const region = place.trim()
     const agri = question
@@ -149,19 +149,35 @@ function QuestionForm({ question }: { question?: Question }) {
             noValidate
             className="mt-8 flex flex-col gap-5"
           >
-            {!question && <AudienceChoice value={audience} onChange={setAudience} />}
+            {summary}
+            {!question && <AudienceChoice value={audience} onChange={(next) => {
+              setAudience(next)
+              setErrors({})
+              write.reset()
+            }} />}
             <QuestionEditor
+              titleId={fieldId('title')}
+              detailsId={fieldId('details')}
               title={title}
               html={details}
               titleError={errors.title}
               detailsError={errors.details}
-              onTitleChange={setTitle}
-              onHtmlChange={setDetails}
+              onTitleChange={(value) => {
+                setTitle(value)
+                if (value.trim()) setErrors((current) => ({ ...current, title: undefined }))
+              }}
+              onHtmlChange={(value) => {
+                setDetails(value)
+                if (htmlToText(value)) setErrors((current) => ({ ...current, details: undefined, ...(isPrivate ? { title: undefined } : {}) }))
+              }}
             />
             {!isPrivate && <PhotoPicker urls={imageUrls} onChange={setImageUrls} />}
             {!question && <SimilarQuestions title={title} />}
             <div hidden={isPrivate} className="flex flex-col gap-7 border-t border-border pt-7">
-              <TopicPicker categories={categories.data ?? []} loading={categories.isPending} value={categoryId} error={errors.topic} onChange={setCategoryId} />
+              <TopicPicker categories={categories.data ?? []} loading={categories.isPending} id={fieldId('topic')} value={categoryId} error={errors.topic} onChange={(value) => {
+                setCategoryId(value)
+                setErrors((current) => ({ ...current, topic: undefined }))
+              }} />
               <TextField
                 label={t('Where are you? (optional)')}
                 hint={t('A district or upazila. Answers that fit your soil and weather depend on it.')}
@@ -174,32 +190,29 @@ function QuestionForm({ question }: { question?: Question }) {
               />
               <TagInput popular tags={tags} onChange={setTags} />
             </div>
-            {write.isError && (
-              <p role="alert" className="text-sm text-destructive">
-                {errorMessage(write.error)}
-              </p>
-            )}
-            {/* The one primary action stays in reach however long the details get. Asking is a task page (AppLayout):
-                no tab bar under it on phones, so the bar sits on the screen's edge, clear of the home indicator. */}
-            <div className="sticky bottom-0 z-10 -mx-4 mt-2 flex items-center gap-3 border-t border-border bg-background/95 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur-sm sm:mx-0 sm:px-0">
-              <p className="mr-auto hidden min-w-0 text-sm text-muted-foreground sm:block" aria-live="polite">
-                {missing.length > 0 ? (
-                  t('Still needed: {list}', { list: missing.join(', ') })
-                ) : (
-                  <span className="inline-flex items-center gap-1.5 text-foreground">
-                    <CheckCircle size={16} weight="fill" className="text-primary" aria-hidden="true" />
-                    {question ? t('Ready to save') : isPrivate ? t('Ready to ask') : t('Ready to post')}
-                    <kbd className="ml-1 rounded-md border border-border-strong px-1.5 font-sans text-xs text-muted-foreground">{t('Ctrl + Enter')}</kbd>
-                  </span>
-                )}
-              </p>
-              <Button variant="quiet" className="ml-auto sm:ml-0" onClick={() => navigate(-1)}>
-                {t('Cancel')}
-              </Button>
-              <Button type="submit" loading={write.isPending} pendingLabel={question ? t('Saving question…') : isPrivate ? t('Sending question…') : t('Posting question…')} className="min-w-36 flex-1 sm:flex-none">
-                {isPrivate ? <Sparkle size={18} weight="fill" aria-hidden="true" /> : <PaperPlaneTilt size={18} weight="fill" aria-hidden="true" />}
-                {question ? t('Save question') : isPrivate ? t('Ask the AI privately') : t('Post question')}
-              </Button>
+            {/* The action and any server failure stay visible as the question grows. */}
+            <div className="sticky bottom-0 z-10 -mx-4 mt-2 flex flex-col gap-3 border-t border-border bg-background/95 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur-sm sm:mx-0 sm:px-0">
+              <FormError message={!isPrivate && write.isError ? errorMessage(write.error) : null} />
+              <div className="flex items-center gap-3">
+                <p className="mr-auto hidden min-w-0 text-sm text-muted-foreground sm:block" aria-live="polite">
+                  {missing.length > 0 ? (
+                    t('Still needed: {list}', { list: missing.join(', ') })
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 text-foreground">
+                      <CheckCircle size={16} weight="fill" className="text-primary" aria-hidden="true" />
+                      {question ? t('Ready to save') : isPrivate ? t('Ready to ask') : t('Ready to post')}
+                      <kbd className="ml-1 rounded-md border border-border-strong px-1.5 font-sans text-xs text-muted-foreground">{t('Ctrl + Enter')}</kbd>
+                    </span>
+                  )}
+                </p>
+                <Button variant="quiet" className="ml-auto sm:ml-0" onClick={() => navigate(-1)}>
+                  {t('Cancel')}
+                </Button>
+                <Button type="submit" loading={write.isPending} pendingLabel={question ? t('Saving question…') : isPrivate ? t('Sending question…') : t('Posting question…')} className="min-w-36 flex-1 sm:flex-none">
+                  {isPrivate ? <Sparkle size={18} weight="fill" aria-hidden="true" /> : <PaperPlaneTilt size={18} weight="fill" aria-hidden="true" />}
+                  {question ? t('Save question') : isPrivate ? t('Ask the AI privately') : t('Post question')}
+                </Button>
+              </div>
             </div>
           </form>
         </div>

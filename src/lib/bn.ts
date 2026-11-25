@@ -3,6 +3,14 @@
  * Missing keys fall back to English (see `translate`).
  */
 export const BN: Record<string, string> = {
+  'Add a title.': 'একটি শিরোনাম দিন।',
+  'Add some text or an image to your story.': 'আপনার লেখায় কিছু লেখা বা একটি ছবি যোগ করুন।',
+  'Top story': 'সেরা লেখা',
+  'Latest question': 'সাম্প্রতিক প্রশ্ন',
+  'Recommended reading': 'পড়ার সুপারিশ',
+  'Latest story': 'সাম্প্রতিক লেখা',
+  'Trending question': 'আলোচিত প্রশ্ন',
+  'There is a problem': 'একটি সমস্যা হয়েছে',
   // Shell
   Questions: 'প্রশ্ন',
   Advisor: 'পরামর্শক',

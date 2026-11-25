@@ -5,6 +5,7 @@ import { ApiError, errorMessage } from '../../api/errors'
 import { MAX_REPORT_DETAILS, REPORT_REASONS, useReport, type ReportReason, type ReportTarget } from '../../api/reports'
 import { useT } from '../../lib/i18n'
 import { Button } from '../../ui/Button'
+import { FormError, useFormValidation } from '../../ui/FormValidation'
 import { TextArea } from '../../ui/TextArea'
 
 interface ReportDialogProps {
@@ -25,12 +26,12 @@ export function ReportDialog({ targetType, targetId, what, onClose, onReported }
   const report = useReport()
   const [reason, setReason] = useState<ReportReason>()
   const [details, setDetails] = useState('')
-  const [missing, setMissing] = useState(false)
+  const { errors, reportErrors, fieldId, summary } = useFormValidation<'reason'>()
   const [done, setDone] = useState<'sent' | 'already' | null>(null)
 
   function submit(event: FormEvent) {
     event.preventDefault()
-    if (!reason) return setMissing(true)
+    if (reportErrors({ reason: reason ? undefined : t('Choose what is wrong.') }) || !reason) return
     report.mutate(
       { targetType, targetId, reason, details: details.trim() || undefined },
       {
@@ -66,7 +67,8 @@ export function ReportDialog({ targetType, targetId, what, onClose, onReported }
           </div>
         ) : (
           <form onSubmit={submit} noValidate className="flex flex-col gap-4">
-            <fieldset aria-describedby={missing && !reason ? 'reason-error' : undefined}>
+            {summary}
+            <fieldset id={fieldId('reason')} tabIndex={-1} aria-invalid={Boolean(errors.reason) || undefined} aria-describedby={errors.reason ? `${fieldId('reason')}-error` : undefined}>
               <legend className="text-sm font-medium">{t('What is wrong?')}</legend>
               <div className="mt-2 flex flex-col gap-2">
                 {REPORT_REASONS.map((option) => (
@@ -78,7 +80,10 @@ export function ReportDialog({ targetType, targetId, what, onClose, onReported }
                       reason === option.value ? 'bg-accent ring-primary' : 'ring-border hover:bg-muted',
                     )}
                   >
-                    <input type="radio" name="reason" value={option.value} checked={reason === option.value} onChange={() => setReason(option.value)} className="mt-1 size-4 accent-(--primary)" />
+                    <input type="radio" name="reason" value={option.value} checked={reason === option.value} onChange={() => {
+                      setReason(option.value)
+                      reportErrors({})
+                    }} className="mt-1 size-4 accent-(--primary)" />
                     <span>
                       <span className="block text-sm font-medium">{t(option.label)}</span>
                       <span className="block text-xs text-muted-foreground">{t(option.hint)}</span>
@@ -86,18 +91,14 @@ export function ReportDialog({ targetType, targetId, what, onClose, onReported }
                   </label>
                 ))}
               </div>
-              {missing && !reason && (
-                <p id="reason-error" className="mt-2 text-sm text-destructive">
-                  {t('Choose what is wrong.')}
+              {errors.reason && (
+                <p id={`${fieldId('reason')}-error`} className="mt-2 text-sm text-destructive">
+                  {errors.reason}
                 </p>
               )}
             </fieldset>
             <TextArea label={t('Details (optional)')} rows={3} maxLength={MAX_REPORT_DETAILS} value={details} onChange={(event) => setDetails(event.target.value)} />
-            {failed && (
-              <p role="alert" className="text-sm text-destructive">
-                {report.error instanceof ApiError && report.error.isNotFound ? t('This post is gone.') : errorMessage(report.error)}
-              </p>
-            )}
+            <FormError message={failed ? (report.error instanceof ApiError && report.error.isNotFound ? t('This post is gone.') : errorMessage(report.error)) : null} />
             <div className="flex gap-3">
               <Button type="submit" size="sm" loading={report.isPending} pendingLabel={t('Sending report…')}>
                 {t('Send report')}

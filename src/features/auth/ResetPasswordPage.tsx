@@ -4,6 +4,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useResetPassword } from '../../api/auth'
 import { errorMessage } from '../../api/errors'
 import { passwordProblem } from '../../lib/auth'
+import { useFormValidation } from '../../ui/FormValidation'
 import { Button } from '../../ui/Button'
 import { PasswordField } from '../../ui/PasswordField'
 import { AuthPage, FormError } from './AuthPage'
@@ -19,7 +20,7 @@ export function ResetPasswordPage() {
   const reset = useResetPassword()
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
-  const [errors, setErrors] = useState<{ password?: string; confirm?: string }>({})
+  const { errors, setErrors, reportErrors, fieldId, summary } = useFormValidation<'password' | 'confirm'>()
 
   if (!token) {
     return (
@@ -37,8 +38,7 @@ export function ResetPasswordPage() {
       password: passwordProblem(password) ?? undefined,
       confirm: confirm === password ? undefined : "The passwords don't match.",
     }
-    setErrors(found)
-    if (found.password || found.confirm) return
+    if (reportErrors(found)) return
     reset.mutate(
       { token, newPassword: password },
       { onSuccess: () => navigate('/sign-in', { replace: true, state: { notice: PASSWORD_RESET_NOTICE } }) },
@@ -48,6 +48,7 @@ export function ResetPasswordPage() {
   return (
     <AuthPage title={t('Set a new password')} intro={t('Choose a password you don\'t use anywhere else.')}>
       <form onSubmit={submit} noValidate className="flex flex-col gap-5">
+        {summary}
         <PasswordField
           label={t('New password')}
           autoComplete="new-password"
@@ -62,7 +63,7 @@ export function ResetPasswordPage() {
             }))
             reset.reset()
           }}
-          error={errors.password}
+          id={fieldId('password')} error={errors.password}
         />
         <PasswordField
           label={t('Repeat new password')}
@@ -74,7 +75,7 @@ export function ResetPasswordPage() {
             setErrors((current) => ({ ...current, confirm: current.confirm && value !== password ? "The passwords don't match." : undefined }))
             reset.reset()
           }}
-          error={errors.confirm}
+          id={fieldId('confirm')} error={errors.confirm}
         />
         <FormError message={reset.isError ? errorMessage(reset.error) : null} />
         {reset.isError && (

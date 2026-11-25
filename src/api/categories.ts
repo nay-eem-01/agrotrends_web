@@ -6,7 +6,7 @@ import type { Page, Schemas } from './types'
 
 export type Category = Schemas['CategoryResponse']
 
-/** Every category (there are few), for the publish sheet. Public. */
+/** Every category (there are few), for topic pickers. Public. */
 export function useCategories() {
   return useQuery({
     queryKey: ['categories', 'catalog'],

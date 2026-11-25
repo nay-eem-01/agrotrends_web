@@ -57,6 +57,11 @@ test('a question is checked, posted as rich text without farming fields, and ope
   expect(screen.getByLabelText('Your question')).toHaveAccessibleDescription('Write your question in a line.')
   expect(screen.getByRole('textbox', { name: 'Details' })).toHaveAccessibleDescription('Add what you have seen and tried.')
   expect(screen.getByRole('group', { name: 'Topic' })).toHaveAccessibleDescription('Choose a topic.')
+  const summary = screen.getByRole('alert', { name: 'There is a problem' })
+  expect(summary).toHaveFocus()
+  expect(within(summary).getAllByRole('link')).toHaveLength(3)
+  await userEvent.click(within(summary).getByRole('link', { name: 'Add what you have seen and tried.' }))
+  expect(screen.getByRole('textbox', { name: 'Details' })).toHaveFocus()
   expect(screen.queryByLabelText('Crop')).not.toBeInTheDocument()
   expect(screen.queryByText('Farming details')).not.toBeInTheDocument()
 
@@ -65,6 +70,7 @@ test('a question is checked, posted as rich text without farming fields, and ope
   await userEvent.click(screen.getByRole('button', { name: 'Bold' }))
   await userEvent.keyboard('Every morning')
   await userEvent.click(await screen.findByRole('radio', { name: 'Fisheries' }))
+  expect(summary).not.toBeInTheDocument()
   await userEvent.click(screen.getByRole('button', { name: 'Post question' }))
 
   await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/questions/12'))

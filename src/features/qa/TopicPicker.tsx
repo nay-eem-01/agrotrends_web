@@ -10,6 +10,7 @@ import { Message } from '../../ui/TextField'
 const SHOWN = 8
 
 interface TopicPickerProps {
+  id?: string
   categories: Category[]
   loading: boolean
   value?: number
@@ -21,9 +22,10 @@ interface TopicPickerProps {
  * The topic as one tap: native radios dressed as chips, so arrow keys move between them and a screen reader hears a
  * group of choices. A long list keeps its first few as chips and the rest behind a search.
  */
-export function TopicPicker({ categories, loading, value, error, onChange }: TopicPickerProps) {
+export function TopicPicker({ id, categories, loading, value, error, onChange }: TopicPickerProps) {
   const t = useT()
-  const id = useId()
+  const generatedId = useId()
+  const groupId = id ?? generatedId
   const shown = categories.slice(0, SHOWN)
   const rest = categories.slice(SHOWN)
   // A topic chosen from the search still shows as a chip, so the choice is visible.
@@ -31,7 +33,7 @@ export function TopicPicker({ categories, loading, value, error, onChange }: Top
   const chips = chosenFromRest ? [...shown, chosenFromRest] : shown
 
   return (
-    <fieldset aria-describedby={error ? `${id}-error` : undefined} aria-invalid={error ? true : undefined} className="min-w-0">
+    <fieldset id={groupId} tabIndex={-1} aria-describedby={error ? `${groupId}-error` : undefined} aria-invalid={error ? true : undefined} className="min-w-0">
       <legend className="text-sm font-medium">{t('Topic')}</legend>
       <p className="mt-1 text-sm text-muted-foreground">{t('Pick the one closest to your question.')}</p>
       {loading ? (
@@ -55,7 +57,7 @@ export function TopicPicker({ categories, loading, value, error, onChange }: Top
               >
                 <input
                   type="radio"
-                  name={id}
+                  name={groupId}
                   value={category.id}
                   checked={checked}
                   onChange={() => category.id != null && onChange(category.id)}
@@ -83,7 +85,7 @@ export function TopicPicker({ categories, loading, value, error, onChange }: Top
       )}
       {error && (
         <div className="mt-2">
-          <Message inputId={id} error={error} />
+          <Message inputId={groupId} error={error} />
         </div>
       )}
     </fieldset>

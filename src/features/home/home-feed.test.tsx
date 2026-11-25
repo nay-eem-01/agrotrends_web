@@ -34,7 +34,7 @@ beforeEach(() => {
 
 afterEach(() => vi.unstubAllGlobals())
 
-test('signed in, home shows questions and stories as two tabs, never mixed', async () => {
+test('signed in, home shows questions and stories as two tabs and a mobile recommendation', async () => {
   const api = mockApi(routes())
   renderWithProviders(<App />, '/')
 
@@ -43,10 +43,11 @@ test('signed in, home shows questions and stories as two tabs, never mixed', asy
   const tabs = within(feed).getByRole('navigation', { name: 'Show' })
   expect(within(tabs).getByRole('link', { name: 'Questions' })).toHaveAttribute('aria-current', 'page')
   await within(feed).findByRole('link', { name: 'Why are my tilapia gasping?' })
-  expect(within(feed).queryByRole('link', { name: 'Keeping oxygen up in summer ponds' })).not.toBeInTheDocument()
+  const preview = await within(feed).findByRole('region', { name: 'Recommended reading' })
+  expect(within(preview).getByRole('link', { name: /Keeping oxygen up in summer ponds/ })).toHaveAttribute('href', '/stories/oxygen')
   expect(api.mock.calls.some(([url]) => String(url).startsWith('/api/blogs/all'))).toBe(false)
   // The two ways to ask, named by who sees them.
-  expect(within(feed).getByRole('link', { name: 'Ask a question in public…' })).toHaveAttribute('href', '/questions/ask')
+  expect(within(feed).getByRole('link', { name: 'Ask a question' })).toHaveAttribute('href', '/questions/ask')
   expect(within(feed).getByRole('link', { name: 'Private AI' })).toHaveAttribute('href', '/advisor')
 
   // The sidebar links to people the reader follows.
@@ -75,6 +76,7 @@ test('signed in, home shows questions and stories as two tabs, never mixed', asy
   await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/?show=stories&topic=2'))
   expect(await within(feed).findByRole('link', { name: 'Keeping oxygen up in summer ponds' })).toHaveAttribute('href', '/stories/oxygen')
   expect(within(feed).queryByRole('link', { name: 'Why are my tilapia gasping?' })).not.toBeInTheDocument()
+  expect(within(preview).getByRole('link', { name: /Boro seedlings turning yellow/ })).toHaveAttribute('href', '/questions/8')
   expect(within(feed).queryByRole('navigation', { name: 'Sort questions' })).not.toBeInTheDocument()
   expect(api.mock.calls.some(([url]) => String(url).startsWith('/api/blogs/all/category/2'))).toBe(true)
 })
@@ -119,7 +121,7 @@ test('For you with nothing in the followed topics offers more topics', async () 
   expect(within(screen.getByRole('main')).getByRole('link', { name: 'Follow topics' })).toHaveAttribute('href', '/topics')
 })
 
-test('experts to follow appear once the backend serves them, and phones get the quick actions', async () => {
+test('experts to follow appear once the backend serves them,', async () => {
   let following = false
   const api = mockApi(
     routes({
@@ -146,7 +148,6 @@ test('experts to follow appear once the backend serves them, and phones get the 
   const sidebar = screen.getByRole('complementary', { name: 'Navigation' })
   expect(await within(sidebar).findByRole('link', { name: 'Dr Nasrin' })).toHaveAttribute('href', '/authors/7')
   await waitFor(() => expect(within(suggestions).queryByRole('link', { name: /Dr Nasrin/ })).not.toBeInTheDocument())
-  expect(within(screen.getByRole('navigation', { name: 'Quick actions' })).getByRole('link', { name: 'Ask a question' })).toHaveAttribute('href', '/questions/ask')
 })
 
 test('with nothing trending yet, the rail falls back to questions waiting for an answer and the newest stories', async () => {

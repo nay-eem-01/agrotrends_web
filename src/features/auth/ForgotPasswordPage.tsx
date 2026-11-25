@@ -5,6 +5,7 @@ import { cn } from 'cn'
 import { useForgotPassword, useForgotPasswordByPhone, useResetPasswordByPhone } from '../../api/auth'
 import { errorMessage } from '../../api/errors'
 import { compactPhone, isEmail, passwordProblem } from '../../lib/auth'
+import { useFormValidation } from '../../ui/FormValidation'
 import { Button } from '../../ui/Button'
 import { TextField } from '../../ui/TextField'
 import { PasswordField } from '../../ui/PasswordField'
@@ -91,14 +92,13 @@ function ByPhone() {
   const [code, setCode] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
-  const [errors, setErrors] = useState<{ mobile?: string; code?: string; password?: string; confirm?: string }>({})
+  const { errors, reportErrors, fieldId, summary } = useFormValidation<'mobile' | 'code' | 'password' | 'confirm'>()
   const phone = { countryCode: countryCode.trim(), mobileNumber: compactPhone(mobile) }
 
   function sendCode(event: FormEvent) {
     event.preventDefault()
     const problem = /^0?\d{6,14}$/.test(phone.mobileNumber) ? undefined : t('Enter the number without the country code.')
-    setErrors({ mobile: problem })
-    if (!problem) send.mutate(phone)
+    if (!reportErrors({ mobile: problem })) send.mutate(phone)
   }
 
   function submit(event: FormEvent) {
@@ -108,8 +108,7 @@ function ByPhone() {
       password: passwordProblem(password) ?? undefined,
       confirm: confirm === password ? undefined : "The passwords don't match.",
     }
-    setErrors(found)
-    if (found.code || found.password || found.confirm) return
+    if (reportErrors(found)) return
     reset.mutate({ ...phone, code, newPassword: password }, { onSuccess: () => navigate('/sign-in', { replace: true, state: { notice: PASSWORD_RESET_NOTICE } }) })
   }
 
@@ -118,6 +117,7 @@ function ByPhone() {
       <AuthPage title={t('Forgot your password?')} intro={t('Enter the phone number you signed up with and we\'ll text you a code.')}>
         <Method phone />
         <form onSubmit={sendCode} noValidate className="flex flex-col gap-5">
+          {summary}
           <div className="grid grid-cols-[6rem_1fr] gap-3">
             <TextField label={t('Code')} autoComplete="tel-country-code" value={countryCode} onChange={(e) => setCountryCode(e.target.value)} />
             <TextField
@@ -128,7 +128,7 @@ function ByPhone() {
               placeholder="1712345678"
               value={mobile}
               onChange={(e) => setMobile(e.target.value)}
-              error={errors.mobile}
+              id={fieldId('mobile')} error={errors.mobile}
             />
           </div>
           <FormError message={send.isError ? errorMessage(send.error) : null} />
@@ -144,6 +144,7 @@ function ByPhone() {
   return (
     <AuthPage title={t('Set a new password')} intro={t('If an account uses {phone}, we texted it a 6-digit code. It works for 10 minutes.', { phone: phone.countryCode + phone.mobileNumber.replace(/^0/, '') })}>
       <form onSubmit={submit} noValidate className="flex flex-col gap-5">
+        {summary}
         <TextField
           label={t('SMS code')}
           inputMode="numeric"
@@ -151,7 +152,7 @@ function ByPhone() {
           maxLength={6}
           value={code}
           onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
-          error={errors.code}
+          id={fieldId('code')} error={errors.code}
           className="max-w-48"
         />
         <PasswordField
@@ -160,15 +161,18 @@ function ByPhone() {
           hint="8 to 16 characters, with a capital letter, a number and a symbol."
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          error={errors.password}
+          id={fieldId('password')} error={errors.password}
         />
-        <PasswordField label={t('Repeat new password')} autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} error={errors.confirm} />
+        <PasswordField label={t('Repeat new password')} autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} id={fieldId('confirm')} error={errors.confirm} />
         <FormError message={reset.isError ? errorMessage(reset.error) : null} />
         <div className="flex flex-wrap items-center gap-3">
           <Button type="submit" loading={reset.isPending} pendingLabel={t('Resetting password…')}>
             {t('Set new password')}
           </Button>
-          <Button variant="quiet" onClick={() => send.reset()}>
+          <Button variant="quiet" onClick={() => {
+            reportErrors({})
+            send.reset()
+          }}>
             {t('Use another number')}
           </Button>
         </div>

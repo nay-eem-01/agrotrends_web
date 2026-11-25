@@ -16,6 +16,7 @@ import { storyDate } from '../../lib/dates'
 import { useT } from '../../lib/i18n'
 import { Button, ButtonLink } from '../../ui/Button'
 import { FormSkeleton } from '../../ui/LoadingSkeleton'
+import { FormError, useFormValidation } from '../../ui/FormValidation'
 import { TextField } from '../../ui/TextField'
 import { PhotoPicker } from '../qa/PhotoPicker'
 
@@ -149,10 +150,12 @@ function ApplyForm() {
   const [institution, setInstitution] = useState('')
   const [images, setImages] = useState<string[]>([])
   const [links, setLinks] = useState<string[]>([''])
-  const [errors, setErrors] = useState<Errors>({})
+  const { errors, setErrors, reportErrors, fieldId, summary } = useFormValidation<keyof Errors>()
+  const [invalidLink, setInvalidLink] = useState(-1)
   const pending = apply.error instanceof ApiError && apply.error.status === 409
 
   function toggle(id: number) {
+    setErrors((current) => ({ ...current, topics: undefined }))
     setTopics((current) => (current.includes(id) ? current.filter((value) => value !== id) : current.length < EXPERT_LIMITS.topics ? [...current, id] : current))
   }
 
@@ -160,16 +163,17 @@ function ApplyForm() {
     event.preventDefault()
     if (apply.isPending) return
     const filled = links.map((link) => link.trim()).filter(Boolean)
+    const badLink = links.findIndex((link) => link.trim() && !isWebLink(link.trim()))
+    setInvalidLink(badLink)
     const found: Errors = {
       topics: topics.length === 0 ? t('Choose at least one topic.') : undefined,
       field: fieldTitle.trim() ? undefined : t('Say what your field is.'),
-      credential: credentialType ? undefined : t('Choose what your proof is.'),
       institution: institution.trim() ? undefined : t('Name your institution or workplace.'),
+      credential: credentialType ? undefined : t('Choose what your proof is.'),
       proof: images.length === 0 && filled.length === 0 ? t('Add at least one photo or link as proof.') : undefined,
-      links: filled.some((link) => !isWebLink(link)) ? t('Links start with http:// or https://.') : undefined,
+      links: badLink >= 0 ? t('Links start with http:// or https://.') : undefined,
     }
-    setErrors(found)
-    if (Object.values(found).some(Boolean) || !credentialType) return
+    if (reportErrors(found) || !credentialType) return
     apply.mutate({
       categoryIds: topics,
       fieldTitle: fieldTitle.trim(),
@@ -182,7 +186,8 @@ function ApplyForm() {
 
   return (
     <form onSubmit={submit} noValidate className="flex flex-col gap-7">
-      <fieldset aria-describedby="topics-hint">
+      {summary}
+      <fieldset id={fieldId('topics')} tabIndex={-1} aria-invalid={Boolean(errors.topics) || undefined} aria-describedby="topics-hint">
         <legend className="text-sm font-medium">{t('Topics (up to {n})', { n: EXPERT_LIMITS.topics })}</legend>
         <ul className="mt-2 flex flex-wrap gap-2">
           {(categories.data ?? []).map((category) => {
@@ -215,7 +220,11 @@ function ApplyForm() {
           placeholder={t('Veterinarian, soil scientist, plant pathologist…')}
           maxLength={EXPERT_LIMITS.field}
           value={fieldTitle}
-          onChange={(event) => setFieldTitle(event.target.value)}
+          id={fieldId('field')}
+          onChange={(event) => {
+            setFieldTitle(event.target.value)
+            if (event.target.value.trim()) setErrors((current) => ({ ...current, field: undefined }))
+          }}
           error={errors.field}
         />
         <TextField
@@ -223,11 +232,15 @@ function ApplyForm() {
           placeholder={t('BRRI, a district livestock office, a university…')}
           maxLength={EXPERT_LIMITS.institution}
           value={institution}
-          onChange={(event) => setInstitution(event.target.value)}
+          id={fieldId('institution')}
+          onChange={(event) => {
+            setInstitution(event.target.value)
+            if (event.target.value.trim()) setErrors((current) => ({ ...current, institution: undefined }))
+          }}
           error={errors.institution}
         />
       </div>
-      <fieldset aria-describedby={errors.credential ? 'credential-error' : undefined}>
+      <fieldset id={fieldId('credential')} tabIndex={-1} aria-invalid={Boolean(errors.credential) || undefined} aria-describedby={errors.credential ? 'credential-error' : undefined}>
         <legend className="text-sm font-medium">{t('Your proof is a')}</legend>
         <div className="mt-2 flex flex-wrap gap-2">
           {(Object.keys(CREDENTIAL_LABELS) as CredentialType[]).map((value) => {
@@ -241,7 +254,10 @@ function ApplyForm() {
                   errors.credential && !chosen && 'border-destructive/50',
                 )}
               >
-                <input type="radio" name="credential" value={value} className="sr-only" checked={chosen} onChange={() => setCredentialType(value)} />
+                <input type="radio" name="credential" value={value} className="sr-only" checked={chosen} onChange={() => {
+                  setCredentialType(value)
+                  setErrors((current) => ({ ...current, credential: undefined }))
+                }} />
                 {chosen && <Check size={16} weight="bold" aria-hidden="true" />}
                 {t(CREDENTIAL_LABELS[value])}
               </label>
@@ -256,7 +272,10 @@ function ApplyForm() {
       </fieldset>
       <PhotoPicker
         urls={images}
-        onChange={setImages}
+        onChange={(next) => {
+          setImages(next)
+          if (next.length) setErrors((current) => ({ ...current, proof: undefined }))
+        }}
         max={EXPERT_LIMITS.images}
         label={t('Proof photos')}
         hint={t('Up to {n}. Photos are stored at a public, hard-to-guess address: cover anything you would not want leaked.', { n: EXPERT_LIMITS.images })}
@@ -267,15 +286,25 @@ function ApplyForm() {
           <div key={index} className="flex items-end gap-2">
             <TextField
               className="flex-1"
+              id={index === invalidLink ? fieldId('links') : index === 0 ? fieldId('proof') : undefined}
+              error={index === invalidLink ? errors.links : index === 0 ? errors.proof : undefined}
               label={t('Link {n}', { n: index + 1 })}
               type="url"
               inputMode="url"
               placeholder="https://"
               value={link}
-              onChange={(event) => setLinks((current) => current.map((value, i) => (i === index ? event.target.value : value)))}
+              onChange={(event) => {
+                const value = event.target.value
+                setLinks((current) => current.map((link, i) => (i === index ? value : link)))
+                if (value.trim()) setErrors((current) => ({ ...current, proof: undefined }))
+              }}
             />
             {links.length > 1 && (
-              <Button variant="quiet" size="sm" aria-label={t('Remove link {n}', { n: index + 1 })} onClick={() => setLinks((current) => current.filter((_, i) => i !== index))}>
+              <Button variant="quiet" size="sm" aria-label={t('Remove link {n}', { n: index + 1 })} onClick={() => {
+                setLinks((current) => current.filter((_, i) => i !== index))
+                if (index === invalidLink) setErrors((current) => ({ ...current, links: undefined }))
+                if (index <= invalidLink) setInvalidLink(index === invalidLink ? -1 : invalidLink - 1)
+              }}>
                 <X size={16} aria-hidden="true" />
               </Button>
             )}
@@ -286,18 +315,8 @@ function ApplyForm() {
             {t('Add a link')}
           </Button>
         )}
-        {errors.links && <p className="text-sm text-destructive">{errors.links}</p>}
       </fieldset>
-      {errors.proof && (
-        <p role="alert" className="text-sm text-destructive">
-          {errors.proof}
-        </p>
-      )}
-      {apply.isError && (
-        <p role="alert" className="text-sm text-destructive">
-          {pending ? t('You already have an application waiting. Its status is shown here once it reloads.') : errorMessage(apply.error)}
-        </p>
-      )}
+      <FormError message={apply.isError ? (pending ? t('You already have an application waiting. Its status is shown here once it reloads.') : errorMessage(apply.error)) : null} />
       <div className="flex flex-wrap items-center gap-3 border-t border-border pt-5">
         <p className="mr-auto text-sm text-muted-foreground">{t("If it isn't approved, you can apply again.")}</p>
         <ButtonLink to="/settings" variant="quiet">

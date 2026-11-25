@@ -3,17 +3,21 @@ import Image from '@tiptap/extension-image'
 import Placeholder from '@tiptap/extension-placeholder'
 import { EditorContent, useEditor, useEditorState, type Editor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
-import { useRef, useState, type ChangeEvent, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ChangeEvent, type ReactNode } from 'react'
 import { errorMessage } from '../../api/errors'
 import { useUploadImage } from '../../api/images'
 import { IMAGE_TYPES, imageProblem } from '../../lib/images'
 import { Button } from '../../ui/Button'
+import { Message } from '../../ui/TextField'
 import { ImageUploadProgress } from '../../ui/ImageUploadProgress'
 import { cx } from '../../ui/cx'
 import { useImageDrop } from '../../ui/useImageDrop'
 
 interface StoryEditorProps {
   actions: ReactNode
+  settings: ReactNode
+  validationSummary: ReactNode
+  fields: Record<'title' | 'body', { id: string; error?: string }>
   title: string
   html: string
   cover: string
@@ -23,7 +27,8 @@ interface StoryEditorProps {
 }
 
 /** Title and body, set the way the story will read once published. */
-export function StoryEditor({ actions, title, html, cover, onTitleChange, onHtmlChange, onCoverChange }: StoryEditorProps) {
+export function StoryEditor({ actions, settings, validationSummary, fields, title, html, cover, onTitleChange, onHtmlChange, onCoverChange }: StoryEditorProps) {
+  const { id: bodyId, error: bodyError } = fields.body
   const editor = useEditor({
     extensions: [
       StarterKit.configure({ heading: { levels: [2, 3] }, link: { openOnClick: false, autolink: true } }),
@@ -32,11 +37,15 @@ export function StoryEditor({ actions, title, html, cover, onTitleChange, onHtml
     ],
     content: html,
     editorProps: {
-      attributes: { class: 'story-body min-h-[50vh] focus:outline-none', 'aria-label': 'Story', role: 'textbox', 'aria-multiline': 'true' },
+      attributes: bodyAttributes(bodyId, bodyError),
     },
     onUpdate: ({ editor }) => onHtmlChange(editor.getHTML()),
     immediatelyRender: true,
   })
+
+  useEffect(() => {
+    editor?.setOptions({ editorProps: { attributes: bodyAttributes(bodyId, bodyError) } })
+  }, [editor, bodyId, bodyError])
 
   const picker = useImagePicker((src) => editor?.chain().focus().setImage({ src }).run())
   const storyDrop = useImageDrop((file, event) => {
@@ -52,31 +61,53 @@ export function StoryEditor({ actions, title, html, cover, onTitleChange, onHtml
   }, picker.setProblem, picker.uploading || !editor)
 
   return (
-    <div>
-      <div className="sticky top-[calc(4rem+1px)] z-10 flex flex-col gap-3 border-b border-border bg-background py-3">
+    <div className="grid lg:grid-cols-[minmax(0,1fr)_15rem] lg:grid-rows-[auto_1fr] lg:gap-x-10">
+      <div className="sticky top-[calc(4rem+1px)] z-10 flex min-w-0 flex-col gap-3 self-start border-b border-border bg-background py-3">
         {actions}
         {editor && <Toolbar editor={editor} picker={picker} />}
       </div>
-      <Cover cover={cover} onChange={onCoverChange} />
-      <textarea
-        aria-label="Title"
-        placeholder="Title"
-        rows={1}
-        value={title}
-        maxLength={200}
-        onChange={(event) => onTitleChange(event.target.value.replace(/\n/g, ' '))}
-        onKeyDown={(event) => {
-          // Enter moves on to the story instead of breaking the title.
-          if (event.key === 'Enter') {
-            event.preventDefault()
-            editor?.commands.focus('start')
-          }
-        }}
-        className="mt-8 w-full resize-none bg-transparent font-serif text-[2rem] leading-[1.15] font-semibold tracking-[-0.015em] text-foreground [field-sizing:content] placeholder:text-muted-foreground/60 focus:outline-none sm:text-3xl"
-      />
-      <EditorContent {...storyDrop.handlers} editor={editor} className={cx('mt-6 rounded-xl', storyDrop.active && 'outline-2 outline-primary')} />
+      <div className="min-w-0">
+        {validationSummary && <div className="pt-4">{validationSummary}</div>}
+        <Cover cover={cover} onChange={onCoverChange} />
+        <textarea
+          id={fields.title.id}
+          aria-label="Title"
+          aria-invalid={Boolean(fields.title.error) || undefined}
+          aria-describedby={fields.title.error ? `${fields.title.id}-error` : undefined}
+          placeholder="Title"
+          rows={1}
+          value={title}
+          maxLength={200}
+          onChange={(event) => onTitleChange(event.target.value.replace(/\n/g, ' '))}
+          onKeyDown={(event) => {
+            // Enter moves on to the story instead of breaking the title.
+            if (event.key === 'Enter') {
+              event.preventDefault()
+              editor?.commands.focus('start')
+            }
+          }}
+          className="mt-8 w-full resize-none bg-transparent font-serif text-[2rem] leading-[1.15] font-semibold tracking-[-0.015em] text-foreground [field-sizing:content] placeholder:text-muted-foreground/60 focus:outline-none sm:text-3xl"
+        />
+        <Message inputId={fields.title.id} error={fields.title.error} />
+        <EditorContent {...storyDrop.handlers} editor={editor} className={cx('mt-6 rounded-xl', storyDrop.active && 'outline-2 outline-primary')} />
+        <Message inputId={bodyId} error={bodyError} />
+      </div>
+      <aside aria-label="Story settings" className="mt-8 min-w-0 space-y-6 border-t border-border pt-6 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mt-0 lg:border-0">
+        {settings}
+      </aside>
     </div>
   )
+}
+
+function bodyAttributes(id: string, error?: string): Record<string, string> {
+  return {
+    id,
+    class: 'story-body min-h-[50vh] focus:outline-none',
+    'aria-label': 'Story',
+    role: 'textbox',
+    'aria-multiline': 'true',
+    ...(error ? { 'aria-invalid': 'true', 'aria-describedby': `${id}-error` } : {}),
+  }
 }
 
 function Toolbar({ editor, picker }: { editor: Editor; picker: ReturnType<typeof useImagePicker> }) {

@@ -1,4 +1,4 @@
-/** An unsaved story kept on this device until it becomes a server draft (that needs a category, chosen at publish). */
+/** An unsaved story kept on this device until it becomes a server draft (that needs a topic). */
 export interface LocalDraft {
   title: string
   html: string

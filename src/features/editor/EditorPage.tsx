@@ -7,90 +7,70 @@ import { ApiError, errorMessage } from '../../api/errors'
 import type { BlogResponse } from '../../api/types'
 import { clearLocalDraft, isBlank, loadLocalDraft, saveLocalDraft } from '../../lib/draft'
 import { Button, ButtonLink } from '../../ui/Button'
+import { FormError, useFormValidation } from '../../ui/FormValidation'
+import { useT } from '../../lib/i18n'
 import { EditorSkeleton } from '../../ui/LoadingSkeleton'
 import { useSession } from '../auth/session'
 import { NotFoundPage } from '../errors/NotFoundPage'
-import { toAgri } from '../farming/FarmingFields'
-import { AiCitableField, PublishSheet, SubtitleField, type PublishAction, type StoryDetails } from './PublishSheet'
 import { StoryEditor } from './StoryEditor'
-import { useCategories } from '../../api/categories'
-import { SearchSelect } from '../../ui/SearchSelect'
-import { TagInput } from '../topics/TagInput'
+import { StorySettings, type StoryDetails } from './StorySettings'
 
 const AUTOSAVE_DELAY = 1200
 
 const hasText = (html: string) => html.replace(/<[^>]*>/g, '').trim() !== '' || /<img/i.test(html)
 
 function detailsOf(story?: BlogResponse): StoryDetails {
-  const agri = story?.agri ?? {}
   return {
     subtitle: story?.subtitle ?? '',
     aiCitable: story?.aiCitable ?? true,
     categoryId: story?.category?.id,
     tags: story?.tags ?? [],
-    crop: agri.crop ?? '',
-    season: agri.season,
-    region: agri.region ?? '',
-    soil: agri.soil,
   }
 }
 
-/** The request fields the publish sheet controls. Empty farming details are sent as absent; a blank subtitle is sent as "" so an update clears it. */
+/** Omitting agri preserves metadata on existing stories. An empty subtitle clears it. */
 function detailFields(details: StoryDetails) {
   return {
     subtitle: details.subtitle.trim(),
     aiCitable: details.aiCitable,
     categoryId: details.categoryId ?? 0,
     tags: details.tags,
-    agri: toAgri(details),
   }
 }
 
 /** `/write` starts a story; `/write/:blogId` edits one of yours. Any signed-in account (RequireAuth handles visitors). */
 export function EditorPage() {
   const { blogId } = useParams()
-  return blogId ? <EditStory blogId={Number(blogId)} /> : <NewStory />
+  return blogId ? <EditStory key={blogId} blogId={Number(blogId)} /> : <NewStory />
 }
 
-/** The writing column, with the publish checklist beside it from 1024px. */
-function Page({ children, aside }: { children: ReactNode; aside?: ReactNode }) {
-  return (
-    <section className="mx-auto grid max-w-[68rem] gap-10 px-4 pb-24 sm:px-8 lg:grid-cols-[minmax(0,1fr)_15rem]">
-      <div className="min-w-0">{children}</div>
-      {aside && <aside aria-label="Story settings" className="hidden lg:block">{aside}</aside>}
-    </section>
-  )
+function Page({ children }: { children: ReactNode }) {
+  return <section className="mx-auto max-w-[68rem] px-4 pb-24 sm:px-8">{children}</section>
 }
 
 const wordCount = (html: string) => html.replace(/<[^>]*>/g, ' ').split(/\s+/).filter(Boolean).length
 
-/**
- * The panel beside the story: its topic and tags (they go with Publish), what it still needs, and how long it reads;
- * worked out from the draft itself.
- */
+/** A checklist and reading time calculated from the current story. */
 export function BeforePublish({
   title,
   html,
   cover,
-  details,
-  onDetailsChange,
+  hasTopic,
 }: {
   title: string
   html: string
   cover: string
-  details?: StoryDetails
-  onDetailsChange?: (details: StoryDetails) => void
+  hasTopic?: boolean
 }) {
   const words = wordCount(html)
   const items = [
     { label: 'A title', done: title.trim() !== '' },
     { label: 'Some text', done: hasText(html) },
-    ...(details ? [{ label: 'A topic', done: details.categoryId != null }] : []),
+    ...(hasTopic !== undefined ? [{ label: 'A topic', done: hasTopic }] : []),
     { label: 'A cover image (optional)', done: cover !== '' },
   ]
   return (
-    <div className="sticky top-24 flex flex-col gap-6 pt-6 text-sm">
-      {details && onDetailsChange && <TopicAndTags details={details} onChange={onDetailsChange} />}
+    <div className="flex flex-col gap-4 border-t border-border pt-5 text-sm">
       <div className="flex flex-col gap-2.5">
         <h2 className="font-sans text-sm font-semibold">Before you publish</h2>
         <ul className="flex flex-col gap-2.5">
@@ -124,22 +104,34 @@ function StatusBar({ status, children, heading }: { status: ReactNode; children?
   )
 }
 
-function TopicAndTags({ details, onChange }: { details: StoryDetails; onChange: (details: StoryDetails) => void }) {
-  const categories = useCategories()
-  return (
-    <>
-      <SearchSelect
-        label="Topic"
-        value={details.categoryId != null ? String(details.categoryId) : ''}
-        options={(categories.data ?? []).map((category) => ({ value: String(category.id), label: category.categoryName ?? '' }))}
-        placeholder="Choose a topic"
-        onChange={(value) => onChange({ ...details, categoryId: value ? Number(value) : undefined })}
-      />
-      <TagInput tags={details.tags} onChange={(tags) => onChange({ ...details, tags })} />
-      <SubtitleField value={details.subtitle} onChange={(subtitle) => onChange({ ...details, subtitle })} />
-      <AiCitableField checked={details.aiCitable} onChange={(aiCitable) => onChange({ ...details, aiCitable })} />
-    </>
-  )
+function useStorySettings(story?: BlogResponse) {
+  const [details, setDetails] = useState(() => detailsOf(story))
+  const t = useT()
+  const { errors, setErrors, reportErrors, fieldId, summary } = useFormValidation<'title' | 'body' | 'topic'>()
+
+  return {
+    details,
+    validate: (title: string, html: string) => reportErrors({
+      title: title.trim() ? undefined : t('Add a title.'),
+      body: hasText(html) ? undefined : t('Add some text or an image to your story.'),
+      topic: details.categoryId == null ? t('Choose a topic.') : undefined,
+    }),
+    clearError: (field: 'title' | 'body') => setErrors((current) => current[field] ? { ...current, [field]: undefined } : current),
+    fields: {
+      title: { id: fieldId('title'), error: errors.title },
+      body: { id: fieldId('body'), error: errors.body },
+    },
+    summary,
+    props: {
+      details,
+      topicId: fieldId('topic'),
+      topicError: errors.topic,
+      onChange: (changes: Partial<StoryDetails>) => {
+        if (changes.categoryId != null) setErrors((current) => ({ ...current, topic: undefined }))
+        setDetails((current) => ({ ...current, ...changes }))
+      },
+    },
+  }
 }
 
 /** Runs `save` once the value has been still for a moment. */
@@ -164,18 +156,15 @@ function NewStory() {
   const [draft, setDraft] = useState(() => loadLocalDraft() ?? { title: '', html: '', cover: '', savedAt: 0 })
   const [savedAt, setSavedAt] = useState(draft.savedAt)
   const content = { title: draft.title, html: draft.html, cover: draft.cover }
-  useAutosave(JSON.stringify(content), () => setSavedAt(saveLocalDraft(content).savedAt), true)
-  const [sheetOpen, setSheetOpen] = useState(false)
-  const [details, setDetails] = useState(() => detailsOf())
+  const settings = useStorySettings()
   const write = useBlogWrite()
   const navigate = useNavigate()
-  const ready = draft.title.trim() !== '' && hasText(draft.html)
+  useAutosave(JSON.stringify(content), () => setSavedAt(saveLocalDraft(content).savedAt), !write.isPending)
 
-  function submit(details: StoryDetails, action: PublishAction) {
-    setDetails(details)
-    const status = action === 'publish' ? 'PUBLISHED' : 'DRAFT'
+  function submit(status: 'PUBLISHED' | 'DRAFT') {
+    if (write.isPending || settings.validate(draft.title, draft.html)) return
     write.mutate(
-      { kind: 'create', request: { ...detailFields(details), title: draft.title.trim(), content: draft.html, imageUrl: draft.cover || undefined, status } },
+      { kind: 'create', request: { ...detailFields(settings.details), title: draft.title.trim(), content: draft.html, imageUrl: draft.cover || undefined, status } },
       {
         onSuccess: (story) => {
           clearLocalDraft()
@@ -185,32 +174,44 @@ function NewStory() {
     )
   }
 
+  const action = write.variables?.kind === 'create' ? write.variables.request.status : undefined
+
   return (
-    <Page aside={<BeforePublish title={draft.title} html={draft.html} cover={draft.cover ?? ''} details={details} onDetailsChange={setDetails} />}>
+    <Page>
       <title>New story – AgroTrends</title>
-      <PublishSheet
-        open={sheetOpen}
-        mode="new"
-        initial={details}
-        draft={{ title: draft.title, content: draft.html }}
-        busy={write.isPending}
-        error={write.isError ? errorMessage(write.error) : null}
-        onSubmit={submit}
-        onClose={() => setSheetOpen(false)}
-      />
       <StoryEditor
-        actions={
-          <StatusBar heading="New story" status={savedAt && !isBlank(content) ? 'Draft saved on this device' : 'New story'}>
-            <Button size="sm" disabled={!ready} title={ready ? undefined : 'Add a title and some text first'} onClick={() => setSheetOpen(true)}>
-              Publish
-            </Button>
-          </StatusBar>
+        settings={
+          <>
+            <StorySettings {...settings.props} draft={{ title: draft.title, content: draft.html }} />
+            <BeforePublish title={draft.title} html={draft.html} cover={draft.cover ?? ''} hasTopic={settings.details.categoryId != null} />
+          </>
         }
+        actions={
+          <>
+            <StatusBar heading="New story" status={savedAt && !isBlank(content) ? 'Draft saved on this device' : 'New story'}>
+              <Button size="sm" variant="secondary" disabled={write.isPending} loading={write.isPending && action === 'DRAFT'} pendingLabel="Saving draft…" onClick={() => submit('DRAFT')}>
+                Save as draft
+              </Button>
+              <Button size="sm" disabled={write.isPending} loading={write.isPending && action === 'PUBLISHED'} pendingLabel="Publishing…" onClick={() => submit('PUBLISHED')}>
+                Publish
+              </Button>
+            </StatusBar>
+            <FormError message={write.isError ? errorMessage(write.error) : null} />
+          </>
+        }
+        validationSummary={settings.summary}
+        fields={settings.fields}
         title={draft.title}
         html={draft.html}
         cover={draft.cover ?? ''}
-        onTitleChange={(title) => setDraft((d) => ({ ...d, title }))}
-        onHtmlChange={(html) => setDraft((d) => ({ ...d, html }))}
+        onTitleChange={(title) => {
+          setDraft((d) => ({ ...d, title }))
+          if (title.trim()) settings.clearError('title')
+        }}
+        onHtmlChange={(html) => {
+          setDraft((d) => ({ ...d, html }))
+          if (hasText(html)) settings.clearError('body')
+        }}
         onCoverChange={(cover) => setDraft((d) => ({ ...d, cover }))}
       />
     </Page>
@@ -244,123 +245,125 @@ function StoryForm({ story }: { story: BlogResponse }) {
   const [title, setTitle] = useState(story.title ?? '')
   const [html, setHtml] = useState(story.content ?? '')
   const [cover, setCover] = useState(story.imageUrl ?? '')
-  const [dirty, setDirty] = useState(false)
-  const [sheetOpen, setSheetOpen] = useState(false)
-  const [details, setDetails] = useState(() => detailsOf(story))
-  const sheetWrite = useBlogWrite()
+  const settings = useStorySettings(story)
   const navigate = useNavigate()
   const published = story.status === 'PUBLISHED'
   const blogId = story.id ?? 0
   const notice = (useLocation().state as { notice?: string } | null)?.notice
+  const [action, setAction] = useState<'save' | 'publish' | 'unpublish' | null>(null)
+  const request = { blogId, title: title.trim(), content: html, imageUrl: cover || undefined, ...detailFields(settings.details) }
+  const snapshot = JSON.stringify(request)
+  const [saved, setSaved] = useState(snapshot)
+  const failedAutosave = useRef<string | null>(null)
+  const dirty = snapshot !== saved
+  const ready = title.trim() !== '' && hasText(html)
+  const locked = write.error instanceof ApiError && write.error.status === 409
+  const busy = action !== null || write.isPending
+  const canSave = ready && settings.details.categoryId != null
 
-  function request(details: StoryDetails) {
-    return { blogId, title: title.trim(), content: html, imageUrl: cover || undefined, ...detailFields(details) }
-  }
+  useAutosave(snapshot, (current) => {
+    if (failedAutosave.current === current) return
+    failedAutosave.current = null
+    write.mutate({ kind: 'update', quiet: true, request }, {
+      onSuccess: () => setSaved(current),
+      onError: () => { failedAutosave.current = current },
+    })
+  }, !published && !locked && !busy && canSave && dirty)
 
-  function save(quiet: boolean) {
-    if (!title.trim() || !hasText(html)) return
-    write.mutate({ kind: 'update', quiet, request: request(details) }, { onSuccess: () => setDirty(false) })
-  }
-
-  function submit(details: StoryDetails, action: PublishAction) {
-    setDetails(details)
-    if (action === 'unpublish') {
-      return sheetWrite.mutate({ kind: 'unpublish', blogId }, { onSuccess: () => setSheetOpen(false) })
+  async function submit(next: NonNullable<typeof action>) {
+    if (busy || locked) return
+    if (next !== 'unpublish' && settings.validate(title, html)) return
+    setAction(next)
+    try {
+      if (next === 'unpublish') {
+        await write.mutateAsync({ kind: 'unpublish', blogId })
+      } else {
+        await write.mutateAsync({ kind: 'update', request })
+        failedAutosave.current = null
+        setSaved(snapshot)
+        if (next === 'publish') {
+          const live = await write.mutateAsync({ kind: 'publish', blogId })
+          navigate(`/stories/${live?.slug ?? story.slug}`, { state: { notice: 'Published' } })
+        }
+      }
+    } catch {
+      // The mutation keeps the error visible in the editor so the author can retry.
+    } finally {
+      setAction(null)
     }
-    sheetWrite.mutate(
-      { kind: 'update', request: request(details) },
-      {
-        onSuccess: () => {
-          setDirty(false)
-          if (action !== 'publish') return setSheetOpen(false)
-          sheetWrite.mutate({ kind: 'publish', blogId }, { onSuccess: (live) => navigate(`/stories/${live?.slug ?? story.slug}`, { state: { notice: 'Published' } }) })
-        },
-      },
-    )
   }
-  // 409: the story is hidden while moderators review reports; nothing more is sent until they decide.
-  const locked = [write.error, sheetWrite.error].some((error) => error instanceof ApiError && error.status === 409)
-  useAutosave(`${title}\u0000${html}\u0000${cover}\u0000${JSON.stringify(details)}`, () => save(true), !published && !locked)
 
-  const statusText = write.isPending
-    ? (published ? 'Unsaved changes' : 'Saving…')
-    : write.isError
-      ? errorMessage(write.error)
+  const statusText = published
+    ? (dirty ? 'Unsaved changes' : 'Published')
+    : busy && !action
+      ? 'Saving…'
       : dirty
-        ? published
-          ? 'Unsaved changes'
-          : 'Editing draft'
-        : published
-          ? 'Published'
-          : write.isSuccess
-            ? 'Draft saved'
-            : (notice ?? 'Draft')
+        ? 'Editing draft'
+        : write.isSuccess
+          ? 'Draft saved'
+          : (notice ?? 'Draft')
 
   return (
-    <Page
-      aside={
-        <BeforePublish
-          title={title}
-          html={html}
-          cover={cover}
-          details={details}
-          onDetailsChange={(next) => {
-            setDetails(next)
-            setDirty(true)
-          }}
-        />
-      }
-    >
+    <Page>
       <title>{`Editing ${story.title} – AgroTrends`}</title>
-      {locked && (
-        <Alert variant="destructive" className="mb-4">
-          <EyeSlash aria-hidden="true" />
-          <AlertTitle>This story is hidden while moderators review reports about it</AlertTitle>
-          <AlertDescription>Changes can't be saved or published until they decide. Copy anything you want to keep.</AlertDescription>
-        </Alert>
-      )}
-      <PublishSheet
-        open={sheetOpen && !locked}
-        mode={published ? 'published' : 'draft'}
-        initial={details}
-        draft={{ title, content: html }}
-        busy={sheetWrite.isPending}
-        error={sheetWrite.isError ? errorMessage(sheetWrite.error) : null}
-        onSubmit={submit}
-        onClose={() => setSheetOpen(false)}
-      />
       <StoryEditor
-        actions={
-          <StatusBar heading={`Editing ${story.title}`} status={statusText}>
-            {story.slug && (
-              <ButtonLink to={`/stories/${story.slug}`} variant="quiet" size="sm">
-                Preview
-              </ButtonLink>
-            )}
-            {published && (
-              <Button size="sm" disabled={!dirty} loading={write.isPending} pendingLabel="Saving changes…" onClick={() => save(false)}>
-                Save changes
-              </Button>
-            )}
-            <Button size="sm" variant={published ? 'secondary' : 'primary'} onClick={() => setSheetOpen(true)}>
-              {published ? 'Details' : 'Publish'}
-            </Button>
-          </StatusBar>
+        settings={
+          <>
+            <StorySettings {...settings.props} draft={{ title, content: html }} />
+            {!published && <BeforePublish title={title} html={html} cover={cover} hasTopic={settings.details.categoryId != null} />}
+          </>
         }
+        actions={
+          <>
+            <StatusBar heading={`Editing ${story.title}`} status={statusText}>
+              {story.slug && (
+                <ButtonLink to={`/stories/${story.slug}`} variant="quiet" size="sm">
+                  Preview
+                </ButtonLink>
+              )}
+              {published ? (
+                <>
+                  <Button size="sm" variant="quiet" disabled={busy || locked} loading={action === 'unpublish'} pendingLabel="Unpublishing…" onClick={() => void submit('unpublish')}>
+                    Unpublish
+                  </Button>
+                  <Button size="sm" disabled={!dirty || busy || locked} loading={action === 'save'} pendingLabel="Saving changes…" onClick={() => void submit('save')}>
+                    Save changes
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button size="sm" variant="secondary" disabled={busy || locked} loading={action === 'save'} pendingLabel="Saving draft…" onClick={() => void submit('save')}>
+                    Save as draft
+                  </Button>
+                  <Button size="sm" disabled={busy || locked} loading={action === 'publish'} pendingLabel="Publishing…" onClick={() => void submit('publish')}>
+                    Publish
+                  </Button>
+                </>
+              )}
+            </StatusBar>
+            <FormError message={!locked && write.isError ? errorMessage(write.error) : null} />
+            {locked && (
+              <Alert variant="destructive">
+                <EyeSlash aria-hidden="true" />
+                <AlertTitle>This story is hidden while moderators review reports about it</AlertTitle>
+                <AlertDescription>Changes can't be saved or published until they decide. Copy anything you want to keep.</AlertDescription>
+              </Alert>
+            )}
+          </>
+        }
+        validationSummary={settings.summary}
+        fields={settings.fields}
         title={title}
         html={html}
         cover={cover}
-        onCoverChange={(value) => {
-          setCover(value)
-          setDirty(true)
-        }}
+        onCoverChange={setCover}
         onTitleChange={(value) => {
           setTitle(value)
-          setDirty(true)
+          if (value.trim()) settings.clearError('title')
         }}
         onHtmlChange={(value) => {
           setHtml(value)
-          setDirty(true)
+          if (hasText(value)) settings.clearError('body')
         }}
       />
     </Page>

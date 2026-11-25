@@ -4,6 +4,7 @@ import { errorMessage } from '../../api/errors'
 import { CheckCircle, Circle } from '@phosphor-icons/react'
 import { fetchMe } from '../../api/auth'
 import { compactPhone, isEmail, joinPhone, passwordProblem, splitMobile } from '../../lib/auth'
+import { useFormValidation } from '../../ui/FormValidation'
 import { Button } from '../../ui/Button'
 import { TextField } from '../../ui/TextField'
 import { PasswordField } from '../../ui/PasswordField'
@@ -95,7 +96,7 @@ function AccountForm() {
   const { user, updateUser } = useSession()
   const update = useUpdateAccount()
   const [form, setForm] = useState(() => ({ name: user?.name ?? '', email: user?.email ?? '', ...splitMobile(user?.mobileNumber), ...(user?.mobileNumber ? {} : { countryCode: '+880' }) }))
-  const [errors, setErrors] = useState<AccountErrors>({})
+  const { errors, setErrors, reportErrors, fieldId, summary } = useFormValidation<keyof AccountErrors>()
   const [sent, setSent] = useState<{ email?: string; phone?: string }>({})
 
   function set(key: keyof typeof form, value: string) {
@@ -118,8 +119,7 @@ function AccountForm() {
     if (email && !isEmail(email)) found.email = 'Enter a valid e-mail address.'
     if (mobile && !/^\+\d{1,4}$/.test(form.countryCode.trim())) found.countryCode = 'Like +880.'
     if (mobile && !/^0?\d{6,14}$/.test(mobile)) found.mobileNumber = 'Enter the number without the country code.'
-    setErrors(found)
-    if (Object.keys(found).length > 0) return
+    if (reportErrors(found)) return
 
     const request = {
       name: form.name.trim(),
@@ -141,7 +141,8 @@ function AccountForm() {
 
   return (
     <form onSubmit={submit} noValidate className="flex flex-col gap-5">
-      <TextField label="Full name" autoComplete="name" value={form.name} onChange={(e) => set('name', e.target.value)} error={errors.name} />
+      {summary}
+      <TextField label="Full name" autoComplete="name" value={form.name} onChange={(e) => set('name', e.target.value)} id={fieldId('name')} error={errors.name} />
       <div className="flex flex-col gap-2">
         <TextField
           label="E-mail"
@@ -150,13 +151,13 @@ function AccountForm() {
           hint="You can sign in with it. Leave it empty to remove it, if you keep a phone number."
           value={form.email}
           onChange={(e) => set('email', e.target.value)}
-          error={errors.email}
+          id={fieldId('email')} error={errors.email}
         />
         {user?.email && user.email === form.email.trim() && <ContactStatus confirmed={user.emailVerified} action={user.emailVerified ? null : <ResendLink email={user.email} variant="quiet" />} />}
       </div>
       <div className="flex flex-col gap-2">
         <div className="grid grid-cols-[6rem_1fr] gap-3">
-          <TextField label="Code" autoComplete="tel-country-code" value={form.countryCode} onChange={(e) => set('countryCode', e.target.value)} error={errors.countryCode} />
+          <TextField label="Code" autoComplete="tel-country-code" value={form.countryCode} onChange={(e) => set('countryCode', e.target.value)} id={fieldId('countryCode')} error={errors.countryCode} />
           <TextField
             label="Mobile number"
             type="tel"
@@ -165,7 +166,7 @@ function AccountForm() {
             placeholder="1712345678"
             value={form.mobileNumber}
             onChange={(e) => set('mobileNumber', e.target.value)}
-            error={errors.mobileNumber}
+            id={fieldId('mobileNumber')} error={errors.mobileNumber}
           />
         </div>
         {user?.mobileNumber && compactPhone(form.mobileNumber) && joinPhone(form.countryCode, form.mobileNumber) === user.mobileNumber && (
@@ -219,7 +220,7 @@ function PasswordForm() {
   const [current, setCurrent] = useState('')
   const [next, setNext] = useState('')
   const [confirm, setConfirm] = useState('')
-  const [errors, setErrors] = useState<PasswordErrors>({})
+  const { errors, reportErrors, fieldId, summary } = useFormValidation<keyof PasswordErrors>()
 
   function submit(event: FormEvent) {
     event.preventDefault()
@@ -229,19 +230,19 @@ function PasswordForm() {
     if (problem) found.next = problem
     else if (next === current) found.next = 'Choose a password different from the current one.'
     if (confirm !== next) found.confirm = "The passwords don't match."
-    setErrors(found)
-    if (Object.keys(found).length > 0) return
+    if (reportErrors(found)) return
     change.mutate({ currentPassword: current, newPassword: next }, { onSuccess: () => signInAgain(PASSWORD_CHANGED_NOTICE) })
   }
 
   return (
     <form onSubmit={submit} noValidate className="flex flex-col gap-5">
+      {summary}
       <PasswordField
         label="Current password"
         autoComplete="current-password"
         value={current}
         onChange={(e) => setCurrent(e.target.value)}
-        error={errors.current}
+        id={fieldId('current')} error={errors.current}
       />
       <PasswordField
         label="New password"
@@ -249,14 +250,14 @@ function PasswordForm() {
         hint="8 to 16 characters, with a capital letter, a number and a symbol."
         value={next}
         onChange={(e) => setNext(e.target.value)}
-        error={errors.next}
+        id={fieldId('next')} error={errors.next}
       />
       <PasswordField
         label="Repeat new password"
         autoComplete="new-password"
         value={confirm}
         onChange={(e) => setConfirm(e.target.value)}
-        error={errors.confirm}
+        id={fieldId('confirm')} error={errors.confirm}
       />
       <FormError message={change.isError ? errorMessage(change.error) : null} />
       <Button type="submit" loading={change.isPending} pendingLabel="Changing password…" className="self-start">

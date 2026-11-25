@@ -45,7 +45,7 @@ test('an application is checked, then sent with topics, field, credential and pr
   renderWithProviders(<App />, '/experts/apply')
 
   await userEvent.click(await screen.findByRole('button', { name: 'Send application' }))
-  expect(screen.getByText('Choose at least one topic.')).toBeInTheDocument()
+  expect(screen.getByRole('link', { name: 'Choose at least one topic.' })).toBeInTheDocument()
   expect(screen.getByLabelText('Your field')).toHaveAccessibleDescription('Say what your field is.')
   expect(screen.getByRole('alert')).toHaveTextContent('Add at least one photo or link as proof.')
 
@@ -57,7 +57,10 @@ test('an application is checked, then sent with topics, field, credential and pr
   await screen.findByRole('img', { name: 'Photo 1' })
   await userEvent.type(screen.getByLabelText('Link 1'), 'ftp://nope')
   await userEvent.click(screen.getByRole('button', { name: 'Send application' }))
-  expect(screen.getByText('Links start with http:// or https://.')).toBeInTheDocument()
+  const invalidLink = screen.getByRole('link', { name: 'Links start with http:// or https://.' })
+  await userEvent.click(invalidLink)
+  expect(screen.getByLabelText('Link 1')).toHaveFocus()
+  expect(screen.getByLabelText('Link 1')).toHaveAccessibleDescription('Links start with http:// or https://.')
   await userEvent.clear(screen.getByLabelText('Link 1'))
   await userEvent.type(screen.getByLabelText('Link 1'), 'https://dls.gov.bd/staff/nasrin')
   await userEvent.click(screen.getByRole('button', { name: 'Send application' }))

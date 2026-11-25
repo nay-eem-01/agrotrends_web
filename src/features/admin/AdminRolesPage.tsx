@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/compone
 import { Skeleton } from '@/components/ui/skeleton'
 import { usePrivileges, useRoles, useRoleWrite, type Role } from '../../api/admin'
 import { errorMessage } from '../../api/errors'
+import { FormError, useFormValidation } from '../../ui/FormValidation'
 import { Button } from '../../ui/Button'
 import { TextField } from '../../ui/TextField'
 import { AdminPage } from './AdminPage'
@@ -96,11 +97,11 @@ function RoleForm({ role, onDone }: { role?: Role; onDone: () => void }) {
   const write = useRoleWrite()
   const [name, setName] = useState(role?.name ?? '')
   const [chosen, setChosen] = useState<number[]>((role?.privileges ?? []).map((p) => p.id ?? 0))
-  const [missing, setMissing] = useState(false)
+  const { errors, setErrors, reportErrors, fieldId, summary } = useFormValidation<'name'>()
 
   function submit(event: FormEvent) {
     event.preventDefault()
-    if (!name.trim()) return setMissing(true)
+    if (reportErrors({ name: name.trim() ? undefined : 'Give the role a name.' })) return
     const fields = { roleName: name.trim(), roleType: 'ADMIN' as const, privilegeIds: chosen }
     write.mutate(role ? { kind: 'update', request: { id: role.id ?? 0, ...fields } } : { kind: 'create', request: fields }, { onSuccess: onDone })
   }
@@ -111,7 +112,11 @@ function RoleForm({ role, onDone }: { role?: Role; onDone: () => void }) {
         <DialogTitle className="text-xl font-semibold">{role ? `Edit ${role.name}` : 'New admin role'}</DialogTitle>
         <DialogDescription className="mt-1 text-sm text-muted-foreground">Members holding it get exactly these privileges.</DialogDescription>
       </div>
-      <TextField label="Name" placeholder="Moderator" value={name} onChange={(event) => setName(event.target.value)} error={missing && !name.trim() ? 'Give the role a name.' : undefined} />
+      {summary}
+      <TextField id={fieldId('name')} label="Name" placeholder="Moderator" value={name} onChange={(event) => {
+        setName(event.target.value)
+        if (event.target.value.trim() && errors.name) setErrors({})
+      }} error={errors.name} />
       <fieldset className="flex flex-col gap-2">
         <legend className="mb-1 text-sm font-medium">Privileges</legend>
         {privileges.isPending ? (
@@ -136,11 +141,7 @@ function RoleForm({ role, onDone }: { role?: Role; onDone: () => void }) {
           ))
         )}
       </fieldset>
-      {write.isError && (
-        <p role="alert" className="text-sm text-destructive">
-          {errorMessage(write.error)}
-        </p>
-      )}
+      <FormError message={write.isError ? errorMessage(write.error) : null} />
       <div className="flex justify-end gap-2">
         <Button variant="quiet" onClick={onDone}>
           Cancel

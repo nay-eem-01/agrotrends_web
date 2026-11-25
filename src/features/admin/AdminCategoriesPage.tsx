@@ -63,18 +63,28 @@ function CategoryRow({ category }: { category: Category }) {
   const write = useCategoryWrite()
   const [mode, setMode] = useState<'view' | 'rename' | 'confirm'>('view')
   const [name, setName] = useState(category.categoryName ?? '')
+  const [problem, setProblem] = useState<string>()
   const id = category.id ?? 0
 
   function rename(event: FormEvent) {
     event.preventDefault()
-    if (name.trim()) write.mutate({ kind: 'rename', id, name: name.trim() }, { onSuccess: () => setMode('view') })
+    const value = name.trim()
+    if (!value) {
+      setProblem('Enter a name.')
+      return
+    }
+    setProblem(undefined)
+    write.mutate({ kind: 'rename', id, name: value }, { onSuccess: () => setMode('view') })
   }
 
   return (
     <li className="border-b border-rule py-4">
       {mode === 'rename' ? (
         <form onSubmit={rename} className="flex items-end gap-2">
-          <TextField label={`Rename ${category.categoryName}`} className="flex-1" value={name} onChange={(e) => setName(e.target.value)} />
+          <TextField label={`Rename ${category.categoryName}`} className="flex-1" value={name} error={problem} onChange={(e) => {
+            setName(e.target.value)
+            if (e.target.value.trim()) setProblem(undefined)
+          }} />
           <Button type="submit" size="sm" loading={write.isPending} pendingLabel="Saving category…">
             Save
           </Button>
@@ -97,7 +107,12 @@ function CategoryRow({ category }: { category: Category }) {
             </>
           ) : (
             <>
-              <Button variant="quiet" size="sm" aria-label={`Rename ${category.categoryName}`} onClick={() => setMode('rename')}>
+              <Button variant="quiet" size="sm" aria-label={`Rename ${category.categoryName}`} onClick={() => {
+                setName(category.categoryName ?? '')
+                setProblem(undefined)
+                write.reset()
+                setMode('rename')
+              }}>
                 Rename
               </Button>
               <Button variant="quiet" size="sm" aria-label={`Delete ${category.categoryName}`} className="text-destructive" onClick={() => setMode('confirm')}>

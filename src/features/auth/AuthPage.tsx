@@ -1,6 +1,5 @@
-import { ChatCircleText, SealCheck, Sparkle, WarningCircle } from '@phosphor-icons/react'
+import { ChatCircleText, SealCheck, Sparkle } from '@phosphor-icons/react'
 import type { ReactNode } from 'react'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import { usePublicStats } from '../../api/stats'
 import { formatNumber, useT } from '../../lib/i18n'
 import { Sprig } from '../../ui/Botanical'
@@ -67,12 +66,4 @@ export function AuthPage({ title, intro, children }: { title: string; intro: str
   )
 }
 
-export function FormError({ message }: { message: string | null }) {
-  if (!message) return null
-  return (
-    <Alert variant="destructive">
-      <WarningCircle aria-hidden="true" />
-      <AlertDescription>{message}</AlertDescription>
-    </Alert>
-  )
-}
+export { FormError } from '../../ui/FormValidation'

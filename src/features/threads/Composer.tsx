@@ -2,6 +2,7 @@ import { useEffect, useId, useState, type FormEvent } from 'react'
 import { errorMessage } from '../../api/errors'
 import { useT } from '../../lib/i18n'
 import { Button } from '../../ui/Button'
+import { FormError } from '../../ui/FormValidation'
 import { TextArea } from '../../ui/TextArea'
 
 export interface ComposerProps {
@@ -29,6 +30,11 @@ export function Composer({ label, submitLabel, pendingLabel, doneLabel, placehol
   const [text, setText] = useState(initial)
   const [problem, setProblem] = useState<string>()
   const [done, setDone] = useState(false)
+  const [invalidAttempt, setInvalidAttempt] = useState(0)
+
+  useEffect(() => {
+    if (invalidAttempt > 0) document.getElementById(fieldId)?.focus()
+  }, [invalidAttempt, fieldId])
 
   useEffect(() => {
     if (!focusOnOpen) return
@@ -45,6 +51,7 @@ export function Composer({ label, submitLabel, pendingLabel, doneLabel, placehol
     const content = text.trim()
     if (!content) {
       setProblem(t('Write something first.'))
+      setInvalidAttempt((current) => current + 1)
       return
     }
     setProblem(undefined)
@@ -66,6 +73,7 @@ export function Composer({ label, submitLabel, pendingLabel, doneLabel, placehol
         readOnly={pending}
         onChange={(event) => {
           setText(event.target.value)
+          if (event.target.value.trim()) setProblem(undefined)
           setDone(false)
         }}
         error={problem}
@@ -77,11 +85,7 @@ export function Composer({ label, submitLabel, pendingLabel, doneLabel, placehol
           }
         }}
       />
-      {error != null && (
-        <p role="alert" className="text-sm text-destructive">
-          {errorMessage(error)}
-        </p>
-      )}
+      <FormError message={error != null && !problem ? errorMessage(error) : null} />
       <div className="flex flex-wrap items-center gap-3">
         <Button type="submit" size="sm" loading={pending} pendingLabel={pendingLabel}>
           {submitLabel}

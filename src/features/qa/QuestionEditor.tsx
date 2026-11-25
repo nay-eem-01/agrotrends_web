@@ -2,12 +2,14 @@ import { LinkSimple, ListBullets, ListNumbers, Quotes, TextB, TextItalic } from 
 import Placeholder from '@tiptap/extension-placeholder'
 import { EditorContent, useEditor, useEditorState, type Editor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
-import { useEffect, useId, type ReactNode } from 'react'
+import { useEffect, type ReactNode } from 'react'
 import { cn } from 'cn'
 import { useT } from '../../lib/i18n'
 import { Message } from '../../ui/TextField'
 
 interface QuestionEditorProps {
+  titleId: string
+  detailsId: string
   title: string
   html: string
   titleError?: string
@@ -20,10 +22,8 @@ interface QuestionEditorProps {
  * The question as a page, not a box: a one-line title, a soft toolbar that stays in reach while writing, and the
  * details as rich text. Photos are their own labelled field under it (PhotoPicker), so phones don't hide them in an icon.
  */
-export function QuestionEditor({ title, html, titleError, detailsError, onTitleChange, onHtmlChange }: QuestionEditorProps) {
+export function QuestionEditor({ titleId, detailsId, title, html, titleError, detailsError, onTitleChange, onHtmlChange }: QuestionEditorProps) {
   const t = useT()
-  const titleId = useId()
-  const detailsId = useId()
   const editor = useEditor({
     extensions: [
       // No headings: a question is a few paragraphs, and its title is the only heading.
@@ -39,7 +39,7 @@ export function QuestionEditor({ title, html, titleError, detailsError, onTitleC
   useEffect(() => {
     editor?.setOptions({ editorProps: { attributes: attributes() } })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editor, detailsError])
+  }, [editor, detailsId, detailsError])
 
   function attributes(): Record<string, string> {
     return {

@@ -4,6 +4,7 @@ import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react
 import { useSignIn } from '../../api/auth'
 import { errorMessage } from '../../api/errors'
 import { isEmail, isPhone, safeNext, signInIdentifier } from '../../lib/auth'
+import { useFormValidation } from '../../ui/FormValidation'
 import { Button } from '../../ui/Button'
 import { PasswordField } from '../../ui/PasswordField'
 import { TextField } from '../../ui/TextField'
@@ -21,7 +22,7 @@ export function SignInPage() {
   const signIn = useSignIn()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
+  const { errors, reportErrors, fieldId, summary } = useFormValidation<'email' | 'password'>()
 
   if (session.status === 'signed-in') return <Navigate to={next} replace />
 
@@ -31,8 +32,7 @@ export function SignInPage() {
       email: isEmail(email) || isPhone(email) ? undefined : t('Enter your e-mail address or phone number.'),
       password: password ? undefined : t('Enter your password.'),
     }
-    setErrors(found)
-    if (found.email || found.password) return
+    if (reportErrors(found)) return
     signIn.mutate(
       { identifier: signInIdentifier(email), password },
       {
@@ -53,20 +53,21 @@ export function SignInPage() {
       )}
       <GoogleSignIn next={next} />
       <form onSubmit={submit} noValidate className="flex flex-col gap-5">
+        {summary}
         <TextField
           label={t('E-mail or phone number')}
           autoComplete="username"
           placeholder="you@example.com or 01712345678"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          error={errors.email}
+          id={fieldId('email')} error={errors.email}
         />
         <PasswordField
           label={t('Password')}
           autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          error={errors.password}
+          id={fieldId('password')} error={errors.password}
           aside={
             <Link to="/forgot-password" className="text-sm font-medium text-primary underline-offset-4 hover:underline">
               {t('Forgot your password?')}

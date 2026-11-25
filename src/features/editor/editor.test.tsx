@@ -88,7 +88,6 @@ test('a server draft saves itself with its other details intact', async () => {
     categoryId: 2,
     imageUrl: '/uploads/j.jpg',
     tags: ['jute'],
-    agri: { crop: 'jute', season: 'KHARIF_1' },
   })
   await waitFor(() => expect(screen.getByText('Draft saved')).toBeInTheDocument())
 })

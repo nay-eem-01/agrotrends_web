@@ -5,9 +5,29 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 
 ---
 
+## 2026-11-25 — Action feedback
+
+- Added action-specific submit labels and delayed button spinners. Kept upload progress local to each image control and showed review status after sending an expert application.
+- Showed quick follow and settings changes immediately and reported failures when they rolled back.
+
+---
+
+## 2026-11-25 — Story editor spacing
+
+- Kept story actions and the formatting toolbar in one sticky header with a consistent gap while scrolling.
+
+---
+
+## 2026-11-25 — Explore topics and people to follow
+
+- Grouped the topic directory by agricultural subject with search and quick follow controls.
+- Moved followed people into the left navigation and showed topic-based expert recommendations below Top Stories.
+
+---
+
 ## 2026-11-24 — Story reading layout
 
-- Aligned the story cover with its title and placed the contents links in a sticky bar that highlights the current section on phones and desktops.
+- Aligned the story cover with its title and placed the contents in a sticky navigation that highlights the current section. The list appears on the left on desktop and opens from a compact control on narrower screens.
 
 ---
 

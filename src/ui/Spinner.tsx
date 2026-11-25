@@ -10,7 +10,7 @@ export function Spinner({ size = 20, label = 'Loading' }: SpinnerProps) {
       width={size}
       height={size}
       viewBox="0 0 24 24"
-      className="animate-spin"
+      className="motion-safe:animate-spin"
       role={label ? 'status' : undefined}
       aria-label={label || undefined}
       aria-hidden={label ? undefined : true}

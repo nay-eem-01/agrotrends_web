@@ -174,7 +174,7 @@ export function SignUpPage() {
         />
 
         <FormError message={signUp.isError ? errorMessage(signUp.error) : null} />
-        <Button type="submit" loading={signUp.isPending} className="mt-1">
+        <Button type="submit" loading={signUp.isPending} pendingLabel={t('Creating account…')} className="mt-1">
           {t('Create account')}
         </Button>
         <p className="text-xs text-muted-foreground">

@@ -145,7 +145,7 @@ function RoleForm({ role, onDone }: { role?: Role; onDone: () => void }) {
         <Button variant="quiet" onClick={onDone}>
           Cancel
         </Button>
-        <Button type="submit" loading={write.isPending}>
+        <Button type="submit" loading={write.isPending} pendingLabel="Saving role…">
           {role ? 'Save role' : 'Create role'}
         </Button>
       </div>
@@ -169,7 +169,7 @@ function DeleteRole({ role, onClose }: { role: Role | null; onClose: () => void 
         )}
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <Button variant="danger" size="sm" loading={write.isPending} onClick={() => role && write.mutate({ kind: 'delete', roleId: role.id ?? 0 }, { onSuccess: onClose })}>
+          <Button variant="danger" size="sm" loading={write.isPending} pendingLabel="Deleting role…" onClick={() => role && write.mutate({ kind: 'delete', roleId: role.id ?? 0 }, { onSuccess: onClose })}>
             Delete role
           </Button>
         </AlertDialogFooter>

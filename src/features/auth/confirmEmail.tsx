@@ -47,7 +47,7 @@ export function ResendLink({ email, variant = 'secondary' }: { email: string; va
   }
   return (
     <span className="flex flex-wrap items-center gap-3">
-      <Button variant={variant} size="sm" loading={resend.isPending} onClick={() => resend.mutate(email)}>
+      <Button variant={variant} size="sm" loading={resend.isPending} pendingLabel={t('Sending link…')} onClick={() => resend.mutate(email)}>
         {t('Send a new link')}
       </Button>
       {resend.isError && (

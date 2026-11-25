@@ -53,6 +53,7 @@ export function BanControls({ userId, name, banned }: { userId: number; name: st
           variant={banned ? 'secondary' : 'quiet'}
           size="sm"
           loading={moderate.isPending && moderate.variables?.action === 'unban'}
+          pendingLabel="Restoring access…"
           onClick={() => moderate.mutate({ action: 'unban', userId }, { onSuccess: () => setDone(`${name} can sign in again.`) })}
         >
           Lift a ban
@@ -89,7 +90,7 @@ export function BanControls({ userId, name, banned }: { userId: number; name: st
           )}
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <Button variant="danger" size="sm" loading={moderate.isPending} onClick={ban}>
+            <Button variant="danger" size="sm" loading={moderate.isPending} pendingLabel="Restricting access…" onClick={ban}>
               Ban
             </Button>
           </AlertDialogFooter>

@@ -114,12 +114,12 @@ export function BeforePublish({
 
 function StatusBar({ status, children, heading }: { status: ReactNode; children?: ReactNode; heading: string }) {
   return (
-    <div className="flex min-h-14 items-center justify-between gap-4 pt-4">
+    <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
       <h1 className="sr-only">{heading}</h1>
-      <output aria-live="polite" className="text-sm text-muted-foreground">
+      <output aria-live="polite" className="min-w-0 flex-1 basis-28 text-sm text-muted-foreground [overflow-wrap:anywhere]">
         {status}
       </output>
-      <div className="flex items-center gap-2">{children}</div>
+      <div className="ml-auto flex flex-wrap items-center justify-end gap-2">{children}</div>
     </div>
   )
 }
@@ -188,11 +188,6 @@ function NewStory() {
   return (
     <Page aside={<BeforePublish title={draft.title} html={draft.html} cover={draft.cover ?? ''} details={details} onDetailsChange={setDetails} />}>
       <title>New story – AgroTrends</title>
-      <StatusBar heading="New story" status={savedAt && !isBlank(content) ? 'Draft saved on this device' : 'New story'}>
-        <Button size="sm" disabled={!ready} title={ready ? undefined : 'Add a title and some text first'} onClick={() => setSheetOpen(true)}>
-          Publish
-        </Button>
-      </StatusBar>
       <PublishSheet
         open={sheetOpen}
         mode="new"
@@ -204,6 +199,13 @@ function NewStory() {
         onClose={() => setSheetOpen(false)}
       />
       <StoryEditor
+        actions={
+          <StatusBar heading="New story" status={savedAt && !isBlank(content) ? 'Draft saved on this device' : 'New story'}>
+            <Button size="sm" disabled={!ready} title={ready ? undefined : 'Add a title and some text first'} onClick={() => setSheetOpen(true)}>
+              Publish
+            </Button>
+          </StatusBar>
+        }
         title={draft.title}
         html={draft.html}
         cover={draft.cover ?? ''}
@@ -281,7 +283,7 @@ function StoryForm({ story }: { story: BlogResponse }) {
   useAutosave(`${title}\u0000${html}\u0000${cover}\u0000${JSON.stringify(details)}`, () => save(true), !published && !locked)
 
   const statusText = write.isPending
-    ? 'Saving…'
+    ? (published ? 'Unsaved changes' : 'Saving…')
     : write.isError
       ? errorMessage(write.error)
       : dirty
@@ -310,21 +312,6 @@ function StoryForm({ story }: { story: BlogResponse }) {
       }
     >
       <title>{`Editing ${story.title} – AgroTrends`}</title>
-      <StatusBar heading={`Editing ${story.title}`} status={statusText}>
-        {story.slug && (
-          <ButtonLink to={`/stories/${story.slug}`} variant="quiet" size="sm">
-            Preview
-          </ButtonLink>
-        )}
-        {published && (
-          <Button size="sm" disabled={!dirty} loading={write.isPending} onClick={() => save(false)}>
-            Save changes
-          </Button>
-        )}
-        <Button size="sm" variant={published ? 'secondary' : 'primary'} onClick={() => setSheetOpen(true)}>
-          {published ? 'Details' : 'Publish'}
-        </Button>
-      </StatusBar>
       {locked && (
         <Alert variant="destructive" className="mb-4">
           <EyeSlash aria-hidden="true" />
@@ -343,6 +330,23 @@ function StoryForm({ story }: { story: BlogResponse }) {
         onClose={() => setSheetOpen(false)}
       />
       <StoryEditor
+        actions={
+          <StatusBar heading={`Editing ${story.title}`} status={statusText}>
+            {story.slug && (
+              <ButtonLink to={`/stories/${story.slug}`} variant="quiet" size="sm">
+                Preview
+              </ButtonLink>
+            )}
+            {published && (
+              <Button size="sm" disabled={!dirty} loading={write.isPending} pendingLabel="Saving changes…" onClick={() => save(false)}>
+                Save changes
+              </Button>
+            )}
+            <Button size="sm" variant={published ? 'secondary' : 'primary'} onClick={() => setSheetOpen(true)}>
+              {published ? 'Details' : 'Publish'}
+            </Button>
+          </StatusBar>
+        }
         title={title}
         html={html}
         cover={cover}

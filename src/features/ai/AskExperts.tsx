@@ -84,7 +84,7 @@ function AskExpertsForm({ item, onCancel, ask }: { item: AiHistoryItem; onCancel
         </p>
       )}
       <div className="flex gap-3">
-        <Button type="submit" size="sm" loading={ask.isPending}>
+        <Button type="submit" size="sm" loading={ask.isPending} pendingLabel={t('Sending request…')}>
           {t('Post for the experts')}
         </Button>
         <Button variant="quiet" size="sm" onClick={onCancel}>

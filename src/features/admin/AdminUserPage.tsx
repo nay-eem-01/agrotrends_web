@@ -125,6 +125,7 @@ function ExpertTopics({ userId, topics }: { userId: number; topics: { id?: numbe
                 size="sm"
                 className="h-7 px-2.5"
                 loading={decide.isPending && decide.variables?.action === 'revoke' && decide.variables.categoryId === topic.id}
+                pendingLabel="Revoking badge…"
                 onClick={() => decide.mutate({ action: 'revoke', userId, categoryId: topic.id ?? 0 })}
               >
                 Revoke
@@ -193,6 +194,7 @@ function AdminRoles({ userId, held }: { userId: number; held: string[] }) {
               <Button
                 disabled={!chosen}
                 loading={change.isPending && change.variables?.grant}
+                pendingLabel="Giving role…"
                 onClick={() => change.mutate({ userId, roleId: Number(chosen), grant: true }, { onSuccess: () => setChosen('') })}
               >
                 Give role

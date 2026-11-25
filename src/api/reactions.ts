@@ -1,3 +1,5 @@
+import { toast } from 'sonner'
+import { errorMessage } from './errors'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './client'
 import type { Page, StorySummary } from './types'
@@ -65,7 +67,15 @@ export function useToggleBookmark() {
       queryClient.setQueryData(reactionKeys.bookmarkIds, next)
       return { before }
     },
-    onError: (_error, _vars, context) => queryClient.setQueryData(reactionKeys.bookmarkIds, context?.before),
+    onError: (error, { blogId }, context) => {
+      queryClient.setQueryData<Set<number | undefined>>(reactionKeys.bookmarkIds, (current) => {
+        const next = new Set(current)
+        if (context?.before?.has(blogId)) next.add(blogId)
+        else next.delete(blogId)
+        return next
+      })
+      toast.error(errorMessage(error))
+    },
     onSettled: () => queryClient.invalidateQueries({ queryKey: reactionKeys.bookmarks, refetchType: 'none' }),
   })
 }

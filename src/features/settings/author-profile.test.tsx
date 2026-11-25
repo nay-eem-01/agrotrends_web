@@ -1,16 +1,10 @@
-import { fireEvent, screen, within } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { clearSession } from '../../api/client'
 import App from '../../App'
+import { envelope, mockApi } from '../../test/api'
 import { renderWithProviders } from '../../test/render'
-
-function envelope(status: number, payload: unknown, message = 'OK') {
-  return new Response(JSON.stringify({ status: String(status), message, payload, success: status < 400 }), {
-    status,
-    headers: { 'Content-Type': 'application/json' },
-  })
-}
 
 const author = { id: 1, authorId: 5, name: 'Nasrin Akter', email: 'nasrin@farm.bd', mobileNumber: '+8801712345678' }
 const profile = {
@@ -24,11 +18,10 @@ const profile = {
   profileImageUrl: '/uploads/old.png',
 }
 
-const fetchMock = vi.fn<typeof fetch>()
+let fetchMock: ReturnType<typeof mockApi>
 let routes: Record<string, () => Response>
 
 beforeEach(() => {
-  vi.stubGlobal('fetch', fetchMock)
   localStorage.clear()
   clearSession()
   localStorage.setItem('agrotrends.refreshToken', 'r0')
@@ -36,12 +29,7 @@ beforeEach(() => {
     'POST /api/auth/refresh-token': () => envelope(200, { accessToken: 'a1', refreshToken: 'r1', user: author }),
     'GET /api/authors/me': () => envelope(200, profile),
   }
-  fetchMock.mockImplementation(async (input, init) => {
-    const key = `${init?.method ?? 'GET'} ${String(input)}`
-    const handler = routes[key]
-    if (!handler) throw new Error(`Unexpected ${key}`)
-    return handler()
-  })
+  fetchMock = mockApi(routes)
 })
 
 afterEach(() => {
@@ -100,6 +88,7 @@ test('a new photo is uploaded and saved with the profile', async () => {
   fireEvent.drop(profileSection.getByRole('button', { name: 'Change photo' }), {
     dataTransfer: { types: ['Files'], files: [photo], items: [] },
   })
+  await waitFor(() => expect(document.querySelector('img[src="/uploads/new.webp"]')).toBeInTheDocument())
   await userEvent.click(profileSection.getByRole('button', { name: 'Save profile' }))
 
   await profileSection.findByText('Profile saved')

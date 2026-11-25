@@ -31,6 +31,7 @@ export function DigestPreview() {
           variant="secondary"
           size="sm"
           loading={preview.isPending}
+          pendingLabel="Preparing preview…"
           className="shrink-0"
           onClick={() => preview.mutate(undefined, { onSuccess: () => setOpen(true) })}
         >

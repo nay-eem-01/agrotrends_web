@@ -5,7 +5,7 @@ import { cn } from 'cn'
 import { useMyAuthorProfile } from '../../api/authors'
 import { useTopicStories } from '../../api/blogs'
 import { useCategories, useFollowedCategories } from '../../api/categories'
-import { useExperts, type ExpertSummary } from '../../api/experts'
+import { useRecommendedExperts, type ExpertSummary } from '../../api/experts'
 import { useFeed, useTrendingQuestions } from '../../api/feed'
 import { useToggleAuthorFollow } from '../../api/follows'
 import { useQuestions } from '../../api/questions'
@@ -18,7 +18,6 @@ import { CoverFallback } from '../../ui/Botanical'
 import { Button, ButtonLink } from '../../ui/Button'
 import { RowsSkeleton } from '../../ui/LoadingSkeleton'
 import { useSession } from '../auth/session'
-import { useRequireSignIn } from '../auth/useRequireSignIn'
 import { QuestionCard } from '../qa/QuestionRow'
 import { TopicChips } from '../topics/TopicChips'
 
@@ -26,7 +25,7 @@ type Show = 'questions' | 'stories'
 
 /**
  * `/` for signed-in readers: a composer, then Questions | Stories as two tabs above topic filters, with what's
- * trending and experts to follow on the right (the sections and your topics are in the app's sidebar). One kind at a
+ * trending and people to follow on the right. The app's sidebar lists people the reader already follows. One kind at a
  * time, never mixed. The tab, topic and sort live in the URL (`?show=stories&topic=2`, `?unanswered=true`), so a tab
  * can be linked and Back works. On phones the quick actions come first.
  */
@@ -343,7 +342,7 @@ function Rail() {
   const t = useT()
   const trending = useFeed('trending')
   const questions = useTrendingQuestions()
-  const experts = useExperts()
+  const experts = useRecommendedExperts()
   const top = (trending.data?.pages[0]?.content ?? []).slice(0, 4)
   const asked = questions.data?.content ?? []
   // The fallbacks load only once their trending list has come back empty (or failed).
@@ -354,9 +353,9 @@ function Rail() {
   const open = (waiting.data?.pages[0]?.content ?? []).slice(0, 4)
   const fresh = (latest.data?.pages[0]?.content ?? []).slice(0, 4)
   return (
-    <aside aria-label={t('More to read')} className="hidden sm:block">
-      <div className="sticky top-24 flex flex-col gap-8">
-        <section aria-labelledby="ask-advisor" className="flex flex-col gap-2 rounded-xl bg-surface p-4">
+    <aside aria-label={t('More to read')} className="min-w-0">
+      <div className="flex flex-col gap-8 xl:sticky xl:top-24">
+        <section aria-labelledby="ask-advisor" className="hidden flex-col gap-2 rounded-xl bg-surface p-4 sm:flex">
           <h2 id="ask-advisor" className="flex items-center gap-1.5 font-sans text-sm font-semibold">
             <Sparkle size={16} aria-hidden="true" className="text-primary" />
             {t('Ask the AI advisor')}
@@ -386,7 +385,7 @@ function Rail() {
           )
         )}
         {top.length > 0 ? (
-          <RailList id="trending-stories" title={t('Trending stories')}>
+          <RailList id="trending-stories" title={t('Top stories')}>
             {top.map((story) => (
               <RailItem key={story.id} to={`/stories/${story.slug}`} meta={story.author?.name}>
                 {story.title}
@@ -404,58 +403,63 @@ function Rail() {
             </RailList>
           )
         )}
-        {(experts.data?.content?.length ?? 0) > 0 && (
-          <section aria-labelledby="experts-to-follow">
-            <h2 id="experts-to-follow" className="font-sans text-sm font-semibold">
-              {t('Experts to follow')}
-            </h2>
-            <ul className="mt-3 flex flex-col gap-3.5">
-              {experts.data!.content.map((expert) => (
-                <li key={expert.userId} className="flex items-center gap-2.5 text-sm">
-                  <Avatar name={expert.name ?? ''} src={expert.avatarUrl ?? undefined} size={32} />
+        <section aria-labelledby="who-to-follow">
+          <h2 id="who-to-follow" className="font-sans text-sm font-semibold">{t('Who to follow')}</h2>
+          {experts.isPending ? (
+            <RowsSkeleton kind="avatar" count={2} className="mt-3" />
+          ) : experts.isError ? (
+            <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+              <p role="alert">{t('Could not load recommendations.')}</p>
+              <Button variant="secondary" size="sm" onClick={() => void experts.refetch()}>{t('Try again')}</Button>
+            </div>
+          ) : experts.data.length === 0 ? (
+            <p className="mt-3 text-sm text-muted-foreground">
+              {t('No expert recommendations for your topics yet.')}{' '}
+              <Link to="/topics" className="text-primary underline-offset-4 hover:underline">{t('Explore topics')}</Link>
+            </p>
+          ) : (
+            <ul className="mt-4 space-y-3.5">
+              {experts.data.map((expert) => (
+                <li key={expert.userId} className="flex items-start gap-2.5 text-sm">
+                  <Avatar name={expert.name ?? ''} src={expert.avatarUrl} size={32} className="shrink-0" />
                   <Link to={`/users/${expert.userId}`} state={{ name: expert.name }} className="min-w-0 flex-1">
                     <span className="block truncate font-semibold hover:underline">{expert.name}</span>
-                    <span className="block truncate text-xs text-muted-foreground">{[expert.expertField, expert.institution].filter(Boolean).join(' · ')}</span>
+                    <span className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{[expert.expertField, expert.institution].filter(Boolean).join(' · ')}</span>
                   </Link>
                   <RailFollow expert={expert} />
                 </li>
               ))}
             </ul>
-          </section>
-        )}
+          )}
+        </section>
       </div>
     </aside>
   )
 }
 
-/** A quiet Follow for the rail (a full pill would crowd the name); hidden on your own row. */
 function RailFollow({ expert }: { expert: ExpertSummary }) {
   const t = useT()
-  const { status, user } = useSession()
   const toggle = useToggleAuthorFollow()
-  const requireSignIn = useRequireSignIn()
-  if (expert.authorId == null || (user?.id != null && user.id === expert.userId)) return null
-  const following = status === 'signed-in' && Boolean(expert.followedByMe)
+  if (expert.authorId == null) return null
+  const authorId = expert.authorId
+  const following = toggle.isPending || toggle.isSuccess
   return (
-    <button
-      type="button"
-      aria-pressed={status === 'signed-in' ? following : undefined}
-      aria-label={`${following ? t('Following') : t('Follow')} ${expert.name ?? ''}`}
-      disabled={toggle.isPending}
-      onClick={() => requireSignIn(() => toggle.mutate({ authorId: expert.authorId!, follow: !following }))}
-      className={cn(
-        'h-8 shrink-0 rounded-full px-3 text-xs font-semibold transition-colors duration-150 disabled:opacity-60',
-        following ? 'text-muted-foreground hover:bg-surface hover:text-foreground' : 'bg-surface text-primary hover:bg-secondary',
-      )}
+    <Button
+      variant="secondary"
+      size="sm"
+      aria-label={following ? t('Following {name}', { name: expert.name ?? '' }) : t('Follow {name}', { name: expert.name ?? '' })}
+      aria-pressed={following}
+      disabled={following}
+      onClick={() => toggle.mutate({ authorId, follow: true })}
     >
       {following ? t('Following') : t('Follow')}
-    </button>
+    </Button>
   )
 }
 
 function RailList({ id, title, children }: { id: string; title: string; children: ReactNode }) {
   return (
-    <section aria-labelledby={id}>
+    <section aria-labelledby={id} className="hidden sm:block">
       <h2 id={id} className="font-sans text-sm font-semibold">
         {title}
       </h2>

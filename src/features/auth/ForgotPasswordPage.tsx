@@ -71,7 +71,7 @@ function ByEmail() {
       <form onSubmit={submit} noValidate className="flex flex-col gap-5">
         <TextField label={t('E-mail')} type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} error={error} />
         <FormError message={forgot.isError ? errorMessage(forgot.error) : null} />
-        <Button type="submit" loading={forgot.isPending} className="mt-1">
+        <Button type="submit" loading={forgot.isPending} pendingLabel={t('Sending link…')} className="mt-1">
           {t('Send reset link')}
         </Button>
       </form>
@@ -132,7 +132,7 @@ function ByPhone() {
             />
           </div>
           <FormError message={send.isError ? errorMessage(send.error) : null} />
-          <Button type="submit" loading={send.isPending} className="mt-1">
+          <Button type="submit" loading={send.isPending} pendingLabel={t('Sending code…')} className="mt-1">
             {t('Text me a code')}
           </Button>
         </form>
@@ -165,7 +165,7 @@ function ByPhone() {
         <PasswordField label={t('Repeat new password')} autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} error={errors.confirm} />
         <FormError message={reset.isError ? errorMessage(reset.error) : null} />
         <div className="flex flex-wrap items-center gap-3">
-          <Button type="submit" loading={reset.isPending}>
+          <Button type="submit" loading={reset.isPending} pendingLabel={t('Resetting password…')}>
             {t('Set new password')}
           </Button>
           <Button variant="quiet" onClick={() => send.reset()}>

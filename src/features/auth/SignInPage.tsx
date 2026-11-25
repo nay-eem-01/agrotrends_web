@@ -74,7 +74,7 @@ export function SignInPage() {
           }
         />
         <FormError message={signIn.isError ? errorMessage(signIn.error) : null} />
-        <Button type="submit" loading={signIn.isPending} className="mt-1">
+        <Button type="submit" loading={signIn.isPending} pendingLabel={t('Signing in…')} className="mt-1">
           {t('Sign in')}
         </Button>
       </form>

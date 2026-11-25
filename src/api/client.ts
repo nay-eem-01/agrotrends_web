@@ -82,6 +82,7 @@ interface RequestOptions {
   /** Only for public reads whose payload never depends on the caller. */
   anonymous?: boolean
   signal?: AbortSignal
+  onUploadProgress?: (percent: number | null) => void
 }
 
 /**
@@ -181,7 +182,11 @@ async function send(path: string, options: RequestOptions, withToken = true): Pr
   try {
     // The backend's messages follow the reader's language; English is its default, so only Bengali is sent.
     const params = getLang() === 'bn' ? { ...options.params, lang: 'bn' } : options.params
-    return await fetch(BASE_URL + path + queryString(params), {
+    const url = BASE_URL + path + queryString(params)
+    if (options.onUploadProgress && body instanceof FormData) {
+      return await sendUpload(url, options.method ?? 'POST', body, headers, options.onUploadProgress)
+    }
+    return await fetch(url, {
       method: options.method ?? 'GET',
       headers,
       body,
@@ -193,6 +198,29 @@ async function send(path: string, options: RequestOptions, withToken = true): Pr
     if (error instanceof DOMException && error.name === 'AbortError') throw error
     throw new ApiError(0, NETWORK_ERROR_MESSAGE)
   }
+}
+
+/** XMLHttpRequest exposes bytes sent for multipart uploads. Authentication and retries stay in api(). */
+function sendUpload(url: string, method: string, body: FormData, headers: Record<string, string>, onProgress: (percent: number | null) => void): Promise<Response> {
+  return new Promise((resolve, reject) => {
+    const request = new XMLHttpRequest()
+    request.open(method, url)
+    for (const [name, value] of Object.entries(headers)) request.setRequestHeader(name, value)
+    onProgress(null)
+    request.upload.addEventListener('progress', (event) => {
+      if (event.lengthComputable && event.total > 0) onProgress(Math.min(99, Math.floor(event.loaded / event.total * 100)))
+    })
+    request.upload.addEventListener('load', () => onProgress(100))
+    request.addEventListener('load', () => {
+      if (!request.status) return reject(new ApiError(0, NETWORK_ERROR_MESSAGE))
+      const empty = [204, 205, 304].includes(request.status)
+      resolve(new Response(empty ? null : request.responseText, { status: request.status }))
+    })
+    request.addEventListener('error', reject)
+    request.addEventListener('timeout', reject)
+    request.addEventListener('abort', () => reject(new DOMException('Upload aborted', 'AbortError')))
+    request.send(body)
+  })
 }
 
 export function queryString(params?: Record<string, QueryValue>): string {

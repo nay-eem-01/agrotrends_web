@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './client'
+import { recommendedExpertsKey } from './experts'
 import { feedKeys } from './feed'
 import type { Page, Schemas } from './types'
 
@@ -46,9 +47,27 @@ export function useToggleCategoryFollow() {
   return useMutation({
     mutationFn: ({ categoryId, follow }: { categoryId: number; follow: boolean }) =>
       api<null>(`/api/categories/${categoryId}/follow`, { method: follow ? 'PUT' : 'DELETE' }),
+    onMutate: async ({ categoryId, follow }) => {
+      await queryClient.cancelQueries({ queryKey: followedCategoriesKey })
+      const before = queryClient.getQueryData<Category[]>(followedCategoriesKey)
+      const category = queryClient.getQueryData<Category[]>(['categories', 'catalog'])?.find(({ id }) => id === categoryId)
+      if (before && (!follow || category)) {
+        const rest = before.filter(({ id }) => id !== categoryId)
+        queryClient.setQueryData(followedCategoriesKey, follow && category ? [...rest, category] : rest)
+      }
+      return { previous: before?.find(({ id }) => id === categoryId) }
+    },
+    onError: (_error, { categoryId }, context) => {
+      queryClient.setQueryData<Category[]>(followedCategoriesKey, (current) => {
+        if (!current) return current
+        const rest = current.filter(({ id }) => id !== categoryId)
+        return context?.previous ? [...rest, context.previous] : rest
+      })
+    },
     onSuccess: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: followedCategoriesKey }),
+        queryClient.invalidateQueries({ queryKey: recommendedExpertsKey }),
         queryClient.invalidateQueries({ queryKey: ['questions', 'list', { following: true }] }),
         queryClient.invalidateQueries({ queryKey: feedKeys.feed('following') }),
       ])

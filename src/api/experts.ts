@@ -1,3 +1,5 @@
+import { toast } from 'sonner'
+import { getLang, translate } from '../lib/i18n'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './client'
 import type { Page, Schemas } from './types'
@@ -33,6 +35,13 @@ export function useApplyAsExpert() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (request: ExpertApplicationRequest) => api<ExpertApplication>('/api/experts/applications', { method: 'POST', body: request }),
+    onSuccess: (application) => {
+      toast.success(translate(getLang(), 'Application sent'))
+      queryClient.setQueryData<Page<ExpertApplication>>(expertKeys.mine, (old) => old && {
+        ...old,
+        content: [application, ...old.content.filter(({ id }) => id !== application.id)],
+      })
+    },
     onSettled: () => queryClient.invalidateQueries({ queryKey: expertKeys.mine }),
   })
 }
@@ -77,6 +86,7 @@ export function useExpertDecision() {
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: ['admin'] })
       void queryClient.invalidateQueries({ queryKey: ['reputation'] })
+      void queryClient.invalidateQueries({ queryKey: recommendedExpertsKey })
     },
   })
 }
@@ -94,5 +104,16 @@ export function useExperts(categoryId?: number) {
     queryFn: ({ signal }) => api<Page<ExpertSummary>>('/api/experts', { params: { categoryId, pageNo: 0, pageSize: 3 }, signal }),
     retry: false,
     staleTime: 10 * 60_000,
+  })
+}
+
+
+export const recommendedExpertsKey = ['experts', 'recommended'] as const
+
+export function useRecommendedExperts() {
+  return useQuery({
+    queryKey: recommendedExpertsKey,
+    queryFn: ({ signal }) => api<ExpertSummary[]>('/api/me/recommended-experts', { signal }),
+    retry: false,
   })
 }

@@ -82,7 +82,7 @@ export function ResetPasswordPage() {
             {t('Send a new reset link')}
           </Link>
         )}
-        <Button type="submit" loading={reset.isPending} className="mt-1">
+        <Button type="submit" loading={reset.isPending} pendingLabel={t('Resetting password…')} className="mt-1">
           {t('Set new password')}
         </Button>
       </form>

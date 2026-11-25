@@ -92,7 +92,7 @@ function AdminSignIn({ signedInAsReader }: { signedInAsReader: boolean }) {
       <TextField label="Admin e-mail or phone" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} />
       <TextField label="Password" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
       <FormError message={error ?? (signIn.isError ? errorMessage(signIn.error) : null)} />
-      <Button type="submit" loading={signIn.isPending} className="self-start">
+      <Button type="submit" loading={signIn.isPending} pendingLabel="Signing in…" className="self-start">
         Sign in as admin
       </Button>
     </form>

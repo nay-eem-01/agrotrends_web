@@ -35,7 +35,7 @@ function Categories() {
     <>
       <form onSubmit={add} noValidate className="mt-8 flex items-start gap-3">
         <TextField label="New category" className="flex-1" value={name} onChange={(e) => setName(e.target.value)} error={error} />
-        <Button type="submit" loading={create.isPending} className="mt-7">
+        <Button type="submit" loading={create.isPending} pendingLabel="Creating category…" className="mt-7">
           Add category
         </Button>
       </form>
@@ -75,7 +75,7 @@ function CategoryRow({ category }: { category: Category }) {
       {mode === 'rename' ? (
         <form onSubmit={rename} className="flex items-end gap-2">
           <TextField label={`Rename ${category.categoryName}`} className="flex-1" value={name} onChange={(e) => setName(e.target.value)} />
-          <Button type="submit" size="sm" loading={write.isPending}>
+          <Button type="submit" size="sm" loading={write.isPending} pendingLabel="Saving category…">
             Save
           </Button>
           <Button variant="quiet" size="sm" onClick={() => setMode('view')}>
@@ -88,7 +88,7 @@ function CategoryRow({ category }: { category: Category }) {
           {mode === 'confirm' ? (
             <>
               <span className="text-sm">Delete it? Stories in it may block this.</span>
-              <Button variant="danger" size="sm" loading={write.isPending} onClick={() => write.mutate({ kind: 'delete', id })}>
+              <Button variant="danger" size="sm" loading={write.isPending} pendingLabel="Deleting category…" onClick={() => write.mutate({ kind: 'delete', id })}>
                 Delete category
               </Button>
               <Button variant="quiet" size="sm" onClick={() => setMode('view')}>

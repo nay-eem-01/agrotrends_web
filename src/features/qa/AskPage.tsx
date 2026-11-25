@@ -96,6 +96,7 @@ function QuestionForm({ question }: { question?: Question }) {
 
   function submit(event: FormEvent) {
     event.preventDefault()
+    if (write.isPending) return
     if (isPrivate) {
       const text = [title.trim(), htmlToText(details).trim()].filter(Boolean).join('\n\n')
       if (!text) {
@@ -195,7 +196,7 @@ function QuestionForm({ question }: { question?: Question }) {
               <Button variant="quiet" className="ml-auto sm:ml-0" onClick={() => navigate(-1)}>
                 {t('Cancel')}
               </Button>
-              <Button type="submit" loading={write.isPending} className="min-w-36 flex-1 sm:flex-none">
+              <Button type="submit" loading={write.isPending} pendingLabel={question ? t('Saving question…') : isPrivate ? t('Sending question…') : t('Posting question…')} className="min-w-36 flex-1 sm:flex-none">
                 {isPrivate ? <Sparkle size={18} weight="fill" aria-hidden="true" /> : <PaperPlaneTilt size={18} weight="fill" aria-hidden="true" />}
                 {question ? t('Save question') : isPrivate ? t('Ask the AI privately') : t('Post question')}
               </Button>

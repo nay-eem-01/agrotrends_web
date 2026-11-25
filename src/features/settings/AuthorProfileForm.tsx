@@ -7,6 +7,7 @@ import { splitList } from '../../lib/auth'
 import { IMAGE_TYPES, imageProblem } from '../../lib/images'
 import { Avatar } from '../../ui/Avatar'
 import { Button } from '../../ui/Button'
+import { ImageUploadProgress } from '../../ui/ImageUploadProgress'
 import { FormSkeleton } from '../../ui/LoadingSkeleton'
 import { cx } from '../../ui/cx'
 import { useImageDrop } from '../../ui/useImageDrop'
@@ -85,7 +86,7 @@ function ProfileEditor({ profile, name, onSaved }: { profile: AuthorProfileRespo
         <Avatar name={name} src={form.profileImageUrl || null} size={72} />
         <div className="flex flex-col items-start gap-1">
           <div className="flex flex-wrap gap-2">
-            <Button variant="secondary" size="sm" loading={upload.isPending} onClick={() => fileInput.current?.click()}>
+            <Button variant="secondary" size="sm" disabled={upload.isPending} onClick={() => fileInput.current?.click()}>
               {form.profileImageUrl ? 'Change photo' : 'Add photo'}
             </Button>
             {form.profileImageUrl && (
@@ -103,6 +104,7 @@ function ProfileEditor({ profile, name, onSaved }: { profile: AuthorProfileRespo
             tabIndex={-1}
             onChange={choosePhoto}
           />
+          {upload.isPending && <ImageUploadProgress progress={upload.progress} className="w-full max-w-56" />}
           {photoError ? (
             <p role="alert" className="text-xs text-danger">
               {photoError}
@@ -134,7 +136,7 @@ function ProfileEditor({ profile, name, onSaved }: { profile: AuthorProfileRespo
       />
       <FormError message={update.isError ? errorMessage(update.error) : null} />
       <div className="flex items-center gap-4">
-        <Button type="submit" loading={update.isPending} disabled={upload.isPending}>
+        <Button type="submit" loading={update.isPending} pendingLabel="Saving profile…" disabled={upload.isPending}>
           Save profile
         </Button>
         {update.isSuccess && <output className="text-sm text-paddy">Profile saved</output>}

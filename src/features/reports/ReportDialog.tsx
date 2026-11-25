@@ -99,7 +99,7 @@ export function ReportDialog({ targetType, targetId, what, onClose, onReported }
               </p>
             )}
             <div className="flex gap-3">
-              <Button type="submit" size="sm" loading={report.isPending}>
+              <Button type="submit" size="sm" loading={report.isPending} pendingLabel={t('Sending report…')}>
                 {t('Send report')}
               </Button>
               <Button variant="quiet" size="sm" onClick={onClose}>

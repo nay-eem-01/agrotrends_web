@@ -62,7 +62,7 @@ test('an application is checked, then sent with topics, field, credential and pr
   await userEvent.type(screen.getByLabelText('Link 1'), 'https://dls.gov.bd/staff/nasrin')
   await userEvent.click(screen.getByRole('button', { name: 'Send application' }))
 
-  expect(await screen.findByRole('heading', { name: 'Your application is waiting for an admin' })).toBeInTheDocument()
+  expect(await screen.findByRole('heading', { name: 'Under review' })).toBeInTheDocument()
   const sent = api.mock.calls.find(([url]) => url === '/api/experts/applications')!
   expect(JSON.parse(sent[1]!.body as string)).toEqual({
     categoryIds: [1],
@@ -77,7 +77,7 @@ test('an application is checked, then sent with topics, field, credential and pr
 test('a pending application shows its status instead of the form', async () => {
   mockApi({ ...signedIn(), ...categories, 'GET /api/experts/applications/me': () => envelope(200, page([application()])) })
   renderWithProviders(<App />, '/experts/apply')
-  expect(await screen.findByRole('heading', { name: 'Your application is waiting for an admin' })).toBeInTheDocument()
+  expect(await screen.findByRole('heading', { name: 'Under review' })).toBeInTheDocument()
   expect(screen.queryByRole('button', { name: 'Send application' })).not.toBeInTheDocument()
   expect(screen.queryByRole('button', { name: 'Apply again' })).not.toBeInTheDocument()
 })

@@ -18,6 +18,7 @@ export function FollowTagButton({ tag }: { tag: string }) {
       variant={following ? 'secondary' : 'primary'}
       size="sm"
       aria-pressed={signedIn ? following : undefined}
+      disabled={toggle.isPending}
       onClick={() => requireSignIn(() => toggle.mutate({ tag, follow: !following }))}
     >
       {following ? t('Following') : t('Follow')}

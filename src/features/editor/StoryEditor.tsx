@@ -8,11 +8,12 @@ import { errorMessage } from '../../api/errors'
 import { useUploadImage } from '../../api/images'
 import { IMAGE_TYPES, imageProblem } from '../../lib/images'
 import { Button } from '../../ui/Button'
-import { Spinner } from '../../ui/Spinner'
+import { ImageUploadProgress } from '../../ui/ImageUploadProgress'
 import { cx } from '../../ui/cx'
 import { useImageDrop } from '../../ui/useImageDrop'
 
 interface StoryEditorProps {
+  actions: ReactNode
   title: string
   html: string
   cover: string
@@ -22,7 +23,7 @@ interface StoryEditorProps {
 }
 
 /** Title and body, set the way the story will read once published. */
-export function StoryEditor({ title, html, cover, onTitleChange, onHtmlChange, onCoverChange }: StoryEditorProps) {
+export function StoryEditor({ actions, title, html, cover, onTitleChange, onHtmlChange, onCoverChange }: StoryEditorProps) {
   const editor = useEditor({
     extensions: [
       StarterKit.configure({ heading: { levels: [2, 3] }, link: { openOnClick: false, autolink: true } }),
@@ -52,7 +53,10 @@ export function StoryEditor({ title, html, cover, onTitleChange, onHtmlChange, o
 
   return (
     <div>
-      {editor && <Toolbar editor={editor} picker={picker} />}
+      <div className="sticky top-[calc(4rem+1px)] z-10 flex flex-col gap-3 border-b border-border bg-background py-3">
+        {actions}
+        {editor && <Toolbar editor={editor} picker={picker} />}
+      </div>
       <Cover cover={cover} onChange={onCoverChange} />
       <textarea
         aria-label="Title"
@@ -103,8 +107,8 @@ function Toolbar({ editor, picker }: { editor: Editor; picker: ReturnType<typeof
 
   // One row that scrolls sideways on phones, as the question editor's does; it wraps once there's room.
   return (
-    <div className="sticky top-16 z-10">
-      <div role="toolbar" aria-label="Formatting" className="flex items-center gap-0.5 overflow-x-auto rounded-2xl bg-muted/90 p-1 backdrop-blur-sm [scrollbar-width:none] sm:flex-wrap sm:overflow-visible">
+    <div className="min-w-0">
+      <div role="toolbar" aria-label="Formatting" className="flex items-center gap-0.5 overflow-x-auto rounded-2xl bg-muted p-1 [scrollbar-width:none] sm:flex-wrap sm:overflow-visible">
         <Tool label="Heading" pressed={state.h2} onClick={() => chain().toggleHeading({ level: 2 }).run()}>
           <TextHTwo size={20} />
         </Tool>
@@ -121,8 +125,8 @@ function Toolbar({ editor, picker }: { editor: Editor; picker: ReturnType<typeof
           <LinkSimple size={20} />
         </Tool>
         <div {...drop.handlers} className={cx('shrink-0 rounded-xl', drop.active && 'outline-2 outline-primary')}>
-          <Tool label="Image" pressed={false} onClick={picker.open}>
-            {picker.uploading ? <Spinner size={18} label="Uploading image" /> : <ImageIcon size={20} />}
+          <Tool label="Image" pressed={false} disabled={picker.uploading} onClick={picker.open}>
+            <ImageIcon size={20} />
           </Tool>
         </div>
         {picker.input}
@@ -136,6 +140,7 @@ function Toolbar({ editor, picker }: { editor: Editor; picker: ReturnType<typeof
           <ListNumbers size={20} />
         </Tool>
       </div>
+      {picker.uploading && <ImageUploadProgress progress={picker.progress} className="mt-2 max-w-56" />}
       {picker.error && (
         <p role="alert" className="mt-1 rounded-xl bg-background px-2 py-1 text-sm text-destructive">
           {picker.error}
@@ -145,12 +150,13 @@ function Toolbar({ editor, picker }: { editor: Editor; picker: ReturnType<typeof
   )
 }
 
-function Tool({ label, pressed, onClick, children }: { label: string; pressed: boolean; onClick: () => void; children: ReactNode }) {
+function Tool({ label, pressed, disabled, onClick, children }: { label: string; pressed: boolean; disabled?: boolean; onClick: () => void; children: ReactNode }) {
   return (
     <button
       type="button"
       aria-label={label}
       aria-pressed={pressed}
+      disabled={disabled}
       title={label}
       onMouseDown={(event) => event.preventDefault()}
       onClick={onClick}
@@ -188,6 +194,7 @@ function useImagePicker(onUploaded: (url: string) => void) {
     uploadFile,
     setProblem,
     uploading: upload.isPending,
+    progress: upload.progress,
     error: problem ?? (upload.isError ? errorMessage(upload.error) : null),
     input: <input ref={input} type="file" accept={IMAGE_TYPES.join(',')} className="sr-only" tabIndex={-1} aria-hidden="true" onChange={choose} />,
   }
@@ -203,7 +210,7 @@ function Cover({ cover, onChange }: { cover: string; onChange: (cover: string) =
         <>
           <img src={cover} alt="" className="mb-3 aspect-[21/9] max-h-80 w-full rounded-xl bg-muted object-cover" />
           <div className="flex flex-wrap items-center gap-2">
-            <Button variant="secondary" size="sm" loading={picker.uploading} onClick={picker.open}>
+            <Button variant="secondary" size="sm" disabled={picker.uploading} onClick={picker.open}>
               Change cover
             </Button>
             <Button variant="quiet" size="sm" disabled={picker.uploading} onClick={() => onChange('')}>
@@ -220,11 +227,12 @@ function Cover({ cover, onChange }: { cover: string; onChange: (cover: string) =
           aria-describedby="cover-hint"
           className="flex h-32 w-full flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-input bg-surface text-sm font-medium text-muted-foreground transition-[color,border-color] duration-150 hover:border-primary hover:text-foreground disabled:opacity-60"
         >
-          {picker.uploading ? <Spinner size={20} label="Uploading image" /> : <ImageIcon size={22} aria-hidden="true" />}
+          <ImageIcon size={22} aria-hidden="true" />
           Add a cover image
         </button>
       )}
       {picker.input}
+      {picker.uploading && <ImageUploadProgress progress={picker.progress} className="mt-2 max-w-56" />}
       {picker.error ? (
         <p role="alert" className="mt-2 text-sm text-destructive">
           {picker.error}

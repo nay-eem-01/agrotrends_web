@@ -28,5 +28,33 @@ export function mockApi(routes: Record<string, Handler>) {
     return handler(url, init)
   })
   vi.stubGlobal('fetch', fetchMock)
+  // Keep multipart XHR uploads on the same mocked API as fetch.
+  vi.stubGlobal('XMLHttpRequest', class extends EventTarget {
+    upload = new EventTarget()
+    status = 0
+    responseText = ''
+    private method = 'POST'
+    private url = ''
+    private headers: Record<string, string> = {}
+
+    open(method: string, url: string) {
+      this.method = method
+      this.url = url
+    }
+
+    setRequestHeader(name: string, value: string) {
+      this.headers[name] = value
+    }
+
+    send(body: FormData) {
+      this.upload.dispatchEvent(new ProgressEvent('progress', { lengthComputable: true, loaded: 50, total: 100 }))
+      this.upload.dispatchEvent(new Event('load'))
+      void fetchMock(this.url, { method: this.method, headers: this.headers, body }).then(async (response) => {
+        this.status = response.status
+        this.responseText = await response.text()
+        this.dispatchEvent(new Event('load'))
+      }, () => this.dispatchEvent(new Event('error')))
+    }
+  })
   return fetchMock
 }

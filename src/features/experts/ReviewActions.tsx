@@ -33,6 +33,7 @@ export function ReviewActions({ questionId, canConfirm, canFlag }: ReviewActions
             label={t('Your corrected answer')}
             placeholder={t('What is wrong, and what should the farmer do instead?')}
             submitLabel={t('Post correction')}
+            pendingLabel={t('Posting correction…')}
             doneLabel={t('Correction posted')}
             rows={5}
             focusOnOpen
@@ -45,7 +46,7 @@ export function ReviewActions({ questionId, canConfirm, canFlag }: ReviewActions
       ) : mode === 'flag' ? (
         <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
           <span>{t('Flag it as wrong or unsafe? It will be hidden from everyone.')}</span>
-          <Button variant="danger" size="sm" loading={review.isPending} onClick={() => review.mutate({ action: 'flag' })}>
+          <Button variant="danger" size="sm" loading={review.isPending} pendingLabel={t('Flagging answer…')} onClick={() => review.mutate({ action: 'flag' })}>
             {t('Flag')}
           </Button>
           <Button variant="quiet" size="sm" onClick={() => setMode('idle')}>
@@ -56,7 +57,7 @@ export function ReviewActions({ questionId, canConfirm, canFlag }: ReviewActions
         <div className="mt-2 -ml-3 flex flex-wrap gap-1">
           {canConfirm && (
             <>
-              <Button variant="quiet" size="sm" loading={review.isPending} onClick={() => review.mutate({ action: 'confirm' })}>
+              <Button variant="quiet" size="sm" loading={review.isPending} pendingLabel={t('Confirming answer…')} onClick={() => review.mutate({ action: 'confirm' })}>
                 <CheckCircle size={18} aria-hidden="true" />
                 {t('Confirm')}
               </Button>

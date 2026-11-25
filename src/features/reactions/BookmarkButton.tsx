@@ -20,6 +20,7 @@ export function BookmarkButton({ story, className }: { story: Pick<StorySummary,
     <button
       type="button"
       aria-pressed={signedIn ? saved : undefined}
+      disabled={toggle.isPending}
       aria-label={signedIn ? `Save “${story.title}”` : t('Sign in to save')}
       onClick={() => requireSignIn(() => toggle.mutate({ blogId, save: !saved }))}
       className={cx('inline-flex size-11 items-center justify-center rounded-full', saved ? 'text-ink' : 'text-ink-muted hover:text-ink', className)}

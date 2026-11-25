@@ -75,6 +75,22 @@ test('switching language while signed in saves it, so e-mails come in it too', a
   await waitFor(() => expect(sent(api, 'PUT')).toEqual([{ preferredLang: 'bn' }]))
 })
 
+test('a failed language save puts the previous language back', async () => {
+  let finish!: (response: Response) => void
+  const response = new Promise<Response>((resolve) => { finish = resolve })
+  mockApi({ ...signedIn(confirmed), 'PUT /api/user/settings': () => response })
+  renderWithProviders(<App />, '/about')
+
+  await userEvent.click(await screen.findByRole('button', { name: 'Account' }))
+  const language = within(await screen.findByRole('menu')).getByRole('menuitem', { name: /^Language\s*বাংলা$/ })
+  await userEvent.click(language)
+  expect(document.documentElement.lang).toBe('bn')
+
+  finish(envelope(400, null, 'Could not save language.'))
+  await waitFor(() => expect(document.documentElement.lang).toBe('en'))
+  expect(await screen.findByText('Could not save language.')).toBeInTheDocument()
+})
+
 test('the unsubscribe link lands on a page that says which e-mails stopped, or that the link was bad', async () => {
   mockApi({})
   const view = renderWithProviders(<App />, '/unsubscribed?kind=digest')

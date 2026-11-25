@@ -4,7 +4,6 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { cn } from 'cn'
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -163,6 +162,8 @@ function OpenGroup({ group }: { group: ReportGroup }) {
         open={confirm === 'remove-content'}
         title={isAi ? 'Hide this AI answer?' : 'Remove this post for good?'}
         action={isAi ? 'Hide it' : 'Remove it'}
+        pendingLabel={isAi ? 'Hiding answer…' : 'Removing post…'}
+        pending={moderate.isPending}
         onCancel={() => setConfirm(null)}
         onConfirm={() => moderate.mutate({ action: 'remove-content', reportId }, { onSettled: () => setConfirm(null) })}
       >
@@ -174,6 +175,8 @@ function OpenGroup({ group }: { group: ReportGroup }) {
         open={confirm === 'dismiss'}
         title="Dismiss these reports?"
         action="Dismiss"
+        pendingLabel="Dismissing reports…"
+        pending={moderate.isPending}
         onCancel={() => setConfirm(null)}
         onConfirm={() => moderate.mutate({ action: 'dismiss', reportId }, { onSettled: () => setConfirm(null) })}
       >
@@ -183,7 +186,16 @@ function OpenGroup({ group }: { group: ReportGroup }) {
   )
 }
 
-function Confirm({ open, title, action, children, onCancel, onConfirm }: { open: boolean; title: string; action: string; children: ReactNode; onCancel: () => void; onConfirm: () => void }) {
+function Confirm({ open, title, action, pending, pendingLabel, children, onCancel, onConfirm }: {
+  open: boolean
+  title: string
+  action: string
+  pending: boolean
+  pendingLabel: string
+  children: ReactNode
+  onCancel: () => void
+  onConfirm: () => void
+}) {
   return (
     <AlertDialog open={open} onOpenChange={(value) => !value && onCancel()}>
       <AlertDialogContent>
@@ -193,7 +205,7 @@ function Confirm({ open, title, action, children, onCancel, onConfirm }: { open:
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm}>{action}</AlertDialogAction>
+          <Button loading={pending} pendingLabel={pendingLabel} onClick={onConfirm}>{action}</Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

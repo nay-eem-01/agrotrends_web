@@ -22,7 +22,7 @@ export function NotificationsPage() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <h1 className="text-2xl sm:text-3xl">{t('Notifications')}</h1>
         {unread > 0 && (
-          <Button variant="secondary" size="sm" loading={markRead.isPending} onClick={() => markRead.mutate('all')}>
+          <Button variant="secondary" size="sm" loading={markRead.isPending} pendingLabel={t('Marking as read…')} onClick={() => markRead.mutate('all')}>
             {t('Mark all read')}
           </Button>
         )}

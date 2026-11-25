@@ -103,7 +103,7 @@ function WhyApply() {
 }
 
 const STATUS = {
-  PENDING: { icon: Clock, title: 'Your application is waiting for an admin', tone: 'bg-secondary' },
+  PENDING: { icon: Clock, title: 'Under review', tone: 'bg-secondary' },
   APPROVED: { icon: SealCheck, title: 'You are a verified expert', tone: 'bg-mustard-soft' },
   REJECTED: { icon: ShieldWarning, title: 'Your application was not approved', tone: 'bg-muted' },
 } as const
@@ -158,6 +158,7 @@ function ApplyForm() {
 
   function submit(event: FormEvent) {
     event.preventDefault()
+    if (apply.isPending) return
     const filled = links.map((link) => link.trim()).filter(Boolean)
     const found: Errors = {
       topics: topics.length === 0 ? t('Choose at least one topic.') : undefined,
@@ -302,7 +303,7 @@ function ApplyForm() {
         <ButtonLink to="/settings" variant="quiet">
           {t('Cancel')}
         </ButtonLink>
-        <Button type="submit" loading={apply.isPending}>
+        <Button type="submit" loading={apply.isPending} pendingLabel={t('Sending application…')}>
           {t('Send application')}
         </Button>
       </div>

@@ -5,6 +5,7 @@ import { MAX_LOCATION, useUpdateUserProfile, useUserProfile, type UserProfile } 
 import { IMAGE_TYPES, imageProblem } from '../../lib/images'
 import { CoverFallback } from '../../ui/Botanical'
 import { Button } from '../../ui/Button'
+import { ImageUploadProgress } from '../../ui/ImageUploadProgress'
 import { FormSkeleton } from '../../ui/LoadingSkeleton'
 import { cx } from '../../ui/cx'
 import { useImageDrop } from '../../ui/useImageDrop'
@@ -59,7 +60,7 @@ function Editor({ profile }: { profile: UserProfile }) {
           {cover ? <img src={cover} alt="Your current cover" className="size-full object-cover" /> : <CoverFallback className="size-full" />}
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button variant="secondary" size="sm" loading={upload.isPending} onClick={() => fileInput.current?.click()}>
+          <Button variant="secondary" size="sm" disabled={upload.isPending} onClick={() => fileInput.current?.click()}>
             {cover ? 'Change cover' : 'Add cover'}
           </Button>
           {cover && (
@@ -69,6 +70,7 @@ function Editor({ profile }: { profile: UserProfile }) {
           )}
         </div>
         <input ref={fileInput} type="file" accept={IMAGE_TYPES.join(',')} aria-label="Cover photo" className="sr-only" tabIndex={-1} onChange={chooseCover} />
+        {upload.isPending && <ImageUploadProgress progress={upload.progress} className="w-full max-w-56" />}
         {photoError ? (
           <p role="alert" className="text-xs text-destructive">
             {photoError}
@@ -89,7 +91,7 @@ function Editor({ profile }: { profile: UserProfile }) {
       />
       <FormError message={update.isError ? errorMessage(update.error) : null} />
       <div className="flex items-center gap-4">
-        <Button type="submit" loading={update.isPending} disabled={upload.isPending}>
+        <Button type="submit" loading={update.isPending} pendingLabel="Saving profile…" disabled={upload.isPending}>
           Save profile page
         </Button>
         {update.isSuccess && <output className="text-sm text-primary">Profile page saved</output>}

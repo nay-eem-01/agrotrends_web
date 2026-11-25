@@ -64,17 +64,20 @@ function DetailsForm({ mode, initial, draft, busy, error, onSubmit, onClose }: O
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (busy) return
     // The button that submitted, read from the event: state set in the same click isn't applied yet.
-    const action = ((event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null)?.value as PublishAction
-    setAction(action)
-    if (details.categoryId == null && action !== 'unpublish') {
+    const action = ((event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null)?.value as PublishAction | undefined
+    const submittedAction = action ?? primary.action
+    setAction(submittedAction)
+    if (details.categoryId == null && submittedAction !== 'unpublish') {
       setMissingCategory(true)
       return
     }
-    onSubmit({ ...details, crop: details.crop.trim(), region: details.region.trim() }, action)
+    onSubmit({ ...details, crop: details.crop.trim(), region: details.region.trim() }, submittedAction)
   }
 
   const primary = mode === 'published' ? { action: 'save' as const, label: 'Save details' } : { action: 'publish' as const, label: mode === 'new' ? 'Publish now' : 'Publish' }
+  const pendingLabels = { publish: 'Publishing…', save: mode === 'new' ? 'Saving draft…' : 'Saving details…', unpublish: 'Unpublishing…' }
   const secondary =
     mode === 'published' ? { action: 'unpublish' as const, label: 'Unpublish' } : { action: 'save' as const, label: mode === 'new' ? 'Save as draft' : 'Save details' }
 
@@ -122,7 +125,7 @@ function DetailsForm({ mode, initial, draft, busy, error, onSubmit, onClose }: O
         </p>
       )}
       <div className="flex flex-wrap items-center gap-3">
-        <Button type="submit" value={primary.action} loading={busy && action === primary.action} disabled={busy}>
+        <Button type="submit" value={primary.action} loading={busy && action === primary.action} pendingLabel={pendingLabels[primary.action]} disabled={busy}>
           {primary.label}
         </Button>
         <Button
@@ -130,6 +133,7 @@ function DetailsForm({ mode, initial, draft, busy, error, onSubmit, onClose }: O
           variant={secondary.action === 'unpublish' ? 'quiet' : 'secondary'}
           value={secondary.action}
           loading={busy && action === secondary.action}
+          pendingLabel={pendingLabels[secondary.action]}
           disabled={busy}
         >
           {secondary.label}
@@ -180,7 +184,7 @@ function AiHelp({ draft, tags, onAddTag, onUseSubtitle }: { draft: { title: stri
     <section aria-label="AI suggestions" className="rounded-lg border border-dashed border-border-strong p-4">
       {!assist.data ? (
         <div className="flex flex-wrap items-center gap-3">
-          <Button variant="secondary" size="sm" loading={assist.isPending} onClick={() => assist.mutate(draft)}>
+          <Button variant="secondary" size="sm" loading={assist.isPending} pendingLabel="Generating suggestions…" onClick={() => assist.mutate(draft)}>
             <Sparkle size={16} aria-hidden="true" />
             Suggest topics and a summary
           </Button>

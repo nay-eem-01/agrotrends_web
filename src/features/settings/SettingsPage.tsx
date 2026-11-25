@@ -183,7 +183,7 @@ function AccountForm() {
       </div>
       <FormError message={update.isError ? errorMessage(update.error) : null} />
       <div className="flex flex-wrap items-center gap-4">
-        <Button type="submit" loading={update.isPending}>
+        <Button type="submit" loading={update.isPending} pendingLabel="Saving profile…">
           Save changes
         </Button>
         {update.isSuccess && (
@@ -259,7 +259,7 @@ function PasswordForm() {
         error={errors.confirm}
       />
       <FormError message={change.isError ? errorMessage(change.error) : null} />
-      <Button type="submit" loading={change.isPending} className="self-start">
+      <Button type="submit" loading={change.isPending} pendingLabel="Changing password…" className="self-start">
         Change password
       </Button>
     </form>

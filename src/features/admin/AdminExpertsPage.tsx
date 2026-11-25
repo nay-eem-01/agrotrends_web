@@ -188,10 +188,10 @@ function Decide({ application }: { application: ExpertApplication }) {
         </p>
       )}
       <div className="flex gap-3">
-        <Button size="sm" loading={decide.isPending && decide.variables?.action === 'approve'} disabled={decide.isPending} onClick={approve}>
+        <Button size="sm" loading={decide.isPending && decide.variables?.action === 'approve'} pendingLabel="Approving…" disabled={decide.isPending} onClick={approve}>
           Approve
         </Button>
-        <Button variant="danger" size="sm" loading={decide.isPending && decide.variables?.action === 'reject'} disabled={decide.isPending} onClick={reject}>
+        <Button variant="danger" size="sm" loading={decide.isPending && decide.variables?.action === 'reject'} pendingLabel="Rejecting…" disabled={decide.isPending} onClick={reject}>
           Reject
         </Button>
       </div>

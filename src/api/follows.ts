@@ -1,5 +1,8 @@
+import { toast } from 'sonner'
+import { errorMessage } from './errors'
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from './client'
+import { recommendedExpertsKey } from './experts'
 import { feedKeys } from './feed'
 import type { AuthorProfileResponse, Page, Schemas, StorySummary } from './types'
 
@@ -54,14 +57,16 @@ export function useToggleAuthorFollow() {
       }
       return { before }
     },
-    onError: (_error, { authorId }, context) => {
+    onError: (error, { authorId }, context) => {
       if (context?.before) queryClient.setQueryData(['authors', authorId], context.before)
+      toast.error(errorMessage(error))
     },
     onSettled: (_data, _error, { authorId }) => {
       void queryClient.invalidateQueries({ queryKey: feedKeys.feed('following') })
       // The author's public profile carries followedByMe and the follower count.
       void queryClient.invalidateQueries({ queryKey: ['authors', authorId], exact: true })
       void queryClient.invalidateQueries({ queryKey: followKeys.authors })
+      void queryClient.invalidateQueries({ queryKey: recommendedExpertsKey })
       // "Experts to follow" carries followedByMe too.
       void queryClient.invalidateQueries({ queryKey: ['experts', 'list'] })
     },

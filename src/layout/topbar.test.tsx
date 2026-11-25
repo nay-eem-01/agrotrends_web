@@ -152,3 +152,14 @@ test('the theme can be switched from the header and the choice is stored', async
   await userEvent.click(header.getByRole('button', { name: 'Light theme' }))
   expect(document.documentElement.dataset.theme).toBeUndefined()
 })
+
+test('the branded header offers a safe way back when a page is opened directly', async () => {
+  mockApi({ 'GET /api/questions/all': () => envelope(200, page([])), 'GET /api/categories/all': () => envelope(200, page([])) })
+  renderWithProviders(<App />, '/stories')
+
+  const header = within(screen.getByRole('banner'))
+  expect(header.getByRole('link', { name: 'AgroTrends home' })).toHaveTextContent('AgroTrends')
+  await userEvent.click(header.getByRole('button', { name: 'Go back' }))
+  expect(screen.getByTestId('path')).toHaveTextContent(/^\/$/)
+  expect(header.queryByRole('button', { name: 'Go back' })).not.toBeInTheDocument()
+})

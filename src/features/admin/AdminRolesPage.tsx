@@ -1,3 +1,4 @@
+import { useT } from '../../lib/i18n'
 import { Plus } from '@phosphor-icons/react'
 import { useState, type FormEvent } from 'react'
 import {
@@ -15,6 +16,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/compone
 import { Skeleton } from '@/components/ui/skeleton'
 import { usePrivileges, useRoles, useRoleWrite, type Role } from '../../api/admin'
 import { errorMessage } from '../../api/errors'
+import { FormError, useFormValidation } from '../../ui/FormValidation'
 import { Button } from '../../ui/Button'
 import { TextField } from '../../ui/TextField'
 import { AdminPage } from './AdminPage'
@@ -26,6 +28,7 @@ const TYPE_LABEL = { USER: 'Members', ADMIN: 'Admin role', SUPER_ADMIN: 'Super a
  * created, edited and deleted here (super-admin only); the member and super-admin roles are fixed.
  */
 export function AdminRolesPage() {
+  const t = useT()
   const roles = useRoles()
   const [editing, setEditing] = useState<Role | 'new' | null>(null)
   const [deleting, setDeleting] = useState<Role | null>(null)
@@ -36,7 +39,7 @@ export function AdminRolesPage() {
         <p className="max-w-xl text-sm text-muted-foreground">Give a role to a member on their page. Privileges apply at once, without a new sign-in.</p>
         <Button onClick={() => setEditing('new')}>
           <Plus size={18} weight="bold" aria-hidden="true" />
-          New role
+          {t("New role")}
         </Button>
       </div>
       {roles.isPending ? (
@@ -46,7 +49,7 @@ export function AdminRolesPage() {
           {errorMessage(roles.error)}
         </p>
       ) : (
-        <ul aria-label="Roles" className="mt-6 border-t border-border">
+        <ul aria-label={t("Roles")} className="mt-6 border-t border-border">
           {roles.data.map((role) => (
             <li key={role.id} className="flex flex-wrap items-start gap-x-4 gap-y-2 border-b border-border py-4">
               <div className="min-w-0 flex-1">
@@ -69,10 +72,10 @@ export function AdminRolesPage() {
               {role.type === 'ADMIN' && (
                 <div className="flex gap-1">
                   <Button variant="quiet" size="sm" aria-label={`Edit ${role.name}`} onClick={() => setEditing(role)}>
-                    Edit
+                    {t("Edit")}
                   </Button>
                   <Button variant="quiet" size="sm" aria-label={`Delete ${role.name}`} className="text-destructive" onClick={() => setDeleting(role)}>
-                    Delete
+                    {t("Delete")}
                   </Button>
                 </div>
               )}
@@ -92,15 +95,16 @@ export function AdminRolesPage() {
 
 /** Name, an optional description and the privileges, for a new role or an existing admin role. */
 function RoleForm({ role, onDone }: { role?: Role; onDone: () => void }) {
+  const t = useT()
   const privileges = usePrivileges()
   const write = useRoleWrite()
   const [name, setName] = useState(role?.name ?? '')
   const [chosen, setChosen] = useState<number[]>((role?.privileges ?? []).map((p) => p.id ?? 0))
-  const [missing, setMissing] = useState(false)
+  const { errors, setErrors, reportErrors, fieldId, summary } = useFormValidation<'name'>()
 
   function submit(event: FormEvent) {
     event.preventDefault()
-    if (!name.trim()) return setMissing(true)
+    if (reportErrors({ name: name.trim() ? undefined : t('Give the role a name.') })) return
     const fields = { roleName: name.trim(), roleType: 'ADMIN' as const, privilegeIds: chosen }
     write.mutate(role ? { kind: 'update', request: { id: role.id ?? 0, ...fields } } : { kind: 'create', request: fields }, { onSuccess: onDone })
   }
@@ -111,9 +115,13 @@ function RoleForm({ role, onDone }: { role?: Role; onDone: () => void }) {
         <DialogTitle className="text-xl font-semibold">{role ? `Edit ${role.name}` : 'New admin role'}</DialogTitle>
         <DialogDescription className="mt-1 text-sm text-muted-foreground">Members holding it get exactly these privileges.</DialogDescription>
       </div>
-      <TextField label="Name" placeholder="Moderator" value={name} onChange={(event) => setName(event.target.value)} error={missing && !name.trim() ? 'Give the role a name.' : undefined} />
+      {summary}
+      <TextField id={fieldId('name')} label={t("Name")} placeholder={t("Moderator")} value={name} onChange={(event) => {
+        setName(event.target.value)
+        if (event.target.value.trim() && errors.name) setErrors({})
+      }} error={errors.name} />
       <fieldset className="flex flex-col gap-2">
-        <legend className="mb-1 text-sm font-medium">Privileges</legend>
+        <legend className="mb-1 text-sm font-medium">{t("Privileges")}</legend>
         {privileges.isPending ? (
           <Skeleton className="h-24" />
         ) : privileges.isError ? (
@@ -136,17 +144,13 @@ function RoleForm({ role, onDone }: { role?: Role; onDone: () => void }) {
           ))
         )}
       </fieldset>
-      {write.isError && (
-        <p role="alert" className="text-sm text-destructive">
-          {errorMessage(write.error)}
-        </p>
-      )}
+      <FormError message={write.isError ? errorMessage(write.error) : null} />
       <div className="flex justify-end gap-2">
         <Button variant="quiet" onClick={onDone}>
-          Cancel
+          {t("Cancel")}
         </Button>
-        <Button type="submit" loading={write.isPending}>
-          {role ? 'Save role' : 'Create role'}
+        <Button type="submit" loading={write.isPending} pendingLabel={t("Saving role…")}>
+          {t(role ? 'Save role' : 'Create role')}
         </Button>
       </div>
     </form>
@@ -154,6 +158,7 @@ function RoleForm({ role, onDone }: { role?: Role; onDone: () => void }) {
 }
 
 function DeleteRole({ role, onClose }: { role: Role | null; onClose: () => void }) {
+  const t = useT()
   const write = useRoleWrite()
   return (
     <AlertDialog open={role !== null} onOpenChange={(open) => !open && onClose()}>
@@ -168,9 +173,9 @@ function DeleteRole({ role, onClose }: { role: Role | null; onClose: () => void 
           </p>
         )}
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <Button variant="danger" size="sm" loading={write.isPending} onClick={() => role && write.mutate({ kind: 'delete', roleId: role.id ?? 0 }, { onSuccess: onClose })}>
-            Delete role
+          <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
+          <Button variant="danger" size="sm" loading={write.isPending} pendingLabel={t("Deleting role…")} onClick={() => role && write.mutate({ kind: 'delete', roleId: role.id ?? 0 }, { onSuccess: onClose })}>
+            {t("Delete role")}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

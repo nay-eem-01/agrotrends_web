@@ -97,25 +97,21 @@ export function ProfileSkeleton({ label, cover }: { label?: string; cover?: bool
   )
 }
 
-export function ReadingSkeleton({ label, story }: { label?: string; story?: boolean }) {
+export function ReadingSkeleton({ label }: { label?: string }) {
   return (
-    <SkeletonGroup label={label} className={cn('mx-auto px-4 pt-8 pb-20 sm:px-8', story ? 'max-w-[calc(var(--container-read)+3rem)]' : 'max-w-[65rem]')}>
+    <SkeletonGroup label={label} className="mx-auto max-w-[calc(var(--container-read)+3rem)] px-4 pt-8 pb-20 sm:px-8">
       <Skeleton className="mb-7 h-4 w-28" />
-      <div className={cn(!story && 'grid gap-8 xl:grid-cols-[minmax(0,1fr)_15.5rem]')}>
-        <div className="space-y-4">
-          <Skeleton className="h-5 w-24 rounded-full" />
-          <Skeleton className="h-9 w-5/6 sm:h-12" />
-          <div className="flex items-center gap-3">
-            <Skeleton className="size-11 rounded-full" />
-            <Skeleton className="h-5 w-36" />
-          </div>
-          {story && <Skeleton className="aspect-[2/1] w-full rounded-xl" />}
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-11/12" />
-          <Skeleton className="h-4 w-3/4" />
-          {!story && <Skeleton className="mt-8 h-28 w-full rounded-2xl" />}
+      <div className="space-y-4">
+        <Skeleton className="h-5 w-24 rounded-full" />
+        <Skeleton className="h-9 w-5/6 sm:h-12" />
+        <div className="flex items-center gap-3">
+          <Skeleton className="size-11 rounded-full" />
+          <Skeleton className="h-5 w-36" />
         </div>
-        {!story && <Skeleton className="hidden h-36 rounded-xl xl:block" />}
+        <Skeleton className="aspect-[2/1] w-full rounded-xl" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-11/12" />
+        <Skeleton className="h-4 w-3/4" />
       </div>
     </SkeletonGroup>
   )

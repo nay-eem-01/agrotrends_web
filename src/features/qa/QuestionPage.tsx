@@ -13,12 +13,12 @@ import { Chip } from '../../ui/Chip'
 import { ImageViewer } from '../../ui/ImageViewer'
 import { TagList } from '../../ui/TagList'
 import { SafeHtml } from '../../ui/SafeHtml'
-import { ReadingSkeleton } from '../../ui/LoadingSkeleton'
 import { useSession } from '../auth/session'
 import { NotFoundPage } from '../errors/NotFoundPage'
 import { useMyVotes } from '../../api/votes'
 import { useUserSettings } from '../../api/settings'
 import { Answers } from './Answers'
+import { QuestionSkeleton, questionLayout } from './QuestionSkeleton'
 import { PostMenu } from '../threads/PostMenu'
 import { AiAnswerCard } from './AiAnswerCard'
 import { AuthorLine } from './AuthorLine'
@@ -40,7 +40,7 @@ export function QuestionPage() {
 
   if (!valid) return <NotFoundPage />
   if (question.isPending) {
-    return <ReadingSkeleton label={t('Loading question')} />
+    return <QuestionSkeleton label={t('Loading question')} />
   }
   if (question.isError) {
     if (question.error instanceof ApiError && question.error.isNotFound) return <NotFoundPage />
@@ -74,14 +74,14 @@ function QuestionView({ question }: { question: Question }) {
   const views = (question as Question & { viewCount?: number }).viewCount
 
   return (
-    <article className="mx-auto max-w-[65rem] px-4 pt-6 pb-20 sm:px-8 sm:pt-8">
+    <article className={questionLayout.page}>
       <title>{`${question.title} – AgroTrends`}</title>
       <Link to="/questions" className="-ml-1 inline-flex h-11 items-center gap-1.5 px-1 text-sm font-medium text-muted-foreground hover:text-foreground">
         <ArrowLeft size={16} aria-hidden="true" />
         {t('Back to questions')}
       </Link>
       {/* After Stack Overflow: the question and its answers in the main column, its numbers and Answer in a side panel. */}
-      <div className="mt-2 grid gap-6 xl:grid-cols-[minmax(0,1fr)_15.5rem] xl:items-start xl:gap-x-10">
+      <div className={questionLayout.columns}>
         <div className="min-w-0">
           <section aria-label={t('Question')}>
             <div className="flex items-start gap-3">
@@ -113,7 +113,7 @@ function QuestionView({ question }: { question: Question }) {
               />
             )}
             {own && confirmingDelete && <DeleteQuestion questionId={id} onCancel={() => setConfirmingDelete(false)} />}
-            <div className="mt-6 grid grid-cols-[2.75rem_minmax(0,1fr)] gap-4">
+            <div className={questionLayout.post}>
               {/* The question's own vote, beside its text; named so it isn't mistaken for the answers' votes. */}
               <fieldset aria-label={t('Rate this question')} className="flex flex-col items-center">
                 {!own && <span className="sr-only">{t('Useful question?')}</span>}
@@ -171,7 +171,7 @@ function QuestionView({ question }: { question: Question }) {
           <AiAnswerCard questionId={id} topicId={question.category?.id} askedAt={askedAt} />
           <Answers questionId={id} askerId={question.userId} />
         </div>
-        <aside aria-label={t('About this question')} className="hidden flex-col gap-5 pt-2 text-sm sm:flex xl:sticky xl:top-24">
+        <aside aria-label={t('About this question')} className={questionLayout.sidebar}>
           <dl className="grid grid-cols-[1fr_auto] gap-x-3 gap-y-2">
             <dt className="text-muted-foreground">{t('Answers')}</dt>
             <dd className="font-semibold tabular-nums">{formatNumber(question.answerCount ?? 0)}</dd>
@@ -230,7 +230,7 @@ function DeleteQuestion({ questionId, onCancel }: { questionId: number; onCancel
       <Button
         variant="danger"
         size="sm"
-        loading={remove.isPending}
+        loading={remove.isPending} pendingLabel={t('Deleting…')}
         onClick={() => remove.mutate({ kind: 'delete', questionId }, { onSuccess: () => navigate('/questions', { replace: true }) })}
       >
         {t('Delete')}

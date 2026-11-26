@@ -1,3 +1,4 @@
+import { useT } from '../../lib/i18n'
 import { Envelope } from '@phosphor-icons/react'
 import { useState } from 'react'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -14,13 +15,14 @@ const MAIL_CANVAS = '<meta name="color-scheme" content="light"><style>html{backg
  * frame with scripts off, never inserted into the page.
  */
 export function DigestPreview() {
+  const t = useT()
   const preview = useDigestPreview()
   const [open, setOpen] = useState(false)
 
   return (
     <section aria-labelledby="admin-digest" className="mt-10">
       <h2 id="admin-digest" className="text-sm font-semibold text-muted-foreground">
-        Weekly digest
+        {t("Weekly digest")}
       </h2>
       <div className="mt-3 flex flex-col gap-3 rounded-xl border border-border p-5 sm:flex-row sm:items-center sm:justify-between">
         <p className="max-w-[60ch] text-sm text-muted-foreground">
@@ -31,11 +33,12 @@ export function DigestPreview() {
           variant="secondary"
           size="sm"
           loading={preview.isPending}
+          pendingLabel={t("Preparing preview…")}
           className="shrink-0"
           onClick={() => preview.mutate(undefined, { onSuccess: () => setOpen(true) })}
         >
           <Envelope size={16} aria-hidden="true" />
-          Preview your digest
+          {t("Preview your digest")}
         </Button>
       </div>
       {preview.isError && (
@@ -49,7 +52,7 @@ export function DigestPreview() {
             <DialogTitle>Your digest this week</DialogTitle>
             <DialogDescription>Not sent. This is what your own e-mail would hold today.</DialogDescription>
           </DialogHeader>
-          <iframe title="Digest preview" sandbox="" srcDoc={MAIL_CANVAS + (preview.data ?? '')} className="h-[60vh] w-full rounded-lg border border-border" />
+          <iframe title={t("Digest preview")} sandbox="" srcDoc={MAIL_CANVAS + (preview.data ?? '')} className="h-[60vh] w-full rounded-lg border border-border" />
         </DialogContent>
       </Dialog>
     </section>

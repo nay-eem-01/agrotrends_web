@@ -153,6 +153,7 @@ function AuthorRow({ author }: { author: AuthorSummary }) {
         variant={following ? 'secondary' : 'primary'}
         size="sm"
         aria-pressed={following}
+        disabled={toggle.isPending}
         aria-label={`${following ? t('Following') : t('Follow')} ${name}`}
         onClick={() => {
           setFollowing(!following)

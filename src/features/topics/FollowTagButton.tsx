@@ -1,5 +1,6 @@
 import { useT } from '../../lib/i18n'
 import { useFollowedTags, useToggleTagFollow } from '../../api/topics'
+import { errorMessage } from '../../api/errors'
 import { Button } from '../../ui/Button'
 import { useSession } from '../auth/session'
 import { useRequireSignIn } from '../auth/useRequireSignIn'
@@ -14,13 +15,17 @@ export function FollowTagButton({ tag }: { tag: string }) {
   const requireSignIn = useRequireSignIn()
 
   return (
-    <Button
-      variant={following ? 'secondary' : 'primary'}
-      size="sm"
-      aria-pressed={signedIn ? following : undefined}
-      onClick={() => requireSignIn(() => toggle.mutate({ tag, follow: !following }))}
-    >
-      {following ? t('Following') : t('Follow')}
-    </Button>
+    <span className="inline-flex flex-col items-start gap-1">
+      <Button
+        variant={following ? 'secondary' : 'primary'}
+        size="sm"
+        aria-pressed={signedIn ? following : undefined}
+        disabled={toggle.isPending}
+        onClick={() => requireSignIn(() => toggle.mutate({ tag, follow: !following }))}
+      >
+        {following ? t('Following') : t('Follow')}
+      </Button>
+      {toggle.isError && <span role="alert" className="text-xs text-destructive">{errorMessage(toggle.error)}</span>}
+    </span>
   )
 }

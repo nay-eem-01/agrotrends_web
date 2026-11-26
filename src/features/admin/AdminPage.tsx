@@ -1,3 +1,4 @@
+import { useT } from '../../lib/i18n'
 import { useState, type FormEvent, type ReactNode } from 'react'
 import { ArrowLeft } from '@phosphor-icons/react'
 import { Link, NavLink } from 'react-router-dom'
@@ -17,15 +18,16 @@ import { ADMIN_SECTIONS } from './sections'
  * isn't staff. From 1024px the sections are in the app sidebar's Admin group; below that they scroll as tabs here.
  */
 export function AdminPage({ title, back, children }: { title: string; back?: { to: string; label: string }; children: ReactNode }) {
+  const t = useT()
   const { status, user } = useSession()
   return (
     <div className="mx-auto max-w-(--container-page) px-4 pt-6 pb-20 sm:px-8 sm:pt-10">
-      <title>{`${title} – Admin – AgroTrends`}</title>
+      <title>{`${t(title)} – ${t('Admin')} – AgroTrends`}</title>
       {status === 'restoring' ? (
         <RowsSkeleton />
       ) : isAdmin(user) ? (
         <>
-          <nav aria-label="Admin sections" className="-mx-4 mb-6 overflow-x-auto border-b border-border px-4 [scrollbar-width:none] sm:-mx-8 sm:px-8 lg:hidden">
+          <nav aria-label={t('Admin sections')} className="-mx-4 mb-6 overflow-x-auto border-b border-border px-4 [scrollbar-width:none] sm:-mx-8 sm:px-8 md:hidden">
             <ul className="flex gap-6">
               {ADMIN_SECTIONS.map((section) => (
                 <li key={section.to}>
@@ -39,7 +41,7 @@ export function AdminPage({ title, back, children }: { title: string; back?: { t
                       )
                     }
                   >
-                    {section.label}
+                    {t(section.label)}
                   </NavLink>
                 </li>
               ))}
@@ -49,17 +51,17 @@ export function AdminPage({ title, back, children }: { title: string; back?: { t
             {back && (
               <Link to={back.to} className="-ml-1 mb-2 inline-flex h-11 items-center gap-1.5 rounded-full px-1 text-sm font-medium text-muted-foreground hover:text-foreground">
                 <ArrowLeft size={16} aria-hidden="true" />
-                {back.label}
+                {t(back.label)}
               </Link>
             )}
-            <h1 className="font-serif text-[2rem] leading-tight font-medium sm:text-[2.5rem]">{title}</h1>
+            <h1 className="font-serif text-[2rem] leading-tight font-medium sm:text-[2.5rem]">{t(title)}</h1>
             {children}
           </section>
         </>
       ) : (
         <section className="mx-auto max-w-md">
-          <p className="text-sm text-muted-foreground">Admin</p>
-          <h1 className="mt-1 font-serif text-[2rem] leading-tight font-medium sm:text-[2.5rem]">{title}</h1>
+          <p className="text-sm text-muted-foreground">{t('Admin')}</p>
+          <h1 className="mt-1 font-serif text-[2rem] leading-tight font-medium sm:text-[2.5rem]">{t(title)}</h1>
           <AdminSignIn signedInAsReader={status === 'signed-in'} />
         </section>
       )}
@@ -68,6 +70,7 @@ export function AdminPage({ title, back, children }: { title: string; back?: { t
 }
 
 function AdminSignIn({ signedInAsReader }: { signedInAsReader: boolean }) {
+  const t = useT()
   const session = useSession()
   const signIn = useAdminSignIn()
   const [email, setEmail] = useState('')
@@ -77,7 +80,7 @@ function AdminSignIn({ signedInAsReader }: { signedInAsReader: boolean }) {
   function submit(event: FormEvent) {
     event.preventDefault()
     if (!(isEmail(email) || isPhone(email)) || !password) {
-      setError('Enter your admin e-mail or phone number, and the password.')
+      setError(t('Enter your admin e-mail or phone number, and the password.'))
       return
     }
     setError(undefined)
@@ -87,13 +90,13 @@ function AdminSignIn({ signedInAsReader }: { signedInAsReader: boolean }) {
   return (
     <form onSubmit={submit} noValidate className="mt-8 flex max-w-md flex-col gap-5">
       <p className="text-muted-foreground">
-        {signedInAsReader ? 'Your account has no admin access. Sign in with an admin account.' : 'Sign in with an admin account.'}
+        {t(signedInAsReader ? 'Your account has no admin access. Sign in with an admin account.' : 'Sign in with an admin account.')}
       </p>
-      <TextField label="Admin e-mail or phone" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} />
-      <TextField label="Password" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
+      <TextField label={t("Admin e-mail or phone")} autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} />
+      <TextField label={t("Password")} type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
       <FormError message={error ?? (signIn.isError ? errorMessage(signIn.error) : null)} />
-      <Button type="submit" loading={signIn.isPending} className="self-start">
-        Sign in as admin
+      <Button type="submit" loading={signIn.isPending} pendingLabel="Signing in…" className="self-start">
+        {t("Sign in as admin")}
       </Button>
     </form>
   )

@@ -17,10 +17,9 @@ function author(assist: () => Response) {
   }
 }
 
-async function openSheet() {
+async function openEditor() {
   renderWithProviders(<App />, '/write')
-  await userEvent.click(await screen.findByRole('button', { name: 'Publish' }))
-  return within(await screen.findByRole('dialog'))
+  return within(await screen.findByRole('complementary', { name: 'Story settings' }))
 }
 
 beforeEach(() => {
@@ -33,25 +32,25 @@ afterEach(() => vi.unstubAllGlobals())
 
 test('AI suggests a summary and topics the author can add', async () => {
   const api = mockApi(author(() => envelope(200, { summary: 'Hilsa spawn upriver in the monsoon.', suggestedTags: ['hilsa', 'monsoon'] })))
-  const sheet = await openSheet()
+  const settings = await openEditor()
 
-  await userEvent.click(sheet.getByRole('button', { name: 'Suggest topics and a summary' }))
-  expect(await sheet.findByText('Hilsa spawn upriver in the monsoon.')).toBeInTheDocument()
-  expect(sheet.getByText('Suggested by AI. Check before you use it.')).toBeInTheDocument()
+  await userEvent.click(settings.getByRole('button', { name: 'Suggest topics and a summary' }))
+  expect(await settings.findByText('Hilsa spawn upriver in the monsoon.')).toBeInTheDocument()
+  expect(settings.getByText('Suggested by AI. Check before you use it.')).toBeInTheDocument()
 
-  await userEvent.click(sheet.getByRole('button', { name: '+ monsoon' }))
-  expect(sheet.getByRole('button', { name: 'Remove tag monsoon' })).toBeInTheDocument()
-  expect(sheet.queryByRole('button', { name: '+ monsoon' })).not.toBeInTheDocument()
+  await userEvent.click(settings.getByRole('button', { name: '+ monsoon' }))
+  expect(settings.getByRole('button', { name: 'Remove tag monsoon' })).toBeInTheDocument()
+  expect(settings.queryByRole('button', { name: '+ monsoon' })).not.toBeInTheDocument()
 
   const sent = JSON.parse(api.mock.calls.find(([url]) => url === '/api/ai/blog-assist')![1]!.body as string)
   expect(sent).toEqual({ title: 'Hilsa runs', content: '<p>Hilsa move upriver.</p>' })
 })
 
-test('an unavailable AI says so and leaves the sheet usable', async () => {
+test('an unavailable AI says so and leaves the settings usable', async () => {
   mockApi(author(() => envelope(503, null, 'The AI advisor is not available right now. Please try again later.')))
-  const sheet = await openSheet()
+  const settings = await openEditor()
 
-  await userEvent.click(sheet.getByRole('button', { name: 'Suggest topics and a summary' }))
-  expect(await sheet.findByRole('alert')).toHaveTextContent('The AI advisor is not available right now.')
-  expect(sheet.getByRole('button', { name: 'Publish now' })).toBeEnabled()
+  await userEvent.click(settings.getByRole('button', { name: 'Suggest topics and a summary' }))
+  expect(await settings.findByRole('alert')).toHaveTextContent('The AI advisor is not available right now.')
+  expect(screen.getByRole('button', { name: 'Publish' })).toBeEnabled()
 })

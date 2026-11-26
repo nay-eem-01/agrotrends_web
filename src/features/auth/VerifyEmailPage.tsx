@@ -84,7 +84,7 @@ function ResendForm() {
     <form onSubmit={submit} noValidate className="flex flex-col gap-4">
       <TextField label={t('E-mail')} type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} error={error} />
       <FormError message={resend.isError ? errorMessage(resend.error) : null} />
-      <Button type="submit" loading={resend.isPending} className="self-start">
+      <Button type="submit" loading={resend.isPending} pendingLabel={t('Sending link…')} className="self-start">
         {t('Send a new link')}
       </Button>
     </form>

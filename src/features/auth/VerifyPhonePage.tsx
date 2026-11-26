@@ -75,7 +75,7 @@ export function VerifyPhonePage() {
         />
         <FormError message={verify.isError ? errorMessage(verify.error) : null} />
         <div className="flex flex-wrap items-center gap-3">
-          <Button type="submit" loading={verify.isPending}>
+          <Button type="submit" loading={verify.isPending} pendingLabel={t('Verifying code…')}>
             {t('Confirm')}
           </Button>
           <ResendCode phone={phone} />
@@ -102,7 +102,7 @@ export function ResendCode({ phone }: { phone: string }) {
       <Button
         variant="quiet"
         disabled={wait > 0}
-        loading={resend.isPending}
+        loading={resend.isPending} pendingLabel={t('Sending code…')}
         onClick={() => resend.mutate(splitMobile(phone), { onSuccess: () => setWait(RESEND_AFTER_S) })}
       >
         {wait > 0 ? t('Send a new code in {n}s', { n: wait }) : t('Send a new code')}

@@ -1,10 +1,11 @@
-import { BookOpen, ChatCircleText, Compass, House, NotePencil, Newspaper, Plus, SealCheck, Sparkle, UserCircle, type Icon } from '@phosphor-icons/react'
+import { BookOpen, ChatCircleText, Compass, House, NotePencil, Newspaper, Plus, SealCheck, Sparkle, UserCircle, Users, type Icon } from '@phosphor-icons/react'
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
-import { Link, NavLink, useLocation } from 'react-router-dom'
+import { Link, NavLink } from 'react-router-dom'
 import { cn } from 'cn'
 import { isAdmin } from '../api/auth'
-import { useFollowedCategories } from '../api/categories'
-import { useFollowedTags } from '../api/topics'
+import { useFollowedAuthors } from '../api/follows'
+import { Avatar } from '../ui/Avatar'
+import { RowsSkeleton } from '../ui/LoadingSkeleton'
 import { ADMIN_SECTIONS } from '../features/admin/sections'
 import { useSession } from '../features/auth/session'
 import { useMyBadges } from '../features/experts/useMyBadges'
@@ -49,17 +50,16 @@ export function useSidebar() {
 /**
  * The app's navigation from 768px, on every page: the sections, then (signed in) your profile, reading list and
  * stories, the review queue for Verified Experts, the Admin sections for staff (so admin pages need no rail of their
- * own) and your topics. Hidden, it keeps an icon strip, so the sections are one click away on reading and writing pages
+ * own) and the people you follow. Hidden, it keeps an icon strip, so the sections are one click away on reading and writing pages
  * too; the top bar's menu button opens and hides it. Below 768px the menu sheet and the phone tab bar take over.
  */
 export function AppSidebar() {
   const t = useT()
   const { open } = useSidebar()
-  const location = useLocation()
   const { status, user } = useSession()
   const signedIn = status === 'signed-in'
-  const followed = useFollowedTags(signedIn)
-  const categories = useFollowedCategories(signedIn).data ?? []
+  const followed = useFollowedAuthors(signedIn && open)
+  const people = followed.data?.pages[0]?.content.slice(0, 8) ?? []
   const { expertAnywhere } = useMyBadges()
   const staff = signedIn && isAdmin(user)
   const sections: { to: string; end?: boolean; label: string; icon: Icon }[] = [
@@ -76,10 +76,6 @@ export function AppSidebar() {
         ...(expertAnywhere ? [{ to: '/review', label: t('Review queue'), icon: SealCheck }] : []),
       ]
     : []
-  const topics = [
-    ...categories.map((category) => ({ to: `/questions?categoryId=${category.id}`, label: category.categoryName })),
-    ...(followed.data ?? []).map((tag) => ({ to: `/tags/${encodeURIComponent(tag)}`, label: tag })),
-  ].slice(0, 8)
 
   return (
     <aside
@@ -103,29 +99,41 @@ export function AppSidebar() {
             <hr className="my-3 border-border" />
             {open && <h2 className="mb-1 px-3 font-sans text-xs font-semibold text-muted-foreground">{t('Admin')}</h2>}
             {ADMIN_SECTIONS.map((item) => (
-              <Item key={item.to} {...item} open={open} />
+              <Item key={item.to} {...item} label={t(item.label)} open={open} />
             ))}
           </>
         )}
         {signedIn && open && (
-          <>
-            <h2 className="mt-5 mb-1 px-3 font-sans text-xs font-semibold text-muted-foreground">{t('Your topics')}</h2>
-            {topics.map(({ to, label }) => (
-              <Link
-                key={to}
-                to={to}
-                aria-current={location.pathname + location.search === to ? 'page' : undefined}
-                className="flex h-9 items-center gap-3 rounded-full px-3 hover:bg-surface aria-[current=page]:bg-surface aria-[current=page]:font-semibold aria-[current=page]:text-primary"
-              >
-                <span aria-hidden="true" className="size-2 rounded-full bg-primary" />
-                <span className="truncate">{label}</span>
-              </Link>
-            ))}
-            <Link to="/topics" className="flex h-9 items-center gap-3 rounded-full px-3 text-muted-foreground hover:bg-surface hover:text-foreground">
-              <Plus size={14} aria-hidden="true" />
-              {t('Follow topics')}
+          <section aria-labelledby="sidebar-following" className="mt-4 border-t border-border pt-4">
+            <h2 id="sidebar-following" className="mb-2 flex items-center gap-2 px-3 font-sans text-sm font-semibold">
+              <Users size={18} aria-hidden="true" />
+              {t('Following')}
+            </h2>
+            {followed.isPending ? (
+              <RowsSkeleton label={t('Loading authors')} kind="avatar" count={2} className="px-3" />
+            ) : people.length > 0 && (
+              <ul>
+                {people.map(({ authorId, name, profileImageUrl }) => (
+                  <li key={authorId}>
+                    <Link
+                      to={`/authors/${authorId}`}
+                      className="flex min-h-9 items-center gap-2.5 rounded-full px-3 text-muted-foreground hover:bg-surface hover:text-foreground"
+                    >
+                      <Avatar name={name ?? ''} src={profileImageUrl} size={22} className="shrink-0" />
+                      <span className="truncate">{name}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <Link to="/library?tab=following" className="flex min-h-9 items-center rounded-full px-3 text-xs text-muted-foreground hover:bg-surface hover:text-foreground">
+              {t('See who you follow')}
             </Link>
-          </>
+            <Link to="/topics" className="flex min-h-9 items-center gap-2 rounded-full px-3 text-xs text-muted-foreground hover:bg-surface hover:text-foreground">
+              <Plus size={14} aria-hidden="true" />
+              {t('Explore topics')}
+            </Link>
+          </section>
         )}
       </nav>
     </aside>

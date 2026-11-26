@@ -31,6 +31,7 @@ export function EmailSettings() {
           <div key={key} className="flex items-start gap-3">
             <Checkbox
               id={id}
+              disabled={update.isPending}
               checked={settings.data[key] !== false}
               onCheckedChange={(checked) => update.mutate({ [key]: checked === true })}
               aria-describedby={`${id}-hint`}

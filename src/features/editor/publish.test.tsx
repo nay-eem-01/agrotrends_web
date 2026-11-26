@@ -6,7 +6,7 @@ import type { BlogResponse } from '../../api/types'
 import App from '../../App'
 import { loadLocalDraft, saveLocalDraft } from '../../lib/draft'
 import { envelope, mockApi, page } from '../../test/api'
-import { chooseOption, pickOption, renderWithProviders } from '../../test/render'
+import { chooseOption, renderWithProviders } from '../../test/render'
 
 function signedInAuthor() {
   localStorage.setItem('agrotrends.refreshToken', 'r0')
@@ -28,10 +28,15 @@ beforeEach(() => {
 
 afterEach(() => vi.unstubAllGlobals())
 
-test('Publish stays off until the story has a title and text', async () => {
+test('publishing an empty story explains what it still needs', async () => {
   mockApi(signedInAuthor())
   renderWithProviders(<App />, '/write')
-  expect(await screen.findByRole('button', { name: 'Publish' })).toBeDisabled()
+  await userEvent.click(await screen.findByRole('button', { name: 'Publish' }))
+  const summary = screen.getByRole('alert', { name: 'There is a problem' })
+  expect(summary).toHaveFocus()
+  expect(within(summary).getByRole('link', { name: 'Add a title.' })).toBeInTheDocument()
+  expect(within(summary).getByRole('link', { name: 'Add some text or an image to your story.' })).toBeInTheDocument()
+  expect(screen.getByRole('textbox', { name: 'Story' })).toHaveAccessibleDescription('Add some text or an image to your story.')
 })
 
 test('publishing a new story sends its details and opens it', async () => {
@@ -46,26 +51,27 @@ test('publishing a new story sends its details and opens it', async () => {
   })
   renderWithProviders(<App />, '/write')
 
-  await userEvent.click(await screen.findByRole('button', { name: 'Publish' }))
-  const sheet = within(await screen.findByRole('dialog', { name: 'Ready to publish?' }))
-
-  await userEvent.click(sheet.getByRole('button', { name: 'Publish now' }))
-  expect(sheet.getByLabelText('Topic')).toHaveAccessibleDescription('Choose a topic.')
+  const settings = within(await screen.findByRole('complementary', { name: 'Story settings' }))
+  await userEvent.click(screen.getByRole('button', { name: 'Publish' }))
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  expect(settings.getByLabelText('Topic')).toHaveAccessibleDescription('Choose a topic.')
+  const summary = screen.getByRole('alert', { name: 'There is a problem' })
+  expect(summary).toHaveFocus()
+  await userEvent.click(within(summary).getByRole('link', { name: 'Choose a topic.' }))
+  expect(settings.getByLabelText('Topic')).toHaveFocus()
+  expect(settings.queryByText('Farming details')).not.toBeInTheDocument()
   expect(bodies(api, 'POST', '/api/blogs/create')).toHaveLength(0)
 
-  await chooseOption(sheet.getByLabelText('Topic'), 'Crops')
-  const topics = sheet.getByLabelText('Tags')
+  await chooseOption(settings.getByLabelText('Topic'), 'Crops')
+  const topics = settings.getByLabelText('Tags')
   await userEvent.type(topics, 'Ri')
-  await userEvent.click(await sheet.findByRole('button', { name: 'Add tag rice blast' }))
+  await userEvent.click(await settings.findByRole('button', { name: 'Add tag rice blast' }))
   await userEvent.type(topics, 'Cold Stress{Enter}')
-  await pickOption(sheet.getByLabelText('Season'), 'Rabi')
-  await userEvent.type(sheet.getByLabelText('Crop'), ' boro rice ')
-  await pickOption(sheet.getByLabelText('Soil'), 'Clay loam')
-  await userEvent.type(sheet.getByLabelText('Subtitle (optional)'), ' What to do when nights drop below 12 °C ')
-  const cite = sheet.getByRole('checkbox', { name: /Let the AI advisor cite this story/ })
+  await userEvent.type(settings.getByLabelText('Subtitle (optional)'), ' What to do when nights drop below 12 °C ')
+  const cite = settings.getByRole('checkbox', { name: /Let the AI advisor cite this story/ })
   expect(cite).toBeChecked()
   await userEvent.click(cite)
-  await userEvent.click(sheet.getByRole('button', { name: 'Publish now' }))
+  await userEvent.click(screen.getByRole('button', { name: 'Publish' }))
 
   await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/stories/boro-cold'))
   expect(bodies(api, 'POST', '/api/blogs/create')[0]).toEqual({
@@ -73,7 +79,6 @@ test('publishing a new story sends its details and opens it', async () => {
     aiCitable: false,
     categoryId: 1,
     tags: ['rice blast', 'cold stress'],
-    agri: { crop: 'boro rice', season: 'RABI', soil: 'CLAY_LOAM' },
     title: 'Boro in cold spells',
     content: '<p>Cover the seedbed.</p>',
     imageUrl: '/uploads/c.jpg',
@@ -88,13 +93,12 @@ test('topics stop at five', async () => {
   mockApi(signedInAuthor())
   renderWithProviders(<App />, '/write')
 
-  await userEvent.click(await screen.findByRole('button', { name: 'Publish' }))
-  const sheet = within(await screen.findByRole('dialog'))
-  const topics = sheet.getByLabelText('Tags')
+  const settings = within(await screen.findByRole('complementary', { name: 'Story settings' }))
+  const topics = settings.getByLabelText('Tags')
   await userEvent.type(topics, 'a{Enter}b{Enter}c{Enter}d{Enter}e{Enter}')
   expect(topics).toBeDisabled()
-  expect(sheet.getByText("That's the most you can add (5).")).toBeInTheDocument()
-  await userEvent.click(sheet.getByRole('button', { name: 'Remove tag c' }))
+  expect(settings.getByText("That's the most you can add (5).")).toBeInTheDocument()
+  await userEvent.click(settings.getByRole('button', { name: 'Remove tag c' }))
   expect(topics).toBeEnabled()
 })
 
@@ -104,10 +108,9 @@ test('saving as a draft keeps it private and opens it for editing', async () => 
   const api = mockApi({ ...signedInAuthor(), 'POST /api/blogs/create': () => envelope(200, draft), 'GET /api/blogs/id/71': () => envelope(200, draft) })
   renderWithProviders(<App />, '/write')
 
-  await userEvent.click(await screen.findByRole('button', { name: 'Publish' }))
-  const sheet = within(await screen.findByRole('dialog'))
-  await chooseOption(sheet.getByLabelText('Topic'), 'Fisheries')
-  await userEvent.click(sheet.getByRole('button', { name: 'Save as draft' }))
+  const settings = within(await screen.findByRole('complementary', { name: 'Story settings' }))
+  await chooseOption(settings.getByLabelText('Topic'), 'Fisheries')
+  await userEvent.click(screen.getByRole('button', { name: 'Save as draft' }))
 
   await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/write/71'))
   expect(bodies(api, 'POST', '/api/blogs/create')[0]).toMatchObject({ status: 'DRAFT', categoryId: 2 })
@@ -127,18 +130,18 @@ test('publishing a server draft saves its details first', async () => {
   })
   renderWithProviders(<App />, '/write/72')
 
-  await userEvent.click(await screen.findByRole('button', { name: 'Publish' }))
-  const sheet = within(await screen.findByRole('dialog'))
-  await waitFor(() => expect(sheet.getByLabelText('Topic')).toHaveValue('Fisheries'))
-  expect(sheet.getByText('jute', { selector: 'span' })).toBeInTheDocument()
-  await userEvent.click(sheet.getByRole('button', { name: 'Publish' }))
+  const settings = within(await screen.findByRole('complementary', { name: 'Story settings' }))
+  await waitFor(() => expect(settings.getByLabelText('Topic')).toHaveValue('Fisheries'))
+  expect(settings.getByText('jute', { selector: 'span' })).toBeInTheDocument()
+  await userEvent.click(screen.getByRole('button', { name: 'Publish' }))
 
   await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/stories/jute-72'))
-  expect(bodies(api, 'PUT', '/api/blogs/update')[0]).toMatchObject({ blogId: 72, categoryId: 2, tags: ['jute'], agri: { crop: 'jute' } })
+  expect(bodies(api, 'PUT', '/api/blogs/update')[0]).toMatchObject({ blogId: 72, categoryId: 2, tags: ['jute'] })
+  expect(bodies(api, 'PUT', '/api/blogs/update')[0]).not.toHaveProperty('agri')
   expect(api.mock.calls.some(([url, init]) => init?.method === 'POST' && url === '/api/blogs/id/72/publish')).toBe(true)
 })
 
-test('a published story can be unpublished from its details', async () => {
+test('a published story can be unpublished from the editor', async () => {
   let live: BlogResponse = { id: 73, slug: 'live', title: 'Live', content: '<p>x</p>', status: 'PUBLISHED', category: { id: 1 } }
   mockApi({
     ...signedInAuthor(),
@@ -150,8 +153,7 @@ test('a published story can be unpublished from its details', async () => {
   })
   renderWithProviders(<App />, '/write/73')
 
-  await userEvent.click(await screen.findByRole('button', { name: 'Details' }))
-  await userEvent.click(within(await screen.findByRole('dialog', { name: 'Story details' })).getByRole('button', { name: 'Unpublish' }))
+  await userEvent.click(await screen.findByRole('button', { name: 'Unpublish' }))
   await waitFor(() => expect(screen.getByRole('button', { name: 'Publish' })).toBeInTheDocument())
   expect(screen.queryByRole('button', { name: 'Save changes' })).not.toBeInTheDocument()
 })
@@ -169,7 +171,7 @@ test('an author can open their own story in the editor', async () => {
   expect(await screen.findByRole('link', { name: 'Edit story' })).toHaveAttribute('href', '/write/74')
 })
 
-test('the topic and tags chosen beside the story carry into the publish step', async () => {
+test('the inline checklist updates when a topic is selected', async () => {
   saveLocalDraft({ title: 'Boro in cold spells', html: '<p>Cover the seedbed.</p>', cover: '' })
   mockApi(signedInAuthor())
   renderWithProviders(<App />, '/write')
@@ -178,7 +180,4 @@ test('the topic and tags chosen beside the story carry into the publish step', a
   await chooseOption(panel.getByLabelText('Topic'), 'Fisheries')
   expect(panel.getByText('A topic').parentElement).toHaveTextContent('A topic, done')
 
-  await userEvent.click(screen.getByRole('button', { name: 'Publish' }))
-  const sheet = within(await screen.findByRole('dialog', { name: 'Ready to publish?' }))
-  expect(sheet.getByLabelText('Topic')).toHaveValue('Fisheries')
 })

@@ -2,12 +2,15 @@ import { PaperPlaneTilt, Plant, SealCheck, Sparkle } from '@phosphor-icons/react
 import { lazy, Suspense, useId, useRef, useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { RowsSkeleton } from '../../ui/LoadingSkeleton'
+import { useFeed } from '../../api/feed'
+import { useQuestions } from '../../api/questions'
 import { usePublicStats } from '../../api/stats'
 import { seasonCalendar, SEASON_LABELS, type Season } from '../../lib/agri'
 import { formatNumber, useT } from '../../lib/i18n'
 import { Button } from '../../ui/Button'
 import { ADVISOR_EXAMPLES } from '../ai/examples'
 import { useSession } from '../auth/session'
+import { FeedHighlight } from './FeedHighlight'
 
 // Below the hero: topics, questions, the advisor and stories load just after it (their icons and lists are not
 // needed for the first paint), keeping the main bundle in budget.
@@ -58,7 +61,7 @@ function Hero() {
       aria-labelledby="discover-title"
       className="mx-auto max-w-(--container-page) px-4 pt-6 pb-14 sm:px-8 sm:pt-10 lg:py-16"
     >
-      <div className="grid w-full grid-cols-1 items-center gap-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:gap-16">
+      <div className="grid w-full grid-cols-1 items-center gap-5 sm:gap-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:gap-16">
         <div className="min-w-0">
           <h1
             id="discover-title"
@@ -73,9 +76,28 @@ function Hero() {
               {t('{n} verified experts check the answers', { n: formatNumber(experts) })}
             </p>
           )}
+          <MobileDiscoverPreview />
         </div>
         <AskPanel />
       </div>
+    </section>
+  )
+}
+
+function MobileDiscoverPreview() {
+  const t = useT()
+  const question = useQuestions({}).data?.pages[0]?.content[0]
+  const story = useFeed('latest').data?.pages[0]?.content[0]
+  if (!question && !story) return null
+
+  return (
+    <section aria-label={t('More to read')} className="mt-5 grid gap-2 lg:hidden">
+      {question?.title && question.questionId && (
+        <FeedHighlight label={t('Latest question')} title={question.title} to={`/questions/${question.questionId}`} />
+      )}
+      {story?.title && story.slug && (
+        <FeedHighlight label={t('Latest story')} title={story.title} to={`/stories/${story.slug}`} image={story.imageUrl} />
+      )}
     </section>
   )
 }

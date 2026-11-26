@@ -45,6 +45,22 @@ test('a cover is uploaded, shown and kept with the device draft', async () => {
   expect(screen.getByRole('button', { name: 'Add a cover image' })).toBeInTheDocument()
 })
 
+test('a cover upload shows processing while the server prepares the image', async () => {
+  let finish!: (response: Response) => void
+  const result = new Promise<Response>((resolve) => { finish = resolve })
+  mockApi({ ...signedInAuthor(), 'POST /api/images': () => result })
+  renderWithProviders(<App />, '/write')
+
+  const cover = await screen.findByRole('button', { name: 'Add a cover image' })
+  await userEvent.upload(fileInputs()[1], photo())
+  expect(await screen.findByText('Processing image…')).toBeInTheDocument()
+  expect(cover).toBeDisabled()
+
+  finish(envelope(200, { url: '/uploads/cover.webp' }))
+  expect(await screen.findByRole('button', { name: 'Change cover' })).toBeEnabled()
+  expect(screen.queryByText('Processing image…')).not.toBeInTheDocument()
+})
+
 test('an inline image is uploaded and placed in the story', async () => {
   mockApi({ ...signedInAuthor(), 'POST /api/images': () => envelope(200, { url: '/uploads/inline.webp' }) })
   renderWithProviders(<App />, '/write')

@@ -58,7 +58,7 @@ export function Thread({ kind, parentId, whenEmpty }: ThreadProps) {
       </h2>
       <div className="mt-6">
         {status === 'signed-in' ? (
-          <ThreadComposer kind={kind} parentId={parentId} placeholder={t(copy.placeholder)} label={t(copy.compose)} submitLabel={t(copy.submit)} doneLabel={t(copy.posted)} />
+          <ThreadComposer kind={kind} parentId={parentId} placeholder={t(copy.placeholder)} label={t(copy.compose)} submitLabel={t(copy.submit)} pendingLabel={t('Posting response…')} doneLabel={t(copy.posted)} />
         ) : (
           <Button variant="secondary" size="sm" onClick={() => requireSignIn(() => {})}>
             {t(copy.signIn)}
@@ -100,6 +100,7 @@ interface ItemProps {
  * reply's id; the backend files it under the same response.
  */
 function Conversation({ kind, parentId, copy, item, replies }: ItemProps & { item: ThreadItem; replies: ThreadItem[] }) {
+  const t = useT()
   const { status } = useSession()
   const requireSignIn = useRequireSignIn()
   const [replyTo, setReplyTo] = useState<ThreadItem | null>(null)
@@ -124,7 +125,8 @@ function Conversation({ kind, parentId, copy, item, replies }: ItemProps & { ite
                 replyTo={replyTo.id}
                 initial={replyTo.id === item.id ? '' : `@${replyTo.authorName} `}
                 label={`Reply to ${replyTo.authorName}`}
-                submitLabel="Reply"
+                submitLabel={t('Reply')}
+                pendingLabel={t('Posting reply…')}
                 doneLabel="Reply posted"
                 focusOnOpen
                 onCancel={() => setReplyTo(null)}
@@ -174,7 +176,8 @@ function Item({ kind, parentId, copy, item, onReply }: ItemProps & { item: Threa
             editing={item.id}
             initial={item.content}
             label={t(copy.edit)}
-            submitLabel="Save"
+            submitLabel={t('Save')}
+            pendingLabel={t('Saving changes…')}
             doneLabel="Saved"
             focusOnOpen
             onCancel={() => setMode('view')}
@@ -191,7 +194,7 @@ function Item({ kind, parentId, copy, item, onReply }: ItemProps & { item: Threa
           <Button
             variant="danger"
             size="sm"
-            loading={remove.isPending}
+            loading={remove.isPending} pendingLabel={t('Deleting…')}
             onClick={() => remove.mutate({ action: 'delete', id: item.id })}
           >
             {t('Delete')}
@@ -230,6 +233,7 @@ interface ThreadComposerProps {
   placeholder?: string
   label: string
   submitLabel: string
+  pendingLabel: string
   doneLabel: string
   focusOnOpen?: boolean
   onCancel?: () => void

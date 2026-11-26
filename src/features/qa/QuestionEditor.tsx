@@ -1,13 +1,16 @@
+import { EditorLinkDialog } from '../editor/EditorDialogs'
 import { LinkSimple, ListBullets, ListNumbers, Quotes, TextB, TextItalic } from '@phosphor-icons/react'
 import Placeholder from '@tiptap/extension-placeholder'
 import { EditorContent, useEditor, useEditorState, type Editor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
-import { useEffect, useId, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { cn } from 'cn'
 import { useT } from '../../lib/i18n'
 import { Message } from '../../ui/TextField'
 
 interface QuestionEditorProps {
+  titleId: string
+  detailsId: string
   title: string
   html: string
   titleError?: string
@@ -20,10 +23,8 @@ interface QuestionEditorProps {
  * The question as a page, not a box: a one-line title, a soft toolbar that stays in reach while writing, and the
  * details as rich text. Photos are their own labelled field under it (PhotoPicker), so phones don't hide them in an icon.
  */
-export function QuestionEditor({ title, html, titleError, detailsError, onTitleChange, onHtmlChange }: QuestionEditorProps) {
+export function QuestionEditor({ titleId, detailsId, title, html, titleError, detailsError, onTitleChange, onHtmlChange }: QuestionEditorProps) {
   const t = useT()
-  const titleId = useId()
-  const detailsId = useId()
   const editor = useEditor({
     extensions: [
       // No headings: a question is a few paragraphs, and its title is the only heading.
@@ -39,7 +40,7 @@ export function QuestionEditor({ title, html, titleError, detailsError, onTitleC
   useEffect(() => {
     editor?.setOptions({ editorProps: { attributes: attributes() } })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editor, detailsError])
+  }, [editor, detailsId, detailsError])
 
   function attributes(): Record<string, string> {
     return {
@@ -91,6 +92,7 @@ export function QuestionEditor({ title, html, titleError, detailsError, onTitleC
 
 function Toolbar({ editor }: { editor: Editor }) {
   const t = useT()
+  const [linkOpen, setLinkOpen] = useState(false)
   // Re-render on selection changes so the pressed states follow the cursor.
   const state = useEditorState({
     editor,
@@ -104,35 +106,30 @@ function Toolbar({ editor }: { editor: Editor }) {
     }),
   })
   const chain = () => editor.chain().focus()
-  // shortcut: a native prompt for the URL, as in the story editor; swap for a popover if askers find it clumsy.
-  function toggleLink() {
-    if (state.link) return void chain().unsetLink().run()
-    const url = window.prompt(t('Link to (https://…)'))?.trim()
-    if (!url) return
-    chain().setLink({ href: /^(https?:|mailto:|\/)/i.test(url) ? url : `https://${url}` }).run()
-  }
-
   return (
-    <div role="toolbar" aria-label={t('Formatting')} className="sticky top-16 z-10 flex items-center gap-0.5 overflow-x-auto rounded-2xl bg-muted/80 p-1 backdrop-blur-sm [scrollbar-width:none]">
-      <Tool label={t('Bold')} pressed={state.bold} onClick={() => chain().toggleBold().run()}>
-        <TextB size={20} />
-      </Tool>
-      <Tool label={t('Italic')} pressed={state.italic} onClick={() => chain().toggleItalic().run()}>
-        <TextItalic size={20} />
-      </Tool>
-      <Tool label={t('Bulleted list')} pressed={state.bullets} onClick={() => chain().toggleBulletList().run()}>
-        <ListBullets size={20} />
-      </Tool>
-      <Tool label={t('Numbered list')} pressed={state.numbers} onClick={() => chain().toggleOrderedList().run()}>
-        <ListNumbers size={20} />
-      </Tool>
-      <Tool label={t('Quote')} pressed={state.quote} onClick={() => chain().toggleBlockquote().run()}>
-        <Quotes size={20} />
-      </Tool>
-      <Tool label={t('Link')} pressed={state.link} onClick={toggleLink}>
-        <LinkSimple size={20} />
-      </Tool>
-    </div>
+    <>
+      <div role="toolbar" aria-label={t('Formatting')} className="sticky top-16 z-10 flex items-center gap-0.5 overflow-x-auto rounded-2xl bg-muted/80 p-1 backdrop-blur-sm [scrollbar-width:none]">
+        <Tool label={t('Bold')} pressed={state.bold} onClick={() => chain().toggleBold().run()}>
+          <TextB size={20} />
+        </Tool>
+        <Tool label={t('Italic')} pressed={state.italic} onClick={() => chain().toggleItalic().run()}>
+          <TextItalic size={20} />
+        </Tool>
+        <Tool label={t('Bulleted list')} pressed={state.bullets} onClick={() => chain().toggleBulletList().run()}>
+          <ListBullets size={20} />
+        </Tool>
+        <Tool label={t('Numbered list')} pressed={state.numbers} onClick={() => chain().toggleOrderedList().run()}>
+          <ListNumbers size={20} />
+        </Tool>
+        <Tool label={t('Quote')} pressed={state.quote} onClick={() => chain().toggleBlockquote().run()}>
+          <Quotes size={20} />
+        </Tool>
+        <Tool label={t('Link')} pressed={state.link} onClick={() => setLinkOpen(true)}>
+          <LinkSimple size={20} />
+        </Tool>
+      </div>
+      {linkOpen && <EditorLinkDialog editor={editor} close={() => setLinkOpen(false)} />}
+    </>
   )
 }
 

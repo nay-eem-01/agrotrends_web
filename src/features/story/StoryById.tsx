@@ -9,7 +9,7 @@ export function StoryById() {
   const story = useBlogById(blogId)
   if (!Number.isFinite(blogId)) return <NotFoundPage />
   if (story.isPending) {
-    return <ReadingSkeleton label="Opening story" story />
+    return <ReadingSkeleton label="Opening story" />
   }
   if (story.isError || !story.data.slug) return <NotFoundPage />
   return <Navigate to={`/stories/${story.data.slug}`} replace />

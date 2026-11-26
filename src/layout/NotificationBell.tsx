@@ -7,6 +7,8 @@ import { useMarkRead, useNotifications, useUnreadCount, type Notification } from
 import { storyDate } from '../lib/dates'
 import { formatNumber, useT } from '../lib/i18n'
 import { describeNotification } from '../lib/notifications'
+import { Button } from '../ui/Button'
+import { FormError } from '../ui/FormValidation'
 import { RowsSkeleton } from '../ui/LoadingSkeleton'
 
 /** The bell in the top bar: the unread count (polled), and the latest ten in a panel. */
@@ -69,34 +71,37 @@ function Panel({ id, hasUnread, onClose }: { id: string; hasUnread: boolean; onC
       aria-label={t('Notifications')}
       // Grows out of the bell (top right) and fades in: an entrance answering the click, under 200ms.
       // Phones: the avatar sits right of the bell, so the panel spans the screen under the bar instead of hanging off it.
-      className="fixed inset-x-4 top-16 z-30 origin-top-right sm:absolute sm:inset-x-auto sm:top-auto sm:right-0 sm:mt-1 sm:w-88 rounded-xl bg-popover text-popover-foreground shadow-lg ring-1 ring-border transition-[opacity,transform] duration-150 ease-(--ease-out) starting:scale-95 starting:opacity-0"
+      className="fixed inset-x-4 top-16 z-30 flex max-h-[calc(100dvh-8rem-env(safe-area-inset-bottom))] flex-col origin-top-right rounded-xl md:absolute md:inset-x-auto md:top-auto md:right-0 md:mt-1 md:w-88 md:max-h-[calc(100dvh-5rem)] bg-popover text-popover-foreground shadow-lg ring-1 ring-border transition-[opacity,transform] duration-150 ease-(--ease-out) starting:scale-95 starting:opacity-0"
     >
-      <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-2">
+      <div className="flex shrink-0 items-center justify-between gap-2 border-b border-border px-4 py-2">
         <h2 className="font-sans text-sm font-semibold">{t('Notifications')}</h2>
         {hasUnread && (
-          <button type="button" onClick={() => markRead.mutate('all')} className="h-9 rounded-full px-3 text-sm text-primary hover:bg-muted">
+          <Button size="sm" variant="quiet" loading={markRead.isPending} pendingLabel={t('Marking as read…')} onClick={() => markRead.mutate('all')}>
             {t('Mark all read')}
-          </button>
+          </Button>
         )}
       </div>
-      {latest.isPending ? (
-        <RowsSkeleton label={t('Loading')} count={3} className="px-4" />
-      ) : latest.isError ? (
-        <p role="alert" className="p-4 text-sm text-muted-foreground">
-          {errorMessage(latest.error)}
-        </p>
-      ) : items.length === 0 ? (
-        <p className="p-4 text-sm text-muted-foreground">{t('Nothing new. Answers to your questions and replies show up here.')}</p>
-      ) : (
-        <ul className="max-h-[60vh] overflow-y-auto py-1">
-          {items.map((item) => (
-            <li key={item.id}>
-              <NotificationRow item={item} onOpen={onClose} />
-            </li>
-          ))}
-        </ul>
-      )}
-      <Link to="/notifications" onClick={onClose} className="block border-t border-border px-4 py-3 text-center text-sm font-medium text-primary hover:bg-muted">
+      {markRead.isError && <FormError message={errorMessage(markRead.error)} />}
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        {latest.isPending ? (
+          <RowsSkeleton label={t('Loading')} count={3} className="px-4" />
+        ) : latest.isError ? (
+          <p role="alert" className="p-4 text-sm text-muted-foreground">
+            {errorMessage(latest.error)}
+          </p>
+        ) : items.length === 0 ? (
+          <p className="p-4 text-sm text-muted-foreground">{t('Nothing new. Answers to your questions and replies show up here.')}</p>
+        ) : (
+          <ul className="py-1">
+            {items.map((item) => (
+              <li key={item.id}>
+                <NotificationRow item={item} onOpen={onClose} />
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+      <Link to="/notifications" onClick={onClose} className="block shrink-0 border-t border-border px-4 py-3 text-center text-sm font-medium text-primary hover:bg-muted">
         {t('See all notifications')}
       </Link>
     </section>

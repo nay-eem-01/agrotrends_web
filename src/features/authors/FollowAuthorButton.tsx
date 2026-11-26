@@ -26,6 +26,7 @@ export function FollowAuthorButton({ author, size = 'sm' }: { author: AuthorProf
       variant={following ? 'secondary' : 'primary'}
       size={size}
       aria-pressed={signedIn ? following : undefined}
+      disabled={toggle.isPending}
       aria-label={`${following ? t('Following') : t('Follow')} ${author.name ?? 'this author'}`}
       onClick={() => requireSignIn(() => toggle.mutate({ authorId: author.authorId ?? 0, follow: !following }))}
     >

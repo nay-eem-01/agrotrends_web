@@ -1,6 +1,7 @@
 import { useLocation } from 'react-router-dom'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useT } from '../lib/i18n'
+import { QuestionSkeleton } from '../features/qa/QuestionSkeleton'
 import { AuthSkeleton, EditorSkeleton, FormSkeleton, ProfileSkeleton, ReadingSkeleton, RowsSkeleton, StoryGridSkeleton, TopicsSkeleton } from '../ui/LoadingSkeleton'
 
 export function RouteSkeleton() {
@@ -8,8 +9,8 @@ export function RouteSkeleton() {
   const t = useT()
   const label = t('Loading page')
 
-  if (/^\/(stories|s)\//.test(pathname)) return <ReadingSkeleton label={label} story />
-  if (/^\/questions\/\d+$/.test(pathname)) return <ReadingSkeleton label={label} />
+  if (/^\/(stories|s)\//.test(pathname)) return <ReadingSkeleton label={label} />
+  if (/^\/questions\/\d+$/.test(pathname)) return <QuestionSkeleton label={label} />
   if (pathname.startsWith('/users/')) return <ProfileSkeleton label={label} cover />
   if (pathname.startsWith('/authors/')) return <ProfileSkeleton label={label} />
   if (pathname === '/write' || pathname.startsWith('/write/')) return <EditorSkeleton label={label} />

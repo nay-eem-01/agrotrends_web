@@ -61,6 +61,7 @@ export function Answers({ questionId, askerId }: { questionId: number; askerId?:
               label={t('Your answer')}
               placeholder={t('What has worked for you?')}
               submitLabel={t('Post answer')}
+              pendingLabel={t('Posting answer…')}
               doneLabel={t('Answer posted')}
               rows={5}
               pending={write.isPending}
@@ -183,6 +184,7 @@ function AnswerCard({ questionId, answer, asker }: { questionId: number; answer:
                   label={t('Reply to {name}', { name: replyTo.authorName ?? '' })}
                   initial={replyTo.answerId === id ? '' : `@${replyTo.authorName ?? ''} `}
                   submitLabel={t('Reply')}
+                  pendingLabel={t('Posting reply…')}
                   doneLabel={t('Reply posted')}
                   focusOnOpen
                   pending={write.isPending}
@@ -210,7 +212,7 @@ function AcceptButton({ questionId, answerId, accepted }: { questionId: number; 
         variant="quiet"
         size="sm"
         aria-pressed={accepted}
-        loading={accept.isPending}
+        loading={accept.isPending} pendingLabel={t('Accepting answer…')}
         onClick={() => accept.mutate({ answerId, accept: !accepted })}
         className={accepted ? 'text-foreground' : undefined}
       >
@@ -265,6 +267,7 @@ function Post({ questionId, item, compact = false, actions }: { questionId: numb
             label={t('Edit your answer')}
             initial={item.content ?? ''}
             submitLabel={t('Save')}
+            pendingLabel={t('Saving changes…')}
             doneLabel={t('Saved')}
             focusOnOpen
             pending={write.isPending}
@@ -282,7 +285,7 @@ function Post({ questionId, item, compact = false, actions }: { questionId: numb
       {mode === 'confirm-delete' && (
         <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
           <span>{t('Delete this answer?')}</span>
-          <Button variant="danger" size="sm" loading={write.isPending} onClick={() => write.mutate({ action: 'delete', answerId: id })}>
+          <Button variant="danger" size="sm" loading={write.isPending} pendingLabel={t('Deleting…')} onClick={() => write.mutate({ action: 'delete', answerId: id })}>
             {t('Delete')}
           </Button>
           <Button variant="quiet" size="sm" onClick={() => setMode('view')}>

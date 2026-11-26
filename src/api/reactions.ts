@@ -34,16 +34,19 @@ export function useClap(blogId: number) {
   })
 }
 
-/**
- * Which stories the reader has saved. The API has no per-story "saved by me" yet, so this reads the most recent
- * 100 saves (backend need in the roadmap); older saves show as unsaved until then.
- */
+/** All saved IDs, including older results, are shared by the story controls. */
 export function useBookmarkedIds(enabled: boolean) {
   return useQuery({
     queryKey: reactionKeys.bookmarkIds,
     queryFn: async ({ signal }) => {
-      const saved = await api<Page<StorySummary>>('/api/bookmarks', { params: { pageNo: 0, pageSize: 100 }, signal })
-      return new Set(saved.content.map((story) => story.id))
+      const ids = new Set<number>()
+      let pageNo = 0
+      for (;;) {
+        const saved = await api<Page<StorySummary>>('/api/bookmarks', { params: { pageNo, pageSize: 100 }, signal })
+        for (const story of saved.content) if (story.id != null) ids.add(story.id)
+        if (saved.last !== false) return ids
+        pageNo += 1
+      }
     },
     enabled,
     staleTime: 5 * 60_000,
@@ -65,7 +68,14 @@ export function useToggleBookmark() {
       queryClient.setQueryData(reactionKeys.bookmarkIds, next)
       return { before }
     },
-    onError: (_error, _vars, context) => queryClient.setQueryData(reactionKeys.bookmarkIds, context?.before),
+    onError: (_error, { blogId }, context) => {
+      queryClient.setQueryData<Set<number | undefined>>(reactionKeys.bookmarkIds, (current) => {
+        const next = new Set(current)
+        if (context?.before?.has(blogId)) next.add(blogId)
+        else next.delete(blogId)
+        return next
+      })
+    },
     onSettled: () => queryClient.invalidateQueries({ queryKey: reactionKeys.bookmarks, refetchType: 'none' }),
   })
 }

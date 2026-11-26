@@ -88,7 +88,6 @@ test('a server draft saves itself with its other details intact', async () => {
     categoryId: 2,
     imageUrl: '/uploads/j.jpg',
     tags: ['jute'],
-    agri: { crop: 'jute', season: 'KHARIF_1' },
   })
   await waitFor(() => expect(screen.getByText('Draft saved')).toBeInTheDocument())
 })
@@ -131,4 +130,17 @@ test('the checklist beside the editor follows the draft and says how long it rea
   expect(screen.getByText('Some text').parentElement).toHaveTextContent('Some text, done')
   expect(screen.getByText('A cover image (optional)').parentElement).toHaveTextContent('not yet')
   expect(screen.getByText('450 words · about 2 min read')).toBeInTheDocument()
+})
+
+test('a story draft can be saved on the device when publishing topics are unavailable', async () => {
+  const api = mockApi({ ...signedInAs(author), 'GET /api/categories/all': () => envelope(503, null) })
+  renderWithProviders(<App />, '/write')
+
+  await userEvent.type(await screen.findByRole('textbox', { name: 'Title' }), 'Market notes')
+  await userEvent.type(screen.getByLabelText('Subtitle (optional)'), 'Smallholder prices')
+  await userEvent.click(screen.getByRole('button', { name: 'Save as draft' }))
+
+  expect(loadLocalDraft()).toMatchObject({ title: 'Market notes', settings: { subtitle: 'Smallholder prices' } })
+  expect(screen.getByText('Draft saved on this device')).toBeVisible()
+  expect(api.mock.calls.some(([url, init]) => String(url).includes('/api/blogs/create') && init?.method === 'POST')).toBe(false)
 })

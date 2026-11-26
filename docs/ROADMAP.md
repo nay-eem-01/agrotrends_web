@@ -23,6 +23,9 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 | Move theme to the header and member language to the account menu | Implemented |
 | In-page previews for question and expert proof photos | Implemented |
 | Aligned story title and cover with sticky section navigation | Implemented |
+| Explore Topics directory and personalized people to follow | Implemented |
+| Keep publish actions and formatting controls spaced while scrolling | Implemented |
+| Action-specific submission feedback and measurable image upload progress | Implemented |
 | Verify authenticated flows and image caching after both repos are promoted to staging | Pending live acceptance |
 
 ---

@@ -1,5 +1,8 @@
+import { toast } from 'sonner'
+import { errorMessage } from './errors'
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './client'
+import { recommendedExpertsKey } from './experts'
 import { FEED_PAGE_SIZE, feedKeys } from './feed'
 import type { Page, StorySummary } from './types'
 
@@ -57,9 +60,18 @@ export function useToggleTagFollow() {
       queryClient.setQueryData(topicKeys.followed, follow ? [tag, ...without] : without)
       return { before }
     },
-    onError: (_error, _vars, context) => queryClient.setQueryData(topicKeys.followed, context?.before),
+    onError: (error, { tag }, context) => {
+      queryClient.setQueryData<string[]>(topicKeys.followed, (current) => {
+        const without = (current ?? []).filter((name) => name !== tag)
+        const previousIndex = context?.before?.indexOf(tag) ?? -1
+        if (previousIndex >= 0) without.splice(previousIndex, 0, tag)
+        return without
+      })
+      toast.error(errorMessage(error))
+    },
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: feedKeys.feed('following') })
+      void queryClient.invalidateQueries({ queryKey: recommendedExpertsKey })
       void queryClient.invalidateQueries({ queryKey: ['questions', 'list', { following: true }] })
     },
   })

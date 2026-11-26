@@ -40,9 +40,10 @@ const mobile = () => `17${Math.floor(Math.random() * 1e8).toString().padStart(8,
 async function signUpAndConfirm(page: Page, person: { name: string; email: string }) {
   await page.goto('/sign-up')
   await page.getByLabel('Full name').fill(person.name)
-  await page.getByLabel('E-mail').fill(person.email)
+  await page.getByRole('button', { name: 'Add an e-mail too' }).click()
+  await page.getByLabel('E-mail', { exact: true }).fill(person.email)
   await page.getByLabel('Mobile number').fill(mobile())
-  await page.getByLabel('Password').fill(PASSWORD)
+  await page.getByLabel('Password', { exact: true }).fill(PASSWORD)
   await page.getByRole('button', { name: 'Create account' }).click()
   await expect(page.getByRole('heading', { name: 'Welcome to AgroTrends' })).toBeVisible()
   await page.getByRole('link', { name: 'Skip for now' }).click()
@@ -53,8 +54,8 @@ async function signUpAndConfirm(page: Page, person: { name: string; email: strin
 
 async function signIn(page: Page, email: string, password = PASSWORD) {
   await page.goto('/sign-in')
-  await page.getByLabel('E-mail').fill(email)
-  await page.getByLabel('Password').fill(password)
+  await page.getByLabel('E-mail or phone number', { exact: true }).fill(email)
+  await page.getByLabel('Password', { exact: true }).fill(password)
   await page.getByRole('button', { name: 'Sign in', exact: true }).click()
   await expect(page.getByRole('button', { name: /Account/ })).toBeVisible()
 }
@@ -79,7 +80,8 @@ test('the asker asks; the answerer answers; the asker is notified', async ({ bro
   await a.page.goto('/questions/ask')
   await a.page.getByLabel('Your question').fill(title)
   await a.page.getByLabel('Details').fill('BRRI dhan29, 30 days old, after a cold week. Asked by the smoke test.')
-  await a.page.getByLabel('Topic').selectOption({ index: 1 })
+  const topic = a.page.getByRole('group', { name: 'Topic', exact: true })
+  await topic.locator('label').filter({ has: a.page.locator('input[type=radio]') }).first().click()
   await a.page.getByLabel('Tags').fill('smoke{Enter}')
   await a.page.getByRole('button', { name: 'Post question' }).click()
   await expect(a.page.getByRole('heading', { level: 1, name: title })).toBeVisible()
@@ -142,7 +144,7 @@ test('an admin dismisses the reports and the question is back', async ({ browser
   const page = await context.newPage()
   await page.goto('/admin/reports')
   await page.getByLabel('Admin e-mail').fill(adminEmail!)
-  await page.getByLabel('Password').fill(adminPassword!)
+  await page.getByLabel('Password', { exact: true }).fill(adminPassword!)
   await page.getByRole('button', { name: 'Sign in as admin' }).click()
   const id = questionPath.split('/').pop()
   const group = page.getByRole('article', { name: `Question ${id}` })

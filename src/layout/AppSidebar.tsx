@@ -99,7 +99,7 @@ export function AppSidebar() {
             <hr className="my-3 border-border" />
             {open && <h2 className="mb-1 px-3 font-sans text-xs font-semibold text-muted-foreground">{t('Admin')}</h2>}
             {ADMIN_SECTIONS.map((item) => (
-              <Item key={item.to} {...item} open={open} />
+              <Item key={item.to} {...item} label={t(item.label)} open={open} />
             ))}
           </>
         )}

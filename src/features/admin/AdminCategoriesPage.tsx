@@ -1,3 +1,4 @@
+import { useT } from '../../lib/i18n'
 import { useState, type FormEvent } from 'react'
 import { useCategories, useCategoryWrite, type Category } from '../../api/categories'
 import { errorMessage } from '../../api/errors'
@@ -17,6 +18,7 @@ export function AdminCategoriesPage() {
 }
 
 function Categories() {
+  const t = useT()
   const categories = useCategories()
   const create = useCategoryWrite()
   const [name, setName] = useState('')
@@ -34,14 +36,14 @@ function Categories() {
   return (
     <>
       <form onSubmit={add} noValidate className="mt-8 flex items-start gap-3">
-        <TextField label="New category" className="flex-1" value={name} onChange={(e) => setName(e.target.value)} error={error} />
-        <Button type="submit" loading={create.isPending} pendingLabel="Creating category…" className="mt-7">
-          Add category
+        <TextField label={t("New category")} className="flex-1" value={name} onChange={(e) => setName(e.target.value)} error={error} />
+        <Button type="submit" loading={create.isPending} pendingLabel={t("Creating category…")} className="mt-7">
+          {t("Add category")}
         </Button>
       </form>
       <FormError message={create.isError ? errorMessage(create.error) : null} />
       {categories.isPending ? (
-        <RowsSkeleton label="Loading categories" className="mt-4" />
+        <RowsSkeleton label={t("Loading categories")} className="mt-4" />
       ) : categories.isError ? (
         <p role="alert" className="py-8 text-ink-muted">
           {errorMessage(categories.error)}
@@ -49,7 +51,7 @@ function Categories() {
       ) : categories.data.length === 0 ? (
         <p className="py-8 text-ink-muted">No categories yet. Authors need one to publish.</p>
       ) : (
-        <ul aria-label="Categories" className="mt-8 border-t border-rule">
+        <ul aria-label={t("Categories")} className="mt-8 border-t border-rule">
           {categories.data.map((category) => (
             <CategoryRow key={category.id} category={category} />
           ))}
@@ -60,6 +62,7 @@ function Categories() {
 }
 
 function CategoryRow({ category }: { category: Category }) {
+  const t = useT()
   const write = useCategoryWrite()
   const [mode, setMode] = useState<'view' | 'rename' | 'confirm'>('view')
   const [name, setName] = useState(category.categoryName ?? '')
@@ -85,11 +88,11 @@ function CategoryRow({ category }: { category: Category }) {
             setName(e.target.value)
             if (e.target.value.trim()) setProblem(undefined)
           }} />
-          <Button type="submit" size="sm" loading={write.isPending} pendingLabel="Saving category…">
-            Save
+          <Button type="submit" size="sm" loading={write.isPending} pendingLabel={t("Saving category…")}>
+            {t("Save")}
           </Button>
           <Button variant="quiet" size="sm" onClick={() => setMode('view')}>
-            Cancel
+            {t("Cancel")}
           </Button>
         </form>
       ) : (
@@ -98,11 +101,11 @@ function CategoryRow({ category }: { category: Category }) {
           {mode === 'confirm' ? (
             <>
               <span className="text-sm">Delete it? Stories in it may block this.</span>
-              <Button variant="danger" size="sm" loading={write.isPending} pendingLabel="Deleting category…" onClick={() => write.mutate({ kind: 'delete', id })}>
-                Delete category
+              <Button variant="danger" size="sm" loading={write.isPending} pendingLabel={t("Deleting category…")} onClick={() => write.mutate({ kind: 'delete', id })}>
+                {t("Delete category")}
               </Button>
               <Button variant="quiet" size="sm" onClick={() => setMode('view')}>
-                Keep it
+                {t("Keep it")}
               </Button>
             </>
           ) : (
@@ -113,10 +116,10 @@ function CategoryRow({ category }: { category: Category }) {
                 write.reset()
                 setMode('rename')
               }}>
-                Rename
+                {t("Rename")}
               </Button>
               <Button variant="quiet" size="sm" aria-label={`Delete ${category.categoryName}`} className="text-destructive" onClick={() => setMode('confirm')}>
-                Delete
+                {t("Delete")}
               </Button>
             </>
           )}

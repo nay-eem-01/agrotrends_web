@@ -1,3 +1,4 @@
+import { useT } from '../../lib/i18n'
 import { useRef, useState, type ChangeEvent, type FormEvent } from 'react'
 import { useMyAuthorProfile, useUpdateMyAuthorProfile } from '../../api/authors'
 import { errorMessage } from '../../api/errors'
@@ -28,6 +29,7 @@ export function AuthorProfileForm({ name, onSaved }: { name: string; onSaved?: (
 type Errors = Partial<Record<'designation' | 'specialities', string>>
 
 function ProfileEditor({ profile, name, onSaved }: { profile: AuthorProfileResponse; name: string; onSaved?: () => void }) {
+  const t = useT()
   const update = useUpdateMyAuthorProfile()
   const upload = useUploadImage()
   const fileInput = useRef<HTMLInputElement>(null)
@@ -65,8 +67,8 @@ function ProfileEditor({ profile, name, onSaved }: { profile: AuthorProfileRespo
   function submit(event: FormEvent) {
     event.preventDefault()
     const found: Errors = {}
-    if (!form.designation.trim()) found.designation = 'Enter your designation.'
-    if (splitList(form.specialities).length === 0) found.specialities = 'Enter at least one speciality.'
+    if (!form.designation.trim()) found.designation = t('Enter your designation.')
+    if (splitList(form.specialities).length === 0) found.specialities = t('Enter at least one speciality.')
     if (reportErrors(found)) return
     update.mutate({
       designation: form.designation.trim(),
@@ -93,7 +95,7 @@ function ProfileEditor({ profile, name, onSaved }: { profile: AuthorProfileRespo
             </Button>
             {form.profileImageUrl && (
               <Button variant="quiet" size="sm" disabled={upload.isPending} onClick={() => set('profileImageUrl', '')}>
-                Remove photo
+                {t("Remove photo")}
               </Button>
             )}
           </div>
@@ -101,7 +103,7 @@ function ProfileEditor({ profile, name, onSaved }: { profile: AuthorProfileRespo
             ref={fileInput}
             type="file"
             accept={IMAGE_TYPES.join(',')}
-            aria-label="Profile photo"
+            aria-label={t("Profile photo")}
             className="sr-only"
             tabIndex={-1}
             onChange={choosePhoto}
@@ -116,32 +118,32 @@ function ProfileEditor({ profile, name, onSaved }: { profile: AuthorProfileRespo
           )}
         </div>
       </div>
-      <TextField label="Designation" value={form.designation} onChange={(e) => set('designation', e.target.value)} id={fieldId('designation')} error={errors.designation} />
+      <TextField label={t("Designation")} value={form.designation} onChange={(e) => set('designation', e.target.value)} id={fieldId('designation')} error={errors.designation} />
       <TextField
-        label="Specialities"
+        label={t("Specialities")}
         hint="Separate with commas, for example: rice, soil health."
         value={form.specialities}
         onChange={(e) => set('specialities', e.target.value)}
         id={fieldId('specialities')} error={errors.specialities}
       />
-      <TextField label="Occupation (optional)" value={form.occupation} onChange={(e) => set('occupation', e.target.value)} />
+      <TextField label={t("Occupation (optional)")} value={form.occupation} onChange={(e) => set('occupation', e.target.value)} />
       <TextField
-        label="Workplace or institution (optional)"
+        label={t("Workplace or institution (optional)")}
         value={form.workPlaceOrInstitution}
         onChange={(e) => set('workPlaceOrInstitution', e.target.value)}
       />
       <TextArea
-        label="About you (optional)"
+        label={t("About you (optional)")}
         hint="A few lines on your work and what you write about. Shown on your author page."
         value={form.bio}
         onChange={(e) => set('bio', e.target.value)}
       />
       <FormError message={update.isError ? errorMessage(update.error) : null} />
       <div className="flex items-center gap-4">
-        <Button type="submit" loading={update.isPending} pendingLabel="Saving profile…" disabled={upload.isPending}>
-          Save profile
+        <Button type="submit" loading={update.isPending} pendingLabel={t("Saving profile…")} disabled={upload.isPending}>
+          {t(onSaved ? 'Save profile' : 'Save author profile')}
         </Button>
-        {update.isSuccess && <output className="text-sm text-paddy">Profile saved</output>}
+        {update.isSuccess && <output className="text-sm text-paddy">{t("Profile saved")}</output>}
       </div>
     </form>
   )

@@ -22,6 +22,7 @@ export function AuthPage({ title, intro, children }: { title: string; intro: str
   ]
   return (
     <div className="mx-auto grid max-w-(--container-page) gap-12 px-4 pt-8 pb-20 sm:px-8 sm:pt-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16">
+      <title>{`${title} – AgroTrends`}</title>
       <aside
         aria-label={t('Why join AgroTrends')}
         className="relative isolate hidden min-h-[36rem] flex-col gap-10 overflow-hidden rounded-2xl bg-surface p-10 lg:flex"

@@ -174,3 +174,20 @@ test('feed cards show which stories are saved', async () => {
   const other = screen.getByRole('link', { name: 'Other' }).closest('article')!
   expect(within(other).getByRole('button', { name: 'Save “Other”' })).toHaveAttribute('aria-pressed', 'false')
 })
+
+test('older bookmarks are still shown as saved and a failed removal can be retried', async () => {
+  mockApi({
+    ...signedInAs(reader),
+    'GET /api/blogs/slug/rice-blast': () => envelope(200, story),
+    'GET /api/bookmarks': (url) => envelope(200, url.searchParams.get('pageNo') === '0' ? page([{ id: 1 }], 0, false) : page([story], 1)),
+    'DELETE /api/blogs/id/402/bookmark': () => envelope(503, null),
+  })
+  renderWithProviders(<App />, '/stories/rice-blast')
+
+  const [save] = await screen.findAllByRole('button', { name: 'Save “Rice blast”' })
+  await waitFor(() => expect(save).toHaveAttribute('aria-pressed', 'true'))
+  await userEvent.click(save)
+  expect(await within(save.parentElement!).findByRole('alert')).toBeVisible()
+  expect(save).toHaveAttribute('aria-pressed', 'true')
+  expect(save).toBeEnabled()
+})

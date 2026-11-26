@@ -24,7 +24,8 @@ const groups = [
 
 const groupByTopic = new Map<string, (typeof groups)[number]['name']>(groups.flatMap(({ name, topics }) => topics.map((topic) => [topic.toLowerCase(), name] as const)))
 
-type Topic = { key: string; name: string; to: string; following: boolean; disabled: boolean; toggle: () => void }
+type Topic = { key: string; name: string; to: string; following: boolean; disabled: boolean; toggle: () => void; error?: string
+}
 
 export function TopicsPage() {
   const t = useT()
@@ -47,6 +48,7 @@ export function TopicsPage() {
     const following = categoryIds.has(id)
     return [{
       key: `category-${id}`,
+      error: toggleCategory.isError && toggleCategory.variables?.categoryId === id ? errorMessage(toggleCategory.error) : undefined,
       name,
       to: `/questions?categoryId=${id}`,
       following,
@@ -57,6 +59,7 @@ export function TopicsPage() {
 
   const tagTopic = (name: string): Topic => ({
     key: `tag-${name}`,
+    error: toggleTag.isError && toggleTag.variables?.tag === name ? errorMessage(toggleTag.error) : undefined,
     name,
     to: tagPath(name),
     following: tagNames.has(name),
@@ -74,7 +77,7 @@ export function TopicsPage() {
   }
   const directory = Array.from(grouped).filter(([, topics]) => topics.length > 0)
   const searchTags = (tags.data ?? []).map(tagTopic)
-  const followError = toggleCategory.error
+
   const catalogPending = catalog.isPending || tags.isPending
   const catalogError = (catalog.isError && (tags.isError || searchTags.length === 0)) || (tags.isError && directory.length === 0)
 
@@ -113,7 +116,6 @@ export function TopicsPage() {
         )}
       </header>
 
-      {followError && <p role="alert" className="mt-4 text-sm text-destructive">{errorMessage(followError)}</p>}
       {signedIn && (followedCategories.isError || followedTags.isError) && (
         <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
           <p role="alert">{t('Could not load your followed topics.')}</p>
@@ -157,7 +159,7 @@ function TopicRow({ topic, pill = false }: { topic: Topic; pill?: boolean }) {
   const t = useT()
   const Icon = topic.following ? Check : Plus
   return (
-    <li className={cn('flex min-h-10 items-center gap-2 text-sm', pill && 'rounded-full border border-border pl-3', pill && topic.following && 'bg-surface')}>
+    <li className={cn('flex min-h-10 items-center gap-2 text-sm', !pill && 'flex-wrap', pill && 'rounded-full border border-border pl-3', pill && topic.following && 'bg-surface')}>
       <Link to={topic.to} className={cn('min-w-0 flex-1 hover:text-primary hover:underline', pill && 'max-w-48 truncate')}>{topic.name}</Link>
       <button
         type="button"
@@ -172,6 +174,8 @@ function TopicRow({ topic, pill = false }: { topic: Topic; pill?: boolean }) {
       >
         <Icon size={16} aria-hidden="true" />
       </button>
+      {topic.error && !pill && <span role="alert" className="basis-full text-xs text-destructive">{topic.error}</span>}
+      {topic.error && pill && <span className="max-w-36 pr-2 text-xs text-destructive">{topic.error}</span>}
     </li>
   )
 }

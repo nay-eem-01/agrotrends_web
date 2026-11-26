@@ -3,7 +3,7 @@ import type { AgriFilters } from '../lib/agri'
 import { api } from './client'
 import { ApiError } from './errors'
 import { FEED_PAGE_SIZE } from './feed'
-import type { BlogResponse, Page, Schemas, StorySummary } from './types'
+import type { BlogCoverDescription, BlogResponse, Page, Schemas, StorySummary } from './types'
 
 export const blogKeys = {
   list: (filters: AgriFilters) => ['blogs', 'list', filters] as const,
@@ -50,8 +50,8 @@ export function useSearch(q: string) {
   })
 }
 
-export type CreateBlogRequest = Schemas['CreateBlogRequest']
-export type UpdateBlogRequest = Schemas['UpdateBlogRequest']
+export type CreateBlogRequest = Schemas['CreateBlogRequest'] & BlogCoverDescription
+export type UpdateBlogRequest = Schemas['UpdateBlogRequest'] & BlogCoverDescription
 
 /** A story by id, for its author to edit (drafts are 404 for anyone else). */
 export function useBlogById(blogId: number, enabled = true) {

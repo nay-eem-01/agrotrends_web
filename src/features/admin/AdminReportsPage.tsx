@@ -1,3 +1,4 @@
+import { useT } from '../../lib/i18n'
 import { EyeSlash } from '@phosphor-icons/react'
 import { useState, type ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
@@ -39,6 +40,7 @@ const reasonLabel = (reason?: Report['reason']) => REPORT_REASONS.find((r) => r.
 
 /** `/admin/reports`: open reports grouped by post, to remove the post or dismiss the reports; and the closed ones. */
 export function AdminReportsPage() {
+  const t = useT()
   const [params] = useSearchParams()
   const status = TABS.find((tab) => tab.status === params.get('status'))?.status ?? 'OPEN'
   const reports = useReports(status)
@@ -46,7 +48,7 @@ export function AdminReportsPage() {
 
   return (
     <AdminPage title="Reports">
-      <nav aria-label="Report status" className="mt-6 flex w-fit gap-1 rounded-full bg-muted p-1">
+      <nav aria-label={t("Report status")} className="mt-6 flex w-fit gap-1 rounded-full bg-muted p-1">
         {TABS.map((tab) => (
           <Link
             key={tab.status}
@@ -54,12 +56,12 @@ export function AdminReportsPage() {
             aria-current={tab.status === status ? 'page' : undefined}
             className={cn('flex h-9 items-center rounded-full px-4 text-sm', tab.status === status ? 'bg-card font-medium shadow-xs ring-1 ring-border' : 'text-muted-foreground hover:text-foreground')}
           >
-            {tab.label}
+            {t(tab.label)}
           </Link>
         ))}
       </nav>
       {reports.isPending ? (
-        <RowsSkeleton label="Loading reports" className="mt-4" />
+        <RowsSkeleton label={t("Loading reports")} className="mt-4" />
       ) : reports.isError ? (
         <p role="alert" className="py-12 text-muted-foreground">
           {errorMessage(reports.error)}
@@ -95,6 +97,7 @@ export function AdminReportsPage() {
 
 /** Every open report on one post, what it says (the snapshot if it is hidden), and one decision for all of them. */
 function OpenGroup({ group }: { group: ReportGroup }) {
+  const t = useT()
   const hidden = group.snapshot != null
   const link = useReportedPostLink(group.targetType, group.targetId, !hidden)
   const moderate = useModerate()
@@ -115,7 +118,7 @@ function OpenGroup({ group }: { group: ReportGroup }) {
         {hidden && (
           <span className="inline-flex h-6 items-center gap-1 rounded-full bg-destructive/10 px-2 text-xs font-medium text-destructive">
             <EyeSlash size={14} aria-hidden="true" />
-            Hidden
+            {t("Hidden")}
           </span>
         )}
         <span className="text-sm text-muted-foreground">
@@ -129,7 +132,7 @@ function OpenGroup({ group }: { group: ReportGroup }) {
         </blockquote>
       ) : link.data ? (
         <Link to={link.data} target="_blank" className="mt-2 inline-block text-sm text-primary underline-offset-4 hover:underline">
-          Open the post
+          {t("Open the post")}
         </Link>
       ) : link.isError ? (
         <p className="mt-2 text-sm text-muted-foreground">The post can't be opened: it may be gone.</p>
@@ -150,11 +153,11 @@ function OpenGroup({ group }: { group: ReportGroup }) {
       <div className="mt-4 flex flex-wrap gap-3 border-t border-border pt-4">
         {!isUser && (
           <Button variant="danger" size="sm" disabled={moderate.isPending} onClick={() => setConfirm('remove-content')}>
-            {isAi ? 'Hide the AI answer' : 'Remove the post'}
+            {t(isAi ? 'Hide the AI answer' : 'Remove the post')}
           </Button>
         )}
         <Button variant="secondary" size="sm" disabled={moderate.isPending} onClick={() => setConfirm('dismiss')}>
-          Dismiss
+          {t("Dismiss")}
         </Button>
         {isUser && <BanControls userId={group.targetId} name={`Profile #${group.targetId}`} />}
       </div>
@@ -173,9 +176,9 @@ function OpenGroup({ group }: { group: ReportGroup }) {
       </Confirm>
       <Confirm
         open={confirm === 'dismiss'}
-        title="Dismiss these reports?"
-        action="Dismiss"
-        pendingLabel="Dismissing reports…"
+        title={t("Dismiss these reports?")}
+        action={t("Dismiss")}
+        pendingLabel={t("Dismissing reports…")}
         pending={moderate.isPending}
         onCancel={() => setConfirm(null)}
         onConfirm={() => moderate.mutate({ action: 'dismiss', reportId }, { onSettled: () => setConfirm(null) })}
@@ -196,6 +199,7 @@ function Confirm({ open, title, action, pending, pendingLabel, children, onCance
   onCancel: () => void
   onConfirm: () => void
 }) {
+  const t = useT()
   return (
     <AlertDialog open={open} onOpenChange={(value) => !value && onCancel()}>
       <AlertDialogContent>
@@ -204,7 +208,7 @@ function Confirm({ open, title, action, pending, pendingLabel, children, onCance
           <AlertDialogDescription>{children}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
           <Button loading={pending} pendingLabel={pendingLabel} onClick={onConfirm}>{action}</Button>
         </AlertDialogFooter>
       </AlertDialogContent>

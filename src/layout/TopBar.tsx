@@ -1,20 +1,21 @@
 import { useT } from '../lib/i18n'
 import { ArrowLeft, List, MagnifyingGlass, NotePencil, Plus } from '@phosphor-icons/react'
 import { lazy, Suspense, useEffect, useRef, useState, type FormEvent, type RefObject } from 'react'
-import { Link, matchPath, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { cn } from 'cn'
 import { useSession } from '../features/auth/session'
 import { ButtonLink } from '../ui/Button'
 import { NotificationBell } from './NotificationBell'
 import { Logo } from './Logo'
 import { HeaderPreferences } from './HeaderPreferences'
+import { useAppBack } from './AppBack'
 import { useSidebar } from './AppSidebar'
 
 // The menus (dialog and menu code) load just after the page; a same-size space holds their place meanwhile.
 const AccountMenu = lazy(() => import('./AccountMenu').then((m) => ({ default: m.AccountMenu })))
 const MobileMenu = lazy(() => import('./MobileMenu').then((m) => ({ default: m.MobileMenu })))
 const SearchDialog = lazy(() => import('./SearchDialog').then((m) => ({ default: m.SearchDialog })))
-const placeholder = (className: string) => <span aria-hidden="true" className={cn('size-11 shrink-0', className)} />
+const placeholder = (className: string) => <span aria-hidden="true" className={cn('size-11 shrink-0 max-[359px]:w-10', className)} />
 
 export function TopBar({ focused = false }: { focused?: boolean }) {
   const t = useT()
@@ -23,7 +24,7 @@ export function TopBar({ focused = false }: { focused?: boolean }) {
   const [searching, setSearching] = useState(false)
   const inline = useRef<HTMLInputElement>(null)
   const { pathname } = useLocation()
-  const navigate = useNavigate()
+  const goBack = useAppBack()
   const [params] = useSearchParams()
   const current = pathname === '/search' ? (params.get('q') ?? '') : ''
 
@@ -39,22 +40,6 @@ export function TopBar({ focused = false }: { focused?: boolean }) {
     document.addEventListener('keydown', shortcut)
     return () => document.removeEventListener('keydown', shortcut)
   }, [])
-
-  function goBack() {
-    // BrowserRouter tracks its own entries. At index zero the previous page may be outside AgroTrends.
-    if (window.history.state?.idx > 0) {
-      navigate(-1)
-      return
-    }
-
-    const questionEdit = matchPath('/questions/:questionId/edit', pathname)
-    if (questionEdit) {
-      navigate(`/questions/${questionEdit.params.questionId}`, { replace: true })
-      return
-    }
-    const section = matchPath('/stories/:slug', pathname) ? '/stories' : matchPath('/questions/:questionId', pathname) ? '/questions' : '/'
-    navigate(section, { replace: true })
-  }
 
   // Focused pages keep the logo, preferences and a way back.
   if (focused)
@@ -75,7 +60,7 @@ export function TopBar({ focused = false }: { focused?: boolean }) {
 
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-background">
-      <div className="flex h-16 items-center gap-0.5 px-2 sm:gap-4 sm:px-6 lg:pl-4">
+      <div className="flex h-16 items-center gap-0.5 px-2 max-[359px]:px-1 sm:gap-4 sm:px-6 lg:pl-4">
         {/* The sections live in the sidebar (layout/AppSidebar); this opens it or hides it to icons. */}
         <button
           type="button"
@@ -90,10 +75,10 @@ export function TopBar({ focused = false }: { focused?: boolean }) {
         {pathname !== '/' && (
           <button
             type="button"
-            onClick={goBack}
+            onClick={() => goBack()}
             aria-label={t('Go back')}
             title={t('Go back')}
-            className="flex size-11 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors duration-150 hover:bg-surface hover:text-foreground md:hidden"
+            className="flex size-11 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors duration-150 hover:bg-surface hover:text-foreground max-[359px]:w-9 md:hidden"
           >
             <ArrowLeft size={20} aria-hidden="true" />
           </button>
@@ -101,7 +86,7 @@ export function TopBar({ focused = false }: { focused?: boolean }) {
         <Logo compactOnMobile={pathname !== '/'} />
         {/* Wide screens: the search is a field in the bar itself; it keeps the words on the results page. */}
         <InlineSearch key={current} initial={current} field={inline} />
-        <nav aria-label={t('Main')} className="ml-auto flex items-center gap-0 md:gap-1">
+        <nav aria-label={t('Main')} className="ml-auto flex items-center gap-0 max-[359px]:[&_button]:w-10 max-[359px]:[&_button]:min-w-10 md:gap-1">
           <button
             type="button"
             onClick={() => setSearching(true)}

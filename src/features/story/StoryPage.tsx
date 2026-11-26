@@ -1,3 +1,5 @@
+import { ImageViewer } from '../../ui/ImageViewer'
+import { useAppBack } from '../../layout/AppBack'
 import { useT, formatNumber } from '../../lib/i18n'
 import { ArrowLeft, CaretDown, Sparkle } from '@phosphor-icons/react'
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
@@ -53,6 +55,7 @@ export function StoryPage() {
 
 function Story({ story }: { story: BlogResponse }) {
   const t = useT()
+  const goBack = useAppBack()
   const author = story.author
   const notice = (useLocation().state as { notice?: string } | null)?.notice
   const { user } = useSession()
@@ -64,7 +67,11 @@ function Story({ story }: { story: BlogResponse }) {
       <title>{`${story.title} – AgroTrends`}</title>
       {/* After Medium: the headline, byline and actions first, then the cover, then the reading column. */}
       <header className={cn(storyColumn, 'pt-6 sm:pt-8')}>
-        <Link to="/stories" className="-ml-1 inline-flex h-11 items-center gap-1.5 px-1 text-sm font-medium text-muted-foreground hover:text-foreground">
+        <Link to="/stories" onClick={(event) => {
+          if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+          event.preventDefault()
+          goBack('/stories', '/stories')
+        }} className="-ml-1 inline-flex h-11 items-center gap-1.5 px-1 text-sm font-medium text-muted-foreground hover:text-foreground">
           <ArrowLeft size={16} aria-hidden="true" />
           {t('Back to stories')}
         </Link>
@@ -109,7 +116,9 @@ function Story({ story }: { story: BlogResponse }) {
       {story.imageUrl && (
         <figure className={cn(storyColumn, 'mt-8')}>
           {/* A wide, deliberate crop from the centre; the photo is never stretched. */}
-          <img src={story.imageUrl} alt="" fetchPriority="high" decoding="async" className="aspect-[16/9] w-full rounded-xl bg-muted object-cover" />
+          <ImageViewer src={story.imageUrl} label={story.imageAlt || t('Open story cover')} className="block w-full">
+            <img src={story.imageUrl} alt={story.imageAlt ?? ''} fetchPriority="high" decoding="async" className="aspect-[16/9] w-full rounded-xl bg-muted object-cover" />
+          </ImageViewer>
         </figure>
       )}
 
@@ -253,7 +262,7 @@ function Body({ story }: { story: BlogResponse }) {
         </nav>
       )}
       <div ref={column} className={cn(storyColumn, 'w-full min-w-0')}>
-        <SafeHtml html={story.content} className={cn('story-body', contents && '[&_h2]:scroll-mt-32 xl:[&_h2]:scroll-mt-24')} />
+        <SafeHtml previewImages html={story.content} className={cn('story-body', contents && '[&_h2]:scroll-mt-32 xl:[&_h2]:scroll-mt-24')} />
       </div>
     </div>
   )

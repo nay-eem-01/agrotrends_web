@@ -1,3 +1,4 @@
+import { useT } from '../../lib/i18n'
 import { useState, type FormEvent, type ReactNode } from 'react'
 import { useChangePassword, useUpdateAccount } from '../../api/account'
 import { errorMessage } from '../../api/errors'
@@ -15,35 +16,50 @@ import { AuthorProfileForm } from './AuthorProfileForm'
 import { EmailSettings } from './EmailSettings'
 import { ProfilePageForm } from './ProfilePageForm'
 import { useMyApplications } from '../../api/experts'
-import { ApplicationStatus } from '../experts/ExpertApplyPage'
+import { ApplicationStatus, ApplicationStatusError } from '../experts/ExpertApplyPage'
 import { ButtonLink } from '../../ui/Button'
 import { FormSkeleton } from '../../ui/LoadingSkeleton'
 
 export const PASSWORD_CHANGED_NOTICE = 'Password changed. Sign in with your new password.'
 
 export function SettingsPage() {
+  const t = useT()
   const { user } = useSession()
+  const sections = [
+    ['account', 'Account'],
+    ['author-profile', 'Author profile'],
+    ...(user?.id != null ? [['profile-page', 'Profile cover and location']] : []),
+    ['emails', 'E-mails'],
+    ['expert', 'Verified expert'],
+    ['password', 'Password'],
+  ]
   return (
     <section className="mx-auto max-w-(--container-feed) px-4 pt-12 pb-20 sm:px-6">
-      <h1 className="text-2xl">Settings</h1>
-      <Section title="Account" intro="Your name is shown on your stories, questions and answers.">
+      <title>{`${t('Settings')} – AgroTrends`}</title>
+      <h1 className="text-2xl">{t('Settings')}</h1>
+      <nav aria-label={t('Settings sections')} className="mt-4">
+        <ul className="flex flex-wrap gap-2">
+          {sections.map(([id, label]) => <li key={id}><a href={`#${id}`} className="inline-flex min-h-9 items-center rounded-full border border-border px-3 text-sm font-medium hover:bg-surface">{t(label)}</a></li>)}
+        </ul>
+      </nav>
+      <Section id="account" title={t("Account")} intro="Your name is shown on your stories, questions and answers.">
         <AccountForm />
       </Section>
-      <Section title="Profile" intro="Optional. People see it next to your stories and answers, and on your profile page.">
+      <Section id="author-profile" title={t("Author profile")} intro="Optional. People see it next to your stories and answers, and on your profile page.">
         <AuthorProfileForm name={user?.name ?? ''} />
       </Section>
       {user?.id != null && (
-        <Section title="Profile page" intro="Optional. Shown at the top of your profile.">
+        <Section id="profile-page" title={t("Profile cover and location")} intro="Optional. Shown at the top of your profile.">
           <ProfilePageForm userId={user.id} />
         </Section>
       )}
-      <Section id="emails" title="E-mails" intro="What we send you. Every e-mail has a link to stop it.">
+      <Section id="emails" title={t("E-mails")} intro="What we send you. Every e-mail has a link to stop it.">
         <EmailSettings />
       </Section>
-      <Section title="Verified expert" intro="Experts check AI answers in their topics and carry a badge on their answers.">
+      <Section id="expert" title="Verified expert" intro="Experts check AI answers in their topics and carry a badge on their answers.">
         <ExpertStatus />
       </Section>
-      <Section title="Password" intro="Changing it signs you out on every device.">
+      <Section id="password" title={t("Password")} intro="Changing it signs you out on every device.">
         <PasswordForm />
       </Section>
     </section>
@@ -52,26 +68,29 @@ export function SettingsPage() {
 
 /** The latest expert application's status, or the way to apply. */
 function ExpertStatus() {
+  const t = useT()
   const mine = useMyApplications()
   if (mine.isPending) return <FormSkeleton fields={0} />
+  if (mine.isError && !mine.data) return <ApplicationStatusError retry={() => void mine.refetch()} pending={mine.isFetching} />
   const latest = mine.data?.content[0]
   return (
     <div className="flex flex-col items-start gap-4">
       {latest && <ApplicationStatus application={latest} />}
       {latest?.status !== 'PENDING' && (
         <ButtonLink to="/experts/apply" variant="secondary" size="sm">
-          {latest ? 'Apply again' : 'Apply to be a verified expert'}
+          {t(latest ? 'Apply again' : 'Apply to be a verified expert')}
         </ButtonLink>
       )}
     </div>
   )
 }
 
-function Section({ id, title, intro, children }: { id?: string; title: string; intro: string; children: ReactNode }) {
+function Section({ id, title, intro, children }: { id: string; title: string; intro: string; children: ReactNode }) {
+  const t = useT()
   return (
-    <section id={id} className="mt-10 scroll-mt-24 border-t border-rule pt-8">
-      <h2 className="text-xl">{title}</h2>
-      <p className="mt-1 text-sm text-ink-muted">{intro}</p>
+    <section id={id} tabIndex={-1} className="mt-10 scroll-mt-24 border-t border-rule pt-8">
+      <h2 className="text-xl">{t(title)}</h2>
+      <p className="mt-1 text-sm text-ink-muted">{t(intro)}</p>
       <div className="mt-6">{children}</div>
     </section>
   )
@@ -93,6 +112,7 @@ type AccountErrors = Partial<Record<'name' | 'email' | 'countryCode' | 'mobileNu
  * unconfirmed (a new e-mail gets a link, a new phone a code). Changing them keeps the reader signed in.
  */
 function AccountForm() {
+  const t = useT()
   const { user, updateUser } = useSession()
   const update = useUpdateAccount()
   const [form, setForm] = useState(() => ({ name: user?.name ?? '', email: user?.email ?? '', ...splitMobile(user?.mobileNumber), ...(user?.mobileNumber ? {} : { countryCode: '+880' }) }))
@@ -142,10 +162,10 @@ function AccountForm() {
   return (
     <form onSubmit={submit} noValidate className="flex flex-col gap-5">
       {summary}
-      <TextField label="Full name" autoComplete="name" value={form.name} onChange={(e) => set('name', e.target.value)} id={fieldId('name')} error={errors.name} />
+      <TextField label={t("Full name")} autoComplete="name" value={form.name} onChange={(e) => set('name', e.target.value)} id={fieldId('name')} error={errors.name} />
       <div className="flex flex-col gap-2">
         <TextField
-          label="E-mail"
+          label={t("E-mail")}
           type="email"
           autoComplete="email"
           hint="You can sign in with it. Leave it empty to remove it, if you keep a phone number."
@@ -157,9 +177,9 @@ function AccountForm() {
       </div>
       <div className="flex flex-col gap-2">
         <div className="grid grid-cols-[6rem_1fr] gap-3">
-          <TextField label="Code" autoComplete="tel-country-code" value={form.countryCode} onChange={(e) => set('countryCode', e.target.value)} id={fieldId('countryCode')} error={errors.countryCode} />
+          <TextField label={t("Code")} autoComplete="tel-country-code" value={form.countryCode} onChange={(e) => set('countryCode', e.target.value)} id={fieldId('countryCode')} error={errors.countryCode} />
           <TextField
-            label="Mobile number"
+            label={t("Mobile number")}
             type="tel"
             inputMode="numeric"
             autoComplete="tel-national"
@@ -175,7 +195,7 @@ function AccountForm() {
             action={
               user.phoneVerified ? null : (
                 <ButtonLink to="/verify-phone?next=%2Fsettings" variant="quiet" size="sm">
-                  Enter the SMS code
+                  {t("Enter the SMS code")}
                 </ButtonLink>
               )
             }
@@ -184,8 +204,8 @@ function AccountForm() {
       </div>
       <FormError message={update.isError ? errorMessage(update.error) : null} />
       <div className="flex flex-wrap items-center gap-4">
-        <Button type="submit" loading={update.isPending} pendingLabel="Saving profile…">
-          Save changes
+        <Button type="submit" loading={update.isPending} pendingLabel={t("Saving profile…")}>
+          {t("Save changes")}
         </Button>
         {update.isSuccess && (
           <output className="text-sm text-success">
@@ -215,6 +235,7 @@ function ContactStatus({ confirmed, action }: { confirmed?: boolean; action: Rea
 type PasswordErrors = Partial<Record<'current' | 'next' | 'confirm', string>>
 
 function PasswordForm() {
+  const t = useT()
   const change = useChangePassword()
   const signInAgain = useSignInAgain()
   const [current, setCurrent] = useState('')
@@ -238,14 +259,14 @@ function PasswordForm() {
     <form onSubmit={submit} noValidate className="flex flex-col gap-5">
       {summary}
       <PasswordField
-        label="Current password"
+        label={t("Current password")}
         autoComplete="current-password"
         value={current}
         onChange={(e) => setCurrent(e.target.value)}
         id={fieldId('current')} error={errors.current}
       />
       <PasswordField
-        label="New password"
+        label={t("New password")}
         autoComplete="new-password"
         hint="8 to 16 characters, with a capital letter, a number and a symbol."
         value={next}
@@ -253,15 +274,15 @@ function PasswordForm() {
         id={fieldId('next')} error={errors.next}
       />
       <PasswordField
-        label="Repeat new password"
+        label={t("Repeat new password")}
         autoComplete="new-password"
         value={confirm}
         onChange={(e) => setConfirm(e.target.value)}
         id={fieldId('confirm')} error={errors.confirm}
       />
       <FormError message={change.isError ? errorMessage(change.error) : null} />
-      <Button type="submit" loading={change.isPending} pendingLabel="Changing password…" className="self-start">
-        Change password
+      <Button type="submit" loading={change.isPending} pendingLabel={t("Changing password…")} className="self-start">
+        {t("Change password")}
       </Button>
     </form>
   )

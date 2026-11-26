@@ -1,9 +1,19 @@
 /** An unsaved story kept on this device until it becomes a server draft (that needs a topic). */
+export interface StoryDraftSettings {
+  subtitle: string
+  aiCitable: boolean
+  categoryId?: number
+  categoryName?: string
+  tags: string[]
+}
+
 export interface LocalDraft {
   title: string
   html: string
   /** Cover image URL, already uploaded. */
   cover?: string
+  coverAlt?: string
+  settings?: StoryDraftSettings
   savedAt: number
 }
 
@@ -25,6 +35,7 @@ export function saveLocalDraft(draft: Omit<LocalDraft, 'savedAt'>, now = Date.no
     else localStorage.setItem(KEY, JSON.stringify(saved))
   } catch {
     // Storage blocked or full: the draft lives until the tab closes.
+    return { ...saved, savedAt: 0 }
   }
   return saved
 }
@@ -38,6 +49,7 @@ export function clearLocalDraft(): void {
 }
 
 /** Tiptap's empty document is "<p></p>". */
-export function isBlank({ title, html, cover }: { title: string; html: string; cover?: string }): boolean {
+export function isBlank({ title, html, cover, settings }: Omit<LocalDraft, 'savedAt'>): boolean {
   return !title.trim() && !html.replace(/<[^>]*>/g, '').trim() && !/<img/i.test(html) && !cover
+    && (!settings || (!settings.subtitle.trim() && settings.aiCitable && settings.categoryId == null && settings.tags.length === 0))
 }

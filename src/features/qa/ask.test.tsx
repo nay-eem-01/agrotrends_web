@@ -279,3 +279,53 @@ test('an edit has no choice: it stays the public question it is', async () => {
   await screen.findByRole('button', { name: 'Save question' })
   expect(screen.queryByRole('group', { name: 'Who should answer?' })).not.toBeInTheDocument()
 })
+
+test('a topic outage offers a retry and keeps the question while topics recover', async () => {
+  let available = false
+  mockApi({
+    ...signedInAs({ id: 9, name: 'Karim' }),
+    ...categories,
+    'GET /api/categories/all': () => available ? envelope(200, page([{ id: 2, categoryName: 'Fisheries' }])) : envelope(503, null),
+  })
+  renderWithProviders(<App />, '/questions/ask')
+
+  const title = await screen.findByRole('textbox', { name: 'Your question' })
+  await userEvent.type(title, 'Fish transport costs')
+  await userEvent.click(screen.getByRole('textbox', { name: 'Details' }))
+  await userEvent.keyboard('We pay by weight to transport fish.')
+  const retry = await screen.findByRole('button', { name: 'Retry topics' })
+  await userEvent.click(screen.getByRole('button', { name: 'Post question' }))
+  expect(screen.getByRole('link', { name: 'Topics could not be loaded. Retry to choose a topic.' })).toBeVisible()
+
+  available = true
+  await userEvent.click(retry)
+  expect(await screen.findByRole('radio', { name: 'Fisheries' })).toBeEnabled()
+  expect(title).toHaveValue('Fish transport costs')
+  expect(screen.getByRole('textbox', { name: 'Details' })).toHaveTextContent('We pay by weight to transport fish.')
+})
+
+test('previously loaded topics remain selectable when the catalogue request fails', async () => {
+  localStorage.setItem('agrotrends.topics.catalog', JSON.stringify([{ id: 2, categoryName: 'Fisheries' }]))
+  mockApi({
+    ...signedInAs({ id: 9, name: 'Karim' }),
+    ...categories,
+    'GET /api/categories/all': () => envelope(503, null),
+  })
+  renderWithProviders(<App />, '/questions/ask')
+
+  const topic = await screen.findByRole('radio', { name: 'Fisheries' })
+  await userEvent.click(topic)
+  expect(await screen.findByText('Showing previously loaded topics. Retry to refresh the list.')).toBeVisible()
+  expect(topic).toBeChecked()
+})
+
+test('Cancel from a direct Ask visit stays in AgroTrends and keeps the draft', async () => {
+  mockApi({ ...signedInAs({ id: 9, name: 'Karim' }), ...categories })
+  renderWithProviders(<App />, '/questions/ask')
+
+  await userEvent.type(await screen.findByRole('textbox', { name: 'Your question' }), 'Transport costs')
+  await userEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+  await waitFor(() => expect(screen.getByTestId('path').textContent).toBe('/questions'))
+  await userEvent.click(within(screen.getByRole('main')).getAllByRole('link', { name: 'Ask a question' })[0])
+  expect(await screen.findByRole('textbox', { name: 'Your question' })).toHaveValue('Transport costs')
+})

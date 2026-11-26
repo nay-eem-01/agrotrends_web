@@ -17,6 +17,7 @@ import { useT } from '../../lib/i18n'
 import { Button, ButtonLink } from '../../ui/Button'
 import { FormSkeleton } from '../../ui/LoadingSkeleton'
 import { FormError, useFormValidation } from '../../ui/FormValidation'
+import { catalogProblem, TopicCatalogStatus } from '../topics/TopicCatalogStatus'
 import { TextField } from '../../ui/TextField'
 import { PhotoPicker } from '../qa/PhotoPicker'
 
@@ -34,6 +35,8 @@ export function ExpertApplyPage() {
       <div className="min-w-0">
         {mine.isPending ? (
           <FormSkeleton label={t('Loading')} className="mt-5" />
+        ) : mine.isError && !mine.data ? (
+          <ApplicationStatusError retry={() => void mine.refetch()} pending={mine.isFetching} />
         ) : latest && (latest.status === 'PENDING' || !reapply) ? (
           <div>
             <ApplicationStatus application={latest} />
@@ -48,6 +51,16 @@ export function ExpertApplyPage() {
         )}
       </div>
     </section>
+  )
+}
+
+export function ApplicationStatusError({ retry, pending }: { retry: () => void; pending: boolean }) {
+  const t = useT()
+  return (
+    <div className="space-y-3">
+      <FormError message={t('Could not check your application status.')} />
+      <Button size="sm" variant="secondary" loading={pending} pendingLabel={t('Loading')} onClick={retry}>{t('Try again')}</Button>
+    </div>
   )
 }
 
@@ -166,7 +179,7 @@ function ApplyForm() {
     const badLink = links.findIndex((link) => link.trim() && !isWebLink(link.trim()))
     setInvalidLink(badLink)
     const found: Errors = {
-      topics: topics.length === 0 ? t('Choose at least one topic.') : undefined,
+      topics: topics.length === 0 ? t(catalogProblem(categories) ?? 'Choose at least one topic.') : undefined,
       field: fieldTitle.trim() ? undefined : t('Say what your field is.'),
       institution: institution.trim() ? undefined : t('Name your institution or workplace.'),
       credential: credentialType ? undefined : t('Choose what your proof is.'),
@@ -187,6 +200,7 @@ function ApplyForm() {
   return (
     <form onSubmit={submit} noValidate className="flex flex-col gap-7">
       {summary}
+      <TopicCatalogStatus catalog={categories} />
       <fieldset id={fieldId('topics')} tabIndex={-1} aria-invalid={Boolean(errors.topics) || undefined} aria-describedby="topics-hint">
         <legend className="text-sm font-medium">{t('Topics (up to {n})', { n: EXPERT_LIMITS.topics })}</legend>
         <ul className="mt-2 flex flex-wrap gap-2">

@@ -5,6 +5,7 @@ import { useMarkRead, useNotifications, useUnreadCount } from '../../api/notific
 import { useT } from '../../lib/i18n'
 import { NotificationRow } from '../../layout/NotificationBell'
 import { Button } from '../../ui/Button'
+import { FormError } from '../../ui/FormValidation'
 import { RowsSkeleton } from '../../ui/LoadingSkeleton'
 
 /** `/notifications`: everything, or only the unread (`?unread=true`), newest first, page by page. */
@@ -22,11 +23,12 @@ export function NotificationsPage() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <h1 className="text-2xl sm:text-3xl">{t('Notifications')}</h1>
         {unread > 0 && (
-          <Button variant="secondary" size="sm" loading={markRead.isPending} onClick={() => markRead.mutate('all')}>
+          <Button variant="secondary" size="sm" loading={markRead.isPending} pendingLabel={t('Marking as read…')} onClick={() => markRead.mutate('all')}>
             {t('Mark all read')}
           </Button>
         )}
       </div>
+      {markRead.isError && <div className="mt-3"><FormError message={errorMessage(markRead.error)} /></div>}
       <nav aria-label={t('Which notifications')} className="mt-6 flex gap-6 border-b border-border">
         {(
           [

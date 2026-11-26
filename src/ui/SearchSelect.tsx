@@ -10,6 +10,7 @@ export interface Option {
 }
 
 interface SearchSelectProps {
+  id?: string
   label: string
   /** The chosen option's value, or '' for none. */
   value: string
@@ -30,15 +31,16 @@ interface SearchSelectProps {
  * A labelled select you can type into to filter, for lists too long to scan (topics). Short fixed lists keep the
  * native select. Clearing the field chooses nothing ('').
  */
-export function SearchSelect({ label, value, options, placeholder, hint, error, disabled, hideLabel, className, container, onChange }: SearchSelectProps) {
+export function SearchSelect({ id, label, value, options, placeholder, hint, error, disabled, hideLabel, className, container, onChange }: SearchSelectProps) {
   const t = useT()
-  const id = useId()
+  const generatedId = useId()
+  const inputId = id ?? generatedId
   const selected = options.find((option) => option.value === value) ?? null
-  const describedBy = error ? `${id}-error` : hint ? `${id}-hint` : undefined
+  const describedBy = error ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined
 
   return (
     <Field data-invalid={error ? true : undefined} data-disabled={disabled || undefined} className={className}>
-      <FieldLabel htmlFor={id} className={hideLabel ? 'sr-only' : undefined}>
+      <FieldLabel htmlFor={inputId} className={hideLabel ? 'sr-only' : undefined}>
         {label}
       </FieldLabel>
       <Combobox
@@ -50,7 +52,7 @@ export function SearchSelect({ label, value, options, placeholder, hint, error, 
         disabled={disabled}
       >
         <ComboboxInput
-          id={id}
+          id={inputId}
           placeholder={placeholder}
           disabled={disabled}
           showClear={selected != null}
@@ -72,7 +74,7 @@ export function SearchSelect({ label, value, options, placeholder, hint, error, 
           </ComboboxList>
         </ComboboxContent>
       </Combobox>
-      <Message inputId={id} hint={hint} error={error} />
+      <Message inputId={inputId} hint={hint} error={error} />
     </Field>
   )
 }

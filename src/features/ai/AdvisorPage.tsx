@@ -304,7 +304,7 @@ function Composer({
           }}
           className="block max-h-48 min-h-10 flex-1 resize-none bg-transparent py-2 text-base leading-relaxed outline-none [field-sizing:content] placeholder:text-muted-foreground focus-visible:outline-none"
         />
-        <Button type="submit" size="sm" loading={pending} className="shrink-0">
+        <Button type="submit" size="sm" loading={pending} pendingLabel={t('Sending question…')} className="shrink-0">
           {!pending && <ArrowUp size={16} weight="bold" aria-hidden="true" />}
           {signedIn ? t('Ask') : t('Sign in to ask')}
         </Button>

@@ -1,3 +1,4 @@
+import { useT } from '../../lib/i18n'
 import { CheckCircle, Circle, X } from '@phosphor-icons/react'
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
@@ -107,11 +108,12 @@ function Contact({ value, confirmed }: { value: string; confirmed?: boolean }) {
 
 /** Their Verified Expert topics, each with Revoke. */
 function ExpertTopics({ userId, topics }: { userId: number; topics: { id?: number; name?: string }[] }) {
+  const t = useT()
   const decide = useExpertDecision()
   return (
     <section aria-labelledby="member-expert">
       <h2 id="member-expert" className="text-lg">
-        Expert topics
+        {t("Expert topics")}
       </h2>
       {topics.length === 0 ? (
         <p className="mt-1 text-sm text-muted-foreground">Not a verified expert in any topic.</p>
@@ -125,9 +127,10 @@ function ExpertTopics({ userId, topics }: { userId: number; topics: { id?: numbe
                 size="sm"
                 className="h-7 px-2.5"
                 loading={decide.isPending && decide.variables?.action === 'revoke' && decide.variables.categoryId === topic.id}
+                pendingLabel={t("Revoking badge…")}
                 onClick={() => decide.mutate({ action: 'revoke', userId, categoryId: topic.id ?? 0 })}
               >
-                Revoke
+                {t("Revoke")}
               </Button>
             </li>
           ))}
@@ -193,6 +196,7 @@ function AdminRoles({ userId, held }: { userId: number; held: string[] }) {
               <Button
                 disabled={!chosen}
                 loading={change.isPending && change.variables?.grant}
+                pendingLabel="Giving role…"
                 onClick={() => change.mutate({ userId, roleId: Number(chosen), grant: true }, { onSuccess: () => setChosen('') })}
               >
                 Give role

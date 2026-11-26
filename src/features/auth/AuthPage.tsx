@@ -1,6 +1,5 @@
-import { ChatCircleText, SealCheck, Sparkle, WarningCircle } from '@phosphor-icons/react'
+import { ChatCircleText, SealCheck, Sparkle } from '@phosphor-icons/react'
 import type { ReactNode } from 'react'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import { usePublicStats } from '../../api/stats'
 import { formatNumber, useT } from '../../lib/i18n'
 import { Sprig } from '../../ui/Botanical'
@@ -23,6 +22,7 @@ export function AuthPage({ title, intro, children }: { title: string; intro: str
   ]
   return (
     <div className="mx-auto grid max-w-(--container-page) gap-12 px-4 pt-8 pb-20 sm:px-8 sm:pt-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16">
+      <title>{`${title} – AgroTrends`}</title>
       <aside
         aria-label={t('Why join AgroTrends')}
         className="relative isolate hidden min-h-[36rem] flex-col gap-10 overflow-hidden rounded-2xl bg-surface p-10 lg:flex"
@@ -67,12 +67,4 @@ export function AuthPage({ title, intro, children }: { title: string; intro: str
   )
 }
 
-export function FormError({ message }: { message: string | null }) {
-  if (!message) return null
-  return (
-    <Alert variant="destructive">
-      <WarningCircle aria-hidden="true" />
-      <AlertDescription>{message}</AlertDescription>
-    </Alert>
-  )
-}
+export { FormError } from '../../ui/FormValidation'

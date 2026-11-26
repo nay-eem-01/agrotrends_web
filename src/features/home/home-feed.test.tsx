@@ -20,7 +20,8 @@ function routes(extra = {}) {
     'GET /api/feed/trending': () => envelope(200, page([story])),
     'GET /api/feed/trending/questions': () => envelope(200, page([{ ...question, questionId: 8, title: 'Boro seedlings turning yellow', answerCount: 4 }])),
     'GET /api/me/following/tags': () => envelope(200, page(['tilapia'])),
-    'GET /api/experts': () => envelope(404, null, 'Not found'),
+    'GET /api/me/recommended-experts': () => envelope(200, []),
+    'GET /api/me/following/authors': () => envelope(200, page([{ authorId: 6, name: 'Amina', profileImageUrl: '/uploads/amina.webp' }])),
     'GET /api/notifications/unread-count': () => envelope(200, 0),
     ...extra,
   }
@@ -33,7 +34,7 @@ beforeEach(() => {
 
 afterEach(() => vi.unstubAllGlobals())
 
-test('signed in, home shows questions and stories as two tabs, never mixed', async () => {
+test('signed in, home shows questions and stories as two tabs and a mobile recommendation', async () => {
   const api = mockApi(routes())
   renderWithProviders(<App />, '/')
 
@@ -42,27 +43,27 @@ test('signed in, home shows questions and stories as two tabs, never mixed', asy
   const tabs = within(feed).getByRole('navigation', { name: 'Show' })
   expect(within(tabs).getByRole('link', { name: 'Questions' })).toHaveAttribute('aria-current', 'page')
   await within(feed).findByRole('link', { name: 'Why are my tilapia gasping?' })
-  expect(within(feed).queryByRole('link', { name: 'Keeping oxygen up in summer ponds' })).not.toBeInTheDocument()
+  const preview = await within(feed).findByRole('region', { name: 'Recommended reading' })
+  expect(within(preview).getByRole('link', { name: /Keeping oxygen up in summer ponds/ })).toHaveAttribute('href', '/stories/oxygen')
   expect(api.mock.calls.some(([url]) => String(url).startsWith('/api/blogs/all'))).toBe(false)
   // The two ways to ask, named by who sees them.
-  expect(within(feed).getByRole('link', { name: 'Ask a question in public…' })).toHaveAttribute('href', '/questions/ask')
+  expect(within(feed).getByRole('link', { name: 'Ask a question' })).toHaveAttribute('href', '/questions/ask')
   expect(within(feed).getByRole('link', { name: 'Private AI' })).toHaveAttribute('href', '/advisor')
 
-  // Your topics live in the app's sidebar, not in the feed.
+  // The sidebar links to people the reader follows.
   const navigation = screen.getByRole('complementary', { name: 'Navigation' })
-  expect(await within(navigation).findByRole('link', { name: 'tilapia' })).toHaveAttribute('href', '/tags/tilapia')
+  expect(await within(navigation).findByRole('link', { name: 'Amina' })).toHaveAttribute('href', '/authors/6')
   const rail = screen.getByRole('complementary', { name: 'More to read' })
   // Trending questions and trending stories are two separate lists.
   const asked = await within(rail).findByRole('region', { name: 'Trending questions' })
   expect(within(asked).getByRole('link', { name: 'Boro seedlings turning yellow' })).toHaveAttribute('href', '/questions/8')
   expect(within(asked).getByText('4 answers')).toBeInTheDocument()
-  const stories = await within(rail).findByRole('region', { name: 'Trending stories' })
+  const stories = await within(rail).findByRole('region', { name: 'Top stories' })
   expect(within(stories).getByRole('link', { name: 'Keeping oxygen up in summer ponds' })).toHaveAttribute('href', '/stories/oxygen')
   // With something trending, the fallbacks are never fetched.
   expect(within(rail).queryByRole('region', { name: 'New stories' })).not.toBeInTheDocument()
   expect(api.mock.calls.some(([url]) => String(url).startsWith('/api/feed/latest'))).toBe(false)
-  // No experts list until the backend has one.
-  expect(within(rail).queryByRole('heading', { name: 'Experts to follow' })).not.toBeInTheDocument()
+  expect(await within(rail).findByText(/No expert recommendations for your topics yet/)).toBeInTheDocument()
 
   // A topic, then Unanswered, then the Stories tab keeps the topic and drops the questions-only sort.
   await userEvent.click(within(within(feed).getByRole('navigation', { name: 'Topics' })).getByRole('link', { name: 'Fisheries' }))
@@ -75,6 +76,7 @@ test('signed in, home shows questions and stories as two tabs, never mixed', asy
   await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/?show=stories&topic=2'))
   expect(await within(feed).findByRole('link', { name: 'Keeping oxygen up in summer ponds' })).toHaveAttribute('href', '/stories/oxygen')
   expect(within(feed).queryByRole('link', { name: 'Why are my tilapia gasping?' })).not.toBeInTheDocument()
+  expect(within(preview).getByRole('link', { name: /Boro seedlings turning yellow/ })).toHaveAttribute('href', '/questions/8')
   expect(within(feed).queryByRole('navigation', { name: 'Sort questions' })).not.toBeInTheDocument()
   expect(api.mock.calls.some(([url]) => String(url).startsWith('/api/blogs/all/category/2'))).toBe(true)
 })
@@ -119,21 +121,33 @@ test('For you with nothing in the followed topics offers more topics', async () 
   expect(within(screen.getByRole('main')).getByRole('link', { name: 'Follow topics' })).toHaveAttribute('href', '/topics')
 })
 
-test('experts to follow appear once the backend serves them, and phones get the quick actions', async () => {
+test('experts to follow appear once the backend serves them,', async () => {
+  let following = false
   const api = mockApi(
     routes({
-      'GET /api/experts': () => envelope(200, page([{ userId: 7, authorId: 7, name: 'Dr Nasrin', expertField: 'Fish health', institution: 'BAU', followedByMe: false }])),
-      'PUT /api/authors/7/follow': () => envelope(200, null),
+      'GET /api/me/recommended-experts': () => envelope(200, following ? [] : [
+        { userId: 7, authorId: 7, name: 'Dr Nasrin', expertField: 'Fish health', institution: 'BAU' },
+      ]),
+      'GET /api/me/following/authors': () => envelope(200, page(following ? [{ authorId: 7, name: 'Dr Nasrin' }] : [])),
+      'PUT /api/authors/7/follow': () => {
+        following = true
+        return envelope(200, null)
+      },
     }),
   )
   renderWithProviders(<App />, '/')
 
   const rail = await screen.findByRole('complementary', { name: 'More to read' })
-  expect(await within(rail).findByRole('link', { name: /Dr Nasrin/ })).toHaveAttribute('href', '/users/7')
+  const suggestions = await within(rail).findByRole('region', { name: 'Who to follow' })
+  expect(await within(suggestions).findByRole('link', { name: /Dr Nasrin/ })).toHaveAttribute('href', '/users/7')
+  const top = within(rail).getByRole('region', { name: 'Top stories' })
+  expect(top.compareDocumentPosition(suggestions) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   // Follow right in the list; the author id is the user id.
   await userEvent.click(within(rail).getByRole('button', { name: 'Follow Dr Nasrin' }))
   await waitFor(() => expect(api.mock.calls.some(([url, init]) => String(url) === '/api/authors/7/follow' && init?.method === 'PUT')).toBe(true))
-  expect(within(screen.getByRole('navigation', { name: 'Quick actions' })).getByRole('link', { name: 'Ask a question' })).toHaveAttribute('href', '/questions/ask')
+  const sidebar = screen.getByRole('complementary', { name: 'Navigation' })
+  expect(await within(sidebar).findByRole('link', { name: 'Dr Nasrin' })).toHaveAttribute('href', '/authors/7')
+  await waitFor(() => expect(within(suggestions).queryByRole('link', { name: /Dr Nasrin/ })).not.toBeInTheDocument())
 })
 
 test('with nothing trending yet, the rail falls back to questions waiting for an answer and the newest stories', async () => {

@@ -1,5 +1,5 @@
 import { useT } from '../lib/i18n'
-import { ChatCircleText, Compass, List, MagnifyingGlass, Newspaper, NotePencil, Plus, Sparkle } from '@phosphor-icons/react'
+import { ChatCircleText, Compass, List, MagnifyingGlass, Newspaper, NotePencil, Plus, Sparkle, Tag, Users } from '@phosphor-icons/react'
 import { useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { cn } from 'cn'
@@ -26,7 +26,7 @@ export function MobileMenu({ signedIn, anonymous }: { signedIn: boolean; anonymo
         <List size={24} aria-hidden="true" />
         <span className="sr-only">{t('Menu')}</span>
       </SheetTrigger>
-      <SheetContent side="right" closeLabel={t('Close')} className="w-[min(20rem,85vw)] gap-0 p-4 pt-5">
+      <SheetContent side="right" closeLabel={t('Close')} className="w-[min(20rem,85vw)] gap-0 overflow-y-auto p-4 pt-5">
         <SheetTitle className="px-3 font-sans text-base font-semibold">{t('Menu')}</SheetTitle>
         <nav aria-label={t('Menu')} className="mt-6 flex flex-col gap-1">
           <NavLink to="/" end onClick={close} className={row}>
@@ -49,6 +49,16 @@ export function MobileMenu({ signedIn, anonymous }: { signedIn: boolean; anonymo
             <NotePencil size={20} aria-hidden="true" />
             {t('Write')}
           </NavLink>
+          <NavLink to="/topics" onClick={close} className={row}>
+            <Tag size={20} aria-hidden="true" />
+            {t('Explore topics')}
+          </NavLink>
+          {signedIn && (
+            <Link to="/library?tab=following" onClick={close} className={row({ isActive: false })}>
+              <Users size={20} aria-hidden="true" />
+              {t('Following')}
+            </Link>
+          )}
           <NavLink to="/search" onClick={close} className={row}>
             <MagnifyingGlass size={20} aria-hidden="true" />
             {t('Search')}

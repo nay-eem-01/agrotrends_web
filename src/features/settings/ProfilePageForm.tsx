@@ -1,3 +1,4 @@
+import { useT } from '../../lib/i18n'
 import { useRef, useState, type ChangeEvent, type FormEvent } from 'react'
 import { errorMessage } from '../../api/errors'
 import { useUploadImage } from '../../api/images'
@@ -5,6 +6,7 @@ import { MAX_LOCATION, useUpdateUserProfile, useUserProfile, type UserProfile } 
 import { IMAGE_TYPES, imageProblem } from '../../lib/images'
 import { CoverFallback } from '../../ui/Botanical'
 import { Button } from '../../ui/Button'
+import { ImageUploadProgress } from '../../ui/ImageUploadProgress'
 import { FormSkeleton } from '../../ui/LoadingSkeleton'
 import { cx } from '../../ui/cx'
 import { useImageDrop } from '../../ui/useImageDrop'
@@ -20,6 +22,7 @@ export function ProfilePageForm({ userId }: { userId: number }) {
 }
 
 function Editor({ profile }: { profile: UserProfile }) {
+  const t = useT()
   const update = useUpdateUserProfile()
   const upload = useUploadImage()
   const fileInput = useRef<HTMLInputElement>(null)
@@ -54,21 +57,22 @@ function Editor({ profile }: { profile: UserProfile }) {
   return (
     <form onSubmit={submit} noValidate className="flex flex-col gap-5">
       <div {...drop.handlers} className={cx('flex flex-col gap-2 rounded-xl', drop.active && 'outline-2 outline-primary')}>
-        <span className="text-sm font-medium">Cover photo</span>
+        <span className="text-sm font-medium">{t("Cover photo")}</span>
         <div className="h-28 overflow-hidden rounded-xl bg-muted">
           {cover ? <img src={cover} alt="Your current cover" className="size-full object-cover" /> : <CoverFallback className="size-full" />}
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button variant="secondary" size="sm" loading={upload.isPending} onClick={() => fileInput.current?.click()}>
-            {cover ? 'Change cover' : 'Add cover'}
+          <Button variant="secondary" size="sm" disabled={upload.isPending} onClick={() => fileInput.current?.click()}>
+            {t(cover ? 'Change cover' : 'Add cover')}
           </Button>
           {cover && (
             <Button variant="quiet" size="sm" disabled={upload.isPending} onClick={() => setCover('')}>
-              Remove cover
+              {t("Remove cover")}
             </Button>
           )}
         </div>
-        <input ref={fileInput} type="file" accept={IMAGE_TYPES.join(',')} aria-label="Cover photo" className="sr-only" tabIndex={-1} onChange={chooseCover} />
+        <input ref={fileInput} type="file" accept={IMAGE_TYPES.join(',')} aria-label={t("Cover photo")} className="sr-only" tabIndex={-1} onChange={chooseCover} />
+        {upload.isPending && <ImageUploadProgress progress={upload.progress} className="w-full max-w-56" />}
         {photoError ? (
           <p role="alert" className="text-xs text-destructive">
             {photoError}
@@ -78,7 +82,7 @@ function Editor({ profile }: { profile: UserProfile }) {
         )}
       </div>
       <TextField
-        label="Location (optional)"
+        label={t("Location (optional)")}
         hint="Where you farm or work, for example: Rangpur."
         value={location}
         maxLength={MAX_LOCATION}
@@ -89,10 +93,10 @@ function Editor({ profile }: { profile: UserProfile }) {
       />
       <FormError message={update.isError ? errorMessage(update.error) : null} />
       <div className="flex items-center gap-4">
-        <Button type="submit" loading={update.isPending} disabled={upload.isPending}>
-          Save profile page
+        <Button type="submit" loading={update.isPending} pendingLabel={t("Saving profile…")} disabled={upload.isPending}>
+          {t('Save cover and location')}
         </Button>
-        {update.isSuccess && <output className="text-sm text-primary">Profile page saved</output>}
+        {update.isSuccess && <output className="text-sm text-primary">{t("Profile page saved")}</output>}
       </div>
     </form>
   )

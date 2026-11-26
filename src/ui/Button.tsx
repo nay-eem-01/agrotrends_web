@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, ReactNode } from 'react'
+import { useEffect, useState, type ButtonHTMLAttributes, type ReactNode } from 'react'
 import { Link, type LinkProps } from 'react-router-dom'
 import { cn } from 'cn'
 import { buttonVariants } from '@/components/ui/button'
@@ -20,23 +20,53 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant
   size?: Size
   loading?: boolean
+  pendingLabel?: string
   children: ReactNode
 }
 
-export function Button({ variant, size, loading = false, disabled, className, children, type = 'button', ...rest }: ButtonProps) {
+export function Button({ variant, size, loading = false, pendingLabel, disabled, className, children, type = 'button', ...rest }: ButtonProps) {
+  const spinner = loading && <DelayedSpinner />
+
   return (
-    <button
-      type={type}
-      data-slot="button"
-      disabled={disabled || loading}
-      aria-busy={loading || undefined}
-      className={buttonClass(variant, size, className)}
-      {...rest}
-    >
-      {loading && <Spinner size={16} label="" />}
-      {children}
-    </button>
+    <>
+      <button
+        type={type}
+        data-slot="button"
+        disabled={disabled || loading}
+        aria-busy={loading || undefined}
+        className={buttonClass(variant, size, className)}
+        {...rest}
+      >
+        {pendingLabel ? (
+          <span className="grid">
+            <span aria-hidden={loading || undefined} className={cn('col-start-1 row-start-1 flex items-center justify-center gap-2', loading && 'invisible')}>
+              {children}
+            </span>
+            <span aria-hidden={!loading || undefined} className={cn('col-start-1 row-start-1 flex items-center justify-center gap-2', !loading && 'invisible')}>
+              <span aria-hidden="true" className="size-4 shrink-0">{spinner}</span>
+              {pendingLabel}
+            </span>
+          </span>
+        ) : (
+          <>
+            {spinner}
+            {children}
+          </>
+        )}
+      </button>
+      {pendingLabel && <output className="sr-only">{loading ? pendingLabel : ''}</output>}
+    </>
   )
+}
+
+function DelayedSpinner() {
+  const [visible, setVisible] = useState(false)
+  useEffect(() => {
+    const timer = window.setTimeout(() => setVisible(true), 1000)
+    return () => window.clearTimeout(timer)
+  }, [])
+
+  return visible ? <Spinner size={16} label="" /> : null
 }
 
 interface ButtonLinkProps extends LinkProps {

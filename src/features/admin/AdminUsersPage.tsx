@@ -1,3 +1,4 @@
+import { useT } from '../../lib/i18n'
 import { MagnifyingGlass } from '@phosphor-icons/react'
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
@@ -19,6 +20,7 @@ const TABS = [
 
 /** `/admin/users?q=&banned=`: find a member by name or e-mail, filter by ban state, open one. */
 export function AdminUsersPage() {
+  const t = useT()
   const [params] = useSearchParams()
   const q = (params.get('q') ?? '').trim()
   const bannedParam = params.get('banned')
@@ -38,7 +40,7 @@ export function AdminUsersPage() {
     <AdminPage title="Users">
       <div className="mt-6 flex flex-wrap items-center gap-3">
         <UserSearch key={q} initial={q} />
-        <nav aria-label="Ban state" className="flex gap-1 rounded-lg bg-muted p-1">
+        <nav aria-label={t("Ban state")} className="flex gap-1 rounded-lg bg-muted p-1">
           {TABS.map((tab) => {
             const current = (bannedParam ?? undefined) === tab.banned
             return (
@@ -77,7 +79,7 @@ export function AdminUsersPage() {
           {users.hasNextPage && (
             <div className="flex justify-center py-6">
               <Button variant="secondary" size="sm" loading={users.isFetchingNextPage} onClick={() => void users.fetchNextPage()}>
-                Show more members
+                {t("Show more members")}
               </Button>
             </div>
           )}
@@ -123,6 +125,7 @@ function UserSearch({ initial }: { initial: string }) {
 }
 
 function UserRow({ user }: { user: AdminUser }) {
+  const t = useT()
   const staff = (user.roles ?? []).filter((role) => role !== 'USER')
   const contact = user.email ?? user.mobileNumber ?? ''
   return (
@@ -145,7 +148,7 @@ function UserRow({ user }: { user: AdminUser }) {
         ))}
         {user.banned && (
           <Badge variant="destructive" title={user.banReason}>
-            Banned
+            {t("Banned")}
           </Badge>
         )}
       </div>

@@ -28,7 +28,7 @@ test('settings edit the location and cover shown on your profile', async () => {
   })
   renderWithProviders(<App />, '/settings')
 
-  const section = within((await screen.findByRole('heading', { name: 'Profile page' })).closest('section')!)
+  const section = within((await screen.findByRole('heading', { name: 'Profile cover and location' })).closest('section')!)
   const location = await section.findByLabelText('Location (optional)')
   expect(location).toHaveValue('Rangpur')
   expect(section.getByRole('img', { name: 'Your current cover' })).toHaveAttribute('src', '/uploads/field.jpg')
@@ -41,7 +41,7 @@ test('settings edit the location and cover shown on your profile', async () => {
   await userEvent.clear(location)
   await userEvent.type(location, ' Bogura ')
   await userEvent.click(section.getByRole('button', { name: 'Remove cover' }))
-  await userEvent.click(section.getByRole('button', { name: 'Save profile page' }))
+  await userEvent.click(section.getByRole('button', { name: 'Save cover and location' }))
 
   await waitFor(() => expect(section.getByText('Profile page saved')).toBeInTheDocument())
   const put = api.mock.calls.find(([url, init]) => String(url) === '/api/user/profile' && init?.method === 'PUT')!

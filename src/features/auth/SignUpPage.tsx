@@ -5,6 +5,7 @@ import { Link, Navigate, useSearchParams } from 'react-router-dom'
 import { useSignUp, type SignUpRequest } from '../../api/auth'
 import { errorMessage } from '../../api/errors'
 import { compactPhone, isEmail, passwordProblem, safeNext } from '../../lib/auth'
+import { useFormValidation } from '../../ui/FormValidation'
 import { Button } from '../../ui/Button'
 import { PasswordField } from '../../ui/PasswordField'
 import { TextField } from '../../ui/TextField'
@@ -70,7 +71,7 @@ export function SignUpPage() {
   const session = useSession()
   const signUp = useSignUp()
   const [form, setForm] = useState<Form>(EMPTY)
-  const [errors, setErrors] = useState<Errors>({})
+  const { errors, setErrors, reportErrors, fieldId, summary } = useFormValidation<keyof Errors>()
   // Which contact shows first (phone, as most farmers sign up by phone); "both" once the other is added too.
   const [contact, setContact] = useState<'phone' | 'email' | 'both'>('phone')
   const showPhone = contact !== 'email'
@@ -93,13 +94,16 @@ export function SignUpPage() {
   function submit(event: FormEvent) {
     event.preventDefault()
     const found = validateSignUp(form)
-    // "Give an e-mail or a phone" belongs on the field that's showing.
-    if (found.email && !form.email.trim() && !showEmail) {
-      found.mobileNumber = found.email
-      delete found.email
+    // Show any invalid contact the member had entered before switching methods.
+    if (found.email && !showEmail) {
+      if (form.email.trim()) setContact('both')
+      else {
+        found.mobileNumber = found.email
+        delete found.email
+      }
     }
-    setErrors(found)
-    if (Object.keys(found).length > 0) return
+    if ((found.mobileNumber || found.countryCode) && !showPhone) setContact('both')
+    if (reportErrors(found)) return
     signUp.mutate(toSignUpRequest(form), {
       onSuccess: (tokens) => session.signedIn(tokens),
     })
@@ -111,7 +115,8 @@ export function SignUpPage() {
     <AuthPage title={t('Create your account')} intro={t('Join farmers, agronomists and students sharing what works in the field.')}>
       <GoogleSignIn next={next} />
       <form onSubmit={submit} noValidate className="flex flex-col gap-5">
-        <TextField label={t('Full name')} autoComplete="name" value={form.name} onChange={(e) => set('name', e.target.value)} error={errors.name} />
+        {summary}
+        <TextField label={t('Full name')} autoComplete="name" value={form.name} onChange={(e) => set('name', e.target.value)} id={fieldId('name')} error={errors.name} />
         <fieldset className="flex flex-col gap-3">
           <legend className="mb-1 text-sm font-medium">{t('How we reach you')}</legend>
           <div className="grid grid-cols-2 rounded-full bg-surface p-1 text-sm font-semibold">
@@ -122,7 +127,10 @@ export function SignUpPage() {
                   key={kind}
                   type="button"
                   aria-pressed={contact === kind}
-                  onClick={() => setContact(kind)}
+                  onClick={() => {
+                    setContact(kind)
+                    setErrors((current) => ({ name: current.name, password: current.password }))
+                  }}
                   className={cn('h-9 rounded-full transition-colors duration-150', current ? 'bg-background text-foreground shadow-xs' : 'text-muted-foreground hover:text-foreground')}
                 >
                   {kind === 'phone' ? t('Mobile number') : t('E-mail')}
@@ -137,7 +145,7 @@ export function SignUpPage() {
                 autoComplete="tel-country-code"
                 value={form.countryCode}
                 onChange={(e) => set('countryCode', e.target.value)}
-                error={errors.countryCode}
+                id={fieldId('countryCode')} error={errors.countryCode}
               />
               <TextField
                 label={t('Mobile number')}
@@ -147,11 +155,11 @@ export function SignUpPage() {
                 placeholder="1712345678"
                 value={form.mobileNumber}
                 onChange={(e) => set('mobileNumber', e.target.value)}
-                error={errors.mobileNumber}
+                id={fieldId('mobileNumber')} error={errors.mobileNumber}
               />
             </div>
           )}
-          {showEmail && <TextField label={t('E-mail')} type="email" autoComplete="email" value={form.email} onChange={(e) => set('email', e.target.value)} error={errors.email} />}
+          {showEmail && <TextField label={t('E-mail')} type="email" autoComplete="email" value={form.email} onChange={(e) => set('email', e.target.value)} id={fieldId('email')} error={errors.email} />}
           {contact === 'both' ? (
             <p className="text-sm text-muted-foreground">{t('An e-mail, a phone number or both. You can add the other later.')}</p>
           ) : (
@@ -170,11 +178,11 @@ export function SignUpPage() {
           hint="8 to 16 characters, with a capital letter, a number and a symbol."
           value={form.password}
           onChange={(e) => set('password', e.target.value)}
-          error={errors.password}
+          id={fieldId('password')} error={errors.password}
         />
 
         <FormError message={signUp.isError ? errorMessage(signUp.error) : null} />
-        <Button type="submit" loading={signUp.isPending} className="mt-1">
+        <Button type="submit" loading={signUp.isPending} pendingLabel={t('Creating account…')} className="mt-1">
           {t('Create account')}
         </Button>
         <p className="text-xs text-muted-foreground">

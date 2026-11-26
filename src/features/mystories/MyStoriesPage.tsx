@@ -152,7 +152,7 @@ function StoryRow({ story }: { story: StorySummary }) {
       {confirming && (
         <div className="mt-3 flex flex-wrap items-center gap-3 rounded-lg bg-field px-4 py-3 text-sm">
           <span>Delete “{story.title}”? Its claps and responses go too. This can't be undone.</span>
-          <Button variant="danger" size="sm" loading={remove.isPending} onClick={() => remove.mutate({ kind: 'delete', blogId: story.id ?? 0 })}>
+          <Button variant="danger" size="sm" loading={remove.isPending} pendingLabel="Deleting story…" onClick={() => remove.mutate({ kind: 'delete', blogId: story.id ?? 0 })}>
             Delete story
           </Button>
           <Button variant="quiet" size="sm" onClick={() => setConfirming(false)}>

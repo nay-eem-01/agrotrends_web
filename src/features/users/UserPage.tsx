@@ -286,6 +286,7 @@ function FollowButton({ authorId, following, name }: { authorId: number; followi
       size="sm"
       variant={following ? 'secondary' : 'primary'}
       aria-pressed={following}
+      disabled={toggle.isPending}
       aria-label={following ? t('Unfollow {name}', { name }) : t('Follow {name}', { name })}
       onClick={() => requireSignIn(() => toggle.mutate({ authorId, follow: !following }))}
     >

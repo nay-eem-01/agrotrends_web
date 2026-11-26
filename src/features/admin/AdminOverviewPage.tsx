@@ -1,3 +1,4 @@
+import { useT } from '../../lib/i18n'
 import { ArrowRight, Flag, SealCheck, Sparkle, type Icon } from '@phosphor-icons/react'
 import { Link } from 'react-router-dom'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -27,6 +28,7 @@ const TOTALS: { key: keyof AdminStats; label: string; to?: string; recent?: keyo
 
 /** `/admin`: the launch test, then what needs attention, then the counts. */
 export function AdminOverviewPage() {
+  const t = useT()
   const stats = useAdminStats()
   return (
     <AdminPage title="Overview">
@@ -46,7 +48,7 @@ export function AdminOverviewPage() {
         <>
           <section aria-labelledby="admin-queues" className="mt-10">
             <h2 id="admin-queues" className="text-sm font-semibold text-muted-foreground">
-              Needs attention
+              {t("Needs attention")}
             </h2>
             <ul className="mt-3 grid gap-3 sm:grid-cols-3">
               {QUEUES.map(({ key, label, to, icon: Icon, hint }) => {
@@ -83,7 +85,7 @@ export function AdminOverviewPage() {
           </section>
           <section aria-labelledby="admin-totals" className="mt-10">
             <h2 id="admin-totals" className="text-sm font-semibold text-muted-foreground">
-              Community
+              {t("Community")}
             </h2>
             <dl className="mt-3 grid grid-cols-2 border-t border-border sm:grid-cols-3 lg:grid-cols-5">
               {TOTALS.map(({ key, label, to, recent }) => (

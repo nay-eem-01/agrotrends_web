@@ -4,7 +4,7 @@ import { errorMessage } from '../../api/errors'
 import { useUploadImage } from '../../api/images'
 import { useT } from '../../lib/i18n'
 import { IMAGE_TYPES, imageProblem } from '../../lib/images'
-import { Spinner } from '../../ui/Spinner'
+import { ImageUploadProgress } from '../../ui/ImageUploadProgress'
 import { cx } from '../../ui/cx'
 import { useImageDrop } from '../../ui/useImageDrop'
 
@@ -65,16 +65,16 @@ export function PhotoPicker({ urls, onChange, label, hint, max = MAX_PHOTOS }: P
         ))}
         {!full && (
           <li>
-            <button
+            {upload.isPending ? (
+              <ImageUploadProgress progress={upload.progress} className="flex aspect-square w-full flex-col justify-center rounded-xl bg-muted px-2 py-2 [&_output]:wrap-anywhere" />
+            ) : <button
               type="button"
-              disabled={upload.isPending}
-              aria-busy={upload.isPending || undefined}
               onClick={() => input.current?.click()}
               className="flex aspect-square w-full flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-border-strong text-muted-foreground transition-[border-color,background-color,color] duration-150 hover:border-primary/50 hover:bg-surface hover:text-primary disabled:cursor-wait"
             >
-              {upload.isPending ? <Spinner size={18} label={t('Uploading image')} /> : <ImageSquare size={22} aria-hidden="true" />}
+              <ImageSquare size={22} aria-hidden="true" />
               <span className="text-xs font-medium">{t('Add a photo')}</span>
-            </button>
+            </button>}
           </li>
         )}
       </ul>

@@ -35,7 +35,7 @@ test('an answer is reported with a reason and details', async () => {
   await userEvent.click((await openMoreActions(card)).getByRole('menuitem', { name: 'Report' }))
   const dialog = await screen.findByRole('dialog', { name: 'Report this answer' })
   await userEvent.click(within(dialog).getByRole('button', { name: 'Send report' }))
-  expect(within(dialog).getByText('Choose what is wrong.')).toBeInTheDocument()
+  expect(within(dialog).getByRole('link', { name: 'Choose what is wrong.' })).toBeInTheDocument()
 
   await userEvent.click(within(dialog).getByRole('radio', { name: /Harmful advice/ }))
   await userEvent.type(within(dialog).getByLabelText('Details (optional)'), 'Ten times the dose burns the crop.')

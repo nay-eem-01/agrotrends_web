@@ -117,13 +117,14 @@ test('the starter catalog can be followed and unfollowed even when there are no 
     },
   })
   renderWithProviders(<App />, '/topics')
-  const follow = await screen.findByRole('button', { name: 'Follow Rice' })
+  const crops = within((await screen.findByRole('heading', { name: 'Crops and gardens' })).closest('section')!)
+  const follow = crops.getByRole('button', { name: 'Follow Rice' })
   await waitFor(() => expect(follow).toBeEnabled())
   await userEvent.click(follow)
 
-  const unfollow = await screen.findByRole('button', { name: 'Unfollow Rice' })
+  const unfollow = await crops.findByRole('button', { name: 'Unfollow Rice' })
   const yours = screen.getByRole('region', { name: 'Topics you follow' })
   expect(within(yours).getByRole('link', { name: 'Rice' })).toHaveAttribute('href', '/questions?categoryId=3')
   await userEvent.click(unfollow)
-  expect(await screen.findByRole('button', { name: 'Follow Rice' })).toHaveAttribute('aria-pressed', 'false')
+  expect(await crops.findByRole('button', { name: 'Follow Rice' })).toHaveAttribute('aria-pressed', 'false')
 })

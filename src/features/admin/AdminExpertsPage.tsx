@@ -1,3 +1,4 @@
+import { useT } from '../../lib/i18n'
 import { ArrowSquareOut } from '@phosphor-icons/react'
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
@@ -36,6 +37,7 @@ const TABS: { status: ApplicationStatus; label: string }[] = [
 
 /** `/admin/experts`: decide expert applications (all or some topics, or reject with a reason); revoke a badge. */
 export function AdminExpertsPage() {
+  const t = useT()
   const [params] = useSearchParams()
   const status = TABS.find((tab) => tab.status === params.get('status'))?.status ?? 'PENDING'
   const applications = useExpertApplications(status)
@@ -43,7 +45,7 @@ export function AdminExpertsPage() {
 
   return (
     <AdminPage title="Expert applications">
-      <nav aria-label="Application status" className="mt-6 flex gap-1 rounded-full bg-muted p-1 self-start w-fit">
+      <nav aria-label={t("Application status")} className="mt-6 flex gap-1 rounded-full bg-muted p-1 self-start w-fit">
         {TABS.map((tab) => (
           <Link
             key={tab.status}
@@ -51,12 +53,12 @@ export function AdminExpertsPage() {
             aria-current={tab.status === status ? 'page' : undefined}
             className={cn('flex h-9 items-center rounded-full px-4 text-sm', tab.status === status ? 'bg-card font-medium shadow-xs ring-1 ring-border' : 'text-muted-foreground hover:text-foreground')}
           >
-            {tab.label}
+            {t(tab.label)}
           </Link>
         ))}
       </nav>
       {applications.isPending ? (
-        <RowsSkeleton label="Loading applications" kind="avatar" className="mt-4" />
+        <RowsSkeleton label={t("Loading applications")} kind="avatar" className="mt-4" />
       ) : applications.isError ? (
         <p role="alert" className="py-12 text-muted-foreground">
           {errorMessage(applications.error)}
@@ -77,6 +79,7 @@ export function AdminExpertsPage() {
 }
 
 function ApplicationCard({ application }: { application: ExpertApplication }) {
+  const t = useT()
   return (
     <article aria-label={`Application from ${application.applicantName}`} className="rounded-xl bg-card p-5 ring-1 ring-border">
       <header className="flex flex-wrap items-baseline justify-between gap-2">
@@ -102,7 +105,7 @@ function ApplicationCard({ application }: { application: ExpertApplication }) {
         <dd>{(application.topics ?? []).map((topic) => topic.categoryName).join(', ')}</dd>
       </dl>
       {(application.proofImageUrls?.length ?? 0) > 0 && (
-        <ul aria-label="Proof photos" className="mt-4 grid grid-cols-4 gap-2">
+        <ul aria-label={t("Proof photos")} className="mt-4 grid grid-cols-4 gap-2">
           {application.proofImageUrls!.map((url, index) => {
             const label = `Proof ${index + 1}`
             return (
@@ -116,7 +119,7 @@ function ApplicationCard({ application }: { application: ExpertApplication }) {
         </ul>
       )}
       {(application.links?.length ?? 0) > 0 && (
-        <ul aria-label="Proof links" className="mt-3 flex flex-col gap-1 text-sm">
+        <ul aria-label={t("Proof links")} className="mt-3 flex flex-col gap-1 text-sm">
           {application.links!.map((link) => (
             <li key={link}>
               <a href={link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 break-all text-primary underline-offset-4 hover:underline">
@@ -136,6 +139,7 @@ function ApplicationCard({ application }: { application: ExpertApplication }) {
 
 /** Approve every requested topic (sent without categoryIds) or some; reject needs a reason. */
 function Decide({ application }: { application: ExpertApplication }) {
+  const t = useT()
   const decide = useExpertDecision()
   const requested = (application.topics ?? []).map((topic) => topic.id ?? 0)
   const [chosen, setChosen] = useState<number[]>(requested)
@@ -158,7 +162,7 @@ function Decide({ application }: { application: ExpertApplication }) {
   return (
     <div className="mt-5 flex flex-col gap-4 border-t border-border pt-4">
       <fieldset>
-        <legend className="text-sm font-medium">Approve for</legend>
+        <legend className="text-sm font-medium">{t('Approve for')}</legend>
         <div className="mt-2 flex flex-wrap gap-3">
           {(application.topics ?? []).map((topic) => (
             <label key={topic.id} className="inline-flex items-center gap-2 text-sm">
@@ -174,7 +178,7 @@ function Decide({ application }: { application: ExpertApplication }) {
         </div>
       </fieldset>
       <TextArea
-        label="Note to the applicant"
+        label={t('Note to the applicant')}
         hint="Optional when approving; required when rejecting. The applicant sees it, never your name."
         rows={2}
         maxLength={MAX_DECISION_NOTE}
@@ -188,11 +192,11 @@ function Decide({ application }: { application: ExpertApplication }) {
         </p>
       )}
       <div className="flex gap-3">
-        <Button size="sm" loading={decide.isPending && decide.variables?.action === 'approve'} disabled={decide.isPending} onClick={approve}>
-          Approve
+        <Button size="sm" loading={decide.isPending && decide.variables?.action === 'approve'} pendingLabel={t('Approving…')} disabled={decide.isPending} onClick={approve}>
+          {t('Approve')}
         </Button>
-        <Button variant="danger" size="sm" loading={decide.isPending && decide.variables?.action === 'reject'} disabled={decide.isPending} onClick={reject}>
-          Reject
+        <Button variant="danger" size="sm" loading={decide.isPending && decide.variables?.action === 'reject'} pendingLabel={t('Rejecting…')} disabled={decide.isPending} onClick={reject}>
+          {t('Reject')}
         </Button>
       </div>
     </div>
@@ -201,6 +205,7 @@ function Decide({ application }: { application: ExpertApplication }) {
 
 /** Take a badge away, per topic. It also reopens the AI answers this expert confirmed there, so it asks first. */
 function Revoke({ application }: { application: ExpertApplication }) {
+  const t = useT()
   const decide = useExpertDecision()
   const [topic, setTopic] = useState<{ id: number; name: string } | null>(null)
 
@@ -237,7 +242,7 @@ function Revoke({ application }: { application: ExpertApplication }) {
                 setTopic(null)
               }}
             >
-              Revoke badge
+              {t('Revoke badge')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

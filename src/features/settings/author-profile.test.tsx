@@ -1,16 +1,10 @@
-import { fireEvent, screen, within } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { clearSession } from '../../api/client'
 import App from '../../App'
+import { envelope, mockApi } from '../../test/api'
 import { renderWithProviders } from '../../test/render'
-
-function envelope(status: number, payload: unknown, message = 'OK') {
-  return new Response(JSON.stringify({ status: String(status), message, payload, success: status < 400 }), {
-    status,
-    headers: { 'Content-Type': 'application/json' },
-  })
-}
 
 const author = { id: 1, authorId: 5, name: 'Nasrin Akter', email: 'nasrin@farm.bd', mobileNumber: '+8801712345678' }
 const profile = {
@@ -24,11 +18,10 @@ const profile = {
   profileImageUrl: '/uploads/old.png',
 }
 
-const fetchMock = vi.fn<typeof fetch>()
+let fetchMock: ReturnType<typeof mockApi>
 let routes: Record<string, () => Response>
 
 beforeEach(() => {
-  vi.stubGlobal('fetch', fetchMock)
   localStorage.clear()
   clearSession()
   localStorage.setItem('agrotrends.refreshToken', 'r0')
@@ -36,12 +29,7 @@ beforeEach(() => {
     'POST /api/auth/refresh-token': () => envelope(200, { accessToken: 'a1', refreshToken: 'r1', user: author }),
     'GET /api/authors/me': () => envelope(200, profile),
   }
-  fetchMock.mockImplementation(async (input, init) => {
-    const key = `${init?.method ?? 'GET'} ${String(input)}`
-    const handler = routes[key]
-    if (!handler) throw new Error(`Unexpected ${key}`)
-    return handler()
-  })
+  fetchMock = mockApi(routes)
 })
 
 afterEach(() => {
@@ -56,7 +44,7 @@ function call(key: string): RequestInit | undefined {
 
 async function openProfile() {
   renderWithProviders(<App />, '/settings')
-  const heading = await screen.findByRole('heading', { name: 'Profile' })
+  const heading = await screen.findByRole('heading', { name: 'Author profile' })
   const section = heading.closest('section')!
   await within(section).findByLabelText('Designation')
   return within(section)
@@ -78,7 +66,7 @@ test('saving sends the whole profile', async () => {
   await userEvent.clear(profileSection.getByLabelText('About you (optional)'))
   await userEvent.type(profileSection.getByLabelText('About you (optional)'), 'Boro and aman rice.')
   await userEvent.type(profileSection.getByLabelText('Specialities'), ', jute')
-  await userEvent.click(profileSection.getByRole('button', { name: 'Save profile' }))
+  await userEvent.click(profileSection.getByRole('button', { name: 'Save author profile' }))
 
   expect(await profileSection.findByText('Profile saved')).toBeInTheDocument()
   expect(JSON.parse(call('PUT /api/authors/me')!.body as string)).toEqual({
@@ -100,7 +88,8 @@ test('a new photo is uploaded and saved with the profile', async () => {
   fireEvent.drop(profileSection.getByRole('button', { name: 'Change photo' }), {
     dataTransfer: { types: ['Files'], files: [photo], items: [] },
   })
-  await userEvent.click(profileSection.getByRole('button', { name: 'Save profile' }))
+  await waitFor(() => expect(document.querySelector('img[src="/uploads/new.webp"]')).toBeInTheDocument())
+  await userEvent.click(profileSection.getByRole('button', { name: 'Save author profile' }))
 
   await profileSection.findByText('Profile saved')
   const upload = call('POST /api/images')!
@@ -125,7 +114,7 @@ test('removing the photo saves without one', async () => {
 
   await userEvent.click(profileSection.getByRole('button', { name: 'Remove photo' }))
   expect(profileSection.getByRole('button', { name: 'Add photo' })).toBeInTheDocument()
-  await userEvent.click(profileSection.getByRole('button', { name: 'Save profile' }))
+  await userEvent.click(profileSection.getByRole('button', { name: 'Save author profile' }))
 
   await profileSection.findByText('Profile saved')
   expect(JSON.parse(call('PUT /api/authors/me')!.body as string)).toHaveProperty('profileImageUrl', '')
@@ -135,7 +124,7 @@ test('designation and specialities are required', async () => {
   const profileSection = await openProfile()
   await userEvent.clear(profileSection.getByLabelText('Designation'))
   await userEvent.clear(profileSection.getByLabelText('Specialities'))
-  await userEvent.click(profileSection.getByRole('button', { name: 'Save profile' }))
+  await userEvent.click(profileSection.getByRole('button', { name: 'Save author profile' }))
 
   expect(profileSection.getByLabelText('Designation')).toHaveAccessibleDescription('Enter your designation.')
   expect(profileSection.getByLabelText('Specialities')).toHaveAccessibleDescription('Enter at least one speciality.')
@@ -146,6 +135,6 @@ test('every account has a profile section, even before its first story', async (
   routes['POST /api/auth/refresh-token'] = () => envelope(200, { accessToken: 'a1', refreshToken: 'r1', user: { ...author, authorId: null } })
   renderWithProviders(<App />, '/settings')
 
-  expect(await screen.findByRole('heading', { name: 'Profile' })).toBeInTheDocument()
+  expect(await screen.findByRole('heading', { name: 'Author profile' })).toBeInTheDocument()
   expect(await screen.findByLabelText('Designation')).toHaveValue('Agronomist')
 })

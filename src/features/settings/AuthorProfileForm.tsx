@@ -1,3 +1,4 @@
+import { useT } from '../../lib/i18n'
 import { useRef, useState, type ChangeEvent, type FormEvent } from 'react'
 import { useMyAuthorProfile, useUpdateMyAuthorProfile } from '../../api/authors'
 import { errorMessage } from '../../api/errors'
@@ -6,7 +7,9 @@ import type { AuthorProfileResponse } from '../../api/types'
 import { splitList } from '../../lib/auth'
 import { IMAGE_TYPES, imageProblem } from '../../lib/images'
 import { Avatar } from '../../ui/Avatar'
+import { useFormValidation } from '../../ui/FormValidation'
 import { Button } from '../../ui/Button'
+import { ImageUploadProgress } from '../../ui/ImageUploadProgress'
 import { FormSkeleton } from '../../ui/LoadingSkeleton'
 import { cx } from '../../ui/cx'
 import { useImageDrop } from '../../ui/useImageDrop'
@@ -23,9 +26,10 @@ export function AuthorProfileForm({ name, onSaved }: { name: string; onSaved?: (
   return <ProfileEditor profile={profile.data} name={name} onSaved={onSaved} />
 }
 
-type Errors = Partial<Record<'designation' | 'specialities' | 'photo', string>>
+type Errors = Partial<Record<'designation' | 'specialities', string>>
 
 function ProfileEditor({ profile, name, onSaved }: { profile: AuthorProfileResponse; name: string; onSaved?: () => void }) {
+  const t = useT()
   const update = useUpdateMyAuthorProfile()
   const upload = useUploadImage()
   const fileInput = useRef<HTMLInputElement>(null)
@@ -37,7 +41,8 @@ function ProfileEditor({ profile, name, onSaved }: { profile: AuthorProfileRespo
     bio: profile.bio ?? '',
     profileImageUrl: profile.profileImageUrl ?? '',
   }))
-  const [errors, setErrors] = useState<Errors>({})
+  const [photoProblem, setPhotoProblem] = useState<string>()
+  const { errors, setErrors, reportErrors, fieldId, summary } = useFormValidation<keyof Errors>()
 
   function set(key: keyof typeof form, value: string) {
     setForm((current) => ({ ...current, [key]: value }))
@@ -54,7 +59,7 @@ function ProfileEditor({ profile, name, onSaved }: { profile: AuthorProfileRespo
   function uploadFile(file: File) {
     if (upload.isPending) return
     const problem = imageProblem(file)
-    setErrors((current) => ({ ...current, photo: problem ?? undefined }))
+    setPhotoProblem(problem ?? undefined)
     if (problem) return
     upload.mutate(file, { onSuccess: (url) => set('profileImageUrl', url) })
   }
@@ -62,10 +67,9 @@ function ProfileEditor({ profile, name, onSaved }: { profile: AuthorProfileRespo
   function submit(event: FormEvent) {
     event.preventDefault()
     const found: Errors = {}
-    if (!form.designation.trim()) found.designation = 'Enter your designation.'
-    if (splitList(form.specialities).length === 0) found.specialities = 'Enter at least one speciality.'
-    setErrors(found)
-    if (found.designation || found.specialities) return
+    if (!form.designation.trim()) found.designation = t('Enter your designation.')
+    if (splitList(form.specialities).length === 0) found.specialities = t('Enter at least one speciality.')
+    if (reportErrors(found)) return
     update.mutate({
       designation: form.designation.trim(),
       specialities: splitList(form.specialities),
@@ -76,21 +80,22 @@ function ProfileEditor({ profile, name, onSaved }: { profile: AuthorProfileRespo
     }, { onSuccess: () => onSaved?.() })
   }
 
-  const drop = useImageDrop(uploadFile, (message) => setErrors((current) => ({ ...current, photo: message })), upload.isPending)
-  const photoError = errors.photo ?? (upload.isError ? errorMessage(upload.error) : undefined)
+  const drop = useImageDrop(uploadFile, setPhotoProblem, upload.isPending)
+  const photoError = photoProblem ?? (upload.isError ? errorMessage(upload.error) : undefined)
 
   return (
     <form onSubmit={submit} noValidate className="flex flex-col gap-5">
+      {summary}
       <div {...drop.handlers} className={cx('flex items-center gap-4 rounded-xl', drop.active && 'outline-2 outline-primary')}>
         <Avatar name={name} src={form.profileImageUrl || null} size={72} />
         <div className="flex flex-col items-start gap-1">
           <div className="flex flex-wrap gap-2">
-            <Button variant="secondary" size="sm" loading={upload.isPending} onClick={() => fileInput.current?.click()}>
+            <Button variant="secondary" size="sm" disabled={upload.isPending} onClick={() => fileInput.current?.click()}>
               {form.profileImageUrl ? 'Change photo' : 'Add photo'}
             </Button>
             {form.profileImageUrl && (
               <Button variant="quiet" size="sm" disabled={upload.isPending} onClick={() => set('profileImageUrl', '')}>
-                Remove photo
+                {t("Remove photo")}
               </Button>
             )}
           </div>
@@ -98,11 +103,12 @@ function ProfileEditor({ profile, name, onSaved }: { profile: AuthorProfileRespo
             ref={fileInput}
             type="file"
             accept={IMAGE_TYPES.join(',')}
-            aria-label="Profile photo"
+            aria-label={t("Profile photo")}
             className="sr-only"
             tabIndex={-1}
             onChange={choosePhoto}
           />
+          {upload.isPending && <ImageUploadProgress progress={upload.progress} className="w-full max-w-56" />}
           {photoError ? (
             <p role="alert" className="text-xs text-danger">
               {photoError}
@@ -112,32 +118,32 @@ function ProfileEditor({ profile, name, onSaved }: { profile: AuthorProfileRespo
           )}
         </div>
       </div>
-      <TextField label="Designation" value={form.designation} onChange={(e) => set('designation', e.target.value)} error={errors.designation} />
+      <TextField label={t("Designation")} value={form.designation} onChange={(e) => set('designation', e.target.value)} id={fieldId('designation')} error={errors.designation} />
       <TextField
-        label="Specialities"
+        label={t("Specialities")}
         hint="Separate with commas, for example: rice, soil health."
         value={form.specialities}
         onChange={(e) => set('specialities', e.target.value)}
-        error={errors.specialities}
+        id={fieldId('specialities')} error={errors.specialities}
       />
-      <TextField label="Occupation (optional)" value={form.occupation} onChange={(e) => set('occupation', e.target.value)} />
+      <TextField label={t("Occupation (optional)")} value={form.occupation} onChange={(e) => set('occupation', e.target.value)} />
       <TextField
-        label="Workplace or institution (optional)"
+        label={t("Workplace or institution (optional)")}
         value={form.workPlaceOrInstitution}
         onChange={(e) => set('workPlaceOrInstitution', e.target.value)}
       />
       <TextArea
-        label="About you (optional)"
+        label={t("About you (optional)")}
         hint="A few lines on your work and what you write about. Shown on your author page."
         value={form.bio}
         onChange={(e) => set('bio', e.target.value)}
       />
       <FormError message={update.isError ? errorMessage(update.error) : null} />
       <div className="flex items-center gap-4">
-        <Button type="submit" loading={update.isPending} disabled={upload.isPending}>
-          Save profile
+        <Button type="submit" loading={update.isPending} pendingLabel={t("Saving profile…")} disabled={upload.isPending}>
+          {t(onSaved ? 'Save profile' : 'Save author profile')}
         </Button>
-        {update.isSuccess && <output className="text-sm text-paddy">Profile saved</output>}
+        {update.isSuccess && <output className="text-sm text-paddy">{t("Profile saved")}</output>}
       </div>
     </form>
   )

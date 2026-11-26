@@ -1,11 +1,12 @@
-import { ChatCircleText, Newspaper, SealCheck, Sparkle } from '@phosphor-icons/react'
-import { useState, type ReactNode } from 'react'
+import { ChatCircleText, Sparkle } from '@phosphor-icons/react'
+import type { ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { cn } from 'cn'
 import { useMyAuthorProfile } from '../../api/authors'
 import { useTopicStories } from '../../api/blogs'
+import { errorMessage } from '../../api/errors'
 import { useCategories, useFollowedCategories } from '../../api/categories'
-import { useExperts, type ExpertSummary } from '../../api/experts'
+import { useRecommendedExperts, type ExpertSummary } from '../../api/experts'
 import { useFeed, useTrendingQuestions } from '../../api/feed'
 import { useToggleAuthorFollow } from '../../api/follows'
 import { useQuestions } from '../../api/questions'
@@ -16,19 +17,20 @@ import { formatNumber, useT } from '../../lib/i18n'
 import { Avatar } from '../../ui/Avatar'
 import { CoverFallback } from '../../ui/Botanical'
 import { Button, ButtonLink } from '../../ui/Button'
+import { FormError } from '../../ui/FormValidation'
 import { RowsSkeleton } from '../../ui/LoadingSkeleton'
 import { useSession } from '../auth/session'
-import { useRequireSignIn } from '../auth/useRequireSignIn'
 import { QuestionCard } from '../qa/QuestionRow'
 import { TopicChips } from '../topics/TopicChips'
+import { FeedHighlight } from './FeedHighlight'
 
 type Show = 'questions' | 'stories'
 
 /**
  * `/` for signed-in readers: a composer, then Questions | Stories as two tabs above topic filters, with what's
- * trending and experts to follow on the right (the sections and your topics are in the app's sidebar). One kind at a
+ * trending and people to follow on the right. The app's sidebar lists people the reader already follows. One kind at a
  * time, never mixed. The tab, topic and sort live in the URL (`?show=stories&topic=2`, `?unanswered=true`), so a tab
- * can be linked and Back works. On phones the quick actions come first.
+ * can be linked and Back works. On smaller screens the feed includes one recommendation from the other tab.
  */
 export function HomeFeed() {
   const t = useT()
@@ -37,6 +39,7 @@ export function HomeFeed() {
   const topic = Number(params.get('topic')) || undefined
   const unanswered = show === 'questions' && params.get('unanswered') === 'true'
   const categories = useCategories()
+  const highlights = useHomeHighlights()
   // For you opens by default when the reader follows a category or tag.
   const followed = useFollowedTags(true)
   const followedCategories = useFollowedCategories(true)
@@ -64,13 +67,12 @@ export function HomeFeed() {
   ]
 
   return (
-    <div className="mx-auto grid max-w-[84rem] gap-8 px-4 pt-6 pb-4 sm:px-8 xl:grid-cols-[minmax(0,1fr)_17rem] xl:gap-8 2xl:grid-cols-[minmax(0,1fr)_20rem] 2xl:gap-10">
+    <div className="mx-auto grid max-w-[84rem] gap-8 px-4 pt-3 pb-4 sm:px-8 sm:pt-6 xl:grid-cols-[minmax(0,1fr)_17rem] xl:gap-8 2xl:grid-cols-[minmax(0,1fr)_20rem] 2xl:gap-10">
       <title>{t('AgroTrends – farming questions, stories and advice')}</title>
       <h1 className="sr-only">{t('Home')}</h1>
       <section aria-label={t('Your feed')} className="min-w-0">
-        <QuickStart />
         <Composer />
-        <nav aria-label={t('Show')} className="mt-2 flex gap-7 border-b border-border">
+        <nav aria-label={t('Show')} className="mt-1 flex gap-7 border-b border-border sm:mt-2">
           {tabs.map((tab) => (
             <Link
               key={tab.show}
@@ -85,8 +87,8 @@ export function HomeFeed() {
             </Link>
           ))}
         </nav>
-        <div className="flex flex-col items-start gap-3 py-4">
-          <TopicChips categories={categories.data ?? []} selected={topic} renderTopic={(category) => (
+        <div className="flex min-w-0 flex-col items-start gap-2 py-2.5 sm:gap-3 sm:py-4">
+          <TopicChips scrollOnMobile categories={categories.data ?? []} selected={topic} renderTopic={(category) => (
             <TopicChip to={to({ topic: category.id })} current={topic === category.id}>{category.categoryName}</TopicChip>
           )}>
             {show === 'questions' && (
@@ -115,9 +117,10 @@ export function HomeFeed() {
             </nav>
           )}
         </div>
+        <MobileHighlight show={show} highlights={highlights} />
         {show === 'questions' ? <QuestionList topic={topic} unanswered={unanswered} following={forYou} waiting={deciding} /> : <StoryList topic={topic} />}
       </section>
-      <Rail />
+      <Rail highlights={highlights} />
     </div>
   )
 }
@@ -131,6 +134,8 @@ function QuestionList({ topic, unanswered, following, waiting }: { topic?: numbe
     <FeedList
       kind="question"
       loading={waiting || questions.isPending}
+      error={questions.isError ? errorMessage(questions.error) : undefined}
+      onRetry={() => void questions.refetch()}
       empty={
         following
           ? t('Nothing yet in the topics you follow. Follow more topics, or see all questions.')
@@ -170,6 +175,8 @@ function StoryList({ topic }: { topic?: number }) {
     <FeedList
       kind="story"
       loading={stories.isPending}
+      error={stories.isError ? errorMessage(stories.error) : undefined}
+      onRetry={() => void stories.refetch()}
       empty={topic ? t('No stories in this topic yet.') : t('No stories yet.')}
       action={
         <ButtonLink to="/write" variant="secondary">
@@ -190,6 +197,8 @@ function StoryList({ topic }: { topic?: number }) {
 function FeedList({
   kind,
   loading,
+  error,
+  onRetry,
   empty,
   action,
   more,
@@ -199,6 +208,8 @@ function FeedList({
 }: {
   kind: 'question' | 'story'
   loading: boolean
+  error?: string
+  onRetry: () => void
   empty: string
   action: ReactNode
   more: boolean
@@ -209,6 +220,13 @@ function FeedList({
   const t = useT()
   if (loading)
     return <RowsSkeleton label={t('Loading your feed')} kind={kind} />
+  if (error && children.length === 0)
+    return (
+      <div className="space-y-3 py-4">
+        <FormError message={error} />
+        <Button variant="secondary" size="sm" onClick={onRetry}>{t('Try again')}</Button>
+      </div>
+    )
   // An empty list says so and offers the one action that fills it.
   if (children.length === 0)
     return (
@@ -220,6 +238,7 @@ function FeedList({
   return (
     <>
       <ul className="border-t border-border">{children}</ul>
+      {error && <FormError message={error} />}
       {more && (
         <div className="flex justify-center py-6">
           <Button variant="secondary" size="sm" loading={loadingMore} onClick={onMore}>
@@ -254,48 +273,13 @@ function Composer() {
   return (
     <div className="mb-2 flex items-center gap-3 rounded-full bg-surface py-2 pr-2 pl-2">
       <Avatar name={user?.name ?? '?'} src={photo} size={32} />
-      <Link to="/questions/ask" className="min-w-0 flex-1 truncate text-sm text-muted-foreground hover:text-foreground">
-        {t('Ask a question in public…')}
+      <Link to="/questions/ask" className="flex min-h-9 min-w-0 flex-1 items-center text-sm text-muted-foreground hover:text-foreground">
+        {t('Ask a question')}
       </Link>
       <Link to="/advisor" className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-border-strong bg-background px-3 text-sm font-semibold hover:border-subtle">
         <Sparkle size={16} aria-hidden="true" />
         {t('Private AI')}
       </Link>
-    </div>
-  )
-}
-
-/** Phones: a greeting and the four ways in. */
-function QuickStart() {
-  const t = useT()
-  const { user } = useSession()
-  const [hour] = useState(() => new Date().getHours())
-  const name = (user?.name ?? '').split(' ')[0]
-  const greeting = hour < 12 ? t('Good morning, {name}', { name }) : hour < 17 ? t('Good afternoon, {name}', { name }) : t('Good evening, {name}', { name })
-  const actions = [
-    { to: '/questions/ask', label: t('Ask a question'), icon: ChatCircleText, main: true },
-    { to: '/advisor', label: t('Private AI advice'), icon: Sparkle },
-    { to: '/stories', label: t('Read stories'), icon: Newspaper },
-    { to: '/questions?unanswered=true', label: t('Help answer'), icon: SealCheck },
-  ]
-  return (
-    <div className="mb-6 flex flex-col gap-4 md:hidden">
-      <p className="font-serif text-2xl font-semibold">{greeting}</p>
-      <nav aria-label={t('Quick actions')} className="grid grid-cols-2 gap-2.5">
-        {actions.map(({ to, label, icon: Icon, main }) => (
-          <Link
-            key={to}
-            to={to}
-            className={cn(
-              'flex flex-col gap-2 rounded-xl border p-3.5 text-sm font-semibold transition-colors duration-150',
-              main ? 'border-primary bg-primary text-primary-foreground' : 'border-border hover:bg-surface',
-            )}
-          >
-            <Icon size={22} aria-hidden="true" className={main ? undefined : 'text-primary'} />
-            {label}
-          </Link>
-        ))}
-      </nav>
     </div>
   )
 }
@@ -334,29 +318,39 @@ function StoryItem({ story }: { story: StorySummary }) {
   )
 }
 
-/**
- * Wide screens: the advisor, then trending questions and trending stories as two short lists, then experts to follow.
- * A quiet site has nothing trending yet, so each list falls back (questions waiting for an answer, the newest stories)
- * and the column is never blank.
- */
-function Rail() {
-  const t = useT()
+function useHomeHighlights() {
   const trending = useFeed('trending')
   const questions = useTrendingQuestions()
-  const experts = useExperts()
   const top = (trending.data?.pages[0]?.content ?? []).slice(0, 4)
   const asked = questions.data?.content ?? []
-  // The fallbacks load only once their trending list has come back empty (or failed).
-  const noAsked = !questions.isPending && asked.length === 0
-  const noTop = !trending.isPending && top.length === 0
-  const waiting = useQuestions({ unanswered: true }, noAsked)
-  const latest = useFeed('latest', noTop)
+  // Fall back to unanswered questions and recent stories when there is nothing trending.
+  const waiting = useQuestions({ unanswered: true }, !questions.isPending && asked.length === 0)
+  const latest = useFeed('latest', !trending.isPending && top.length === 0)
   const open = (waiting.data?.pages[0]?.content ?? []).slice(0, 4)
   const fresh = (latest.data?.pages[0]?.content ?? []).slice(0, 4)
+  return { top, asked, open, fresh }
+}
+
+function MobileHighlight({ show, highlights: { top, asked, open, fresh } }: { show: Show; highlights: ReturnType<typeof useHomeHighlights> }) {
+  const t = useT()
+  const story = top[0] ?? fresh[0]
+  const question = asked[0] ?? open[0]
+  const highlight = show === 'questions'
+    ? story?.title && story.slug && <FeedHighlight label={t(top.length ? 'Top story' : 'Latest story')} title={story.title} to={`/stories/${story.slug}`} image={story.imageUrl} />
+    : question?.title && question.questionId && <FeedHighlight label={t(asked.length ? 'Trending question' : 'Waiting for an answer')} title={question.title} to={`/questions/${question.questionId}`} />
+
+  if (!highlight) return null
+  return <section aria-label={t('Recommended reading')} className="mb-3 xl:hidden">{highlight}</section>
+}
+
+/** The advisor, trending questions and stories, and experts to follow. */
+function Rail({ highlights: { top, asked, open, fresh } }: { highlights: ReturnType<typeof useHomeHighlights> }) {
+  const t = useT()
+  const experts = useRecommendedExperts()
   return (
-    <aside aria-label={t('More to read')} className="hidden sm:block">
-      <div className="sticky top-24 flex flex-col gap-8">
-        <section aria-labelledby="ask-advisor" className="flex flex-col gap-2 rounded-xl bg-surface p-4">
+    <aside aria-label={t('More to read')} className="min-w-0">
+      <div className="flex flex-col gap-8 xl:sticky xl:top-24">
+        <section aria-labelledby="ask-advisor" className="hidden flex-col gap-2 rounded-xl bg-surface p-4 sm:flex">
           <h2 id="ask-advisor" className="flex items-center gap-1.5 font-sans text-sm font-semibold">
             <Sparkle size={16} aria-hidden="true" className="text-primary" />
             {t('Ask the AI advisor')}
@@ -386,7 +380,7 @@ function Rail() {
           )
         )}
         {top.length > 0 ? (
-          <RailList id="trending-stories" title={t('Trending stories')}>
+          <RailList id="trending-stories" title={t('Top stories')}>
             {top.map((story) => (
               <RailItem key={story.id} to={`/stories/${story.slug}`} meta={story.author?.name}>
                 {story.title}
@@ -404,58 +398,63 @@ function Rail() {
             </RailList>
           )
         )}
-        {(experts.data?.content?.length ?? 0) > 0 && (
-          <section aria-labelledby="experts-to-follow">
-            <h2 id="experts-to-follow" className="font-sans text-sm font-semibold">
-              {t('Experts to follow')}
-            </h2>
-            <ul className="mt-3 flex flex-col gap-3.5">
-              {experts.data!.content.map((expert) => (
-                <li key={expert.userId} className="flex items-center gap-2.5 text-sm">
-                  <Avatar name={expert.name ?? ''} src={expert.avatarUrl ?? undefined} size={32} />
+        <section aria-labelledby="who-to-follow">
+          <h2 id="who-to-follow" className="font-sans text-sm font-semibold">{t('Who to follow')}</h2>
+          {experts.isPending ? (
+            <RowsSkeleton kind="avatar" count={2} className="mt-3" />
+          ) : experts.isError ? (
+            <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+              <p role="alert">{t('Could not load recommendations.')}</p>
+              <Button variant="secondary" size="sm" onClick={() => void experts.refetch()}>{t('Try again')}</Button>
+            </div>
+          ) : experts.data.length === 0 ? (
+            <p className="mt-3 text-sm text-muted-foreground">
+              {t('No expert recommendations for your topics yet.')}{' '}
+              <Link to="/topics" className="text-primary underline-offset-4 hover:underline">{t('Explore topics')}</Link>
+            </p>
+          ) : (
+            <ul className="mt-4 space-y-3.5">
+              {experts.data.map((expert) => (
+                <li key={expert.userId} className="flex items-start gap-2.5 text-sm">
+                  <Avatar name={expert.name ?? ''} src={expert.avatarUrl} size={32} className="shrink-0" />
                   <Link to={`/users/${expert.userId}`} state={{ name: expert.name }} className="min-w-0 flex-1">
                     <span className="block truncate font-semibold hover:underline">{expert.name}</span>
-                    <span className="block truncate text-xs text-muted-foreground">{[expert.expertField, expert.institution].filter(Boolean).join(' · ')}</span>
+                    <span className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{[expert.expertField, expert.institution].filter(Boolean).join(' · ')}</span>
                   </Link>
                   <RailFollow expert={expert} />
                 </li>
               ))}
             </ul>
-          </section>
-        )}
+          )}
+        </section>
       </div>
     </aside>
   )
 }
 
-/** A quiet Follow for the rail (a full pill would crowd the name); hidden on your own row. */
 function RailFollow({ expert }: { expert: ExpertSummary }) {
   const t = useT()
-  const { status, user } = useSession()
   const toggle = useToggleAuthorFollow()
-  const requireSignIn = useRequireSignIn()
-  if (expert.authorId == null || (user?.id != null && user.id === expert.userId)) return null
-  const following = status === 'signed-in' && Boolean(expert.followedByMe)
+  if (expert.authorId == null) return null
+  const authorId = expert.authorId
+  const following = toggle.isPending || toggle.isSuccess
   return (
-    <button
-      type="button"
-      aria-pressed={status === 'signed-in' ? following : undefined}
-      aria-label={`${following ? t('Following') : t('Follow')} ${expert.name ?? ''}`}
-      disabled={toggle.isPending}
-      onClick={() => requireSignIn(() => toggle.mutate({ authorId: expert.authorId!, follow: !following }))}
-      className={cn(
-        'h-8 shrink-0 rounded-full px-3 text-xs font-semibold transition-colors duration-150 disabled:opacity-60',
-        following ? 'text-muted-foreground hover:bg-surface hover:text-foreground' : 'bg-surface text-primary hover:bg-secondary',
-      )}
+    <Button
+      variant="secondary"
+      size="sm"
+      aria-label={following ? t('Following {name}', { name: expert.name ?? '' }) : t('Follow {name}', { name: expert.name ?? '' })}
+      aria-pressed={following}
+      disabled={following}
+      onClick={() => toggle.mutate({ authorId, follow: true })}
     >
       {following ? t('Following') : t('Follow')}
-    </button>
+    </Button>
   )
 }
 
 function RailList({ id, title, children }: { id: string; title: string; children: ReactNode }) {
   return (
-    <section aria-labelledby={id}>
+    <section aria-labelledby={id} className="hidden sm:block">
       <h2 id={id} className="font-sans text-sm font-semibold">
         {title}
       </h2>

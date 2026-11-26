@@ -19,6 +19,11 @@ export interface Page<T> {
   empty: boolean
 }
 
-export type BlogResponse = Schemas['BlogResponse']
+/** The optional cover description is supported by newer servers. */
+export interface BlogCoverDescription {
+  imageAlt?: string
+}
+
+export type BlogResponse = Schemas['BlogResponse'] & BlogCoverDescription
 /** A story in a list (feeds, search, drafts, bookmarks): `excerpt` instead of `content`. */
 export type StorySummary = Schemas['BlogSummaryResponse']

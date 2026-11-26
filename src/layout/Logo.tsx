@@ -2,10 +2,10 @@ import { cn } from 'cn'
 import { Link } from 'react-router-dom'
 
 /** The leaf mark plus the wordmark. The mark alone is the favicon. In the footer it's plain, so home has one link. */
-export function Logo({ link = true, wordmarkClassName }: { link?: boolean; wordmarkClassName?: string }) {
+export function Logo({ link = true, compactOnMobile = false }: { link?: boolean; compactOnMobile?: boolean }) {
   const mark = (
     <>
-      <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true">
+      <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true" className={cn('shrink-0', compactOnMobile && 'max-[439px]:size-[22px]')}>
         <rect width="32" height="32" rx="10" fill="var(--color-paddy)" />
         <path d="M16 25V12" stroke="var(--color-paper)" strokeWidth="2" strokeLinecap="round" />
         <path
@@ -13,11 +13,11 @@ export function Logo({ link = true, wordmarkClassName }: { link?: boolean; wordm
           fill="var(--color-mustard)"
         />
       </svg>
-      <span className={cn('font-serif text-lg font-bold tracking-[-0.02em] text-ink sm:text-xl', wordmarkClassName)}>AgroTrends</span>
+      <span className={cn('font-serif text-lg font-bold whitespace-nowrap tracking-[-0.02em] text-ink sm:text-xl', compactOnMobile && 'max-[439px]:text-base')}>AgroTrends</span>
     </>
   )
   return link ? (
-    <Link to="/" className="flex shrink-0 items-center gap-2 rounded-md" aria-label="AgroTrends home">
+    <Link to="/" className={cn('flex min-h-11 shrink-0 items-center gap-2 rounded-md', compactOnMobile && 'max-[439px]:gap-1')} aria-label="AgroTrends home">
       {mark}
     </Link>
   ) : (

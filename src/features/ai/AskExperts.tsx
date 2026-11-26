@@ -6,6 +6,7 @@ import { useCategories } from '../../api/categories'
 import { ApiError, errorMessage } from '../../api/errors'
 import { useT } from '../../lib/i18n'
 import { Button } from '../../ui/Button'
+import { FormError, useFormValidation } from '../../ui/FormValidation'
 import { TextField } from '../../ui/TextField'
 import { SearchSelect } from '../../ui/SearchSelect'
 
@@ -49,24 +50,29 @@ function AskExpertsForm({ item, onCancel, ask }: { item: AiHistoryItem; onCancel
   const categories = useCategories()
   const [categoryId, setCategoryId] = useState<number>()
   const [title, setTitle] = useState('')
-  const [missing, setMissing] = useState(false)
+  const { errors, reportErrors, fieldId, summary } = useFormValidation<'topic'>()
   // 409: published already (another tab, or a double tap); the refetched history carries the link.
   const conflict = ask.error instanceof ApiError && ask.error.status === 409
 
   function submit(event: FormEvent) {
     event.preventDefault()
-    if (categoryId == null) return setMissing(true)
+    if (reportErrors({ topic: categoryId == null ? t('Choose a topic.') : undefined }) || categoryId == null) return
     ask.mutate({ aiAnswerId: item.id ?? 0, categoryId, title: title.trim() })
   }
 
   return (
     <form onSubmit={submit} noValidate className="mt-4 flex flex-col gap-4 rounded-xl bg-surface p-4">
+      {summary}
       <SearchSelect
+        id={fieldId('topic')}
         label={t('Topic')}
         disabled={categories.isPending}
         value={categoryId == null ? '' : String(categoryId)}
-        error={missing && categoryId == null ? t('Choose a topic.') : undefined}
-        onChange={(value) => setCategoryId(value ? Number(value) : undefined)}
+        error={errors.topic}
+        onChange={(value) => {
+          setCategoryId(value ? Number(value) : undefined)
+          if (value) reportErrors({})
+        }}
         options={(categories.data ?? []).map((c) => ({ value: String(c.id), label: c.categoryName ?? '' }))}
         placeholder={categories.isPending ? t('Loading…') : t('Choose a topic')}
       />
@@ -78,13 +84,9 @@ function AskExpertsForm({ item, onCancel, ask }: { item: AiHistoryItem; onCancel
         value={title}
         onChange={(event) => setTitle(event.target.value)}
       />
-      {ask.isError && (
-        <p role="alert" className="text-sm text-destructive">
-          {conflict ? t('This was already asked in public.') : errorMessage(ask.error)}
-        </p>
-      )}
+      <FormError message={ask.isError ? (conflict ? t('This was already asked in public.') : errorMessage(ask.error)) : null} />
       <div className="flex gap-3">
-        <Button type="submit" size="sm" loading={ask.isPending}>
+        <Button type="submit" size="sm" loading={ask.isPending} pendingLabel={t('Sending request…')}>
           {t('Post for the experts')}
         </Button>
         <Button variant="quiet" size="sm" onClick={onCancel}>

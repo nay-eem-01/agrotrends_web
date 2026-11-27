@@ -1,6 +1,6 @@
 import { useT } from '../../lib/i18n'
 import type { InfiniteData, UseInfiniteQueryResult } from '@tanstack/react-query'
-import { useEffect, useRef, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useBlogs } from '../../api/blogs'
 import { errorMessage } from '../../api/errors'
@@ -14,6 +14,7 @@ import { useSession } from '../auth/session'
 import { AgriFilterBar } from './AgriFilterBar'
 import { StoryCard } from './StoryCard'
 import { StoryFeature, StoryTile } from './StoryTiles'
+import { useNearFeedEnd } from './useNearFeedEnd'
 
 const TABS: { kind: FeedKind; label: string; signedInOnly?: boolean }[] = [
   { kind: 'following', label: 'For you', signedInOnly: true },
@@ -167,17 +168,7 @@ function EmptyFeed({ kind }: { kind: FeedKind }) {
 /** Loads the next page when the end of the list scrolls into view; the button does the same for keyboards. */
 function MoreStories({ hasMore, loading, failed, onMore }: { hasMore: boolean; loading: boolean; failed: boolean; onMore: () => void }) {
   const t = useT()
-  const sentinel = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const node = sentinel.current
-    if (!node || !hasMore || loading || failed || typeof IntersectionObserver === 'undefined') return
-    const observer = new IntersectionObserver((entries) => {
-      if (entries.some((entry) => entry.isIntersecting)) onMore()
-    }, { rootMargin: '600px 0px' })
-    observer.observe(node)
-    return () => observer.disconnect()
-  }, [hasMore, loading, failed, onMore])
+  const sentinel = useNearFeedEnd(hasMore && !loading && !failed, onMore)
 
   if (!hasMore) {
     return <p className="py-10 text-center text-sm text-muted-foreground">{t('You\'re all caught up.')}</p>

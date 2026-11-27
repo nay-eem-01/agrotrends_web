@@ -12,6 +12,7 @@ import { Button, ButtonLink } from '../../ui/Button'
 import { Sprig } from '../../ui/Botanical'
 import { ActiveFilters, FilterButton, FilterChip } from '../feed/AgriFilterBar'
 import { TopicChips } from '../topics/TopicChips'
+import { questionFeedLayout } from './QuestionSkeleton'
 import { QuestionCard } from './QuestionRow'
 
 /** The URL of this list with `changes` applied to its query; `undefined` removes a parameter. */
@@ -42,9 +43,9 @@ export function QuestionsPage() {
   const filtered = Object.keys(filters).some((key) => key !== 'unanswered')
 
   return (
-    <div className="mx-auto max-w-(--container-page) px-4 pb-16 sm:px-8">
+    <div className={questionFeedLayout.page}>
       <title>{t('Questions – AgroTrends')}</title>
-      <header className="flex flex-wrap items-end justify-between gap-x-6 gap-y-4 pt-8 sm:pt-10">
+      <header className={questionFeedLayout.header}>
         <div className="max-w-xl">
           <h1 className="text-2xl sm:text-[2rem]">{t('Questions')}</h1>
           <p className="mt-1.5 text-muted-foreground">{t('Crops, fish, livestock or your studies: ask farmers, experts and students.')}</p>
@@ -54,7 +55,7 @@ export function QuestionsPage() {
           {t('Ask a question')}
         </ButtonLink>
       </header>
-      <div className="mt-4 grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1fr)_16rem] xl:gap-8">
+      <div className={questionFeedLayout.columns}>
         <div className="min-w-0">
           <Toolbar filters={filters} />
           {questions.isPending ? (
@@ -82,7 +83,7 @@ export function QuestionsPage() {
             </>
           )}
         </div>
-        <aside className="hidden pt-5 sm:block">
+        <aside className={questionFeedLayout.sidebar}>
           <div className="sticky top-24 flex flex-col gap-6">
             <AdvisorCard />
             <AskingWell />

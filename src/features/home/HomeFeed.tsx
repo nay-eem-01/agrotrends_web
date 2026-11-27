@@ -20,6 +20,7 @@ import { Button, ButtonLink } from '../../ui/Button'
 import { FormError } from '../../ui/FormValidation'
 import { RowsSkeleton } from '../../ui/LoadingSkeleton'
 import { useSession } from '../auth/session'
+import { useNearFeedEnd } from '../feed/useNearFeedEnd'
 import { QuestionCard } from '../qa/QuestionRow'
 import { TopicChips } from '../topics/TopicChips'
 import { FeedHighlight } from './FeedHighlight'
@@ -156,8 +157,10 @@ function QuestionList({ topic, unanswered, following, waiting }: { topic?: numbe
         )
       }
       more={questions.hasNextPage}
+      fetching={questions.isFetching}
       loadingMore={questions.isFetchingNextPage}
-      onMore={() => void questions.fetchNextPage()}
+      failedMore={questions.isFetchNextPageError}
+      onMore={() => void questions.fetchNextPage({ cancelRefetch: false })}
     >
       {items.map((question) => (
         <QuestionCard key={question.questionId} question={question} />
@@ -184,8 +187,10 @@ function StoryList({ topic }: { topic?: number }) {
         </ButtonLink>
       }
       more={stories.hasNextPage}
+      fetching={stories.isFetching}
       loadingMore={stories.isFetchingNextPage}
-      onMore={() => void stories.fetchNextPage()}
+      failedMore={stories.isFetchNextPageError}
+      onMore={() => void stories.fetchNextPage({ cancelRefetch: false })}
     >
       {items.map((story) => (
         <StoryItem key={story.id} story={story} />
@@ -202,7 +207,9 @@ function FeedList({
   empty,
   action,
   more,
+  fetching,
   loadingMore,
+  failedMore,
   onMore,
   children,
 }: {
@@ -213,11 +220,14 @@ function FeedList({
   empty: string
   action: ReactNode
   more: boolean
+  fetching: boolean
   loadingMore: boolean
+  failedMore: boolean
   onMore: () => void
   children: ReactNode[]
 }) {
   const t = useT()
+  const sentinel = useNearFeedEnd(more && !loading && !fetching && !error, onMore)
   if (loading)
     return <RowsSkeleton label={t('Loading your feed')} kind={kind} />
   if (error && children.length === 0)
@@ -238,14 +248,29 @@ function FeedList({
   return (
     <>
       <ul className="border-t border-border">{children}</ul>
-      {error && <FormError message={error} />}
-      {more && (
-        <div className="flex justify-center py-6">
-          <Button variant="secondary" size="sm" loading={loadingMore} onClick={onMore}>
-            {t('Show more')}
-          </Button>
+      {error && (
+        <div className="space-y-3 py-4">
+          <FormError message={error} />
+          <Button variant="secondary" size="sm" disabled={fetching} onClick={failedMore ? onMore : onRetry}>{t('Try again')}</Button>
         </div>
       )}
+      {more ? (
+        <div ref={sentinel} className="relative min-h-px">
+          {loadingMore && <RowsSkeleton label={t('Loading your feed')} kind={kind} count={2} />}
+          {!error && (
+            <Button
+              variant="secondary"
+              size="sm"
+              className={typeof IntersectionObserver === 'undefined' ? 'my-3' : 'sr-only focus:not-sr-only focus:my-3'}
+              disabled={fetching}
+              loading={loadingMore}
+              onClick={onMore}
+            >
+              {t('Show more')}
+            </Button>
+          )}
+        </div>
+      ) : !error && <p className="py-8 text-center text-sm text-muted-foreground">{t("You're all caught up.")}</p>}
     </>
   )
 }

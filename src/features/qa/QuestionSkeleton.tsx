@@ -1,5 +1,5 @@
 import { Skeleton } from '@/components/ui/skeleton'
-import { SkeletonGroup } from '../../ui/LoadingSkeleton'
+import { RowsSkeleton, SkeletonGroup } from '../../ui/LoadingSkeleton'
 
 export const questionLayout = {
   page: 'mx-auto max-w-[65rem] px-4 pt-6 pb-20 sm:px-8 sm:pt-8',
@@ -67,5 +67,38 @@ export function QuestionSkeleton({ label }: { label: string }) {
         </div>
       </div>
     </SkeletonGroup>
+  )
+}
+
+export const questionFeedLayout = {
+  page: 'mx-auto max-w-(--container-page) px-4 pb-16 sm:px-8',
+  header: 'flex flex-wrap items-end justify-between gap-x-6 gap-y-4 pt-8 sm:pt-10',
+  columns: 'mt-4 grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1fr)_16rem] xl:gap-8',
+  sidebar: 'hidden pt-5 sm:block',
+}
+
+export function QuestionFeedSkeleton({ label }: { label: string }) {
+  return (
+    <div className={questionFeedLayout.page}>
+      <div className={questionFeedLayout.header} aria-hidden="true">
+        <div className="min-w-0 flex-1 space-y-2">
+          <Skeleton className="h-8 w-36 sm:h-10" />
+          <Skeleton className="h-6 w-full max-w-md" />
+        </div>
+        <Skeleton className="h-11 w-40 rounded-full" />
+      </div>
+      <div className={questionFeedLayout.columns}>
+        <div className="min-w-0">
+          <div aria-hidden="true" className="flex flex-col gap-3 py-4">
+            <Skeleton className="h-9 w-full max-w-sm rounded-full" />
+            <Skeleton className="h-11 w-full max-w-xs rounded-full" />
+          </div>
+          <RowsSkeleton label={label} kind="question" />
+        </div>
+        <div aria-hidden="true" className={questionFeedLayout.sidebar}>
+          <Skeleton className="h-36 rounded-xl" />
+        </div>
+      </div>
+    </div>
   )
 }

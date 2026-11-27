@@ -2,7 +2,7 @@ import { RowsSkeleton } from '../../ui/LoadingSkeleton'
 import { AiAnswerText } from '../../ui/AiAnswerText'
 import { useLang, useT, formatNumber } from '../../lib/i18n'
 import { ArrowRight, ArrowUp, Bug, ClockCounterClockwise, Drop, Leaf, Plant, Plus, Sparkle, Warning, WarningCircle } from '@phosphor-icons/react'
-import { useId, useRef, useState, type FormEvent, type Ref } from 'react'
+import { useId, useLayoutEffect, useRef, useState, type FormEvent, type RefObject } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { cn } from 'cn'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -246,8 +246,7 @@ function Suggestions({ season, onPick }: { season: Exclude<Season, 'YEAR_ROUND'>
 }
 
 /**
- * The question box: one bordered surface holding the label, the text and a footer with the counter and the button.
- * Enter sends, Shift+Enter is a new line. Near the limit the counter says what is left and is announced.
+ * The input takes the full width above its actions. On touch screens Enter starts a new line.
  */
 function Composer({
   ref,
@@ -259,7 +258,7 @@ function Composer({
   allowance,
   onChange,
 }: {
-  ref: Ref<HTMLTextAreaElement>
+  ref: RefObject<HTMLTextAreaElement | null>
   label: string
   value: string
   error?: string
@@ -272,13 +271,35 @@ function Composer({
   const id = useId()
   const near = value.length >= NEAR_LIMIT
   const left = MAX_ADVISOR_QUESTION - value.length
+  const placeholder = label === t('Your question') ? t('Ask in Bangla or English') : t('Ask a follow-up…')
+
+  // Older browsers need to measure the textarea when either its content or wrapping changes.
+  useLayoutEffect(() => {
+    const field = ref.current
+    if (!field || window.CSS?.supports?.('field-sizing', 'content')) return
+
+    function resize(textarea: HTMLTextAreaElement) {
+      textarea.style.height = 'auto'
+      textarea.style.height = `${textarea.scrollHeight}px`
+    }
+
+    resize(field)
+    if (!window.ResizeObserver) return
+    let width = field.clientWidth
+    const observer = new ResizeObserver(() => {
+      if (field.clientWidth === width) return
+      width = field.clientWidth
+      resize(field)
+    })
+    observer.observe(field)
+    return () => observer.disconnect()
+  }, [ref, value, placeholder])
 
   return (
     <div>
-      {/* A pill like the mock-up's ask bar; it grows with the text, and the label stays for screen readers. */}
       <div
         className={cn(
-          'flex items-end gap-2 rounded-[1.625rem] border bg-card py-1.5 pr-1.5 pl-5 transition-[border-color,box-shadow] duration-150 focus-within:border-primary focus-within:ring-[3px] focus-within:ring-ring/60',
+          'rounded-[1.625rem] border bg-card p-2 transition-[border-color,box-shadow] duration-150 focus-within:border-primary focus-within:ring-[3px] focus-within:ring-ring/60',
           error ? 'border-destructive' : 'border-input hover:border-subtle',
         )}
       >
@@ -290,24 +311,27 @@ function Composer({
           id={id}
           rows={1}
           maxLength={MAX_ADVISOR_QUESTION}
-          placeholder={label === t('Your question') ? t('Bangla or English: what you grow, where, and what you are seeing') : t('Ask a follow-up…')}
+          placeholder={placeholder}
           value={value}
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? `${id}-error` : `${id}-count`}
           onChange={(event) => onChange(event.target.value)}
           onKeyDown={(event) => {
-            // A chat: Enter sends, Shift+Enter is a new line. Never while an input method (Bangla) is composing.
-            if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
-              event.preventDefault()
-              event.currentTarget.form?.requestSubmit()
-            }
+            if (event.key !== 'Enter' || event.shiftKey || event.nativeEvent.isComposing) return
+            const touch = window.matchMedia?.('(pointer: coarse)').matches
+            if (touch && !event.ctrlKey && !event.metaKey) return
+            event.preventDefault()
+            event.currentTarget.form?.requestSubmit()
           }}
-          className="block max-h-48 min-h-10 flex-1 resize-none bg-transparent py-2 text-base leading-relaxed outline-none [field-sizing:content] placeholder:text-muted-foreground focus-visible:outline-none"
+          className="block max-h-40 max-h-[min(10rem,30dvh)] min-h-10 w-full resize-none overflow-y-auto bg-transparent px-3 py-2 text-base leading-6 outline-none [field-sizing:content] placeholder:text-muted-foreground focus-visible:outline-none"
         />
-        <Button type="submit" size="sm" loading={pending} pendingLabel={t('Sending question…')} className="shrink-0">
-          {!pending && <ArrowUp size={16} weight="bold" aria-hidden="true" />}
-          {signedIn ? t('Ask') : t('Sign in to ask')}
-        </Button>
+        <div className="mt-1 flex items-center justify-end gap-3">
+          <output className="text-xs text-muted-foreground">{pending ? t('Sending question…') : ''}</output>
+          <Button type="submit" loading={pending} aria-label={signedIn ? t('Ask') : t('Sign in to ask')} className={signedIn ? 'size-11 shrink-0 p-0' : 'min-h-11 shrink-0'}>
+            {!pending && <ArrowUp size={18} weight="bold" aria-hidden="true" />}
+            {!signedIn && t('Sign in to ask')}
+          </Button>
+        </div>
       </div>
       <div className="mt-2 flex flex-wrap items-center justify-between gap-3 px-5">
         <p id={`${id}-count`} className={cn('inline-flex items-center gap-1.5 text-xs tabular-nums', near ? 'font-medium text-foreground' : 'text-muted-foreground')}>
@@ -318,7 +342,7 @@ function Composer({
         <p className="sr-only" aria-live="polite">
           {near ? t('{n} characters left', { n: formatNumber(left) }) : ''}
         </p>
-        {allowance ? <AllowanceLine allowance={allowance} /> : <span className="hidden text-xs text-muted-foreground sm:inline">{t('Enter to send, Shift+Enter for a new line')}</span>}
+        {allowance ? <AllowanceLine allowance={allowance} /> : <span className="hidden text-xs text-muted-foreground sm:pointer-fine:inline">{t('Enter to send, Shift+Enter for a new line')}</span>}
       </div>
       {error && (
         <p id={`${id}-error`} className="mt-2 flex items-start gap-1.5 text-sm text-destructive">

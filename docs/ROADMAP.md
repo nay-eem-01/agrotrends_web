@@ -26,6 +26,8 @@ previous one and PRs into the phase's base branch (see `.claude/skills/git-workf
 | Explore Topics directory and personalized people to follow | Implemented |
 | Keep publish actions and formatting controls spaced while scrolling | Implemented |
 | Action-specific submission feedback and measurable image upload progress | Implemented |
+| Mobile account bottom sheet and simpler profile sharing and reputation | Implemented |
+| Automatic pagination on both Discover feeds | Implemented |
 | Verify authenticated flows and image caching after both repos are promoted to staging | Pending live acceptance |
 
 ---

@@ -1,7 +1,7 @@
 import { useLocation } from 'react-router-dom'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useT } from '../lib/i18n'
-import { QuestionSkeleton } from '../features/qa/QuestionSkeleton'
+import { QuestionFeedSkeleton, QuestionSkeleton } from '../features/qa/QuestionSkeleton'
 import { AuthSkeleton, EditorSkeleton, FormSkeleton, ProfileSkeleton, ReadingSkeleton, RowsSkeleton, StoryGridSkeleton, TopicsSkeleton } from '../ui/LoadingSkeleton'
 
 export function RouteSkeleton() {
@@ -10,6 +10,7 @@ export function RouteSkeleton() {
   const label = t('Loading page')
 
   if (/^\/(stories|s)\//.test(pathname)) return <ReadingSkeleton label={label} />
+  if (pathname === '/questions') return <QuestionFeedSkeleton label={label} />
   if (/^\/questions\/\d+$/.test(pathname)) return <QuestionSkeleton label={label} />
   if (pathname.startsWith('/users/')) return <ProfileSkeleton label={label} cover />
   if (pathname.startsWith('/authors/')) return <ProfileSkeleton label={label} />
@@ -29,7 +30,7 @@ export function RouteSkeleton() {
       ) : pathname === '/topics' ? (
         <TopicsSkeleton label={label} />
       ) : (
-        <RowsSkeleton label={label} kind={pathname === '/questions' || pathname === '/search' ? 'question' : pathname === '/me/stories' ? 'story' : 'list'} />
+        <RowsSkeleton label={label} kind={pathname === '/search' ? 'question' : pathname === '/me/stories' ? 'story' : 'list'} />
       )}
     </div>
   )

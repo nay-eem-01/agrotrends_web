@@ -1,4 +1,4 @@
-import { Article, CalendarBlank, Certificate, Eye, MapPin, PencilSimple, Quotes, SealCheck, TrendUp } from '@phosphor-icons/react'
+import { CalendarBlank, Certificate, MapPin, SealCheck } from '@phosphor-icons/react'
 import type { ReactNode } from 'react'
 import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import { cn } from 'cn'
@@ -28,13 +28,7 @@ import { ShareButton } from '../share/ShareButton'
 
 type Tab = 'overview' | 'stories' | 'questions' | 'answers' | 'drafts' | 'saved'
 
-/**
- * `/users/:userId`, after a LinkedIn profile: a cover, the photo over its edge, the name in Lora, the headline, where
- * they are and who follows them, a row of numbers, then tabs. Overview has their credentials and the topics they answer
- * on beside their recent contributions; on your own profile, your drafts and your questions instead, and a nudge to
- * finish the profile. Headline, bio, photo and follow come from the author profile; the way from a user to it (and
- * location, credentials, answers) needs `docs/BACKEND_REQUESTS.md` §1 and §3, and the page falls back without them.
- */
+/** The public profile shows identity, reputation and contributions. Owners can share it and access their work. */
 export function UserPage() {
   const t = useT()
   const userId = Number(useParams().userId)
@@ -66,7 +60,7 @@ export function UserPage() {
     ? [
         { label: t('Reputation'), value: reputation.data?.total },
         { label: t('Answers'), value: p.answerCount },
-        { label: t('Accepted'), value: p.acceptedAnswerCount },
+        { label: t('Accepted answers'), value: p.acceptedAnswerCount },
         { label: t('Stories'), value: p.storyCount },
       ]
     : [
@@ -108,13 +102,7 @@ export function UserPage() {
         )}
         <div className="flex items-center gap-2">
           {own ? (
-            <>
-              <ShareButton path={`/users/${userId}`} title={name} variant="secondary" />
-              <ButtonLink to="/settings" variant="secondary" size="sm">
-                <PencilSimple size={16} aria-hidden="true" />
-                {t('Edit profile')}
-              </ButtonLink>
-            </>
+            <ShareButton path={`/users/${userId}`} title={name} label={t('Share profile')} iconOnly className="size-11 rounded-full bg-surface p-0 hover:bg-secondary" />
           ) : (
             <>
               <ReportButton targetType="USER" targetId={userId} own={false} what={t('this profile')} />
@@ -147,16 +135,14 @@ export function UserPage() {
             </span>
           )}
         </p>
-        {own && a && <ProfileNudge filled={[a.designation || a.occupation, a.workPlaceOrInstitution, a.bio, a.profileImageUrl, a.specialities?.length, p?.location]} />}
-        <dl className="mt-6 grid grid-cols-2 border-y border-border sm:grid-cols-4">
-          {stats.map((stat) => (
-            <div key={stat.label} className="flex flex-col-reverse py-4">
-              <dt className="text-sm text-muted-foreground">{stat.label}</dt>
-              <dd className="text-xl font-semibold tabular-nums">{stat.value != null ? formatNumber(stat.value) : '–'}</dd>
+        <dl className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
+          {stats.map(({ label, value }) => value != null && (
+            <div key={label} className="flex flex-row-reverse items-baseline gap-1.5">
+              <dt>{label}</dt>
+              <dd className="font-semibold text-foreground tabular-nums">{formatNumber(value)}</dd>
             </div>
           ))}
         </dl>
-        <Impact userId={userId} />
       </div>
 
       {isAdmin(user) && !own && (
@@ -186,8 +172,8 @@ export function UserPage() {
 
       <div className="mt-8 px-1 sm:px-6">
         {tab === 'overview' && (
-          <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
-            <div className="flex flex-col gap-10">
+          <div className="grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
+            <div className="flex min-w-0 flex-col gap-8 sm:gap-10">
               {a?.bio && (
                 <section aria-labelledby="about">
                   <h2 id="about" className="text-lg">
@@ -199,7 +185,7 @@ export function UserPage() {
               <Credentials credentials={p?.credentials} expertIn={expertIn} />
               <section aria-labelledby="by-topic">
                 <h2 id="by-topic" className="text-lg">
-                  {t('Answers questions on')}
+                  {t('Reputation by topic')}
                 </h2>
                 {reputation.isPending ? (
                   <TopicsSkeleton label={t('Loading')} className="mt-3" />
@@ -237,6 +223,7 @@ export function UserPage() {
                   {t('Points: a question upvoted +5, an answer upvoted +10, downvoted −2, an accepted answer +15 (and +2 to the asker).')}
                 </p>
               </section>
+              <Impact userId={userId} />
             </div>
             {own ? <YourWork questions={list} loading={questions.isPending} /> : <RecentContributions questions={list} answers={answerPages[0]?.content ?? []} authorId={authorId} />}
           </div>
@@ -295,30 +282,6 @@ function FollowButton({ authorId, following, name }: { authorId: number; followi
   )
 }
 
-/** How much of your public profile is filled in, and where to finish it. */
-function ProfileNudge({ filled }: { filled: unknown[] }) {
-  const t = useT()
-  const done = Math.round((filled.filter(Boolean).length / filled.length) * 100)
-  if (done === 100) return null
-  return (
-    <div className="mt-5 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 rounded-xl bg-surface p-4">
-      <div>
-        <p className="text-sm font-semibold">{t('Your profile is {n}% done', { n: done })}</p>
-        <p className="text-sm text-muted-foreground">{t('Add your work, a photo and what you know about, so people know who is answering.')}</p>
-        <progress
-          value={done}
-          max={100}
-          aria-label={t('Profile done')}
-          className="mt-2.5 block h-1.5 w-full appearance-none overflow-hidden rounded-full bg-background [&::-moz-progress-bar]:bg-primary [&::-webkit-progress-bar]:bg-background [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:bg-primary"
-        />
-      </div>
-      <ButtonLink to="/settings" size="sm">
-        {t('Finish profile')}
-      </ButtonLink>
-    </div>
-  )
-}
-
 /** Credentials from the profile (§1), or the topics they are a verified expert in until it exists. */
 function Credentials({ credentials, expertIn }: { credentials?: { title?: string; institution?: string }[]; expertIn: { categoryId?: number; categoryName?: string; expertField?: string | null }[] }) {
   const t = useT()
@@ -357,28 +320,20 @@ function Impact({ userId }: { userId: number }) {
   const t = useT()
   const impact = useUserImpact(userId).data
   if (!impact) return null
-  const tiles = [
-    { value: impact.readersReached ?? 0, label: t('Readers reached by answers'), icon: Eye },
-    { value: impact.citedInAiAnswers ?? 0, label: t('Cited in AI answers'), icon: Quotes },
-    { value: impact.storyCitations ?? 0, label: t('Story citations'), icon: Article },
-  ].filter((tile) => tile.value > 0)
-  if (tiles.length === 0) return null
+  const metrics = [
+    { value: impact.readersReached ?? 0, label: t('Readers reached by answers') },
+    { value: impact.citedInAiAnswers ?? 0, label: t('Cited in AI answers') },
+    { value: impact.storyCitations ?? 0, label: t('Story citations') },
+  ].filter(({ value }) => value > 0)
+  if (metrics.length === 0) return null
   return (
-    <section aria-labelledby="impact" className="mt-6 rounded-xl bg-surface p-4 sm:p-5">
-      <h2 id="impact" className="flex items-center gap-2 font-sans text-sm font-semibold">
-        <TrendUp size={18} weight="bold" aria-hidden="true" className="text-primary" />
-        {t('Impact')}
-      </h2>
-      <dl className="mt-3 flex flex-col gap-3 sm:flex-row">
-        {tiles.map(({ value, label, icon: TileIcon }) => (
-          <div key={label} className="flex flex-1 items-center gap-3 rounded-lg bg-background p-3 ring-1 ring-border">
-            <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-              <TileIcon size={20} weight="duotone" />
-            </span>
-            <div className="flex min-w-0 flex-col-reverse">
-              <dt className="text-sm text-muted-foreground">{label}</dt>
-              <dd className="text-xl font-semibold tabular-nums">{formatNumber(value)}</dd>
-            </div>
+    <section aria-labelledby="impact">
+      <h2 id="impact" className="text-lg">{t('Impact')}</h2>
+      <dl className="mt-2 divide-y divide-border border-y border-border">
+        {metrics.map(({ value, label }) => (
+          <div key={label} className="flex items-baseline justify-between gap-4 py-2.5 text-sm">
+            <dt className="text-muted-foreground">{label}</dt>
+            <dd className="font-medium tabular-nums">{formatNumber(value)}</dd>
           </div>
         ))}
       </dl>

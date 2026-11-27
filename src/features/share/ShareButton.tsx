@@ -1,5 +1,6 @@
 import {
   EnvelopeSimple,
+  Export,
   FacebookLogo,
   LinkedinLogo,
   LinkSimple,
@@ -38,6 +39,8 @@ interface ShareButtonProps {
   title: string
   variant?: 'secondary' | 'quiet'
   className?: string
+  iconOnly?: boolean
+  label?: string
 }
 
 /**
@@ -45,14 +48,16 @@ interface ShareButtonProps {
  * reader has (Facebook, Messenger, WhatsApp, Instagram, IMO...). Everywhere else, and in in-app browsers without
  * one, it opens a menu: Copy link, then each service's own share page in a new tab.
  */
-export function ShareButton({ path, title, variant = 'quiet', className }: ShareButtonProps) {
+export function ShareButton({ path, title, variant = 'quiet', className, iconOnly = false, label }: ShareButtonProps) {
   const t = useT()
   const url = shareUrl(path)
   const touch = isTouch()
-  const label = (
+  const buttonLabel = label ?? t('Share')
+  const Glyph = iconOnly ? Export : ShareNetwork
+  const content = (
     <>
-      <ShareNetwork size={18} aria-hidden="true" />
-      {t('Share')}
+      <Glyph size={18} aria-hidden="true" />
+      {iconOnly ? <span className="sr-only">{buttonLabel}</span> : buttonLabel}
     </>
   )
 
@@ -68,6 +73,7 @@ export function ShareButton({ path, title, variant = 'quiet', className }: Share
     return (
       <button
         type="button"
+        title={iconOnly ? buttonLabel : undefined}
         className={buttonClass(variant, 'sm', className)}
         onClick={() =>
           navigator.share({ title, text: title, url }).catch((error: unknown) => {
@@ -76,14 +82,14 @@ export function ShareButton({ path, title, variant = 'quiet', className }: Share
           })
         }
       >
-        {label}
+        {content}
       </button>
     )
   }
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className={buttonClass(variant, 'sm', className)}>{label}</DropdownMenuTrigger>
+      <DropdownMenuTrigger title={iconOnly ? buttonLabel : undefined} className={buttonClass(variant, 'sm', className)}>{content}</DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-52">
         <DropdownMenuGroup>
           <DropdownMenuItem className="min-h-11" onClick={copy}>

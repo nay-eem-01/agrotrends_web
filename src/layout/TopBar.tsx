@@ -1,7 +1,7 @@
 import { useT } from '../lib/i18n'
 import { ArrowLeft, List, MagnifyingGlass, NotePencil, Plus } from '@phosphor-icons/react'
 import { lazy, Suspense, useEffect, useRef, useState, type FormEvent, type RefObject } from 'react'
-import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, matchPath, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { cn } from 'cn'
 import { useSession } from '../features/auth/session'
 import { ButtonLink } from '../ui/Button'
@@ -26,6 +26,9 @@ export function TopBar({ focused = false }: { focused?: boolean }) {
   const { pathname } = useLocation()
   const goBack = useAppBack()
   const [params] = useSearchParams()
+  const hasInlineBack = matchPath('/stories/:slug', pathname)
+    || (matchPath('/questions/:questionId', pathname) && !matchPath('/questions/ask', pathname))
+  const showMobileBack = pathname !== '/' && !hasInlineBack
   const current = pathname === '/search' ? (params.get('q') ?? '') : ''
 
   // Ctrl/⌘+K goes to the search from anywhere: the field in the bar when it is shown, the dialog otherwise.
@@ -72,7 +75,7 @@ export function TopBar({ focused = false }: { focused?: boolean }) {
         >
           <List size={22} aria-hidden="true" />
         </button>
-        {pathname !== '/' && (
+        {showMobileBack && (
           <button
             type="button"
             onClick={() => goBack()}
@@ -83,7 +86,7 @@ export function TopBar({ focused = false }: { focused?: boolean }) {
             <ArrowLeft size={20} aria-hidden="true" />
           </button>
         )}
-        <Logo compactOnMobile={pathname !== '/'} />
+        <Logo compactOnMobile={showMobileBack} />
         {/* Wide screens: the search is a field in the bar itself; it keeps the words on the results page. */}
         <InlineSearch key={current} initial={current} field={inline} />
         <nav aria-label={t('Main')} className="ml-auto flex items-center gap-0 max-[359px]:[&_button]:w-10 max-[359px]:[&_button]:min-w-10 md:gap-1">
@@ -94,7 +97,7 @@ export function TopBar({ focused = false }: { focused?: boolean }) {
             aria-keyshortcuts="Control+K Meta+K"
             className={cn(
               'hidden size-11 items-center justify-center rounded-full text-muted-foreground hover:text-foreground lg:hidden',
-              pathname === '/' ? 'min-[380px]:flex' : 'min-[440px]:flex',
+              showMobileBack ? 'min-[440px]:flex' : 'min-[380px]:flex',
             )}
           >
             <MagnifyingGlass size={22} aria-hidden="true" />

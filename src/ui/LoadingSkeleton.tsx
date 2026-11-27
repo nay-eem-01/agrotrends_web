@@ -24,15 +24,15 @@ export function RowsSkeleton({ label, className, kind = 'list', count = 3 }: {
     <SkeletonGroup label={label} className={className}>
       <div className="divide-y divide-border border-y border-border">
         {Array.from({ length: count }, (_, index) => (
-          <div key={index} className="flex items-start gap-4 py-4">
+          <div key={index} className={cn('flex items-start gap-4', kind === 'question' ? 'py-5 sm:gap-6' : 'py-4')}>
             {kind === 'avatar' && <Skeleton className="size-10 shrink-0 rounded-full" />}
-            {kind === 'question' && <Skeleton className="h-20 w-12 shrink-0 sm:w-16" />}
             <div className="min-w-0 flex-1 space-y-2">
               {kind === 'question' && <Skeleton className="h-4 w-20 rounded-full" />}
               <Skeleton className="h-5 w-3/4 max-w-md" />
               <Skeleton className="h-4 w-full max-w-lg" />
               {(kind === 'question' || kind === 'story') && <Skeleton className="h-3 w-1/2 max-w-40" />}
             </div>
+            {kind === 'question' && <Skeleton className="size-20 shrink-0 rounded-xl sm:size-28" />}
             {kind === 'story' && <Skeleton className="aspect-[4/3] w-20 shrink-0 sm:w-28" />}
           </div>
         ))}

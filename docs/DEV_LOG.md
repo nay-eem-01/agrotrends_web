@@ -5,6 +5,19 @@ Plan and progress: `docs/ROADMAP.md`. Design: `docs/DESIGN.md`.
 
 ---
 
+## 2026-11-27 · Discover feed scrolling
+
+- Discover automatically appends the next batch of questions or stories as the reader scrolls. A failed batch can be retried without discarding posts already loaded.
+
+---
+
+## 2026-11-27 · Mobile account and profile
+
+- The mobile avatar opens a bottom sheet with profile, activity, preferences, and Sign out.
+- The profile has an icon for sharing, editing lives in Settings, and reputation and contribution counts use inline text. Impact metrics appear in Overview.
+
+---
+
 ## 2026-11-25 — Action feedback
 
 - Added action-specific submit labels and delayed button spinners. Kept upload progress local to each image control and showed review status after sending an expert application.

@@ -42,6 +42,8 @@ test('a question shows its text, context and answers in the backend order', asyn
   renderWithProviders(<App />, '/questions/5')
 
   expect(await screen.findByRole('heading', { level: 1, name: 'Why are my boro seedlings yellow?' })).toBeInTheDocument()
+  expect(screen.getByRole('link', { name: 'Back to questions' })).toHaveAttribute('href', '/questions')
+  expect(screen.queryByRole('button', { name: 'Go back' })).not.toBeInTheDocument()
   expect(screen.getByText('After the cold week.')).toBeInTheDocument()
   expect(document.querySelector('script')).toBeNull()
   expect(within(screen.getByRole('list', { name: 'Farming context' })).getByRole('link', { name: /Crop\s*boro rice/ })).toHaveAttribute('href', '/questions?crop=boro+rice')

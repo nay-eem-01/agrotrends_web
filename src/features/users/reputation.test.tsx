@@ -86,7 +86,7 @@ test('the profile shows reputation by topic, the expert field, and their questio
   expect(await screen.findByRole('link', { name: 'Best feed for calves?' })).toHaveAttribute('href', '/questions/9')
 })
 
-test('your own profile offers Edit profile instead of Report', async () => {
+test('your own profile offers Share profile and keeps editing in Settings', async () => {
   localStorage.setItem('agrotrends.refreshToken', 'r0')
   mockApi({
     'POST /api/auth/refresh-token': () => envelope(200, { accessToken: 'a1', refreshToken: 'r1', user: { id: 7, name: 'Dr Nasrin' } }),
@@ -95,7 +95,10 @@ test('your own profile offers Edit profile instead of Report', async () => {
   })
   renderWithProviders(<App />, '/users/7')
 
-  expect(await screen.findByRole('link', { name: 'Edit profile' })).toHaveAttribute('href', '/settings')
+  await userEvent.click(await screen.findByRole('button', { name: 'Share profile' }))
+  expect(await screen.findByRole('menuitem', { name: 'Copy link' })).toBeVisible()
+  expect(screen.queryByRole('link', { name: 'Edit profile' })).not.toBeInTheDocument()
+  await userEvent.keyboard('{Escape}')
   expect(screen.queryByRole('button', { name: /Report/ })).not.toBeInTheDocument()
 })
 
@@ -115,7 +118,7 @@ test('with the backend summary and author profile: headline, location, followers
   expect(screen.getByText('1,800 followers')).toBeInTheDocument()
   expect(screen.getByRole('button', { name: 'Follow Dr Nasrin' })).toHaveAttribute('aria-pressed', 'false')
   const numbers = screen.getAllByRole('term').map((term) => `${term.textContent} ${term.nextElementSibling?.textContent}`)
-  expect(numbers).toEqual(['Reputation 2,310', 'Answers 184', 'Accepted 92', 'Stories 12'])
+  expect(numbers).toEqual(['Reputation 2,310', 'Answers 184', 'Accepted answers 92', 'Stories 12'])
   expect(screen.getByText('PhD, Aquaculture')).toBeInTheDocument()
   const recent = (await screen.findByRole('heading', { name: 'Recent contributions' })).closest('section')!
   expect(await within(recent).findByRole('link', { name: 'Tilapia gasping?' })).toHaveAttribute('href', '/questions/5#answer-4')

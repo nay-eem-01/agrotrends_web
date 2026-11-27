@@ -106,6 +106,30 @@ test('a signed-in reader reaches their profile from the sidebar and the account 
   expect(await screen.findByRole('menuitem', { name: 'Your profile' })).toHaveAttribute('href', '/users/7')
 })
 
+test('the phone account sheet dismisses and opens the public profile', async () => {
+  vi.stubGlobal('matchMedia', (query: string) => ({ matches: query === '(max-width: 767px)' }))
+  localStorage.setItem('agrotrends.refreshToken', 'r0')
+  mockApi({
+    'POST /api/auth/refresh-token': () => envelope(200, { accessToken: 'a1', refreshToken: 'r1', user: { id: 7, name: 'Rahim Uddin' } }),
+    'GET /api/users/7/profile': () => envelope(200, { userId: 7, name: 'Rahim Uddin' }),
+  })
+  renderWithProviders(<App />, '/about')
+
+  const avatar = await screen.findByRole('button', { name: 'Account' })
+  await userEvent.click(avatar)
+  const sheet = within(await screen.findByRole('dialog', { name: 'Account' }))
+  expect(sheet.getByRole('link', { name: 'Settings' })).toHaveAttribute('href', '/settings')
+  expect(sheet.getByRole('button', { name: 'Sign out' })).toBeVisible()
+  await userEvent.click(sheet.getByRole('button', { name: 'Close' }))
+  await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Account' })).not.toBeInTheDocument())
+  expect(avatar).toHaveFocus()
+
+  await userEvent.click(avatar)
+  await userEvent.click(await screen.findByRole('link', { name: /View public profile/ }))
+  expect(await screen.findByRole('heading', { name: 'Rahim Uddin' })).toBeVisible()
+  expect(screen.queryByRole('dialog', { name: 'Account' })).not.toBeInTheDocument()
+})
+
 test('the sections live in the sidebar only, and the menu button hides it to icons and back', async () => {
   mockApi({ 'GET /api/questions/all': () => envelope(200, page([])), 'GET /api/categories/all': () => envelope(200, page([])) })
   renderWithProviders(<App />, '/questions')
